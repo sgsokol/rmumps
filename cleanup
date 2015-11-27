@@ -1,0 +1,9 @@
+cd inst
+make clean
+cd ..
+find -name '*.bck' -exec rm -f {} \;
+find -name '*.o' -exec rm -f {} \;
+find -name '*.so' -exec rm -f {} \;
+find -name '*.RData' -exec rm -f {} \;
+find -name '*.Rhistory' -exec rm -f {} \;
+find -path '*/tmp/*' -exec rm -f {} \;

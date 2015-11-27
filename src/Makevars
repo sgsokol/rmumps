@@ -1,0 +1,2 @@
+PKG_CXXFLAGS=-I../inst/MUMPS_5.0.1 -DINTSIZE64
+PKG_LIBS= -L../inst/MUMPS_5.0.1/lib -L../inst/MUMPS_5.0.1/libseq -ldmumps -lmumps_common -lpord -lmpiseq -L../inst/metis-5.1.0/build/$(shell uname -s)-$(shell uname -m)/libmetis -lmetis $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

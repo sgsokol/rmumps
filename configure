@@ -1,0 +1,4 @@
+echo "compiling MUMPS and metis libs: "
+
+cd inst
+make
