@@ -1,9 +1,3 @@
-cd inst
-make clean
-cd ..
-find -name '*.bck' -exec rm -f {} \;
-find -name '*.o' -exec rm -f {} \;
-find -name '*.so' -exec rm -f {} \;
-find -name '*.RData' -exec rm -f {} \;
-find -name '*.Rhistory' -exec rm -f {} \;
+cd inst && make clean
+find \( -name '*.bck' -o -name '*.o' -o -name '*.so' -o -name .RData -o -name .Rhistory -o -name '*.dll' -o -name '*.a' \) -exec rm -f {} \;
 find -path '*/tmp/*' -exec rm -f {} \;

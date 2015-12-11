@@ -1,6 +1,6 @@
 
 
-OS := $(shell uname)
+#OS := $(shell uname)
 
 # Set the following variables depending on the operating system and compiler.
 # FC : Fortran 90 compiler
@@ -12,17 +12,17 @@ OS := $(shell uname)
 # LIBBLAS : Blas library to use
 
 
-ifeq ($(OS),Darwin)
-   FC      = gfortran
-   FL      = gfortran
-   CC      = gcc
-   OPTC    = -O -I. -fPIC -DINTSIZE64
-   OPTF    = -O -fPIC -fdefault-integer-8
-   OPTL    = $(OPTF) -shared -fcray-pointer
-
+#ifeq ($(OS),Darwin)
+#   FC      = gfortran
+#   FL      = gfortran
+#   CC      = gcc
+#   OPTC    = -O -I. -fPIC -DINTSIZE64
+#   OPTF    = -O -fPIC -fdefault-integer-8
+#   OPTL    = $(OPTF) -shared -fcray-pointer
+#
 	#LIBBLAS = /System/Library/Frameworks/Accelerate.framework/Frameworks/vecLib.framework/Versions/Current/libBLAS.dylib
-	LMETISDIR = $(metisdir)/build/Darwin-x86_64/libmetis/
-else
+	#LMETISDIR = $(metisdir)/build/Darwin-x86_64/libmetis/
+#else
 
    # Linux
    CC      = gcc
@@ -36,7 +36,6 @@ else
    OPTL    = $(OPTF) -shared -fcray-pointer
    #LIBBLAS = /opt/OpenBLAS/lib/libopenblas_haswellp-r0.2.14.a 
    #LIBBLAS = /usr/local/atlas/lib64/libsatlas.so
-   LMETISDIR = $(topdir)/../$(metisdir)/build/Linux-x86_64/libmetis/
 
 
  #  # The following is for Intel Fortran (ifort) with MKL:
@@ -52,6 +51,7 @@ else
  #  LIBBLAS =   -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_core.a ${MKLROOT}/lib/intel64/libmkl_sequential.a -Wl,--end-group -lpthread -lm
 
 
-endif
+#endif
 
+LMETISDIR = $(topdir)/../$(metisdir)/build/`gcc -dumpmachine`/libmetis/
 

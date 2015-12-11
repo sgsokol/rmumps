@@ -65,7 +65,7 @@ LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-LMETISDIR = $(topdir)/../metis-5.1.0/build/Linux-x86_64/libmetis/
+LMETISDIR = $(topdir)/../metis-5.1.0/build/`gcc -dumpmachine`/libmetis/
 IMETIS    = $(topdir)/../metis-5.1.0/include # should be set to include directory for (par)metis.h
 
 

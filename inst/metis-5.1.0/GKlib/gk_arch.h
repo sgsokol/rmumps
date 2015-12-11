@@ -41,7 +41,9 @@
 #endif
   #include <inttypes.h>
   #include <sys/types.h>
+#ifndef MINGW
   #include <sys/resource.h>
+#endif
   #include <sys/time.h>
 #endif
 

@@ -1,58 +1,33 @@
-rm(list=ls(all=TRUE)); unloadNamespace("rmumps"); gc()
-require(Matrix)
-#require(rmumps);
-library(devtools); load_all();
-require(microbenchmark)
+# prepare random sparse matrix
+library(Matrix)
+library(rmumps)
+n=2000
+a=Matrix(0, n, n)
 set.seed(7)
-
-n=5 # matrix size n x n
-nsq=n*n
-nz=round(0.5*nsq) # how many non zero
-ax=-runif(nz)
-ai=sample(1:n, nz, replace=T)
-aj=sample(1:n, nz, replace=T)
-# make sparse matrix from triplicate x, i, j
-a=sparseMatrix(i=ai, j=aj, x=ax, dims=c(n, n), giveCsparse=FALSE)
-ad=as.matrix(a)
-
-# make a diagonal dominant
+ij=sample(1:(n*n), 15*n)
+a[ij]=runif(ij)
 diag(a)=0
 diag(a)=-rowSums(a)
-a[1,1]=a[1,1]+1
-
-# define solution(s)
-# one rhs
-xsol=rnorm(n)
-b=as.numeric(a%*%xsol)
-
-# many rhs
-nrhs=round(n/2)
-msol=matrix(rnorm(n*nrhs), nrow=n)
-bm=as.matrix(a%*%msol)
-
-# init mumps object
+a[1,1]=a[1,1]-1
 am=Rmumps$new(a)
+b=as.double(a\%*\%(1:n)) # rhs for an exact solution vector 1:n
+# following time includes symbolic analysis, LU factorization and system solving
+system.time(x<-am$solve(b))
+bb=2*b
+# this second time should be much shorter
+# as symbolic analysis and LU factorization are already done
+system.time(xx<-am$solve(bb))
+# compare to Matrix corresponding times
+system.time(xm<-solve(a, b))
+system.time(xxm<-solve(a, bb))
+# compare to Matrix precision
+range(x-1:n)  # mumps
+range(xm-1:n) # Matrix
 
-# solve one rhs
-microbenchmark(solve(ad, b), solve(a, b), am$solve(b), times=1)# times > 1 is a pb as the solution is put in b (in place)
-stopifnot(diff(range(b-xsol)) < 1.e-10)
+# matrix inversion
+system.time(aminv <- am$inv())
+system.time(ainv <- solve(a)) # the same in Matrix
 
-# solve many rhs
-microbenchmark(solve(ad, bm), solve(a, bm), am$solvem(bm), times=1)
-stopifnot(diff(range(bm-msol)) < 1.e-10)
-
-# effect of pre-symbolic analysis
-b=as.numeric(a%*%xsol)
-am=Rmumps$new(a)
-am$symbolic()
-# solve one rhs
-microbenchmark(solve(ad, b), solve(a, b), am$solve(b), times=1)# times > 1 is a pb as the solution is put in b (in place)
-stopifnot(diff(range(b-xsol)) < 1.e-10)
-
-# effect of pre-symbolic+numeric analysis
-b=as.numeric(a%*%xsol)
-am=Rmumps$new(a)
-am$numeric()
-# solve one rhs
-microbenchmark(solve(ad, b), solve(a, b), am$solve(b), times=1)# times > 1 is a pb as the solution is put in b (in place)
-stopifnot(diff(range(b-xsol)) < 1.e-10)
+# clean up by hand to avoid possible interference between gc() and
+# Rcpp object destructor after unloading this namespace
+rm(am)

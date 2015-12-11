@@ -12,10 +12,11 @@ gkrand   = not-set
 
 
 # Basically proxies everything to the builddir cmake.
-cputype = $(shell uname -m | sed "s/\\ /_/g")
-systype = $(shell uname -s)
+#cputype = $(shell uname -m | sed "s/\\ /_/g")
+#systype = $(shell uname -s)
 
-BUILDDIR = build/$(systype)-$(cputype)
+#BUILDDIR = build/$(systype)-$(cputype)
+BUILDDIR = build/`gcc -dumpmachine`
 
 # Process configuration options.
 CONFIG_FLAGS = -DCMAKE_VERBOSE_MAKEFILE=1
