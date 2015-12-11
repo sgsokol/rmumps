@@ -14,4 +14,5 @@ Imports: methods, Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
 SystemRequirements: C++11, GNU make
 NeedsCompilation: yes
-Biarch:	yes
+Biarch: yes
+Suggests: testthat
