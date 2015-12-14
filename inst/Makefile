@@ -10,7 +10,7 @@ include $(topdir)/Makefile.inc
 LIB = -L$(topdir)/lib -ldmumps -lmumps_common -lpord  -L$(LMETIS)  $(LIBSEQ)  $(LIBBLAS)
 
 
-all: $(SRC)
+all:
 	($(MAKE) -C $(metisdir) config )
 	($(MAKE) -C $(metisdir) )
 	($(MAKE) -C $(topdir) d)

@@ -2,7 +2,7 @@ Package: rmumps
 Type: Package
 Title: Rcpp Wrapper for MUMPS Library
 Version: 5.0.1.1
-Date: 2015-12-12
+Date: 2015-12-14
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Rmumps class can be used for storing sparse matrix
@@ -15,4 +15,4 @@ LinkingTo: Rcpp
 SystemRequirements: C++11, GNU make
 NeedsCompilation: yes
 Biarch: yes
-Suggests: testthat
+Suggests: testthat, Matrix

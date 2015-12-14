@@ -6,6 +6,7 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
+// [[Rcpp::interfaces(r, cpp)]]
 
 #include <include/dmumps_c.h>
 //#include <libseq/mpi.h> // useless in sequential mode
@@ -123,6 +124,7 @@ public:
     default:
       sprintf(buf, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
       stop(buf);
+      return R_NilValue;
     }
     /*return List::create(Named("is_null") = wrap(b.isNULL()),
                         Named("type") = wrap(b.sexp_type()),
