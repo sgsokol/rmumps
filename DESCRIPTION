@@ -1,11 +1,11 @@
 Package: rmumps
 Type: Package
-Title: Rcpp Wrapper for MUMPS Library
-Version: 5.0.1.1
+Title: Wrapper for MUMPS Library
+Version: 5.0.1.2
 Date: 2015-12-14
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
-Description: Rmumps class can be used for storing sparse matrix
+Description: Exported class can be used for storing sparse matrix
 	and solving corresponding linear system with one or many right
 	hand sides. There is a possibility to do separately symbolic analysis,
 	LU factorization and system solving.
