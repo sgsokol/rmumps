@@ -2,6 +2,8 @@
 # To compile directly, uncomment the line below.
 # include ../Make.in
 # # include $(BUILDDIR)/Makefile.inc
+topdir = ../..
+include $(topdir)/Makefile.inc.win
 #
 # Otherwise, adequate variables for CC, CFLAGS, AR and
 # RANLIB must be passed to make.
@@ -22,14 +24,15 @@ OBJS = graph.o gbipart.o gbisect.o ddcreate.o ddbisect.o nestdiss.o \
 # OUTC = -o
 
 .c.o:
-	$(CC) $(COPTIONS) -c $*.c $(OUTC)$*.o
+#	$(CC) $(COPTIONS) -c $*.c $(OUTC)$*.o
+	$(CC) $(OPTC) -c $*.c $(OUTC)$*.o
 
 libpord$(LIBEXT):$(OBJS)
-	$(AR)$@ $(OBJS)
+	$(AR) $@ $(OBJS)
 	$(RANLIB) $@
 
 clean:
 	rm -f *.o
 
 realclean:
-	rm -f *.o libpord.$(LIBEXT)
+	rm -f *.o libpord$(LIBEXT)

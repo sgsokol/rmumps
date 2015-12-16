@@ -259,7 +259,7 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 
 .SUFFIXES: .c .F .o
 .F.o:
-	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F $(OUTF)$*.o
+	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -w -c $*.F $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
 
