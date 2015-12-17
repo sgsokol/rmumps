@@ -26,7 +26,7 @@ Maintainer: Serguei Sokol (sokol at insa-toulouse.fr)
 \references{
 MUMPS official site http://mumps.enseeiht.fr
 
-Sokol S (2015). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.1, <URL:
+Sokol S (2015). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.4, <URL:
 http://CRAN.R-project.org/package=rmumps>.
 }
 \examples{
