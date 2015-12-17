@@ -1,0 +1,7 @@
+# how to remove files with c and s prefixes.
+# z is kept for possible extending of rmumps to complex types
+
+for f in s*.F; do
+   b="${f#s}"
+   [ -e "c$b" ] && rm -f "$f" "c$b"
+done
