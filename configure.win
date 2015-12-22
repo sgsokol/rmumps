@@ -1,7 +1,0 @@
-echo "compiling MUMPS and metis libs: "
-
-cd inst
-make -f Makefile.win M3264="-m32"
-make -f Makefile.win clean
-make -f Makefile.win M3264="-m64"
-make -f Makefile.win clean
