@@ -8,7 +8,7 @@
 using namespace Rcpp;
 // [[Rcpp::interfaces(r, cpp)]]
 
-#include <include/dmumps_c.h>
+#include <dmumps_c.h>
 //#include <libseq/mpi.h> // useless in sequential mode
 #define JOB_INIT -1
 #define JOB_END -2
@@ -17,8 +17,8 @@ using namespace Rcpp;
 
 class Rmumps {
 public:
-  Rmumps(S4 mat, bool);
-  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, bool);
+  Rmumps(S4 mat, bool copy_);
+  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, bool copy_);
   ~Rmumps() { clean(); };
   void clean() {
     //Rprintf("clean() is called...\n");
@@ -305,6 +305,7 @@ Rmumps::Rmumps(S4 mat, bool copy_=true) {
   MUMPS_INT nz=x.size();
   irn.resize(nz);
   jcn.resize(nz);
+  copy=copy_;
   if (copy) {
     anz=clone(x);
   } else {
@@ -317,7 +318,6 @@ Rmumps::Rmumps(S4 mat, bool copy_=true) {
   tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin());
   param.n=n;
   param.nz=nz;
-  copy=copy_;
 }
 Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_=true) {
   MUMPS_INT nz=x.size();

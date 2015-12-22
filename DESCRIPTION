@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.0.1.4
-Date: 2015-12-17
+Version: 5.0.1.5
+Date: 2015-12-21
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Exported class can be used for storing sparse matrix
@@ -12,7 +12,7 @@ Description: Exported class can be used for storing sparse matrix
 License: GPL (>= 2)
 Imports: methods, Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
-SystemRequirements: C++11, GNU make
+SystemRequirements: C++11
 NeedsCompilation: yes
 Biarch: yes
 Suggests: testthat, Matrix
