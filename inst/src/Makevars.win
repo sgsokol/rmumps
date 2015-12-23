@@ -5,7 +5,7 @@ FLAGS.MPI=-I$(DMUMPS)/libseq
 FLAGS.MUMPS=-cpp -Dmetis -Dpord -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) -I$(DMUMPS)/include
 FLAGS.PORD=-I$(DMUMPS)/PORD/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX -DMINGW
-FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include
+FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
 PKG_CXXFLAGS=$(FLAGS.MUMPS) #-DINTSIZE64
 PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
@@ -17,8 +17,7 @@ SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
 
-all: $(SHLIB)
-$(SHLIB): allmumps
+all: allmumps
 
 OBJS_COMMON_MOD = $(addprefix $(DMUMPS)/src/,\
         ana_omp_m.o\
@@ -247,6 +246,15 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 OBJECTS.lib=$(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD) $(OBJS_COMMON_OTHER) $(OBJS_OTHER)
 OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 
-allmumps:
+allmumps: $(OBJECTS.lib)
 	$(AR) cr liballmumps.a $(OBJECTS.lib)
 	$(RANLIB) liballmumps.a
+
+clean:
+	$(RM) $(OBJECTS.lib)
+distclean: clean
+	$(RM) liballmumps.a
+.c.o:
+	$(CC) $(CFLAGS) $(PKG_CFLAGS) -c $< -o $@
+.f.o:
+	$(F77) $(FFLAGS) $(PKG_FFLAGS) -c $< -o $@

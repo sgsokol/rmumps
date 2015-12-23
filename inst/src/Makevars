@@ -17,8 +17,7 @@ SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
 
-all: $(SHLIB)
-$(SHLIB): allmumps
+all: allmumps
 
 OBJS_COMMON_MOD = $(addprefix $(DMUMPS)/src/,\
         ana_omp_m.o\
@@ -247,6 +246,15 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 OBJECTS.lib=$(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD) $(OBJS_COMMON_OTHER) $(OBJS_OTHER)
 OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 
-allmumps:
+allmumps: $(OBJECTS.lib)
 	$(AR) cr liballmumps.a $(OBJECTS.lib)
 	$(RANLIB) liballmumps.a
+
+clean:
+	$(RM) $(OBJECTS.lib)
+distclean: clean
+	$(RM) liballmumps.a
+.c.o:
+	$(CC) $(CFLAGS) $(PKG_CFLAGS) -c $< -o $@
+.f.o:
+	$(F77) $(FFLAGS) $(PKG_FFLAGS) -c $< -o $@
