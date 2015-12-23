@@ -1,18 +1,18 @@
 DMUMPS=MUMPS_5.0.1
 DMETIS=metis-5.1.0
+ARITH = d
 FLAGS.MPI=-I$(DMUMPS)/libseq
-FLAGS.MUMPS=-cpp -Dmetis -Dpord -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_d -I$(DMUMPS)/include
+FLAGS.MUMPS=-cpp -Dmetis -Dpord -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) -I$(DMUMPS)/include
 FLAGS.PORD=-I$(DMUMPS)/PORD/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX -DMINGW
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include
 
-PKG_CXXFLAGS=$(FLAGS.MUMPS) -DINTSIZE64
-PKG_CFLAGS=-DINTSIZE64 $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis)
-PKG_FFLAGS = -fdefault-integer-8 -fcray-pointer -w $(FLAGS.MUMPS) $(FLAGS.MPI)
+PKG_CXXFLAGS=$(FLAGS.MUMPS) #-DINTSIZE64
+PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
+PKG_FFLAGS = -w $(FLAGS.MUMPS) $(FLAGS.MPI) #-fdefault-integer-8 -fcray-pointer
 PKG_LIBS= -L. -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMUMPS)/libseq/*.c $(DMUMPS)/PORD/lib/*.c $(DMETIS)/GKlib/*.c)
-#SOURCES.f = $(wildcard $(DMUMPS)/src/d*.f $(DMUMPS)/src/mumps*.f $(DMUMPS)/src/fac*.f $(DMUMPS)/src/tools*.f $(DMUMPS)/src/ana*.f $(DMUMPS)/libseq/*.f $(DMUMPS)/src/front_data_mgt_m.f $(DMUMPS)/src/omp_tps_common_m.f $(DMUMPS)/src/bcast_errors.f $(DMUMPS)/src/estim_flops.f)
 SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
@@ -20,7 +20,6 @@ SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
 all: $(SHLIB)
 $(SHLIB): allmumps
 
-ARITH = d
 OBJS_COMMON_MOD = $(addprefix $(DMUMPS)/src/,\
         ana_omp_m.o\
         tools_common_mod.o\
