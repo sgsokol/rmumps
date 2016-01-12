@@ -9,7 +9,7 @@ FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
 PKG_CXXFLAGS=$(FLAGS.MUMPS) $(M3264)#-DINTSIZE64
 PKG_CFLAGS= -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
-PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) #-fcray-pointer -fdefault-integer-8 
+PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
 
 SOURCES.c.metis=$(wildcard $(DMETIS)/libmetis/*.c)
 SOURCES.c.gklib=$(wildcard $(DMETIS)/GKlib/*.c)
@@ -19,14 +19,14 @@ SOURCES.f.mpi = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
 
-all: allmumps
+all:
 
 allmumps: $(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/libseq/libmpi.a $(DMUMPS)/PORD/lib/libpord.a $(DMETIS)/GKlib/libgk.a $(DMETIS)/libmetis/libmetis.a
-	mkdir -p ../lib$(M3264) && ar cqT ../MUMPS_thin $^
-	@(cd ../lib$(M3264) && \
-	 echo -e 'create liballmumps.a\naddlib ../MUMPS_thin\nsave\nend' | ar -M)
-	$(RM) ../MUMPS_thin $^
-	$(RANLIB) ../lib$(M3264)/liballmumps.a
+	mkdir -p lib$(M3264) && ar cqT lib$(M3264)/MUMPS_thin $^
+	@(cd lib$(M3264) && \
+	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | ar -M)
+	$(RM) lib$(M3264)/MUMPS_thin $^
+	$(RANLIB) lib$(M3264)/liballmumps.a
 	echo $(CURDIR)
 
 $(DMUMPS)/lib/libdmumps.a:

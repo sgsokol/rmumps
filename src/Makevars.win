@@ -1,14 +1,4 @@
-DMUMPS=../inst/src/MUMPS_5.0.1/
+DMUMPS=MUMPS_5.0.1
 
-PKG_CXXFLAGS=-I$(DMUMPS)include
-PKG_LIBS= -L../inst/lib-m32 -L../inst/lib-m64 -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
-
-.PHONY: $(SHLIB)
-$(SHLIB):
-
-liballmumps32:
-	@(cd ../inst/src && $(MAKE) -f Makevars.win clean && $(MAKE) -f Makevars.win \
-	  M3264="-m32" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
-liballmumps64:
-	@(cd ../inst/src && $(MAKE) -f Makevars.win clean && $(MAKE) -f Makevars.win \
-	  M3264="-m64" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+PKG_CXXFLAGS=-I$(DMUMPS)/include
+PKG_LIBS= -L./lib-m32 -L./lib-m64 -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

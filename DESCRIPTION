@@ -2,7 +2,7 @@ Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
 Version: 5.0.1.5
-Date: 2015-12-21
+Date: 2016-01-17
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Exported class can be used for storing sparse matrix

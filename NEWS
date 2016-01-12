@@ -1,5 +1,19 @@
+Version 5.0.1.5
+===============
+
+* 2016-01-17
+ - fixed some building issues on all platforms (all reported by Prof. Brian Ripley):
+  + no more cmake is needed on Linux and Mac OS;
+  + no more sources kept in binary package;
+  + MAKE env. variable is respected now;
+  + explicit mention of gcc is removed;
+  + /bin/rm is replaced by $(RM);
+  + fixed a non initialized variable use in C++ code;
+  + a .a prefix is used for static library on Windows instead of .dll.
+
 Version 5.0.1.4
 ===============
 
 * 2015-12-17
  - initial release. Provides solve(), numeric() and symbolic() methods
+

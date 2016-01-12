@@ -1,10 +1,11 @@
-DMUMPS=../inst/src/MUMPS_5.0.1/
+DMUMPS=MUMPS_5.0.1
+RANLIB?=ranlib
 
-PKG_CXXFLAGS=-I$(DMUMPS)include
-PKG_LIBS= -L../inst/src -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_CXXFLAGS=-I$(DMUMPS)/include
+PKG_LIBS= -L./lib -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-$(SHLIB): ../inst/src/liballmumps.a
+$(SHLIB): lib/liballmumps.a
 
-../inst/src/liballmumps.a:
-	@(cd ../inst/src && $(MAKE) -f Makevars distclean && $(MAKE) -f Makevars \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+lib/liballmumps.a:
+	@($(MAKE) -f Makelibs distclean && $(MAKE) -f Makelibs \
+	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")

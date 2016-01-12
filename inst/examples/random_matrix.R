@@ -10,7 +10,7 @@ diag(a)=0
 diag(a)=-rowSums(a)
 a[1,1]=a[1,1]-1
 am=Rmumps$new(a)
-b=as.double(a\%*\%(1:n)) # rhs for an exact solution vector 1:n
+b=as.double(a%*%(1:n)) # rhs for an exact solution vector 1:n
 # following time includes symbolic analysis, LU factorization and system solving
 system.time(x<-am$solve(b))
 bb=2*b
