@@ -10,7 +10,6 @@ FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 PKG_CXXFLAGS=$(FLAGS.MUMPS) #-DINTSIZE64
 PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
 PKG_FFLAGS = -w $(FLAGS.MUMPS) $(FLAGS.MPI) #-fdefault-integer-8 -fcray-pointer
-PKG_LIBS= -L. -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMUMPS)/libseq/*.c $(DMUMPS)/PORD/lib/*.c $(DMETIS)/GKlib/*.c)
 SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)

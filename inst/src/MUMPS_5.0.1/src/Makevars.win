@@ -1,30 +1,16 @@
-#
-#  This file is part of MUMPS 5.0.1, released
-#  on Thu Jul 23 17:08:29 UTC 2015
-#
-#
-#  This file is part of MUMPS 5.0beta, built on Tue Jan 10 16:43:31 UTC 2012
-#
 topdir = ..
 libdir = $(topdir)/lib
 
-default:	d
+default:	mumps_lib
 
-.PHONY: default s d c z mumps_lib clean
+.PHONY: mumps_lib clean distclean
 
-s:
-	$(MAKE) ARITH=s mumps_lib
-d:
-	$(MAKE) ARITH=d mumps_lib
-c:
-	$(MAKE) ARITH=c mumps_lib
-z:
-	$(MAKE) ARITH=z mumps_lib
+ARITH=d
+INCS=-I. -I../libseq -I../include ../../metis-5.1.0/include -I../PORD/include/
+CDEFS=-DAdd_ -Dpord -Dmetis
 
-include $(topdir)/Makefile.inc.win
-
-mumps_lib:    $(libdir)/libmumps_common$(PLAT)$(LIBEXT) \
-              $(libdir)/lib$(ARITH)mumps$(PLAT)$(LIBEXT)
+mumps_lib:    $(libdir)/libmumps_common.a \
+              $(libdir)/lib$(ARITH)mumps.a
 
 OBJS_COMMON_MOD = \
         ana_omp_m.o\
@@ -154,14 +140,12 @@ OBJS_OTHER = \
         $(ARITH)type3_root.o\
         $(ARITH)mumps_restart.o
 
-$(libdir)/libmumps_common$(PLAT)$(LIBEXT):      $(OBJS_COMMON_MOD) $(OBJS_COMMON_OTHER)
-	#$(AR)$@ $? $(LPORD) $(LIBSEQ) $(LMETIS) -lgfortran -lpthread
-	$(AR)$@ $?
+$(libdir)/libmumps_common.a:      $(OBJS_COMMON_MOD) $(OBJS_COMMON_OTHER)
+	$(AR) cvrs $@ $?
 	$(RANLIB) $@
 
-$(libdir)/lib$(ARITH)mumps$(PLAT)$(LIBEXT):    $(OBJS_MOD) $(OBJS_OTHER)
-	#$(AR)$@ $? -L$(libdir) -lmumps_common$(PLAT) $(LPORD) $(LIBSEQ) $(LMETIS) -lgfortran -lpthread
-	$(AR)$@ $?
+$(libdir)/lib$(ARITH)mumps.a:    $(OBJS_MOD) $(OBJS_OTHER)
+	$(AR) cvrs $@ $?
 	$(RANLIB) $@
 
 # Dependencies between modules:
@@ -261,14 +245,15 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 
 .SUFFIXES: .c .F .o
 .F.o:
-	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -w -c $*.F $(OUTF)$*.o
+	$(FC) $(FFLAGS) $(M3264) -Dpord -Dmetis -I../libseq -I. -I../include -w -c $*.F -o $*.o
 .c.o:
-	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
+	$(CC) $(CFLAGS) $(CDEFS) $(INCS) $(M3264) -c $*.c -o $*.o
 
 $(ARITH)mumps_c.o:	mumps_c.c
-	$(CC) $(OPTC) $(INCS) $(CDEFS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) \
-	      $(IORDERINGSC) $(ORDERINGSC) -I../include -c mumps_c.c $(OUTC)$@
-
+	$(CC) $(CFLAGS) $(CDEFS) $(INCS) $(M3264) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) \
+	 -c mumps_c.c -o $@
 
 clean:
 	$(RM) *.o *.mod
+distclean: clean
+	$(RM) $(libdir)/*.a

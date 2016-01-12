@@ -6,5 +6,5 @@ PKG_LIBS= -L../inst/src -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS
 $(SHLIB): ../inst/src/liballmumps.a
 
 ../inst/src/liballmumps.a:
-	@(cd ../inst/src && $(MAKE) -f Makevars \
+	@(cd ../inst/src && $(MAKE) -f Makevars distclean && $(MAKE) -f Makevars \
 	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")

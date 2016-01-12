@@ -1,10 +1,14 @@
 DMUMPS=../inst/src/MUMPS_5.0.1/
 
 PKG_CXXFLAGS=-I$(DMUMPS)include
-PKG_LIBS= -L../inst/src -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS= -L../inst/lib-m32 -L../inst/lib-m64 -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-$(SHLIB): ../inst/src/liballmumps.a
+.PHONY: $(SHLIB)
+$(SHLIB):
 
-../inst/src/liballmumps.a:
-	@(cd ../inst/src && $(MAKE) -f Makevars.win \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+liballmumps32:
+	@(cd ../inst/src && $(MAKE) -f Makevars.win clean && $(MAKE) -f Makevars.win \
+	  M3264="-m32" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+liballmumps64:
+	@(cd ../inst/src && $(MAKE) -f Makevars.win clean && $(MAKE) -f Makevars.win \
+	  M3264="-m64" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")

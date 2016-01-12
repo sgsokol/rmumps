@@ -1,0 +1,12 @@
+echo FCFLAGS=$FCFLAGS
+for term in FC FCFLAGS FCPICFLAGS CC CFLAGS CPICFLAGS; do
+   eval "$term='$(R CMD config $term)'"
+done
+echo FCFLAGS=$FCFLAGS
+
+MAKE=${MAKE:-make}
+#AR=${AR:-ar}
+RANLIB=${RANLIB:-ranlib}
+
+$MAKE -C src -f Makevars.win liballmumps32 CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
+$MAKE -C src -f Makevars.win liballmumps64 CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
