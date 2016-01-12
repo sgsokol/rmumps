@@ -65,7 +65,7 @@ Rcpp Exported Class Wrapping MUMPS library
  The solution is written "in place" thus overwriting rhs (watch out side effects)
 
  For a possible error messages (e.g. when factorizing a singular matrix), cf.
- MUMPS documentation on the official MUMPS cite).
+ MUMPS documentation on the official MUMPS site).
 }
 
 \keyword{classes}
@@ -86,13 +86,5 @@ Rcpp Exported Class Wrapping MUMPS library
      multiple rhs if b is a matrix (can be dense or sparse). Return the solution(s).}
     \item{\code{inv()}:}{Return inverse of the matrix)}
     \item{\code{set_mat_data(x)}:}{updates matrix entries (same order as previously)}
-  }
-}
-\keyword{classes}
-\section{Fields}{
-  \describe{
-    \item{\code{copy}:}{Object of class \code{activeBindingFunction} ~~ }
-    \item{\code{mrhs}:}{Object of class \code{activeBindingFunction} ~~ }
-    \item{\code{rhs}:}{Object of class \code{activeBindingFunction} ~~ }
   }
 }
