@@ -1,4 +1,4 @@
-DMUMPS=MUMPS_5.0.1
+DMUMPS=lib/MUMPS_5.0.1
 
 PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib-m32 -L./lib-m64 -lallmumps -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
