@@ -1,8 +1,9 @@
-Version 5.0.1.5
+Version 5.0.1.7
 ===============
 
-* 2016-01-17
- - fixed a blocking typo in inst/example.R
+* 2016-01-20
+ - INTEGER type is compiled as int32 and not int64 as in previous version;
+ - fixed a typo in inst/example.R;
  - fixed some building issues on all platforms (all reported by Prof. Brian Ripley):
   + no more cmake is needed on Linux and Mac OS;
   + no more sources kept in binary package;
@@ -10,7 +11,9 @@ Version 5.0.1.5
   + explicit mention of gcc is removed;
   + /bin/rm is replaced by $(RM);
   + fixed a non initialized variable use in C++ code;
-  + a .a prefix is used for static library on Windows instead of .dll.
+  + a .a prefix is used for static library on Windows instead of .dll;
+ - fixed the use of default values in constructors which are ignored by
+   RcppModule (detected by UBSAN test run by R-core team);
 
 Version 5.0.1.4
 ===============

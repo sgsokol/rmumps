@@ -17,7 +17,9 @@ using namespace Rcpp;
 
 class Rmumps {
 public:
+  Rmumps(S4 mat);
   Rmumps(S4 mat, bool copy_);
+  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, bool copy_);
   ~Rmumps() { clean(); };
   void clean() {
@@ -282,12 +284,20 @@ public:
   std::set<int> jobs;
 private:
   DMUMPS_STRUC_C param;
+  void new_mat(S4 mat, bool copy_);
+  void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_);
   void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a);
   char buf[512];
 };
 
 /* constructors */
-Rmumps::Rmumps(S4 mat, bool copy_=true) {
+Rmumps::Rmumps(S4 mat, bool copy_) {
+  new_mat(mat, copy_);
+}
+Rmumps::Rmumps(S4 mat) {
+  new_mat(mat, true);
+}
+void Rmumps::new_mat(S4 mat, bool copy_) {
   if (!mat.inherits("dgTMatrix")) {
      Environment meth("package:methods");
      Function as_=meth["as"];
@@ -319,7 +329,13 @@ Rmumps::Rmumps(S4 mat, bool copy_=true) {
   param.n=n;
   param.nz=nz;
 }
-Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_=true) {
+Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n) {
+  new_ijv(i0, j0, x, n, true);
+}
+Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_) {
+  new_ijv(i0, j0, x, n, copy_);
+}
+void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_) {
   MUMPS_INT nz=x.size();
   std::vector<MUMPS_INT> irn(nz);
   std::vector<MUMPS_INT> jcn(nz);
@@ -361,7 +377,7 @@ RCPP_MODULE(mod_Rmumps){
   .constructor<S4, bool>()
   .constructor<IntegerVector, IntegerVector, NumericVector, int>()
   .constructor<IntegerVector, IntegerVector, NumericVector, int, bool>()
-  //.finalizer(&cleanme) // makes crash by double freeing of the same pointer
+  //.finalizer(&cleanme) // crashes by double freeing of the same pointer
   
   .property("rhs", &Rmumps::get_rhs, &Rmumps::set_rhs)
   .property("mrhs", &Rmumps::get_mrhs, &Rmumps::set_mrhs)

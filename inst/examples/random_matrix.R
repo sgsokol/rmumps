@@ -31,3 +31,4 @@ system.time(ainv <- solve(a)) # the same in Matrix
 # clean up by hand to avoid possible interference between gc() and
 # Rcpp object destructor after unloading this namespace
 rm(am)
+gc()
