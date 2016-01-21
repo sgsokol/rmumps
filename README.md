@@ -1,4 +1,5 @@
-Rcpp Wrapper for MUMPS Library.
+Rcpp Wrapper for MUMPS Library
+------------------------------
 
 MUMPS stands for "a MUltifrontal Massively Parallel sparse direct Solver"
 see more on their official site http://mumps.enseeiht.fr/.
