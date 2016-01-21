@@ -1,5 +1,6 @@
 DMUMPS=MUMPS_5.0.1
 DMETIS=metis-5.1.0
+DLIB=../lib$(M3264)
 ARITH = d
 FLAGS.MPI=-I$(DMUMPS)/libseq
 FLAGS.MUMPS=-Dmetis -Dpord -I$(DMUMPS)/include
@@ -19,14 +20,14 @@ SOURCES.f.mpi = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
 
-all:
+all: allmumps
 
 allmumps: $(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/libseq/libmpi.a $(DMUMPS)/PORD/lib/libpord.a $(DMETIS)/GKlib/libgk.a $(DMETIS)/libmetis/libmetis.a
-	mkdir -p lib$(M3264) && ar cqT lib$(M3264)/MUMPS_thin $^
-	@(cd lib$(M3264) && \
+	mkdir -p $(DLIB) && ar cqT $(DLIB)/MUMPS_thin $^
+	@(cd $(DLIB) && \
 	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | ar -M)
-	$(RM) lib$(M3264)/MUMPS_thin $^
-	$(RANLIB) lib$(M3264)/liballmumps.a
+	$(RM) $(DLIB)/MUMPS_thin $^
+	$(RANLIB) $(DLIB)/liballmumps.a
 	echo $(CURDIR)
 
 $(DMUMPS)/lib/libdmumps.a:

@@ -246,13 +246,13 @@ OBJECTS.lib=$(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD)
 OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 
 allmumps: $(OBJECTS.lib)
-	mkdir -p lib && $(AR) cvrs lib/liballmumps.a $(OBJECTS.lib)
-	$(RANLIB) lib/liballmumps.a
+	$(AR) cvrs liballmumps.a $(OBJECTS.lib)
+	$(RANLIB) liballmumps.a
 
 clean:
 	$(RM) $(OBJECTS.lib)
 distclean: clean
-	$(RM) lib/liballmumps.a
+	$(RM) liballmumps.a
 .c.o:
 	$(CC) $(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS) -c $< -o $@
 .f.o:
