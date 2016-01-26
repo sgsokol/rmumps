@@ -28,11 +28,11 @@ Rcpp Exported Class Wrapping MUMPS library
   am=Rmumps$new(a)
   b=as.double(a\%*\%(1:n)) # rhs for an exact solution vector 1:n
   # following time includes symbolic analysis, LU factorization and system solving
-  system.time(x<-am$solve(b))
+  system.time(x<-solve(am, b))
   bb=2*b
   # this second time should be much shorter
   # as symbolic analysis and LU factorization are already done
-  system.time(xx<-am$solve(bb))
+  system.time(xx<-solve(am, bb))
   # compare to Matrix corresponding times
   system.time(xm<-solve(a, b))
   system.time(xxm<-solve(a, bb))
@@ -41,7 +41,7 @@ Rcpp Exported Class Wrapping MUMPS library
   range(xm-1:n) # Matrix
 
   # matrix inversion
-  system.time(aminv <- am$inv())
+  system.time(aminv <- solve(am))
   system.time(ainv <- solve(a)) # the same in Matrix
 
   # clean up by hand to avoid possible interference between gc() and

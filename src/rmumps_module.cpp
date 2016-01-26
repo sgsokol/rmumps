@@ -325,6 +325,9 @@ void Rmumps::new_mat(S4 mat, bool copy_) {
     irn[i]=mi[i]+1;
     jcn[i]=mj[i]+1;
   }
+  //Rf_PrintValue(wrap(irn));
+  //Rf_PrintValue(wrap(jcn));
+  //Rf_PrintValue(wrap(anz));
   tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin());
   param.n=n;
   param.nz=nz;
@@ -335,18 +338,27 @@ Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n) {
 Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_) {
   new_ijv(i0, j0, x, n, copy_);
 }
-void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_) {
+void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_, bool copy_) {
   MUMPS_INT nz=x.size();
-  std::vector<MUMPS_INT> irn(nz);
-  std::vector<MUMPS_INT> jcn(nz);
+  MUMPS_INT n=n_;
+  irn.resize(nz);
+  jcn.resize(nz);
   for (int i=0; i < nz; i++) { // move to 1-based indices
     irn[i]=i0[i]+1;
     jcn[i]=j0[i]+1;
   }
-  tri_init(&*irn.begin(), &*jcn.begin(), &*x.begin());
+  copy=copy_;
+  if (copy) {
+    anz=clone(x);
+  } else {
+    anz=x;
+  }
+  //Rf_PrintValue(wrap(irn));
+  //Rf_PrintValue(wrap(jcn));
+  //Rf_PrintValue(wrap(anz));
+  tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin());
   param.n=n;
   param.nz=nz;
-  copy=copy_;
 }
 
 /* other methods */
@@ -362,6 +374,7 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a) {
   param.a=a;
   /* No outputs */
   param.ICNTL(1)=-1; param.ICNTL(2)=-1; param.ICNTL(3)=-1; param.ICNTL(4)=0;
+  param.ICNTL(5)=0; param.ICNTL(18)=0;
 }
 /*
 void cleanme(Rmumps* obj) {
