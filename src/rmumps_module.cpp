@@ -17,8 +17,8 @@ using namespace Rcpp;
 
 class Rmumps {
 public:
-  Rmumps(S4 mat);
-  Rmumps(S4 mat, bool copy_);
+  Rmumps(RObject mat);
+  Rmumps(RObject mat, bool copy_);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, bool copy_);
   ~Rmumps() { clean(); };
@@ -123,6 +123,16 @@ public:
         return solves(as<S4>(b));
       }
       break;
+    case VECSXP:
+      // sparse or dense many rhs
+      if (b.inherits("simple_triplet_matrix")) {
+        // many sparse rhs
+        return solvestm(as<List>(b));
+      } else {
+        sprintf(buf, "expected simple_triplet_matrix but got something else");
+        stop(buf);
+      }
+      break;
     default:
       sprintf(buf, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
       stop(buf);
@@ -134,6 +144,7 @@ public:
                         Named("is_S4") = wrap(b.isS4()),
                         Named("attr_names") = b.attributeNames());
     */
+    return R_NilValue;
   }
   NumericVector solvev(NumericVector b) {
     if (copy) {
@@ -201,6 +212,9 @@ public:
     //  sprintf(buf, "sparse rhs matrix must be of dgCMatrix class. Instead '%s' class is received (cf. pkg Matrix)", as<std::string>(cstr[0]).c_str());
     //  stop(buf);
     //}
+    if (di[0] == 0 && di[1] == 0) {
+       return(inv());
+    }
     if (di[0] != param.n) stop("sparse rhs matrix must have the same number of rows than system matrix A");
     /* prepare a triplicate: sparse, pointer rhs_sparse */
     rhs_sparse=mat.slot("x");
@@ -218,6 +232,73 @@ public:
       irhs_ptr[i]=mp[i]+1;
     }
     
+    mrhs=NumericMatrix(n, nrhs);
+    param.nz_rhs=nz_rhs;
+    param.nrhs=nrhs;
+    param.lrhs=n;
+    param.irhs_ptr=&*irhs_ptr.begin();
+    param.irhs_sparse=&*irhs_sparse.begin();
+    param.rhs_sparse=&*rhs_sparse.begin();
+    param.rhs=&*mrhs.begin(); // will hold the solution
+    param.ICNTL(20)=1; // decide automaticaly about this sparsity exploit
+    do_job(6);
+    return(mrhs);
+  };
+  NumericMatrix solvestm(List mat) {
+    // solve sparse rhs (may be multiple)
+    // mat is expected to be of type slam::simple_triplet_matrix
+    // if dim(mat)==(0,0) then an inverse matrix is requested
+    int nrow=mat["nrow"];
+    int ncol=mat["ncol"];
+    if (!mat.inherits("simple_triplet_matrix")) {
+      sprintf(buf, "solvestm() expects an rhs matrix of simple_triplet_matrix class");
+      stop(buf);
+    }
+    if (nrow == 0 && ncol == 0) {
+       return(inv());
+    }
+    if (nrow != param.n) stop("sparse rhs matrix must have the same number of rows than system matrix A");
+    /* prepare a triplicate: sparse, pointer rhs_sparse */
+    IntegerVector mi(as<IntegerVector>(mat["i"]));
+    IntegerVector mj(as<IntegerVector>(mat["j"]));
+    NumericVector mv(as<NumericVector>(mat["v"]));
+//print(mi);
+//print(mj);
+//print(mv);
+    
+    MUMPS_INT n=nrow;
+    MUMPS_INT nrhs=ncol;
+    MUMPS_INT nz_rhs=mi.size();
+    irhs_ptr.resize(nrhs+1);
+    irhs_sparse.resize(nz_rhs);
+    
+    // bring to ccs format
+    // first sort, as stm does not impose this
+    IntegerVector iv1=mi+(mj-1)*nrow;
+    IntegerVector iv1s=clone(iv1).sort();
+    IntegerVector o=match(iv1s, iv1);
+    mi=mi[o-1];
+    mj=mj[o-1];
+    rhs_sparse=mv[o-1];
+//print(mi);
+//print(mj);
+//print(mv);
+    for (int i=0; i < nz_rhs; i++) {
+      irhs_sparse[i]=mi[i];
+    }
+    irhs_ptr[0]=1;
+    int ip=0;
+    for (int i=1; i <= nrhs; i++) {
+      // count entries in this column
+      int count=0;
+      for (; mj[ip]==i && ip < nz_rhs; ip++, count++) {
+//Rcout << "ip=" << ip << "; c=" << count << std::endl;
+      }
+//Rcout << "after ip=" << ip << "; c=" << count << std::endl;
+      irhs_ptr[i]=irhs_ptr[i-1]+count;
+    }
+//Rcout << "nz_rhs=" << nz_rhs << std::endl;
+//print(IntegerVector(irhs_ptr.begin(), irhs_ptr.end()));
     mrhs=NumericMatrix(n, nrhs);
     param.nz_rhs=nz_rhs;
     param.nrhs=nrhs;
@@ -271,6 +352,28 @@ public:
   NumericMatrix get_mrhs() {
     return mrhs;
   }
+  IntegerVector dim() {
+    return IntegerVector::create(param.n, param.n);
+  }
+  int nrow() {
+    return param.n;
+  }
+  int ncol() {
+    return param.n;
+  }
+  void print() {
+    Rcout << "A " << param.n << "x" << param.n << " Rmumps matrix" << std::endl;
+    Rcout << "Decomposition(s) done: ";
+    if (jobs.count(1)==1) {
+      Rcout << "symbolic";
+    } else {
+      Rcout << "none";
+    }
+    if (jobs.count(2)==1) {
+      Rcout << ", numeric";
+    }
+    Rcout << std::endl;
+  }
   std::string mumps_version() { return MUMPS_VERSION; };
   std::vector<MUMPS_INT> irn;
   std::vector<MUMPS_INT> jcn;
@@ -284,46 +387,82 @@ public:
   std::set<int> jobs;
 private:
   DMUMPS_STRUC_C param;
-  void new_mat(S4 mat, bool copy_);
+  void new_mat(RObject mat, bool copy_);
   void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_);
   void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a);
   char buf[512];
 };
 
 /* constructors */
-Rmumps::Rmumps(S4 mat, bool copy_) {
+Rmumps::Rmumps(RObject mat, bool copy_) {
   new_mat(mat, copy_);
 }
-Rmumps::Rmumps(S4 mat) {
+Rmumps::Rmumps(RObject mat) {
   new_mat(mat, true);
 }
-void Rmumps::new_mat(S4 mat, bool copy_) {
-  if (!mat.inherits("dgTMatrix")) {
-     Environment meth("package:methods");
-     Function as_=meth["as"];
-     mat=as_(mat, "dgTMatrix");
-     //stop("matrix must be of dgTMatrix class (cf. pkg Matrix)");
+void Rmumps::new_mat(RObject mat_, bool copy_) {
+  MUMPS_INT n;
+  MUMPS_INT nz;
+  switch(mat_.sexp_type()) {
+  case S4SXP: {
+    S4 mat=as<S4>(mat_);
+    if (!mat.inherits("dgTMatrix")) {
+       Environment meth("package:methods");
+       Function as_=meth["as"];
+       mat=as_(mat, "dgTMatrix");
+       //stop("matrix must be of dgTMatrix class (cf. pkg Matrix)");
+    }
+    IntegerVector di(mat.slot("Dim"));
+    if (di[0] != di[1]) stop("matrix must be square");
+    /* prepare a triplicate: irn, jcn, a */
+    NumericVector x(mat.slot("x"));
+    IntegerVector mi(mat.slot("i"));
+    IntegerVector mj(mat.slot("j"));
+    n=di[0];
+    nz=x.size();
+    irn.resize(nz);
+    jcn.resize(nz);
+    copy=copy_;
+    if (copy) {
+      anz=clone(x);
+    } else {
+      anz=x;
+    }
+    for (int i=0; i < nz; i++) { // move to 1-based indices
+      irn[i]=mi[i]+1;
+      jcn[i]=mj[i]+1;
+    }
+    break;
   }
-  IntegerVector di(mat.slot("Dim"));
-  if (di[0] != di[1]) stop("matrix must be square");
-
-  /* prepare a triplicate: irn, jcn, a */
-  NumericVector x(mat.slot("x"));
-  IntegerVector mi(mat.slot("i"));
-  IntegerVector mj(mat.slot("j"));
-  MUMPS_INT n=di[0];
-  MUMPS_INT nz=x.size();
-  irn.resize(nz);
-  jcn.resize(nz);
-  copy=copy_;
-  if (copy) {
-    anz=clone(x);
-  } else {
-    anz=x;
+  case VECSXP: {
+    List mat=as<List>(mat_);
+    if (!mat_.inherits("simple_triplet_matrix")) {
+       stop("constructor input of type VECSXP must be of simple_triplet_matrix class (cf. pkg slam)");
+    }
+    n=mat["nrow"];
+    if (n != as<int>(mat["ncol"])) stop("matrix must be square");
+    /* prepare a triplicate: irn, jcn, a */
+    NumericVector x(as<NumericVector>(mat["v"]));
+    IntegerVector mi(as<IntegerVector>(mat["i"]));
+    IntegerVector mj(as<IntegerVector>(mat["j"]));
+    nz=x.size();
+    irn.resize(nz);
+    jcn.resize(nz);
+    copy=copy_;
+    if (copy) {
+      anz=clone(x);
+    } else {
+      anz=x;
+    }
+    for (int i=0; i < nz; i++) { // already in 1-based indices
+      irn[i]=mi[i];
+      jcn[i]=mj[i];
+    }
+    break;
   }
-  for (int i=0; i < nz; i++) { // move to 1-based indices
-    irn[i]=mi[i]+1;
-    jcn[i]=mj[i]+1;
+  default:
+    sprintf(buf, "constructor form a single object is expecting Matrix::dgTMatrix (i.e. S4SXP) or slam::simple_triplet_matrix (i.e. VECSXP) class as input. Got '%d' SEXP instead", mat_.sexp_type());
+    stop(buf);
   }
   //Rf_PrintValue(wrap(irn));
   //Rf_PrintValue(wrap(jcn));
@@ -386,8 +525,8 @@ RCPP_MODULE(mod_Rmumps){
   using namespace Rcpp ;
   class_<Rmumps>("Rmumps")
   // expose the default constructor
-  .constructor<S4>()
-  .constructor<S4, bool>()
+  .constructor<SEXP>()
+  .constructor<SEXP, bool>()
   .constructor<IntegerVector, IntegerVector, NumericVector, int>()
   .constructor<IntegerVector, IntegerVector, NumericVector, int, bool>()
   //.finalizer(&cleanme) // crashes by double freeing of the same pointer
@@ -401,6 +540,11 @@ RCPP_MODULE(mod_Rmumps){
   .method("solve", &Rmumps::solve, "Solve sparse system with one or many, sparse or dense rhs")
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Epdate matrix entries keeping the non zero pattern untouched")
+  .method("dim", &Rmumps::dim, "Return a vector with matrix dimensions")
+  .method("nrow", &Rmumps::nrow, "Return an integer with matrix row number")
+  .method("ncol", &Rmumps::nrow, "Return an integer with matrix column number")
+  .method("print", &Rmumps::print, "Print the size of matrix and decompositions done")
+  .method("show", &Rmumps::print, "Print the size of matrix and decompositions done")
   //.method("solvev", &Rmumps::solvev, "Solve sparse system with one rhs")
   //.method("solvem", &Rmumps::solvem, "Solve sparse system with many rhs")
   //.method("solves", &Rmumps::solves, "Solve sparse system with many sparse rhs")

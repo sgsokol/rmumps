@@ -3,6 +3,12 @@
 \docType{class}
 \alias{Rcpp_Rmumps-class}
 \alias{Rmumps}
+\alias{solve.Rcpp_Rmumps}
+\alias{dim.Rcpp_Rmumps}
+\alias{nrow.Rcpp_Rmumps}
+\alias{ncol.Rcpp_Rmumps}
+\alias{print.Rcpp_Rmumps}
+\alias{show.Rcpp_Rmumps}
 \title{
 Rcpp Exported Class Wrapping MUMPS library
 }
@@ -78,13 +84,18 @@ Rcpp Exported Class Wrapping MUMPS library
 }
 \section{Methods}{
   \describe{
-    \item{\code{new(asp, copy=TRUE)}:}{constructor from dgTMatrix class (or from a matrix convertable to it)}
-    \item{\code{new(i, j, x, copy=TRUE)}:}{constructor from triade rows, cols, vals}
+    \item{\code{new(asp, copy=TRUE)}:}{constructor from Matrix::dgTMatrix class (or from covertible to it) and slam::simple_triplet_matrix class}
+    \item{\code{new(i, j, x, n, copy=TRUE)}:}{constructor from triade rows, cols, vals}
     \item{\code{symbolic()}:}{do symbolic analysis (stored internally) }
     \item{\code{numeric()}:}{do LU factorization (stored internally)}
     \item{\code{solve(b)}:}{solve single rhs (if b is a vector) or
      multiple rhs if b is a matrix (can be dense or sparse). Return the solution(s).}
     \item{\code{inv()}:}{Return inverse of the matrix)}
     \item{\code{set_mat_data(x)}:}{updates matrix entries (same order as previously)}
+    \item{\code{dim()}:}{Return a dimension vector of the matrix)}
+    \item{\code{nrow()}:}{Return a row number of the matrix)}
+    \item{\code{ncol()}:}{Return a column number of the matrix)}
+    \item{\code{print()}:}{Print summary information on the matrix)}
+    \item{\code{show()}:}{Print summary information on the matrix)}
   }
 }

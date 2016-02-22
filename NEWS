@@ -1,8 +1,10 @@
 Version 5.0.1.8
 ===============
 
-* 2016-02-??
- - added R-like solve() method;
+* 2016-02-22
+ - added constructor from slam::simple_triplet_matrix
+ - added multiple right hand side solver for slam::simple_triplet_matrix
+ - added S3method for Rcpp_Rmumps class: solve(), dim(), nrow(), ncol(), print(), show();
  - fixed constructor from i, j, v triplicate;
 
 Version 5.0.1.7
