@@ -1,3 +1,12 @@
+Version 5.0.1.9
+===============
+
+* 2016-04-12
+ - added method triplet() rendreding a simple_triplet_matrix (cf. package slam)
+ - fixed job registering for symbolic() method
+ - fixed compiler warning about non initialized n and nz in new_mat();
+ - fixed valgrind's warning about non initialized memory use in dmumps()
+
 Version 5.0.1.8
 ===============
 
