@@ -1,0 +1,36 @@
+
+R version 3.2.0 (2015-04-16) -- "Full of Ingredients"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R est un logiciel libre livré sans AUCUNE GARANTIE.
+Vous pouvez le redistribuer sous certaines conditions.
+Tapez 'license()' ou 'licence()' pour plus de détails.
+
+R est un projet collaboratif avec de nombreux contributeurs.
+Tapez 'contributors()' pour plus d'information et
+'citation()' pour la façon de le citer dans les publications.
+
+Tapez 'demo()' pour des démonstrations, 'help()' pour l'aide
+en ligne ou 'help.start()' pour obtenir l'aide au format HTML.
+Tapez 'q()' pour quitter R.
+
+> # use as
+> # R -d valgrind --vanilla < valgrind.R
+> library(rmumps)
+> library(Matrix)
+> n=3
+> a=as(diag(1:n), "dgTMatrix")
+> am=Rmumps$new(a)
+> am$inv()
+     [,1] [,2]      [,3]
+[1,]    1  0.0 0.0000000
+[2,]    0  0.5 0.0000000
+[3,]    0  0.0 0.3333333
+> ai=Rmumps$new(a@i, a@j, a@x, nrow(a))
+> ai$inv()
+     [,1] [,2]      [,3]
+[1,]    1  0.0 0.0000000
+[2,]    0  0.5 0.0000000
+[3,]    0  0.0 0.3333333
+> 
