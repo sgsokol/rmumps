@@ -110,12 +110,12 @@ RM      = rm -f
 # FL : Fortran linker
 # AR : Archive object in a library
 #      keep a space at the end if options have to be separated from lib name
-AR      = ar cvrs 
+AR      = $(AR) cvrs 
 #AR      = gcc-ar vr 
 #AR       = gcc -shared -s -static-libgcc -o 
 # RANLIB : generate index of an archive file
 #   (optionnal use "RANLIB = echo" in case of problem)
-RANLIB  = ranlib
+RANLIB  = $(RANLIB)
 #RANLIB  = echo
 
 # The next two lines should not be modified. They concern

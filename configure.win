@@ -2,10 +2,13 @@ for term in FC FCFLAGS FCPICFLAGS CC CFLAGS CPICFLAGS; do
    eval "$term='$(R CMD config $term)'"
 done
 
+eval "AR=$(echo $CC | sed -e 's/gcc$/ar/' -e 's/gcc .*/ar/')"
+eval "RANLIB=$(echo $CC | sed -e 's/gcc$/ranlib/' -e 's/gcc .*/ranlib/')"
+
 MAKE=${MAKE:-make}
 RANLIB=${RANLIB:-ranlib}
 
 $MAKE -C src/lib -f Makefile.win clean
-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
+$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
 $MAKE -C src/lib -f Makefile.win clean
-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
+$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"

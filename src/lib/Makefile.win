@@ -23,9 +23,9 @@ SOURCES.f.mpi = $(wildcard $(DMUMPS)/libseq/*.f)
 all: allmumps
 
 allmumps: $(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/libseq/libmpi.a $(DMUMPS)/PORD/lib/libpord.a $(DMETIS)/GKlib/libgk.a $(DMETIS)/libmetis/libmetis.a
-	mkdir -p $(DLIB) && ar cqT $(DLIB)/MUMPS_thin $^
+	mkdir -p $(DLIB) && $(AR) cqT $(DLIB)/MUMPS_thin $^
 	@(cd $(DLIB) && \
-	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | ar -M)
+	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)
 	$(RM) $(DLIB)/MUMPS_thin $^
 	$(RANLIB) $(DLIB)/liballmumps.a
 	echo $(CURDIR)
