@@ -15,7 +15,7 @@ using namespace Rcpp;
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
 #include "../inst/include/rmumps.h"
-Rmumps::~Rmumps() { clean(); };
+Rmumps::~Rmumps() { clean(); }
 void Rmumps::clean() {
   //Rprintf("clean() is called...\n");
   param.job=JOB_END;
