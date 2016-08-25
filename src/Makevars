@@ -8,4 +8,4 @@ $(SHLIB): lib/liballmumps.a
 
 lib/liballmumps.a:
 	@($(MAKE) -C lib distclean && $(MAKE) -C lib \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="$(FCFLAGS) $(FPICFLAGS) -pedantic" AR="$(AR)" RANLIB="$(RANLIB)")

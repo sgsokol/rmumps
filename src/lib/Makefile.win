@@ -8,9 +8,10 @@ FLAGS.PORD=-I$(DMUMPS)/PORD/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX -DMINGW
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
-PKG_CXXFLAGS=$(FLAGS.MUMPS) $(M3264)#-DINTSIZE64
-PKG_CFLAGS= -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
-PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
+PKG_CXXFLAGS=$(FLAGS.MUMPS) -pedantic $(M3264)#-DINTSIZE64
+PKG_CFLAGS= -pedantic -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
+PKG_FFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
+PKG_FCFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
 
 SOURCES.c.metis=$(wildcard $(DMETIS)/libmetis/*.c)
 SOURCES.c.gklib=$(wildcard $(DMETIS)/GKlib/*.c)

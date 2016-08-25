@@ -9,6 +9,6 @@ MAKE=${MAKE:-make}
 RANLIB=${RANLIB:-ranlib}
 
 $MAKE -C src/lib -f Makefile.win clean
-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
+$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS -pedantic" FCFLAGS="$FCFLAGS $FPICFLAGS -pedantic" RANLIB="$RANLIB"
 $MAKE -C src/lib -f Makefile.win clean
-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
+$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS -pedantic" FCFLAGS="$FCFLAGS $FPICFLAGS -pedantic" RANLIB="$RANLIB"

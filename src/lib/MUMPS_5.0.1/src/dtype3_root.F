@@ -400,7 +400,7 @@ C
             NRLOCAL = PTRROW( IROW + 2 ) - PTRROW( IROW + 1 )
             NCLOCAL = PTRCOL( JCOL + 2 ) - PTRCOL( JCOL + 1 )
             CALL DMUMPS_ROOT_LOCAL_ASSEMBLY( N,
-     &        root%SCHUR_POINTER(1),
+     &        root%SCHUR_POINTER(1:),
      &        LOCAL_M, LOCAL_N,
      &        root%NPCOL, root%NPROW, root%MBLOCK, root%NBLOCK,
      &        NBCOL, NBROW,
@@ -412,9 +412,9 @@ C
      &        NRLOCAL,
      &        NCLOCAL,
      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
+     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
      &        KEEP,
-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
+     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
        ELSE
         IF ( PTRIST(STEP( IROOT )) .GE. 0 ) THEN
           IF ( PTRIST(STEP( IROOT )) .EQ. 0 ) THEN
@@ -440,9 +440,9 @@ C
      &        NRLOCAL,
      &        NCLOCAL,
      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
+     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
      &        KEEP,
-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
+     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
         END IF
        ENDIF
       END IF

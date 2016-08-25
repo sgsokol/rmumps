@@ -24,12 +24,12 @@
 #
 ################################################################################
 
-	ifdef topdir
-		include $(topdir)/../compiler_options.in
-   else
-      # called from libseq
-		include ../../compiler_options.in
-	endif
+#	ifdef topdir
+#		include $(topdir)/../compiler_options.in
+#   else
+#      # called from libseq
+#		include ../../compiler_options.in
+#	endif
 
 ########################################################################
 #Begin orderings

@@ -607,8 +607,8 @@ C     in the case of a distributed Schur complement (KEEP(60)=2 or 3).
 C     In that case, PROCNODE should be set accordingly and KEEP(38) is
 C     not modified.
             IF (id%KEEP(60) .EQ. 2 .OR. id%KEEP(60).EQ.3) THEN
-               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1),
-     &              1+2*id%NSLAVES, id%IS1(FILS),id%N)
+               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1:),
+     &              1+2*id%NSLAVES, id%IS1(FILS:),id%N)
             ENDIF
 C        *******************
 C        END SEQUENTIAL CODE
@@ -627,14 +627,14 @@ C     IKEEP(1:N,1) can be used as a work space since it is set
 C     to its final state by the SORT_PERM subroutine below.
             SSARBR => id%IS1(IKEEP:IKEEP+id%N-1)
 C     Map nodes and assign candidates for dynamic scheduling
-            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1),
-     &           INFOG(1),
-     &           id%IS1(NE),
-     &           id%IS1(NFSIZ),
-     &           id%IS1(FRERE),
-     &           id%IS1(FILS),
-     &           KEEP(1),KEEP8(1),id%PROCNODE(1),
-     &           SSARBR(1),id%NBSA,PEAK,IERR
+            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1:),
+     &           INFOG(1:),
+     &           id%IS1(NE:),
+     &           id%IS1(NFSIZ:),
+     &           id%IS1(FRERE:),
+     &           id%IS1(FILS:),
+     &           KEEP(1:),KEEP8(1:),id%PROCNODE(1:),
+     &           SSARBR(1:),id%NBSA,PEAK,IERR
      &           )
             NULLIFY(SSARBR)
             if(IERR.eq.-999) then 
@@ -1667,7 +1667,7 @@ C     it always available in a keep(71)
          END DO 
          CALL DMUMPS_BUILD_I_AM_CAND( id%NSLAVES, KEEP(79),
      &        NB_NIV2, id%MYID_NODES,
-     &        id%CANDIDATES(1,1), id%I_AM_CAND(1) )
+     &        id%CANDIDATES(1:,1:), id%I_AM_CAND(1:) )
       ENDIF
 #if ! defined(OLD_LOAD_MECHANISM)
       IF (associated(id%FUTURE_NIV2)) THEN
@@ -2180,7 +2180,7 @@ C     -------------------------
       SUBROUTINE DMUMPS_SET_PROCNODE(INODE, PROCNODE, VALUE, FILS, N)
       INTEGER, intent(in) :: INODE, N, VALUE
       INTEGER, intent(in) :: FILS(N)
-      INTEGER, intent(inout) :: PROCNODE(N)
+      INTEGER, intent(inout) :: PROCNODE(*)
 C     
       INTEGER IN
       IN=INODE

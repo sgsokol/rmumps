@@ -21,7 +21,7 @@ void Rmumps::clean() {
   param.job=JOB_END;
   dmumps_c(&param);
   //Rprintf("clean(): done\n");
-};
+}
 bool Rmumps::get_copy() {
   return copy;
 }
@@ -83,13 +83,13 @@ void Rmumps::do_job(int job) { // later pass it to private scope
     jobs.insert({1, 2, 3});
     break;
   }
-};
+}
 void Rmumps::symbolic() {
   do_job(1);
-};
+}
 void Rmumps::numeric() {
   do_job(4);
-};
+}
 SEXP Rmumps::solve(RObject b) {
   /* wrapper for multiple type rhs */
   switch(b.sexp_type()) {
@@ -150,7 +150,7 @@ NumericVector Rmumps::solvev(NumericVector b) {
   param.ICNTL(20)=0; // rhs is dense
   do_job(6);
   return(rhs);
-};
+}
 NumericMatrix Rmumps::solvem(NumericMatrix b) {
   if (copy) {
     mrhs=clone(b);
@@ -163,7 +163,7 @@ NumericMatrix Rmumps::solvem(NumericMatrix b) {
   param.ICNTL(20)=0; // rhs is dense
   do_job(6);
   return(mrhs);
-};
+}
 void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
   // in place solve
   param.rhs=b;
@@ -171,7 +171,7 @@ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
   param.lrhs=lrhs;
   param.ICNTL(20)=0; // rhs is dense
   do_job(6);
-};
+}
 NumericMatrix Rmumps::inv() {
   MUMPS_INT n=param.n;
   MUMPS_INT nrhs=param.n;
@@ -243,7 +243,7 @@ NumericMatrix Rmumps::solves(S4 mat) {
   param.ICNTL(20)=1; // decide automaticaly about this sparsity exploit
   do_job(6);
   return(mrhs);
-};
+}
 NumericMatrix Rmumps::solvestm(List mat) {
   // solve sparse rhs (may be multiple)
   // mat is expected to be of type slam::simple_triplet_matrix
@@ -310,7 +310,7 @@ NumericMatrix Rmumps::solvestm(List mat) {
   param.ICNTL(20)=1; // decide automaticaly about this sparsity exploit
   do_job(6);
   return(mrhs);
-};
+}
 void Rmumps::set_rhs(NumericVector b) {
   // one dense rhs
   param.ICNTL(20)=0; // rhs is dense;
@@ -389,7 +389,7 @@ List Rmumps::triplet() {
   tr.attr("class")="simple_triplet_matrix";
   return tr;
 }
-std::string Rmumps::mumps_version() { return MUMPS_VERSION; };
+std::string Rmumps::mumps_version() { return MUMPS_VERSION; }
 
 /* constructors */
 Rmumps::Rmumps(RObject mat, bool copy_) {
