@@ -1,11 +1,18 @@
+Version 5.0.1.11
+================
+
+* 2016-12-21
+ - increased default auxiliary memory via ICNTL(14)=50 (was 25)
+ - added methods for finer control and information: set_cntl(), get_cntl(), set_icntl(), get_icntl(), get_infos()
+
 Version 5.0.1.10
-===============
+================
 
 * 2016-08-25
  - fixed compilation with -pedantic option
 
 Version 5.0.1.9-1
-===============
+=================
 
 * 2016-04-14
  - fixed building process (by R-core team)

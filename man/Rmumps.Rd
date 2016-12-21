@@ -65,12 +65,14 @@ Rcpp Exported Class Wrapping MUMPS library
  Serguei Sokol, INRA
 }
 \note{
+ For meaning of entries in MUMPS vectors cntl, icntl, info, rinfo, infog and rinfog cf. original documentation of MUMPS project.
+
  No need to call symbolic() and numeric() methods before a solve() call.
 
  If in constructor, parameter \code{copy} is set to FALSE, no rhs neither matrix copying is done.
  The solution is written "in place" thus overwriting rhs (watch out side effects)
 
- For a possible error messages (e.g. when factorizing a singular matrix), cf.
+ For a detailed error diagnostic (e.g. when factorizing a singular matrix), use method get_infos() and cf.
  MUMPS documentation on the official MUMPS site).
 }
 
@@ -91,7 +93,12 @@ Rcpp Exported Class Wrapping MUMPS library
     \item{\code{solve(b)}:}{solve single rhs (if b is a vector) or
      multiple rhs if b is a matrix (can be dense or sparse). Return the solution(s).}
     \item{\code{inv()}:}{Return inverse of the matrix)}
-    \item{\code{set_mat_data(x)}:}{updates matrix entries (same order as previously)}
+    \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in same order as in previous calls)}
+    \item{\code{set_icntl(iv, ii)}:}{set ICNTL parameter vector}
+    \item{\code{get_icntl()}:}{get ICNTL parameter vector}
+    \item{\code{set_cntl(v, iv)}:}{set CNTL parameter vector}
+    \item{\code{get_cntl()}:}{get CNTL parameter vector}
+    \item{\code{get_infos()}:}{get a named list of information vectors: info, rinfo, infog and rinfog}
     \item{\code{dim()}:}{Return a dimension vector of the matrix)}
     \item{\code{nrow()}:}{Return a row number of the matrix)}
     \item{\code{ncol()}:}{Return a column number of the matrix)}

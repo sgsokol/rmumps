@@ -29,23 +29,6 @@ void Rmumps::set_copy(bool copy_) {
   copy=copy_;
 }
 void Rmumps::do_job(int job) { // later pass it to private scope
-  /* do preliminary job if needed */
-/*  switch (job) {
-  case 2:
-  case 5:
-    if (jobs.count(1)==0) {
-      // symbolic analysis was not yet done
-      do_job(1);
-    }
-    break;
-  case 3:
-    if (jobs.count(2)==0) {
-      // numeric factorization was not yet done
-      do_job(2);
-    }
-    break;
-  }
-*/
   /* downgrade job request if preliminaries are already done */
   switch (job) {
   case 4:
@@ -66,7 +49,7 @@ void Rmumps::do_job(int job) { // later pass it to private scope
     //clean();
     stop("rmumps: info[1]=%d, info[2]=%d", param.info[0], param.info[1]);
   }
-  /* combined jobs are splited for the record */
+  /* combined jobs are split for the record */
   switch (job) {
   case 1:
   case 2:
@@ -352,6 +335,68 @@ NumericVector Rmumps::get_rhs() {
 NumericMatrix Rmumps::get_mrhs() {
   return mrhs;
 }
+void Rmumps::set_icntl(IntegerVector iv, IntegerVector ii) {
+  // set control vector ICNTL at positions in ii (1-based)) to the values in iv
+  // only 1 <= ii <= 33 are effectively used
+  if (iv.size() != ii.size()) {
+    sprintf(buf, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", iv.size(), ii.size());
+    stop(buf);
+  }
+  for (auto i=0; i < ii.size(); i++) {
+    if (ii[i] > 33 || ii[i] < 1)
+      continue;
+    param.ICNTL(ii[i])=iv[i];
+  }
+}
+void Rmumps::set_cntl(NumericVector v, IntegerVector iv) {
+  // set control vector CNTL at positions in iv (1-based)) to the values in v
+  // only 1 <= iv <= 5 are effectively used
+  if (v.size() != iv.size()) {
+    sprintf(buf, "set_icntl: length(v) and length(iv) must be the same (got %d and %d respectively)", v.size(), iv.size());
+    stop(buf);
+  }
+  for (auto i=0; i < iv.size(); i++) {
+    if (iv[i] > 5 || iv[i] < 1)
+      continue;
+    param.cntl[iv[i]-1]=v[i];
+  }
+}
+IntegerVector Rmumps::get_icntl() {
+  // return control vector ICNTL
+  IntegerVector icntl(33);
+  for (auto i=0; i < icntl.size(); i++) {
+    icntl[i]=param.icntl[i];
+  }
+  return icntl;
+}
+NumericVector Rmumps::get_cntl() {
+  // return control vector ICNTL
+  NumericVector cntl(5);
+  for (auto i=0; i < cntl.size(); i++) {
+    cntl[i]=param.cntl[i];
+  }
+  return cntl;
+}
+List Rmumps::get_infos() {
+  // return a named list with vectors info, rinfo, infog and rinfog
+  NumericVector rinfo(3), rinfog(13);
+  IntegerVector info(27), infog(34);
+  for (auto i=0; i < rinfo.size(); i++)
+    rinfo[i]=param.rinfo[i];
+  for (auto i=0; i < info.size(); i++)
+    info[i]=param.info[i];
+  for (auto i=0; i < rinfog.size(); i++)
+    rinfog[i]=param.rinfog[i];
+  for (auto i=0; i < infog.size(); i++)
+    infog[i]=param.infog[i];
+  return List::create(
+    _("info")=info,
+    _("rinfo")=rinfo,
+    _("infog")=infog,
+    _("rinfog")=rinfog
+  );
+}
+
 IntegerVector Rmumps::dim() {
   return IntegerVector::create(param.n, param.n);
 }
@@ -523,7 +568,7 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a) {
   param.ICNTL(11)=0; // no error analysis
   param.ICNTL(12)=0; // not used (as sym!=2)
   param.ICNTL(13)=0; // parallel factorization of the root node
-  param.ICNTL(14)=25; // 25% working space increase during numeric phase
+  param.ICNTL(14)=50; // 50% working space increase during numeric phase
   // 15-17 are not used
   param.ICNTL(19)=0; // compleate factorization (no schur complement)
   param.ICNTL(20)=0; // dense rhs
@@ -561,9 +606,14 @@ RCPP_MODULE(mod_Rmumps){
   .method("solve", &Rmumps::solve, "Solve sparse system with one or many, sparse or dense rhs")
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Update matrix entries keeping the non zero pattern untouched")
+  .method("set_icntl", &Rmumps::set_icntl, "Set ICNTL parameter vector")
+  .method("get_icntl", &Rmumps::get_icntl, "Get ICNTL parameter vector")
+  .method("set_cntl", &Rmumps::set_cntl, "Set CNTL parameter vector")
+  .method("get_cntl", &Rmumps::get_cntl, "Get CNTL parameter vector")
+  .method("get_infos", &Rmumps::get_infos, "Get a named list of information vectors")
   .method("dim", &Rmumps::dim, "Return a vector with matrix dimensions")
   .method("nrow", &Rmumps::nrow, "Return an integer with matrix row number")
-  .method("ncol", &Rmumps::nrow, "Return an integer with matrix column number")
+  .method("ncol", &Rmumps::ncol, "Return an integer with matrix column number")
   .method("print", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("show", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")

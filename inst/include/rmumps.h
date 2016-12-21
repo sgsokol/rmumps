@@ -39,6 +39,11 @@ public:
   void set_rhs(NumericVector b);
   void set_mrhs(NumericMatrix b);
   void set_mat_data(NumericVector x);
+  void set_icntl(IntegerVector iv, IntegerVector ii);
+  void set_cntl(NumericVector v, IntegerVector iv);
+  IntegerVector get_icntl();
+  NumericVector get_cntl();
+  List get_infos();
   NumericVector get_rhs();
   NumericMatrix get_mrhs();
   IntegerVector dim();
