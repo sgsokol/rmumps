@@ -1,17 +1,19 @@
 DMUMPS=MUMPS_5.0.1
 DMETIS=metis-5.1.0
-DLIB=../lib$(M3264)
+DSCOTCH=scotch_6.0.4
+DLIB=../lib
 ARITH = d
 FLAGS.MPI=-I$(DMUMPS)/libseq
-FLAGS.MUMPS=-Dmetis -Dpord -I$(DMUMPS)/include
+FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -I$(DMUMPS)/include
 FLAGS.PORD=-I$(DMUMPS)/PORD/include
+FLAGS.SCOTCH=-I$(DSCOTCH)/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX -DMINGW
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
-PKG_CXXFLAGS=$(FLAGS.MUMPS) -pedantic $(M3264)#-DINTSIZE64
-PKG_CFLAGS= -pedantic -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
-PKG_FFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
-PKG_FCFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
+PKG_CXXFLAGS=$(FLAGS.MUMPS) -pedantic #-DINTSIZE64
+PKG_CFLAGS= -pedantic -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
+PKG_FFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
+PKG_FCFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
 
 SOURCES.c.metis=$(wildcard $(DMETIS)/libmetis/*.c)
 SOURCES.c.gklib=$(wildcard $(DMETIS)/GKlib/*.c)
@@ -19,9 +21,14 @@ SOURCES.c.pord=$(wildcard $(DMUMPS)/PORD/lib/*.c)
 SOURCES.c.mpi=$(wildcard $(DMUMPS)/libseq/*.c)
 SOURCES.f.mpi = $(wildcard $(DMUMPS)/libseq/*.f)
 
-.PHONY: all allmumps
+.PHONY: all allmumps scotchlibs
 
-all: allmumps
+all: allmumps scotchlibs
+
+scotchlibs:
+	$(MAKE) -C $(DSCOTCH)/src -f Makefile.win WININC=.win scotch esmumps
+	mkdir -p $(DLIB)
+	mv -f $(DSCOTCH)/lib/libscotch.a $(DSCOTCH)/lib/libscotcherr.a $(DSCOTCH)/src/esmumps/libesmumps.a $(DLIB)/
 
 allmumps: $(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/libseq/libmpi.a $(DMUMPS)/PORD/lib/libpord.a $(DMETIS)/GKlib/libgk.a $(DMETIS)/libmetis/libmetis.a
 	mkdir -p $(DLIB) && $(AR) cqT $(DLIB)/MUMPS_thin $^
@@ -32,9 +39,9 @@ allmumps: $(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/li
 	echo $(CURDIR)
 
 $(DMUMPS)/lib/libdmumps.a:
-	@(cd $(@D)/../src && $(MAKE) -f Makevars.win M3264="$(M3264)" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+	@(cd $(@D)/../src && $(MAKE) -f Makevars.win CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
 $(DMUMPS)/lib/libmumps_common.a:
-	@(cd $(@D)/../src && $(MAKE) -f Makevars.win M3264="$(M3264)" CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+	@(cd $(@D)/../src && $(MAKE) -f Makevars.win CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
 $(DMUMPS)/libseq/libmpi.a: $(SOURCES.c.mpi:.c=.o) $(SOURCES.f.mpi:.f=.o)
 	@(cd $(@D) && $(AR) crvs $(@F) $(^F) && $(RANLIB) $(@F))
 	$(RM) $^
@@ -51,8 +58,9 @@ $(DMETIS)/libmetis/libmetis.a: $(SOURCES.c.metis:.c=.o)
 clean:
 	$(RM) $(DMUMPS)/PORD/lib/*.[oa] $(DMUMPS)/libseq/*.[oa] $(DMETIS)/GKlib/*.[oa] $(DMETIS)/libmetis/*.[oa]
 	@(cd $(DMUMPS)/src && $(MAKE) -f Makevars.win distclean)
+	@(cd $(DSCOTCH)/src && $(MAKE) clean)
 distclean: clean
-	$(RM) lib*/*allmumps.*
+	$(RM) lib*/lib*.*
 .c.o:
 	$(CC) $(CFLAGS) $(PKG_CFLAGS) -c $< -o $@
 .F.o:

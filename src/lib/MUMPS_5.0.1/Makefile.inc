@@ -50,7 +50,9 @@
 #
 
 #SCOTCHDIR  = ${HOME}/scotch_6.0
-#ISCOTCH    = -I$(SCOTCHDIR)/include 
+SCOTCHDIR  = ${topdir}/../scotch_6.0.4/
+#LSCOTCHDIR  = ${topdir}/../scotch_6.0.4/lib
+ISCOTCH    = -I$(SCOTCHDIR)/include 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF
@@ -83,7 +85,7 @@ LMETIS    = -L$(LMETISDIR) -lmetis
 # If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis 
 # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
-ORDERINGSF  = -Dpord -Dmetis
+ORDERINGSF  = -Dpord -Dmetis -Dscotch
 ORDERINGSC  = $(ORDERINGSF)
 
 LORDERINGS = $(LMETIS) $(LPORD) $(LSCOTCH)
@@ -110,24 +112,24 @@ RM      = /bin/rm -f
 # FL : Fortran linker
 # AR : Archive object in a library
 #      keep a space at the end if options have to be separated from lib name
-AR      = ar vr 
+#AR      = ar vr 
 # RANLIB : generate index of an archive file
 #   (optionnal use "RANLIB = echo" in case of problem)
-RANLIB  = ranlib
+#RANLIB  = ranlib
 #RANLIB  = echo
 
 # The next two lines should not be modified. They concern
 # the sequential library provided by MUMPS, to use instead
 # of ScaLAPACK and MPI.
 INCSEQ  = -I$(topdir)/libseq
-LIBSEQ  = -L$(topdir)/libseq -lmpiseq
+#LIBSEQ  = -L$(topdir)/libseq -lmpiseq
 
 # DEFINE HERE YOUR BLAS LIBRARY
 
 #LIBBLAS = -lblas
 
 # DEFINE HERE YOUR PTHREAD LIBRARY
-LIBOTHERS = -lpthread
+#LIBOTHERS = -lpthread
 
 # FORTRAN/C COMPATIBILITY:
 #  Use:
@@ -149,6 +151,6 @@ CDEFS = -DAdd_
 #Sequential:
 
 INCS = $(INCSEQ)
-LIBS = $(LIBSEQ)
+#LIBS = $(LIBSEQ)
 LIBSEQNEEDED = libseqneeded
 

@@ -19,21 +19,27 @@ public:
   char buf[512];
   
   Rmumps(RObject mat);
-  Rmumps(RObject mat, bool copy_);
+  Rmumps(RObject mat, int sym);
+  Rmumps(RObject mat, int sym, bool copy_);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n);
-  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, bool copy_);
+  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, int sym);
+  Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, int sym, bool copy_);
   ~Rmumps();
   void clean();
   bool get_copy();
   void set_copy(bool copy_);
+  int get_sym();
+  void set_sym(int sym);
   void do_job(int job);
   void symbolic();
   void numeric();
   SEXP solve(RObject b);
+  SEXP solvet(RObject b);
   NumericVector solvev(NumericVector b);
   NumericMatrix solvem(NumericMatrix b);
   void solveptr(double* b, int nrow, int nrhs);
   NumericMatrix inv();
+  NumericMatrix invt();
   NumericMatrix solves(S4 mat);
   NumericMatrix solvestm(List mat);
   void set_rhs(NumericVector b);
@@ -52,12 +58,13 @@ public:
   void print();
   List triplet();
   std::string mumps_version();
+  double det();
 private:
   DMUMPS_STRUC_C param;
-  void new_mat(RObject mat, bool copy_);
-  void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_);
-  void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a);
+  void new_mat(RObject mat, int sym, bool copy_);
+  void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym, bool copy_);
+  void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym);
 };
-#include "rmumps_RcppExports.h"
+//#include "rmumps_RcppExports.h"
 
 #endif // __rmumps_h__

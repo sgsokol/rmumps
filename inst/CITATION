@@ -1,0 +1,34 @@
+citHeader("To cite MUMPS in publications use:")
+
+c(
+citEntry(entry = "Article",
+  title        = "A Fully Asynchronous Multifrontal Solver Using Distributed Dynamic Scheduling",
+  author       = personList(as.person("P. R. Amestoy"),
+                   as.person("I. S. Duff"), as.person("J. Koster"), as.person("J.-Y. L'Excellent")),
+  journal      = "SIAM Journal on Matrix Analysis and Applications",
+  year         = "2001",
+  volume       = "23",
+  number       = "1",
+  pages        = "15--41",
+
+  textVersion  =
+  paste("P. R. Amestoy & al. (2001).",
+        "A Fully Asynchronous Multifrontal Solver Using Distributed Dynamic Scheduling",
+        "SIAM Journal on Matrix Analysis and Applications, 23(1), 15-41.")
+),
+citEntry(entry = "Article",
+  title        = "Hybrid scheduling for the parallel solution of linear systems",
+  author       = personList(as.person("P. R. Amestoy"),
+                   as.person("A. Guermouche"), as.person("J.-Y. L'Excellent"), as.person("S. Pralet")),
+  journal      = "Parallel Computing",
+  year         = "2006",
+  volume       = "32",
+  number       = "2",
+  pages        = "136--156",
+
+  textVersion  =
+  paste("P. R. Amestoy & al. (2006).",
+        "Hybrid scheduling for the parallel solution of linear systems",
+        "Parallel Computing, 32(2), 136-156.")
+)
+)

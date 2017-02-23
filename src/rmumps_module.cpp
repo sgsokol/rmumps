@@ -28,18 +28,37 @@ bool Rmumps::get_copy() {
 void Rmumps::set_copy(bool copy_) {
   copy=copy_;
 }
-void Rmumps::do_job(int job) { // later pass it to private scope
-  /* downgrade job request if preliminaries are already done */
+int Rmumps::get_sym() {
+  return param.sym;
+}
+void Rmumps::set_sym(int sym) {
+  stop("Parameter 'sym' cannot be changed after matrix initialization");
+}
+void Rmumps::do_job(int job) {
+  // downgrade job request if preliminaries are already done 
   switch (job) {
   case 4:
-    if (jobs.count(1)==1) {
+    if (jobs.count(1) == 1) {
        job=2;
     }
     break;
   case 5:
   case 6:
-    if (jobs.count(2)==1) {
+    if (jobs.count(2) == 1) {
        job=3;
+    }
+    break;
+  }
+  // do preliminary work if need
+  switch (job) {
+  case 2:
+    if (jobs.count(1) != 1) {
+       do_job(1);
+    }
+    break;
+  case 3:
+    if (jobs.count(1) != 1) {
+       do_job(2);
     }
     break;
   }
@@ -53,6 +72,8 @@ void Rmumps::do_job(int job) { // later pass it to private scope
   switch (job) {
   case 1:
   case 2:
+    jobs.insert({job});
+    break;
   case 3:
     jobs.insert({job});
     break;
@@ -72,6 +93,13 @@ void Rmumps::symbolic() {
 }
 void Rmumps::numeric() {
   do_job(4);
+}
+SEXP Rmumps::solvet(RObject b) {
+  // solve A^t x = b
+  param.ICNTL(9) = 2;
+  SEXP res=solve(b);
+  param.ICNTL(9) = 1;
+  return res;
 }
 SEXP Rmumps::solve(RObject b) {
   /* wrapper for multiple type rhs */
@@ -155,6 +183,13 @@ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
   param.ICNTL(20)=0; // rhs is dense
   do_job(6);
 }
+NumericMatrix Rmumps::invt() {
+  // inverse of a^t
+  param.ICNTL(9) = 2;
+  NumericMatrix res=inv();
+  param.ICNTL(9) = 1;
+  return res;
+}
 NumericMatrix Rmumps::inv() {
   MUMPS_INT n=param.n;
   MUMPS_INT nrhs=param.n;
@@ -182,7 +217,7 @@ NumericMatrix Rmumps::inv() {
 }
 NumericMatrix Rmumps::solves(S4 mat) {
   // solve sparse rhs (may be multiple)
-  // if dim(mat)==(0,0) then an inverse matrix is requested
+  // if dim(mat) == (0,0) then an inverse matrix is requested
   IntegerVector di(mat.slot("Dim"));
   if (!mat.inherits("dgCMatrix")) {
     Environment meth("package:methods");
@@ -230,7 +265,7 @@ NumericMatrix Rmumps::solves(S4 mat) {
 NumericMatrix Rmumps::solvestm(List mat) {
   // solve sparse rhs (may be multiple)
   // mat is expected to be of type slam::simple_triplet_matrix
-  // if dim(mat)==(0,0) then an inverse matrix is requested
+  // if dim(mat) == (0,0) then an inverse matrix is requested
   int nrow=mat["nrow"];
   int ncol=mat["ncol"];
   if (!mat.inherits("simple_triplet_matrix")) {
@@ -274,7 +309,7 @@ NumericMatrix Rmumps::solvestm(List mat) {
   for (int i=1; i <= nrhs; i++) {
     // count entries in this column
     int count=0;
-    for (; ip < nz_rhs && mj[ip]==i; ip++, count++) {
+    for (; ip < nz_rhs && mj[ip] == i; ip++, count++) {
 //Rcout << "ip=" << ip << "; c=" << count << std::endl;
     }
 //Rcout << "after ip=" << ip << "; c=" << count << std::endl;
@@ -352,7 +387,7 @@ void Rmumps::set_cntl(NumericVector v, IntegerVector iv) {
   // set control vector CNTL at positions in iv (1-based)) to the values in v
   // only 1 <= iv <= 5 are effectively used
   if (v.size() != iv.size()) {
-    sprintf(buf, "set_icntl: length(v) and length(iv) must be the same (got %d and %d respectively)", v.size(), iv.size());
+    sprintf(buf, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", v.size(), iv.size());
     stop(buf);
   }
   for (auto i=0; i < iv.size(); i++) {
@@ -409,12 +444,12 @@ int Rmumps::ncol() {
 void Rmumps::print() {
   Rcout << "A " << param.n << "x" << param.n << " Rmumps matrix" << std::endl;
   Rcout << "Decomposition(s) done: ";
-  if (jobs.count(1)==1) {
+  if (jobs.count(1) == 1) {
     Rcout << "symbolic";
   } else {
     Rcout << "none";
   }
-  if (jobs.count(2)==1) {
+  if (jobs.count(2) == 1) {
     Rcout << ", numeric";
   }
   Rcout << std::endl;
@@ -435,24 +470,37 @@ List Rmumps::triplet() {
   return tr;
 }
 std::string Rmumps::mumps_version() { return MUMPS_VERSION; }
+double Rmumps::det() {
+  if (jobs.count(2) != 1 || param.ICNTL(33) != 1) {
+    param.ICNTL(33)=1;
+    do_job(4);
+  }
+  return param.rinfog[12-1]*exp2(param.infog[34-1]);
+}
 
 /* constructors */
-Rmumps::Rmumps(RObject mat, bool copy_) {
-  new_mat(mat, copy_);
+Rmumps::Rmumps(RObject mat, int sym, bool copy_) {
+  new_mat(mat, sym, copy_);
+}
+Rmumps::Rmumps(RObject mat, int sym) {
+  new_mat(mat, sym, true);
 }
 Rmumps::Rmumps(RObject mat) {
-  new_mat(mat, true);
+  new_mat(mat, 0, true); // default for sym=0 (unsymetric), copy_true
 }
 Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n) {
-  new_ijv(i0, j0, x, n, true);
+  new_ijv(i0, j0, x, n, 0, true);
 }
-Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, bool copy_) {
-  new_ijv(i0, j0, x, n, copy_);
+Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym) {
+  new_ijv(i0, j0, x, n, sym, true);
+}
+Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym, bool copy_) {
+  new_ijv(i0, j0, x, n, sym, copy_);
 }
 /* end of constructors */
 
 /* helpers */
-void Rmumps::new_mat(RObject mat_, bool copy_) {
+void Rmumps::new_mat(RObject mat_, int sym, bool copy_) {
   MUMPS_INT n=-1;
   MUMPS_INT nz=-1;
   switch(mat_.sexp_type()) {
@@ -519,11 +567,11 @@ void Rmumps::new_mat(RObject mat_, bool copy_) {
   //Rf_PrintValue(wrap(irn));
   //Rf_PrintValue(wrap(jcn));
   //Rf_PrintValue(wrap(anz));
-  tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin());
+  tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin(), sym);
   param.n=n;
   param.nz=nz;
 }
-void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_, bool copy_) {
+void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_, int sym, bool copy_) {
   MUMPS_INT nz=x.size();
   MUMPS_INT n=n_;
   irn.resize(nz);
@@ -541,17 +589,17 @@ void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_
   //Rf_PrintValue(wrap(irn));
   //Rf_PrintValue(wrap(jcn));
   //Rf_PrintValue(wrap(anz));
-  tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin());
+  tri_init(&*irn.begin(), &*jcn.begin(), &*anz.begin(), sym);
   param.n=n;
   param.nz=nz;
 }
 
-void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a) {
+void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) {
   /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
   param.job=JOB_INIT;
   param.keep[39]=0; // otherwise valgrind complaints
   param.par=1;
-  param.sym=0;
+  param.sym=sym;
   param.comm_fortran=USE_COMM_WORLD;
   do_job(JOB_INIT);
   param.irn=irn;
@@ -563,10 +611,10 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a) {
   param.ICNTL(6)=0; // no column permutation
   param.ICNTL(7)=7; // automatic choice for symmetric permutation
   param.ICNTL(8)=77; // automatic choice for scaling
-  param.ICNTL(9)=1; // solve a*x=b (not a'*x=b)
+  param.ICNTL(9)=1; // solve a x = b (not a^t x = b)
   param.ICNTL(10)=0; // no iterative refinement
   param.ICNTL(11)=0; // no error analysis
-  param.ICNTL(12)=0; // not used (as sym!=2)
+  param.ICNTL(12)=0; // not used (as sym != 2)
   param.ICNTL(13)=0; // parallel factorization of the root node
   param.ICNTL(14)=50; // 50% working space increase during numeric phase
   // 15-17 are not used
@@ -584,7 +632,7 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a) {
   param.ICNTL(30)=0; // no selected entries of a^-1 are calculated
   param.ICNTL(31)=0; // matrix factors are kept (not discarded)
   param.ICNTL(32)=0; // standart factorization (without forward elim of rhs)
-  param.ICNTL(33)=0; // don't compute the detreminant
+  param.ICNTL(33)=1; // compute the detreminant
 }
 RCPP_EXPOSED_CLASS(Rmumps)
 RCPP_MODULE(mod_Rmumps){
@@ -592,19 +640,24 @@ RCPP_MODULE(mod_Rmumps){
   class_<Rmumps>("Rmumps")
   // expose the default constructor
   .constructor<SEXP>()
-  .constructor<SEXP, bool>()
+  .constructor<SEXP, int>()
+  .constructor<SEXP, int, bool>()
   .constructor<IntegerVector, IntegerVector, NumericVector, int>()
-  .constructor<IntegerVector, IntegerVector, NumericVector, int, bool>()
+  .constructor<IntegerVector, IntegerVector, NumericVector, int, int>()
+  .constructor<IntegerVector, IntegerVector, NumericVector, int, int, bool>()
   //.finalizer(&cleanme) // crashes by double freeing of the same pointer
   
   .property("rhs", &Rmumps::get_rhs, &Rmumps::set_rhs)
   .property("mrhs", &Rmumps::get_mrhs, &Rmumps::set_mrhs)
   .property("copy", &Rmumps::get_copy, &Rmumps::set_copy)
+  .property("sym", &Rmumps::get_sym, &Rmumps::set_sym)
   
   .method("symbolic", &Rmumps::symbolic , "Analyze sparsity pattern")
   .method("numeric", &Rmumps::numeric, "Factorize sparse matrix")
   .method("solve", &Rmumps::solve, "Solve sparse system with one or many, sparse or dense rhs")
+  .method("solvet", &Rmumps::solvet, "Solve transpose of sparse system with one or many, sparse or dense rhs")
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
+  .method("invt", &Rmumps::invt, "Calculate the inverse of a transposed sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Update matrix entries keeping the non zero pattern untouched")
   .method("set_icntl", &Rmumps::set_icntl, "Set ICNTL parameter vector")
   .method("get_icntl", &Rmumps::get_icntl, "Get ICNTL parameter vector")
@@ -617,5 +670,6 @@ RCPP_MODULE(mod_Rmumps){
   .method("print", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("show", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")
+  .method("det", &Rmumps::det, "Return determinant of the matrix")
   ;
 }

@@ -1,14 +1,17 @@
+DLIB=$(realpath .)
 DMUMPS=MUMPS_5.0.1
 DMETIS=metis-5.1.0
+DSCOTCH=scotch_6.0.4
 ARITH = d
 FLAGS.MPI=-I$(DMUMPS)/libseq
-FLAGS.MUMPS=-Dmetis -Dpord -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) -I$(DMUMPS)/include
+FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) -I$(DMUMPS)/include
 FLAGS.PORD=-I$(DMUMPS)/PORD/include
+FLAGS.SCOTCH=-I$(DSCOTCH)/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX #-DMINGW
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
 PKG_CXXFLAGS=$(FLAGS.MUMPS) #-DINTSIZE64
-PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
+PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
 PKG_FFLAGS = -w $(FLAGS.MUMPS) $(FLAGS.MPI) #-fdefault-integer-8 -fcray-pointer
 
 SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMUMPS)/libseq/*.c $(DMUMPS)/PORD/lib/*.c $(DMETIS)/GKlib/*.c)
@@ -16,7 +19,7 @@ SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
 
 .PHONY: all allmumps
 
-all: allmumps
+all: allmumps scotchlibs
 
 OBJS_COMMON_MOD = $(addprefix $(DMUMPS)/src/,\
         ana_omp_m.o\
@@ -242,17 +245,26 @@ $(pre)fac_asm_build_sort_index_ELT_m.o: $(pre)omp_tps_common_m.o
 $(OBJS_COMMON_OTHER):$(OBJS_COMMON_MOD)
 $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 
-OBJECTS.lib=$(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD) $(OBJS_COMMON_OTHER) $(OBJS_OTHER)
+OBJECTS.lib = $(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD) $(OBJS_COMMON_OTHER) $(OBJS_OTHER)
 OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
+scotchlibs:
+	(cd $(DSCOTCH)/src && \
+        $(MAKE) scotch esmumps && \
+        cp esmumps/libesmumps.a libscotch/{libscotch.a,libscotcherr.a} $(DLIB)/ )
+libesmumps.a : scotchlibs
+libscotch.a : scotchlibs
+libscotcherr.a : scotchlibs
 
 allmumps: $(OBJECTS.lib)
 	$(AR) cvrs liballmumps.a $(OBJECTS.lib)
 	$(RANLIB) liballmumps.a
 
 clean:
-	$(RM) $(OBJECTS.lib)
+	$(RM) $(OBJECTS.lib) $(DLIB)/tmp/*
+	@(cd $(DMUMPS)/src && $(MAKE) -f Makevars.win distclean)
+	@(cd $(DSCOTCH)/src && $(MAKE) realclean)
 distclean: clean
-	$(RM) liballmumps.a
+	$(RM) liballmumps.a libesmumps.a libscotch.a libscotcherr.a
 .c.o:
 	$(CC) $(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS) -c $< -o $@
 .f.o:

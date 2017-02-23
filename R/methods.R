@@ -1,5 +1,7 @@
 #solve.Rcpp_Rmumps <- function(a,b) if(missing(b)) a$inv() else a$solve(b)
 solve.Rcpp_Rmumps <- function (a, b, ...) if(missing(b)) a$inv() else a$solve(b)
+solvet.Rcpp_Rmumps <- function (a, b, ...) if(missing(b)) a$invt() else a$solvet(b)
+det.Rcpp_Rmumps <- function (x, ...) x$det()
 dim.Rcpp_Rmumps <- function (x) x$dim()
 nrow.Rcpp_Rmumps <- function (x) x$nrow()
 ncol.Rcpp_Rmumps <- function (x) x$ncol()
