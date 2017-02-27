@@ -56,6 +56,15 @@
 #include "common.h"
 #include "scotch.h"
 
+/*+ This routine sets the process number that
+*** is used to generate a different seed across
+*** all processes.
+*** It returns:
+*** - void  : in all cases.
++*/
+
+void SCOTCH_randomProc ( int procnum); // 2017-02-23 sokol@insa-toulouse.fr: to avoid "implicit declaration" warning
+
 /**************************************/
 /*                                    */
 /* These routines are the Fortran API */

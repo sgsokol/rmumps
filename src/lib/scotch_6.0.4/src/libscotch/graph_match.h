@@ -88,12 +88,12 @@ void                        graphMatch          (GraphCoarsenThread * restrict c
 #define static
 #endif
 
-GRAPHMATCHFUNCDECL (Seq);
+GRAPHMATCHFUNCDECL (Seq)
 
-GRAPHMATCHFUNCDECL (ThrBeg);
+GRAPHMATCHFUNCDECL (ThrBeg)
 
-GRAPHMATCHFUNCDECL (ThrMid);
+GRAPHMATCHFUNCDECL (ThrMid)
 
-GRAPHMATCHFUNCDECL (ThrEnd);
+GRAPHMATCHFUNCDECL (ThrEnd)
 
 #undef static
