@@ -4,6 +4,8 @@
 \alias{Rcpp_Rmumps-class}
 \alias{Rmumps}
 \alias{solve.Rcpp_Rmumps}
+\alias{solvet.Rcpp_Rmumps}
+\alias{determinant.Rcpp_Rmumps}
 \alias{dim.Rcpp_Rmumps}
 \alias{nrow.Rcpp_Rmumps}
 \alias{ncol.Rcpp_Rmumps}
@@ -58,7 +60,7 @@ Rcpp Exported Class Wrapping MUMPS library
 \references{
  MUMPS official site http://mumps.enseeiht.fr
 
- Sokol S (2015). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1_1, <URL:
+ Sokol S (2015). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.X, <URL:
  http://CRAN.R-project.org/package=rmumps>.
 }
 \author{
@@ -92,6 +94,8 @@ Rcpp Exported Class Wrapping MUMPS library
     \item{\code{numeric()}:}{do LU factorization (stored internally)}
     \item{\code{solve(b)}:}{solve single rhs (if b is a vector) or
      multiple rhs if b is a matrix (can be dense or sparse). Return the solution(s).}
+    \item{\code{solvet(b)}:}{same as solve() but solves with transposed matrix}
+    \item{\code{det()}:}{Return determinant of the matrix)}
     \item{\code{inv()}:}{Return inverse of the matrix)}
     \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in same order as in previous calls)}
     \item{\code{set_icntl(iv, ii)}:}{set ICNTL parameter vector}

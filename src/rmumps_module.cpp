@@ -1,4 +1,4 @@
-// Sequential port of MUMPS to R.
+// Port of sequential MUMPS to R.
 // Only a subset of MUMPS is exposed to R.
 // Author of port: Serguei Sokol, INRA, Toulouse, FRANCE
 // Copyright 2015, INRA
@@ -6,7 +6,6 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
-// [[Rcpp::interfaces(r, cpp)]]
 
 //#include <libseq/mpi.h> // useless in sequential mode
 #define JOB_INIT -1
@@ -182,13 +181,6 @@ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
   param.lrhs=lrhs;
   param.ICNTL(20)=0; // rhs is dense
   do_job(6);
-}
-NumericMatrix Rmumps::invt() {
-  // inverse of a^t
-  param.ICNTL(9) = 2;
-  NumericMatrix res=inv();
-  param.ICNTL(9) = 1;
-  return res;
 }
 NumericMatrix Rmumps::inv() {
   MUMPS_INT n=param.n;
@@ -634,7 +626,7 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) 
   param.ICNTL(32)=0; // standart factorization (without forward elim of rhs)
   param.ICNTL(33)=1; // compute the detreminant
 }
-RCPP_EXPOSED_CLASS(Rmumps)
+//RCPP_EXPOSED_CLASS(Rmumps)
 RCPP_MODULE(mod_Rmumps){
   using namespace Rcpp ;
   class_<Rmumps>("Rmumps")
@@ -657,7 +649,6 @@ RCPP_MODULE(mod_Rmumps){
   .method("solve", &Rmumps::solve, "Solve sparse system with one or many, sparse or dense rhs")
   .method("solvet", &Rmumps::solvet, "Solve transpose of sparse system with one or many, sparse or dense rhs")
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
-  .method("invt", &Rmumps::invt, "Calculate the inverse of a transposed sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Update matrix entries keeping the non zero pattern untouched")
   .method("set_icntl", &Rmumps::set_icntl, "Set ICNTL parameter vector")
   .method("get_icntl", &Rmumps::get_icntl, "Get ICNTL parameter vector")

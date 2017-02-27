@@ -39,7 +39,6 @@ public:
   NumericMatrix solvem(NumericMatrix b);
   void solveptr(double* b, int nrow, int nrhs);
   NumericMatrix inv();
-  NumericMatrix invt();
   NumericMatrix solves(S4 mat);
   NumericMatrix solvestm(List mat);
   void set_rhs(NumericVector b);

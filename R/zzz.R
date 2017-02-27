@@ -13,4 +13,3 @@
 #loadModule("yada", TRUE)
 #loadModule("stdVector", TRUE)
 loadModule("mod_Rmumps", TRUE)
-
