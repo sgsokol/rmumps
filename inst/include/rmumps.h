@@ -16,6 +16,7 @@ public:
   NumericVector anz;
   bool copy;
   std::set<int> jobs;
+  MUMPS_INT sym;
   char buf[512];
   
   Rmumps(RObject mat);

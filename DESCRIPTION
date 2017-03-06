@@ -2,14 +2,15 @@ Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
 Version: 5.0.1.12
-Date: 2017-02-??
+Date: 2017-03-06
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
-Description: Some basic features of MUMPS (MUltifrontal Massively Parallel
-	sparse direct Solver) are wrapped in a Rmumps class. It can be used
-	for storing a sparse matrix and sequentially solving corresponding linear system
-	with one or many right hand sides (in their turn dense or sparse).
-	There is a possibility to do separately symbolic analysis, LU factorization and system solving.
+Description: Some basic features of MUMPS (Multifrontal Massively Parallel
+	sparse direct Solver) are wrapped in a class whose methods can be used
+	for sequentially solving a sparse linear system (symmetric or not)
+	with one or many right hand sides (dense or sparse).
+	There is a possibility to do separately symbolic analysis, LU factorization
+	and system solving.
 License: GPL (>= 2)
 Imports: methods, Rcpp (>= 0.12.0)
 LinkingTo: Rcpp

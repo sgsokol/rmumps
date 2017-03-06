@@ -1,4 +1,4 @@
-useDynLib(rmumps)
+useDynLib(rmumps, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 import(methods, Rcpp)
 S3method(solve, Rcpp_Rmumps)

@@ -4,6 +4,7 @@
 \alias{Rcpp_Rmumps-class}
 \alias{Rmumps}
 \alias{solve.Rcpp_Rmumps}
+\alias{solvet}
 \alias{solvet.Rcpp_Rmumps}
 \alias{determinant.Rcpp_Rmumps}
 \alias{dim.Rcpp_Rmumps}
@@ -51,10 +52,23 @@ Rcpp Exported Class Wrapping MUMPS library
   # matrix inversion
   system.time(aminv <- solve(am))
   system.time(ainv <- solve(a)) # the same in Matrix
+  
+  # symmetric matrix
+  asy=as(a+t(a), "symmetricMatrix")
+  bs=as.double(asy\%*\%(1:n)) # rhs for 1:n solution
+  au=asy
+  au[row(au)>col(au)]=0 # here, we keep only diagonal and upper values of asy matrix. It could be also diagonal and lower values.
+  ams=Rmumps$new(au, sym=1)
+  system.time(xs<-solve(ams, bs)) # rmumps
+  system.time(xsm<-solve(asy, bs))# Matrix
+  # compare to Matrix precision
+  range(xs-1:n)  # mumps
+  range(xsm-1:n) # Matrix
 
   # clean up by hand to avoid possible interference between gc() and
   # Rcpp object destructor after unloading this namespace
-  rm(am)
+  rm(am, ams)
+  gc()
  }
 }
 \references{
@@ -67,20 +81,22 @@ Rcpp Exported Class Wrapping MUMPS library
  Serguei Sokol, INRA
 }
 \note{
+ When creating a symmetric matrix (sym=1 or sym=2), the upper (or lower) mart of the input matrix must be zeroed.
+
  For meaning of entries in MUMPS vectors cntl, icntl, info, rinfo, infog and rinfog cf. original documentation of MUMPS project.
 
  No need to call symbolic() and numeric() methods before a solve() call.
 
- If in constructor, parameter \code{copy} is set to FALSE, no rhs neither matrix copying is done.
+ If in constructor, a parameter \code{copy} is set to FALSE, no rhs neither matrix copying is done.
  The solution is written "in place" thus overwriting rhs (watch out side effects)
 
- For a detailed error diagnostic (e.g. when factorizing a singular matrix), use method get_infos() and cf.
- MUMPS documentation on the official MUMPS site).
+ For a detailed error diagnostic (e.g. when factorizing a singular matrix), use method get_infos() and cf. MUMPS documentation on the official MUMPS site).
 }
 
 \keyword{classes}
 \section{Fields}{
   \describe{
+    \item{\code{sym}:}{integer (read only), 0=non symmetric matrix, 1=symmetric with pivots on diagonal or 2=general symmetric}
     \item{\code{copy}:}{logical, copy or not rhs and matrix values}
     \item{\code{mrhs}:}{numeric matrix, multiple rhs (always overwritten with solution)}
     \item{\code{rhs}:}{numeric vector, single rhs (always overwritten with solution)}
@@ -88,7 +104,7 @@ Rcpp Exported Class Wrapping MUMPS library
 }
 \section{Methods}{
   \describe{
-    \item{\code{new(asp, copy=TRUE)}:}{constructor from Matrix::dgTMatrix class (or from covertible to it) and slam::simple_triplet_matrix class}
+    \item{\code{new(asp, sym=0, copy=TRUE)}:}{constructor from Matrix::dgTMatrix class (or from convertible to it) and slam::simple_triplet_matrix class}
     \item{\code{new(i, j, x, n, copy=TRUE)}:}{constructor from triade rows, cols, vals}
     \item{\code{symbolic()}:}{do symbolic analysis (stored internally) }
     \item{\code{numeric()}:}{do LU factorization (stored internally)}
@@ -97,7 +113,7 @@ Rcpp Exported Class Wrapping MUMPS library
     \item{\code{solvet(b)}:}{same as solve() but solves with transposed matrix}
     \item{\code{det()}:}{Return determinant of the matrix)}
     \item{\code{inv()}:}{Return inverse of the matrix)}
-    \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in same order as in previous calls)}
+    \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in the same order as in previous calls)}
     \item{\code{set_icntl(iv, ii)}:}{set ICNTL parameter vector}
     \item{\code{get_icntl()}:}{get ICNTL parameter vector}
     \item{\code{set_cntl(v, iv)}:}{set CNTL parameter vector}

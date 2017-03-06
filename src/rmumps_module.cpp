@@ -587,6 +587,7 @@ void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_
 }
 
 void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) {
+  this->sym=sym;
   /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
   param.job=JOB_INIT;
   param.keep[39]=0; // otherwise valgrind complaints
@@ -641,8 +642,8 @@ RCPP_MODULE(mod_Rmumps){
   
   .property("rhs", &Rmumps::get_rhs, &Rmumps::set_rhs)
   .property("mrhs", &Rmumps::get_mrhs, &Rmumps::set_mrhs)
-  .property("copy", &Rmumps::get_copy, &Rmumps::set_copy)
-  .property("sym", &Rmumps::get_sym, &Rmumps::set_sym)
+  .field("copy", &Rmumps::copy, "copy or not input parameters")
+  .field_readonly("sym", &Rmumps::sym)
   
   .method("symbolic", &Rmumps::symbolic , "Analyze sparsity pattern")
   .method("numeric", &Rmumps::numeric, "Factorize sparse matrix")
