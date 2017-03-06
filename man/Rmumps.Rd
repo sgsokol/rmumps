@@ -57,7 +57,9 @@ Rcpp Exported Class Wrapping MUMPS library
   asy=as(a+t(a), "symmetricMatrix")
   bs=as.double(asy\%*\%(1:n)) # rhs for 1:n solution
   au=asy
-  au[row(au)>col(au)]=0 # here, we keep only diagonal and upper values of asy matrix. It could be also diagonal and lower values.
+  # Here, we keep only diagonal and upper values of asy matrix.
+  # It could be also diagonal and lower values.
+  au[row(au)>col(au)]=0
   ams=Rmumps$new(au, sym=1)
   system.time(xs<-solve(ams, bs)) # rmumps
   system.time(xsm<-solve(asy, bs))# Matrix
