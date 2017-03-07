@@ -250,7 +250,7 @@ OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 scotchlibs:
 	(cd $(DSCOTCH)/src && \
         $(MAKE) scotch esmumps && \
-        cp esmumps/libesmumps.a libscotch/{libscotch.a,libscotcherr.a} $(DLIB)/ )
+        cp esmumps/libesmumps.a libscotch/libscotch.a libscotch/libscotcherr.a $(DLIB)/ )
 libesmumps.a : scotchlibs
 libscotch.a : scotchlibs
 libscotcherr.a : scotchlibs

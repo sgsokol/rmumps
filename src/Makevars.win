@@ -7,7 +7,7 @@ $(SHLIB): lib/liballmumps.a lib/libscotch.a
 
 lib/liballmumps.a:
 	$(MAKE) -C lib -f Makefile.win \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="-s $(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="-s $(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="$(LDFLAGS)"
+	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="$(LDFLAGS)"
 
 lib/libscotch.a:
 	$(MAKE) -C lib -f Makefile.win scotchlibs \
