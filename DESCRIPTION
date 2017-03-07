@@ -1,7 +1,7 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.0.1.12
+Version: 5.0.1.12-1
 Date: 2017-03-06
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>

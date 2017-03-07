@@ -1,13 +1,13 @@
 DMUMPS=lib/MUMPS_5.0.1
 
-PKG_CXXFLAGS=-s -I$(DMUMPS)/include
+PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 $(SHLIB): lib/liballmumps.a lib/libscotch.a
 
 lib/liballmumps.a:
 	$(MAKE) -C lib -f Makefile.win \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="-s $(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="-s $(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="-s $(LDFLAGS)"
+	  CC="$(CC)" FC="$(FC)" CFLAGS="-s $(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="-s $(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="$(LDFLAGS)"
 
 lib/libscotch.a:
 	$(MAKE) -C lib -f Makefile.win scotchlibs \

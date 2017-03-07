@@ -44,7 +44,7 @@ include ../Makefile.inc$(WININC)
 				$(CC) $(HCFLAGS) $(CLIBFLAGS) -I$(includedir) -c $(<) -o $(@)
 
 %$(EXE)	:	%.c
-		 		$(CC) $(HCFLAGS) -I$(includedir) $(<) -o $(@) -L$(libdir) $(LDFLAGS) -L. -l$(ESMUMPSLIB) -l$(SCOTCHLIB) -lscotch -l$(SCOTCHLIB)errexit -lm
+		 		$(CC) $(HCFLAGS) -I$(includedir) $(<) -o $(@) -L$(libdir) $(HLDFLAGS) -L. -l$(ESMUMPSLIB) -l$(SCOTCHLIB) -lscotch -l$(SCOTCHLIB)errexit -lm
 
 ##
 ##  Project rules.

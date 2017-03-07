@@ -43,7 +43,7 @@ include ../Makefile.inc$(WININC)
 				$(CC) $(HCFLAGS) $(CLIBFLAGS) -c $(<) -o $(@)
 
 %$(EXE)	:	%.c
-		 		$(CC) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+		 		$(CC) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(HLDFLAGS)
 
 ##
 ##  Project rules.
@@ -2937,14 +2937,14 @@ dummysizes$(EXE)		:	dummysizes.c				\
 					mapping.h				\
 					order.h					\
 					parser.h
-			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(HLDFLAGS)
 
 ptdummysizes$(EXE)		:	dummysizes.c				\
 					module.h				\
 					common.h				\
 					dgraph.h				\
 					dorder.h
-			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION=$(VERSION) -DSCOTCH_RELEASE=$(RELEASE) -DSCOTCH_PATCHLEVEL=$(PATCHLEVEL) $(<) -o $(@) $(HLDFLAGS)
 
 scotch.h			:	dummysizes$(EXE)			\
 					library.h
