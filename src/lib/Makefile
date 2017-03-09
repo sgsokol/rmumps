@@ -249,7 +249,7 @@ OBJECTS.lib = $(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MO
 OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 scotchlibs:
 	(cd $(DSCOTCH)/src && \
-        $(MAKE) scotch esmumps && \
+        $(MAKE) INC_OS="$(INC_OS)" scotch esmumps && \
         cp esmumps/libesmumps.a libscotch/libscotch.a libscotch/libscotcherr.a $(DLIB)/ )
 libesmumps.a : scotchlibs
 libscotch.a : scotchlibs

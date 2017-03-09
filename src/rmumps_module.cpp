@@ -366,7 +366,7 @@ void Rmumps::set_icntl(IntegerVector iv, IntegerVector ii) {
   // set control vector ICNTL at positions in ii (1-based)) to the values in iv
   // only 1 <= ii <= 33 are effectively used
   if (iv.size() != ii.size()) {
-    sprintf(buf, "set_icntl: length(iv) and length(ii) must be the same (got %td and %td respectively)", iv.size(), ii.size());
+    sprintf(buf, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
     stop(buf);
   }
   for (auto i=0; i < ii.size(); i++) {
@@ -379,7 +379,7 @@ void Rmumps::set_cntl(NumericVector v, IntegerVector iv) {
   // set control vector CNTL at positions in iv (1-based)) to the values in v
   // only 1 <= iv <= 5 are effectively used
   if (v.size() != iv.size()) {
-    sprintf(buf, "set_cntl: length(v) and length(iv) must be the same (got %td and %td respectively)", v.size(), iv.size());
+    sprintf(buf, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", (int) v.size(), (int) iv.size());
     stop(buf);
   }
   for (auto i=0; i < iv.size(); i++) {

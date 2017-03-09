@@ -38,7 +38,7 @@ libdir		= ../../lib
 ##  General inference rules.
 ##
 
-include ../Makefile.inc$(WININC)
+include ../Makefile.inc$(INC_OS)
 
 %$(OBJ)	:	%.c
 				$(CC) $(HCFLAGS) $(CLIBFLAGS) -I$(includedir) -c $(<) -o $(@)

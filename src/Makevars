@@ -1,11 +1,14 @@
 DMUMPS=lib/MUMPS_5.0.1
 RANLIB?=ranlib
 
+sysname=$(shell "$(R_HOME)/bin/Rscript" -e 'cat(Sys.info()[["sysname"]])')
+INC_OS = $(if $(subst Darwin,,$(sysname)),,".macos")
+
 PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 $(SHLIB): lib/liballmumps.a
 
 lib/liballmumps.a:
-	@($(MAKE) -C lib \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+	$(MAKE) -C lib \
+	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"

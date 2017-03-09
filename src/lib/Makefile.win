@@ -26,7 +26,7 @@ SOURCES.f.mpi = $(wildcard $(DMUMPS)/libseq/*.f)
 all: allmumps scotchlibs
 
 scotchlibs:
-	$(MAKE) -C $(DSCOTCH)/src -f Makefile.win WININC=.win scotch esmumps
+	$(MAKE) -C $(DSCOTCH)/src -f Makefile.win INC_OS="$(INC_OS)" scotch esmumps
 	mkdir -p $(DLIB)
 	mv -f $(DSCOTCH)/lib/libscotch.a $(DSCOTCH)/lib/libscotcherr.a $(DSCOTCH)/src/esmumps/libesmumps.a $(DLIB)/
 

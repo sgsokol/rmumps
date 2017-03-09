@@ -40,7 +40,7 @@ mumps_lib: requiredobj
 	(cd src ; $(MAKE) $(ARITH))
 
 scotch_lib:
-	(cd $(SCOTCHDIR) ; $(MAKE))
+	(cd $(SCOTCHDIR) ; $(MAKE) INC_OS=$(INC_OS))
 
 cexamples:	c
 	(cd examples ; $(MAKE) c)
