@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.0.1.12-2
-Date: 2017-03-08
+Version: 5.0.1.12-3
+Date: 2017-03-16
 Author: Serguei Sokol
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Some basic features of MUMPS (Multifrontal Massively Parallel

@@ -128,6 +128,7 @@ typedef struct GraphProc_ {
   int                       procglbnbr;           /*+ Number of processes in communicator      +*/
   int                       proclocnum;           /*+ Rank of process in current communicator  +*/
 #endif /* SCOTCH_PTSCOTCH */
+  int                       dummy; /* 2017-03-16 added by sokol@insa-toulouse.fr to keep silent clang warnings */
 } GraphProc;
 
 /*+ The graph structure. +*/
