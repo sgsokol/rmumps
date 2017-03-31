@@ -1,10 +1,10 @@
 /*
  *
- *  This file is part of MUMPS 5.0.1, released
- *  on Thu Jul 23 17:08:29 UTC 2015
+ *  This file is part of MUMPS 5.1.1, released
+ *  on Mon Mar 20 14:34:33 UTC 2017
  *
  *
- *  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+ *  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
  *  University of Bordeaux.
  *
  *  This version of MUMPS is provided to you free of charge. It is
@@ -28,10 +28,10 @@ extern "C" {
 
 #ifndef MUMPS_VERSION
 /* Protected in case headers of other arithmetics are included */
-#define MUMPS_VERSION "5.0.1"
+#define MUMPS_VERSION "5.1.1"
 #endif
 #ifndef MUMPS_VERSION_MAX_LEN
-#define MUMPS_VERSION_MAX_LEN 25
+#define MUMPS_VERSION_MAX_LEN 30
 #endif
 
 /*
@@ -45,7 +45,7 @@ typedef struct {
     MUMPS_INT      icntl[40];
     MUMPS_INT      keep[500];
     DMUMPS_REAL    cntl[15];
-    DMUMPS_REAL    dkeep[130];
+    DMUMPS_REAL    dkeep[230];
     MUMPS_INT8     keep8[150];
     MUMPS_INT      n;
 
@@ -54,12 +54,14 @@ typedef struct {
 
     /* Assembled entry */
     MUMPS_INT      nz;
+    MUMPS_INT8     nnz;
     MUMPS_INT      *irn;
     MUMPS_INT      *jcn;
     DMUMPS_COMPLEX *a;
 
     /* Distributed entry */
     MUMPS_INT      nz_loc;
+    MUMPS_INT8     nnz_loc;
     MUMPS_INT      *irn_loc;
     MUMPS_INT      *jcn_loc;
     DMUMPS_COMPLEX *a_loc;
@@ -114,7 +116,9 @@ typedef struct {
     /* To save the matrix in matrix market format */
     char write_problem[256];
     MUMPS_INT      lwk_user;
-
+    /* For save/restore feature */
+    char save_dir[256];
+    char save_prefix[256];
 } DMUMPS_STRUC_C;
 
 
