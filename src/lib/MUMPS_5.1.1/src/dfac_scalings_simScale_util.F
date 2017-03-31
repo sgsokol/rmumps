@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -14,17 +14,35 @@ C
      & IRN_loc, JCN_loc, NZ_loc,
      & IPARTVEC, ISZ, OSZ,
      & IWRK, IWSZ)
+C
       IMPLICIT NONE
       EXTERNAL DMUMPS_BUREDUCE
-      INTEGER MYID, NUMPROCS, COMM
-      INTEGER NZ_loc, ISZ, IWSZ, OSZ
-      INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
-      INTEGER IPARTVEC(ISZ)
-      INTEGER IWRK(IWSZ)
+      INTEGER, INTENT(IN)    :: MYID, NUMPROCS, COMM
+      INTEGER(8), INTENT(IN) :: NZ_loc 
+      INTEGER, INTENT(IN)    :: IWSZ
+      INTEGER, INTENT(IN)    :: ISZ, OSZ
+      INTEGER, INTENT(IN)    :: IRN_loc(NZ_loc), JCN_loc(NZ_loc)
+C  OUTPUT
+C     IPARTVEC(I) = proc number with largest number of entries 
+C                in row/col I
+      INTEGER, INTENT(OUT) :: IPARTVEC(ISZ)
+C
+C  INTERNAL WORKING ARRAY
+C     IWRK (1:2*ISZ) is initialized to couples (MYID, Nb of entries
+C     on my proc and in row/col I) for I=1,ISZ
+C     (2*ISZ+1: 4*ISZ) is then set to
+C     the processor with largest number of entries in its row/col
+C     and its value (that is copied back into IPARTVEC(I)
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+      INTEGER(4), INTENT(OUT) :: IWRK(IWSZ)
+#else
+      INTEGER, INTENT(OUT) :: IWRK(IWSZ)
+#endif
       INCLUDE 'mpif.h'
 C
 C     LOCAL VARS
       INTEGER I
+      INTEGER(8) :: I8
       INTEGER OP, IERROR
       INTEGER IR, IC
 C
@@ -34,15 +52,19 @@ C     IF(IWSZ < 4*ISZ) THEN
 C     CHECK ENDS
          CALL MPI_OP_CREATE(DMUMPS_BUREDUCE, .TRUE., OP, IERROR)
 C     PERFORM THE REDUCTION
-         CALL DMUMPS_IBUINIT(IWRK, 4*ISZ, ISZ)
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+        CALL DMUMPS_IBUINIT(IWRK, 4*ISZ, int(ISZ,4))
+#else
+        CALL DMUMPS_IBUINIT(IWRK, 4*ISZ, ISZ)
+#endif
 C     WE FIRST ZERO OUT  
          DO I=1,ISZ
             IWRK(2*I-1) = 0
             IWRK(2*I) = MYID
          ENDDO
-         DO I=1,NZ_loc
-            IR = IRN_loc(I)
-            IC = JCN_loc(I)
+         DO I8=1_8,NZ_loc
+            IR = IRN_loc(I8)
+            IC = JCN_loc(I8)
             IF((IR.GE.1).AND.(IR.LE.ISZ).AND.
      &           (IC.GE.1).AND.(IC.LE.OSZ)) THEN
                IWRK(2*IR-1) = IWRK(2*IR-1) + 1
@@ -73,16 +95,28 @@ C
      &     INUMMYC,     
      &     IWRK, IWSZ)
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, M, N
-      INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
-      INTEGER ROWPARTVEC(M)
-      INTEGER COLPARTVEC(N)
-      INTEGER INUMMYR, INUMMYC
-      INTEGER IWSZ
-      INTEGER IWRK(IWSZ)
-      INTEGER COMM
+      INTEGER(8), INTENT(IN) :: NZ_loc
+      INTEGER, INTENT(IN) :: MYID, NUMPROCS, M, N, IWSZ
+      INTEGER, INTENT(IN) :: IRN_loc(NZ_loc), JCN_loc(NZ_loc)
+C     [ROW/COL]PARTVEC(I) holds proc number with largest number of entries 
+C                in row/col I
+      INTEGER, INTENT(IN) :: ROWPARTVEC(M)
+      INTEGER, INTENT(IN) :: COLPARTVEC(N)
+      INTEGER, INTENT(IN) :: COMM
 C
+C  OUTPUT PARAMETERS
+C     INUMMYR < M and INUMMYC < N  (CPA or <= ??)
+C     INUMMYR holds the number of rows allocated to me 
+C             or non empty on my proc
+C     INUMMYC idem with columns
+      INTEGER INUMMYR, INUMMYC
+C
+C  INTERNAL working array
+      INTEGER IWRK(IWSZ)
+C
+C   Local variables
       INTEGER I, IR, IC
+      INTEGER(8) ::  I8
 C check done outsize     
 C     IF(IWSZ < M) THEN ERROR
 C     IF(IWSZ < N) THEN ERROR
@@ -90,6 +124,8 @@ C     IF(IWSZ < N) THEN ERROR
       INUMMYC = 0
 C     MARK MY ROWS. FIRST COUNT,
 C          IF DYNAMIC MEMORY ALLOCATIOn WILL USED
+C     INUMMYR first counts number of rows affected to me
+C             (that will be centralized on MYID)
       DO I=1,M
          IWRK(I) = 0
          IF(ROWPARTVEC(I).EQ.MYID) THEN
@@ -97,9 +133,9 @@ C          IF DYNAMIC MEMORY ALLOCATIOn WILL USED
             INUMMYR = INUMMYR + 1
          ENDIF
       ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)
-         IC = JCN_loc(I)
+      DO I8=1_8,NZ_loc
+         IR = IRN_loc(I8)
+         IC = JCN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.M).AND.
      &        ((IC.GE.1).AND.(IC.LE.N)) ) THEN
             IF(IWRK(IR) .EQ. 0) THEN
@@ -116,9 +152,9 @@ C     DO THE SMAME THING FOR COLS
             INUMMYC = INUMMYC + 1
          ENDIF
       ENDDO
-      DO I=1,NZ_loc
-         IC = JCN_loc(I)
-         IR = IRN_loc(I)
+      DO I8=1_8,NZ_loc
+         IC = JCN_loc(I8)
+         IR = IRN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.M).AND.
      &        ((IC.GE.1).AND.(IC.LE.N)) ) THEN
             IF(IWRK(IC) .EQ. 0) THEN
@@ -137,7 +173,8 @@ C
      &     MYCOLINDICES, INUMMYC,     
      &     IWRK, IWSZ  )
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, M, N
+      INTEGER(8) :: NZ_loc
+      INTEGER MYID, NUMPROCS, M, N
       INTEGER INUMMYR, INUMMYC, IWSZ
       INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
       INTEGER ROWPARTVEC(M)
@@ -148,6 +185,7 @@ C
       INTEGER COMM
 C
       INTEGER I, IR, IC, ITMP, MAXMN
+      INTEGER(8) :: I8
 C      
       MAXMN = M
       IF(N > MAXMN) MAXMN = N
@@ -158,9 +196,9 @@ C     MARK MY ROWS.
          IWRK(I) = 0
          IF(ROWPARTVEC(I).EQ.MYID) IWRK(I)=1
       ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)         
-         IC = JCN_loc(I)
+      DO I8=1,NZ_loc
+         IR = IRN_loc(I8)         
+         IC = JCN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.M).AND.
      &      ((IC.GE.1).AND.(IC.LE.N))  ) THEN
             IF(IWRK(IR) .EQ. 0) IWRK(IR)= 1
@@ -181,9 +219,9 @@ C     DO THE SMAME THING FOR COLS
          IWRK(I) = 0
          IF(COLPARTVEC(I).EQ.MYID) IWRK(I)= 1
       ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)         
-         IC = JCN_loc(I)
+      DO I8=1,NZ_loc
+         IR = IRN_loc(I8)         
+         IC = JCN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.M).AND.
      &      ((IC.GE.1).AND.(IC.LE.N))  ) THEN
             IF(IWRK(IC) .EQ. 0) IWRK(IC)= 1
@@ -431,14 +469,24 @@ C         if this number of entries is even we take the proc with smallest id
 C     
       IMPLICIT NONE
       INTEGER LEN
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+      INTEGER(4) :: INV(2*LEN) 
+      INTEGER(4) :: INOUTV(2*LEN)
+#else
       INTEGER INV(2*LEN) 
       INTEGER INOUTV(2*LEN)
+#endif
       INTEGER DTYPE
       INTEGER I
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+      INTEGER(4) DIN, DINOUT, PIN, PINOUT
+#else
       INTEGER DIN, DINOUT, PIN, PINOUT
+#endif
       DO I=1,2*LEN-1,2
          DIN = INV(I)     ! nb of entries in row/col
          PIN = INV(I+1)   ! proc number
+C  DINOUT
          DINOUT = INOUTV(I)
          PINOUT = INOUTV(I+1)
          IF (DINOUT < DIN) THEN
@@ -462,8 +510,13 @@ C     SEPARATOR: Another function begins
 C
       SUBROUTINE DMUMPS_IBUINIT(IW, IWSZ, IVAL)
       IMPLICIT NONE
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
       INTEGER IWSZ
       INTEGER IW(IWSZ)
+#else
+      INTEGER(4) IWSZ
+      INTEGER(4) IW(IWSZ)
+#endif
       INTEGER IVAL
       INTEGER I
       DO I=1,IWSZ
@@ -474,86 +527,6 @@ C
 C
 C     SEPARATOR: Another function begins
 C
-      SUBROUTINE DMUMPS_FINDMYROWCOLINDICES(MYID, NUMPROCS,
-     & IRN_loc, JCN_loc, NZ_loc,
-     & ROWPARTVEC, COLPARTVEC, M, N,
-     & MYROWINDICES, INUMMYR,
-     & MYCOLINDICES, INUMMYC,     
-     & IWRKROW, IWRKCOL, IWSZR, IWSZC, COMM    )
-      IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, M, N
-      INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
-      INTEGER ROWPARTVEC(M)
-      INTEGER COLPARTVEC(N)
-      INTEGER MYROWINDICES(M)
-      INTEGER MYCOLINDICES(N)
-      INTEGER INUMMYR, INUMMYC
-      INTEGER IWSZR, IWSZC
-      INTEGER IWRKROW(IWSZR)
-      INTEGER IWRKCOL(IWSZC)
-      INTEGER COMM
-      INTEGER I, IR, IC, ITMP
-      INUMMYR = 0
-      INUMMYC = 0
-C     MARK MY ROWS. FIRST COUNT,
-C          IF DYNAMIC MEMORY ALLOCATIOn WILL USED
-      DO I=1,M
-         IWRKROW(I) = 0
-         IF(ROWPARTVEC(I).EQ.MYID) THEN
-            IWRKROW(I)=1
-            INUMMYR = INUMMYR + 1
-         ENDIF
-      ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)
-         IC = JCN_loc(I)
-         IF((IR.GE.1).AND.(IR.LE.M).AND.
-     &        ((IC.GE.1).AND.(IC.LE.N))) THEN
-            IF(IWRKROW(IR) .EQ. 0) THEN
-               IWRKROW(IR)= 1
-               INUMMYR = INUMMYR + 1
-            ENDIF
-         ENDIF
-      ENDDO
-C     PUT MY ROWS INTO MYROWINDICES
-      ITMP = 1
-      DO I=1,M
-         IF(IWRKROW(I).EQ.1) THEN
-            MYROWINDICES(ITMP) = I
-            ITMP  = ITMP + 1
-         ENDIF
-      ENDDO
-C
-C
-C     DO THE SMAME THING FOR COLS
-      DO I=1,N
-         IWRKCOL(I) = 0
-         IF(COLPARTVEC(I).EQ.MYID) THEN
-            IWRKCOL(I)= 1
-            INUMMYC = INUMMYC + 1
-         ENDIF
-      ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)
-         IC = JCN_loc(I)
-         IF((IR.GE.1).AND.(IR.LE.M).AND.
-     &        ((IC.GE.1).AND.(IC.LE.N))) THEN
-            IF(IWRKCOL(IC) .EQ. 0) THEN
-               IWRKCOL(IC)= 1
-               INUMMYC = INUMMYC + 1
-            ENDIF
-         ENDIF
-      ENDDO
-C     PUT MY ROWS INTO MYROWINDICES
-      ITMP = 1
-      DO I=1,N
-         IF(IWRKCOL(I).EQ.1) THEN
-            MYCOLINDICES(ITMP) = I
-            ITMP  = ITMP + 1
-         ENDIF
-      ENDDO
-      RETURN
-      END SUBROUTINE DMUMPS_FINDMYROWCOLINDICES
 C
 C     SEPARATOR: Another function begins
 C
@@ -562,19 +535,46 @@ C
      &     OSNDRCVNUM,OSNDRCVVOL,
      &     IWRK,IWRKSZ, SNDSZ, RCVSZ, COMM)
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, ISZ, IWRKSZ, OSZ
-      INTEGER ISNDRCVNUM, ISNDRCVVOL
-      INTEGER OSNDRCVNUM, OSNDRCVVOL
-      INTEGER COMM
-      INTEGER INDX(NZ_loc)
-      INTEGER OINDX(NZ_loc)
-      INTEGER IPARTVEC(ISZ)
+      INTEGER(8), INTENT(IN) :: NZ_loc
+      INTEGER, INTENT(IN)    :: IWRKSZ
+      INTEGER, INTENT(IN) ::  MYID, NUMPROCS, ISZ, OSZ
+      INTEGER, INTENT(IN) ::  COMM
+C     When INDX holds row indices O(ther)INDX hold col indices
+      INTEGER, INTENT(IN) :: INDX(NZ_loc)
+      INTEGER, INTENT(IN) :: OINDX(NZ_loc)
+C     On entry IPARTVEC(I) holds proc number with largest number of entries 
+C                in row/col I
+      INTEGER, INTENT(IN) :: IPARTVEC(ISZ)
+C
+C  OUTPUT PARAMETERS
+C     SNDSZ (IPROC+1) is set to the number of rows (or col) that
+C                     MYID will have to send to IPROC
+C     RCVSZ(IPROC+1) is set to the nb of row/cols that
+C                    MYID will receive from IPROC
+      INTEGER, INTENT(OUT) :: SNDSZ(NUMPROCS)
+      INTEGER, INTENT(OUT) :: RCVSZ(NUMPROCS)
+C     OSNDRCVNUM is set to the total number of procs 
+C                destination of messages from MYID (< NUMPROCS)
+C     ISNDRCVNUM is set to the total number procs 
+C                that will send messages to MYID  (< NUMPROCS)
+C     ISNDRCVVOL is set to the total number of row/col that
+C                MYID will have to send to other procs
+C                (bounded by N)
+C     OSNDRCVVOL  is set to the total number of row/col that
+C                MYID will have to send to other procs
+C                (bounded by N)
+C        Knowing that for each row the process with the largest 
+C        number of entries  will centralize all indices then
+C        ISNDRCVVOL and OSNDRCVVOL are bounded by N
+      INTEGER, INTENT(OUT) :: ISNDRCVNUM, OSNDRCVNUM   
+      INTEGER, INTENT(OUT) :: ISNDRCVVOL, OSNDRCVVOL
+C
+C  INTERNAL WORKING ARRAY
       INTEGER IWRK(IWRKSZ)
-      INTEGER SNDSZ(NUMPROCS)
-      INTEGER RCVSZ(NUMPROCS)
       INCLUDE 'mpif.h'
 C     LOCAL VARS
       INTEGER I
+      INTEGER(8) :: I8
       INTEGER IIND, IIND2, PIND
       INTEGER IERROR
 C check done outsize
@@ -586,13 +586,17 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
       DO I=1,IWRKSZ
          IWRK(I) = 0
       ENDDO
-      DO I=1,NZ_loc
-         IIND = INDX(I)
-         IIND2 = OINDX(I)
+C
+C     set SNDSZ
+      DO I8=1,NZ_loc
+         IIND = INDX(I8)
+         IIND2 = OINDX(I8)
          IF((IIND.GE.1).AND.(IIND.LE.ISZ).AND.
      &        (IIND2.GE.1).AND.(IIND2.LE.OSZ))THEN
             PIND = IPARTVEC(IIND)
             IF(PIND .NE. MYID) THEN
+C              MYID will send row/col IIND to proc PIND 
+C              (PIND has the largest nb of entries in row/con IIND
                IF(IWRK(IIND).EQ.0) THEN
                   IWRK(IIND) = 1
                   SNDSZ(PIND+1) = SNDSZ(PIND+1)+1
@@ -600,9 +604,14 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
             ENDIF
          ENDIF
       ENDDO
+C
+C     use SNDSZ to set RCVSZ
       CALL MPI_ALLTOALL(SNDSZ, 1, MPI_INTEGER,
      & RCVSZ, 1, MPI_INTEGER, COMM, IERROR)
-      ISNDRCVNUM = 0 
+C
+C     compute number of procs destinations of messages from MYID 
+C     number of row/col sent by MYID. 
+      ISNDRCVNUM = 0
       ISNDRCVVOL = 0
       OSNDRCVNUM = 0
       OSNDRCVVOL = 0
@@ -626,17 +635,21 @@ C
      &     ITAGCOMM, COMM )
       IMPLICIT NONE
       INCLUDE 'mpif.h'
-      INTEGER MYID, NUMPROCS, NZ_loc, ISZ, ISNDVOL, OSNDVOL, OSZ
+      INTEGER(8) :: NZ_loc  
+      INTEGER ISNDVOL, OSNDVOL
+      INTEGER MYID, NUMPROCS, ISZ, OSZ
 C     ISZ is either M or N
       INTEGER INDX(NZ_loc)
       INTEGER OINDX(NZ_loc)
 C     INDX is either IRN_loc or JCN_col
       INTEGER IPARTVEC(ISZ)
 C     IPARTVEC is either rowpartvec or colpartvec
-      INTEGER ISNDRCVNUM, INGHBPRCS(ISNDRCVNUM)
+      INTEGER :: ISNDRCVNUM
+      INTEGER INGHBPRCS(ISNDRCVNUM)
       INTEGER ISNDRCVIA(NUMPROCS+1)
       INTEGER ISNDRCVJA(ISNDVOL)
-      INTEGER OSNDRCVNUM, ONGHBPRCS(OSNDRCVNUM)
+      INTEGER OSNDRCVNUM 
+      INTEGER ONGHBPRCS(OSNDRCVNUM)
       INTEGER OSNDRCVIA(NUMPROCS+1)
       INTEGER OSNDRCVJA(OSNDVOL)
       INTEGER SNDSZ(NUMPROCS)
@@ -648,6 +661,7 @@ C     IPARTVEC is either rowpartvec or colpartvec
 C     LOCAL VARS
       INTEGER I, IIND, IIND2, IPID, OFFS 
       INTEGER IWHERETO, POFFS, ITMP, IERROR
+      INTEGER(8) :: I8
 C     COMPUATIONs START      
       DO I=1,ISZ
          IWRK(I) = 0
@@ -669,9 +683,9 @@ C     CHECK STARTS
 C check done outsize
 C      IF(POFFS .NE. OSNDRCVNUM + 1)THEN ERROR
 C     INIT DONE. FILL UP THE OSNDRCVJA(OSNDVOL)
-      DO I=1,NZ_loc
-         IIND=INDX(I)
-         IIND2 = OINDX(I)
+      DO I8=1,NZ_loc
+         IIND  = INDX(I8)
+         IIND2 = OINDX(I8)
          IF((IIND.GE.1).AND.(IIND.LE.ISZ).AND.
      &        (IIND2.GE.1).AND.(IIND2.LE.OSZ) ) THEN
             IPID=IPARTVEC(IIND)
@@ -916,15 +930,32 @@ C     COMMUNICATE THE UPDATED ONES
      & IWRK, IWSZ)
       IMPLICIT NONE
       EXTERNAL DMUMPS_BUREDUCE
-      INTEGER MYID, NUMPROCS, COMM
-      INTEGER NZ_loc, ISZ, IWSZ
-      INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
-      INTEGER IPARTVEC(ISZ)
-      INTEGER IWRK(IWSZ)
+      INTEGER, INTENT(IN) :: MYID, NUMPROCS, COMM
+      INTEGER(8)          :: NZ_loc
+      INTEGER, INTENT(IN) :: ISZ, IWSZ
+      INTEGER, INTENT(IN) :: IRN_loc(NZ_loc), JCN_loc(NZ_loc)
+C
+C  OUTPUT
+C     IPARTVEC(I) = proc number with largest number of entries 
+C                in row/col I
+      INTEGER, INTENT(OUT) :: IPARTVEC(ISZ)
+C
+C  INTERNAL WORKING ARRAY
+C     IWRK (1:2*ISZ) is initialized to couples (MYID, Nb of entries
+C     on my proc and in row/col I) for I=1,ISZ
+C     (2*ISZ+1: 4*ISZ) is then set to
+C     the processor with largest number of entries in its row/col
+C     and its value (that is copied back into IPARTVEC(I)
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+      INTEGER(4), INTENT(OUT) :: IWRK(IWSZ)
+#else
+      INTEGER, INTENT(OUT) :: IWRK(IWSZ)
+#endif
       INCLUDE 'mpif.h'
 C
 C     LOCAL VARS
       INTEGER I
+      INTEGER(8) :: I8
       INTEGER OP, IERROR
       INTEGER IR, IC
 C
@@ -939,9 +970,9 @@ C     PERFORM THE REDUCTION
             IWRK(2*I-1) = 0
             IWRK(2*I) = MYID
          ENDDO
-         DO I=1,NZ_loc
-            IR = IRN_loc(I)
-            IC = JCN_loc(I)
+         DO I8=1_8,NZ_loc
+            IR = IRN_loc(I8)
+            IC = JCN_loc(I8)
             IF((IR.GE.1).AND.(IR.LE.ISZ).AND.
      &           (IC.GE.1).AND.(IC.LE.ISZ)) THEN
                IWRK(2*IR-1) = IWRK(2*IR-1) + 1
@@ -966,18 +997,42 @@ C     FREE THE OPERATOR
      & NZ_loc, INDX,OINDX,ISNDRCVNUM,ISNDRCVVOL,OSNDRCVNUM,OSNDRCVVOL,
      & IWRK,IWRKSZ, SNDSZ, RCVSZ, COMM)
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, ISZ, IWRKSZ
-      INTEGER ISNDRCVNUM, ISNDRCVVOL
-      INTEGER OSNDRCVNUM, OSNDRCVVOL
-      INTEGER COMM
-      INTEGER INDX(NZ_loc), OINDX(NZ_loc)
-      INTEGER IPARTVEC(ISZ)
-      INTEGER IWRK(IWRKSZ)
-      INTEGER SNDSZ(NUMPROCS)
-      INTEGER RCVSZ(NUMPROCS)
+      INTEGER(8), INTENT(IN) :: NZ_loc 
+      INTEGER, INTENT(IN)    :: IWRKSZ
+      INTEGER, INTENT(IN)    :: MYID, NUMPROCS, ISZ
+      INTEGER, INTENT(IN)    :: INDX(NZ_loc), OINDX(NZ_loc)
+      INTEGER, INTENT(IN)    :: IPARTVEC(ISZ)
+      INTEGER, INTENT(IN)    :: COMM
+C
+C  OUTPUT PARAMETERS
+C     SNDSZ (IPROC+1) is set to the number of rows (or col) that
+C                     MYID will have to send to IPROC
+C     RCVSZ(IPROC+1) is set to the nb of row/cols that
+C                    MYID will receive from IPROC
+      INTEGER :: SNDSZ(NUMPROCS)
+      INTEGER :: RCVSZ(NUMPROCS)
+C     OSNDRCVNUM is set to the total number of procs 
+C                destination of messages from MYID (< NUMPROCS)
+C     ISNDRCVNUM is set to the total number procs 
+C                that will send messages to MYID  (< NUMPROCS)
+C     ISNDRCVVOL is set to the total number of row/col that
+C                MYID will have to send to other procs
+C                (bounded by N)
+C     OSNDRCVVOL  is set to the total number of row/col that
+C                MYID will have to send to other procs
+C                (bounded by N)
+C        Knowing that for each row the process with the largest 
+C        number of entries  will centralize all indices then
+C        ISNDRCVVOL and OSNDRCVVOL are bounded by N
+      INTEGER, INTENT(OUT)   :: ISNDRCVNUM, ISNDRCVVOL
+      INTEGER, INTENT(OUT)   :: OSNDRCVNUM, OSNDRCVVOL
+C
+C  INTERNAL WORKING ARRAY
+      INTEGER, INTENT(OUT) :: IWRK(IWRKSZ)
       INCLUDE 'mpif.h'
 C     LOCAL VARS
       INTEGER I
+      INTEGER(8) :: I8
       INTEGER IIND, IIND2, PIND
       INTEGER IERROR
 C check done outsize
@@ -989,19 +1044,23 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
       DO I=1,IWRKSZ
          IWRK(I) = 0
       ENDDO
-      DO I=1,NZ_loc
-         IIND = INDX(I)
-         IIND2 = OINDX(I)
+C
+C     set SNDSZ
+      DO I8=1_8,NZ_loc
+         IIND = INDX(I8)
+         IIND2 = OINDX(I8)
          IF((IIND.GE.1).AND.(IIND.LE.ISZ).AND.(IIND2.GE.1)
      &        .AND.(IIND2.LE.ISZ)) THEN
             PIND = IPARTVEC(IIND)
             IF(PIND .NE. MYID) THEN
+C              MYID will send row/col IIND to proc PIND 
+C              (PIND has the largest nb of entries in row/con IIND
                IF(IWRK(IIND).EQ.0) THEN
                   IWRK(IIND) = 1
                   SNDSZ(PIND+1) = SNDSZ(PIND+1)+1
                ENDIF
             ENDIF
-            IIND = OINDX(I)
+            IIND = OINDX(I8)
             PIND = IPARTVEC(IIND)
             IF(PIND .NE. MYID) THEN
                IF(IWRK(IIND).EQ.0) THEN
@@ -1011,9 +1070,14 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
             ENDIF
          ENDIF
       ENDDO
+C
+C     use SNDSZ to set RCVSZ
       CALL MPI_ALLTOALL(SNDSZ, 1, MPI_INTEGER,
      &     RCVSZ, 1, MPI_INTEGER, COMM, IERROR)
-      ISNDRCVNUM = 0 
+C
+C     compute number of procs destinations of messages from MYID 
+C     number of row/col sent by MYID. 
+      ISNDRCVNUM = 0
       ISNDRCVVOL = 0
       OSNDRCVNUM = 0
       OSNDRCVVOL = 0
@@ -1031,7 +1095,8 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
      &     INUMMYR,
      &     IWRK, IWSZ)
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, N
+      INTEGER MYID, NUMPROCS, N
+      INTEGER(8) :: NZ_loc
       INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
       INTEGER PARTVEC(N)
       INTEGER INUMMYR
@@ -1040,6 +1105,7 @@ C      IF(ISZ>IWRKSZ) THEN ERROR
       INTEGER COMM
 C
       INTEGER I, IR, IC
+      INTEGER(8) :: I8
 C check done outsize     
 C     IF(IWSZ < M) THEN ERROR
 C     IF(IWSZ < N) THEN ERROR
@@ -1053,9 +1119,9 @@ C          IF DYNAMIC MEMORY ALLOCATIOn WILL USED
             INUMMYR = INUMMYR + 1
          ENDIF
       ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)
-         IC = JCN_loc(I)
+      DO I8=1_8,NZ_loc
+         IR = IRN_loc(I8)
+         IC = JCN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.N).AND.
      &        ((IC.GE.1).AND.(IC.LE.N))) THEN
             IF(IWRK(IR) .EQ. 0) THEN
@@ -1102,7 +1168,8 @@ C
      &     MYROWINDICES, INUMMYR,
      &     IWRK, IWSZ  )
       IMPLICIT NONE
-      INTEGER MYID, NUMPROCS, NZ_loc, N
+      INTEGER MYID, NUMPROCS, N
+      INTEGER(8) :: NZ_loc
       INTEGER INUMMYR, IWSZ
       INTEGER IRN_loc(NZ_loc), JCN_loc(NZ_loc)
       INTEGER PARTVEC(N)
@@ -1111,6 +1178,7 @@ C
       INTEGER COMM
 C
       INTEGER I, IR, IC, ITMP, MAXMN
+      INTEGER(8) :: I8
 C      
       MAXMN = N
 C check done outsize
@@ -1120,9 +1188,9 @@ C     MARK MY ROWS.
          IWRK(I) = 0
          IF(PARTVEC(I).EQ.MYID) IWRK(I)=1
       ENDDO
-      DO I=1,NZ_loc
-         IR = IRN_loc(I)   
-         IC = JCN_loc(I)
+      DO I8=1_8,NZ_loc
+         IR = IRN_loc(I8)   
+         IC = JCN_loc(I8)
          IF((IR.GE.1).AND.(IR.LE.N).AND.
      &        ((IC.GE.1).AND.(IC.LE.N))) THEN
             IF(IWRK(IR) .EQ. 0) IWRK(IR)= 1
@@ -1155,7 +1223,8 @@ C
      &  ITAGCOMM, COMM )
       IMPLICIT NONE
       INCLUDE 'mpif.h'
-      INTEGER MYID, NUMPROCS, NZ_loc, ISZ, ISNDVOL, OSNDVOL
+      INTEGER MYID, NUMPROCS, ISZ, ISNDVOL, OSNDVOL
+      INTEGER(8) :: NZ_loc
 C     ISZ is either M or N
       INTEGER INDX(NZ_loc), OINDX(NZ_loc)
 C     INDX is either IRN_loc or JCN_col
@@ -1175,6 +1244,7 @@ C     IPARTVEC is either rowpartvec or colpartvec
       INTEGER ITAGCOMM, COMM
 C     LOCAL VARS
       INTEGER I, IIND,IIND2,IPID,OFFS,IWHERETO,POFFS, ITMP, IERROR
+      INTEGER(8) :: I8
 C     COMPUATIONs START      
       DO I=1,ISZ
          IWRK(I) = 0
@@ -1196,9 +1266,9 @@ C CHECK STARTS
 C check done outsize
 C      IF(POFFS .NE. OSNDRCVNUM + 1)THEN ERROR
 C     INIT DONE. FILL UP THE OSNDRCVJA(OSNDVOL)
-      DO I=1,NZ_loc
-         IIND=INDX(I)
-         IIND2 = OINDX(I)
+      DO I8=1_8,NZ_loc
+         IIND=INDX(I8)
+         IIND2 = OINDX(I8)
          IF((IIND.GE.1).AND.(IIND.LE.ISZ).AND.(IIND2.GE.1)
      &        .AND.(IIND2.LE.ISZ)) THEN            
             IPID=IPARTVEC(IIND)
@@ -1210,7 +1280,7 @@ C     INIT DONE. FILL UP THE OSNDRCVJA(OSNDVOL)
                   IWRK(IIND) = 1
                ENDIF
             ENDIF
-            IIND = OINDX(I)
+            IIND = OINDX(I8)
             IPID=IPARTVEC(IIND)
             IF(IPID.NE.MYID) THEN
                IF(IWRK(IIND).EQ.0) THEN

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -11,45 +11,56 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       SUBROUTINE DMUMPS_ANA_F_ELT(N, NELT, ELTPTR, ELTVAR, LIW,
-     &            IKEEP, PTRAR,
+     &            IKEEP, 
      &            IORD, NFSIZ, FILS, FRERE, 
      &            LISTVAR_SCHUR, SIZE_SCHUR,
      &            ICNTL, INFO, KEEP,KEEP8,
-     &            ELTNOD, NSLAVES, 
+     &            NSLAVES, 
      &            XNODEL, NODEL)
+      USE MUMPS_ANA_ORD_WRAPPERS
       IMPLICIT NONE
-      INTEGER N,NELT,LIW,IORD, SIZE_SCHUR, NSLAVES
-      INTEGER PTRAR(N,3), NFSIZ(N), FILS(N), FRERE(N)
-      INTEGER ELTPTR(NELT+1) 
-      INTEGER XNODEL(N+1), NODEL(ELTPTR(NELT+1)-1)
-      INTEGER ELTVAR(ELTPTR(NELT+1)-1)
-      INTEGER IKEEP(N,3)
-      INTEGER LISTVAR_SCHUR(SIZE_SCHUR)
-      INTEGER INFO(40), ICNTL(40), KEEP(500)
-      INTEGER(8) KEEP8(150)
-      INTEGER ELTNOD(NELT)
-      INTEGER K,I,L1,L2,IWFR,NCMPA,LLIW,IFSON,IN
+      INTEGER, INTENT(IN)    :: N,  NELT, SIZE_SCHUR, NSLAVES, LIW
+      INTEGER, INTENT(IN)    :: ELTPTR(NELT+1) 
+      INTEGER, INTENT(IN)    :: ELTVAR(ELTPTR(NELT+1)-1)
+      INTEGER, INTENT(IN)    :: LISTVAR_SCHUR(SIZE_SCHUR)
+      INTEGER, INTENT(IN)    :: ICNTL(40)
+      INTEGER, INTENT(INOUT) :: IORD
+      INTEGER, INTENT(INOUT) :: IKEEP(N,3)
+      INTEGER, INTENT(INOUT) :: INFO(40), KEEP(500)
+      INTEGER(8), INTENT(INOUT) :: KEEP8(150)
+      INTEGER, INTENT(OUT)   :: NFSIZ(N), FILS(N), FRERE(N)
+      INTEGER, INTENT(OUT)   :: XNODEL(N+1), NODEL(ELTPTR(NELT+1)-1)
+      INTEGER K,I,L1,L2,NCMPA,IFSON,IN
       INTEGER NEMIN, MPRINT, LP, MP, LDIAG
-      INTEGER NZ, allocok, ITEMP
-      LOGICAL PROK, NOSUPERVAR
+      INTEGER(8)  :: NZ8, LLIW8, IWFR8
+      INTEGER allocok, ITEMP
+      LOGICAL PROK, NOSUPERVAR, LPOK
       INTEGER(8) :: K79REF
       PARAMETER(K79REF=12000000_8)
       LOGICAL SPLITROOT
       INTEGER, DIMENSION(:), ALLOCATABLE :: IW
       INTEGER, DIMENSION(:), ALLOCATABLE :: IW2
+      INTEGER, DIMENSION(:), ALLOCATABLE :: PARENT
+      INTEGER, DIMENSION(:,:), ALLOCATABLE :: IWtemp
+      INTEGER(8), DIMENSION(:), ALLOCATABLE :: IPE8
+#if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3) 
 #if defined(metis4) || defined(parmetis3)
       INTEGER :: NUMFLAG
 #else
       INTEGER, DIMENSION(:), ALLOCATABLE :: NUMFLAG
 #endif
-      INTEGER :: OPT_METIS_SIZE,IERR
+      INTEGER :: OPT_METIS_SIZE, METIS_IDX_SIZE
       INTEGER, DIMENSION(:), ALLOCATABLE :: OPTIONS_METIS
+      INTEGER :: IERR
+#endif
       INTEGER IDUM 
-      EXTERNAL MUMPS_ANA_H, DMUMPS_ANA_G11_ELT, DMUMPS_ANA_G12_ELT,
+      EXTERNAL DMUMPS_ANA_G11_ELT, DMUMPS_ANA_G12_ELT,
      &         DMUMPS_ANA_G1_ELT, DMUMPS_ANA_G2_ELT, 
+     &         DMUMPS_ANA_G2_ELTNEW,
      &         DMUMPS_ANA_J1_ELT, DMUMPS_ANA_J2_ELT,
      &         DMUMPS_ANA_K,
-     &         DMUMPS_ANA_LNEW, DMUMPS_ANA_M
+     &         DMUMPS_ANA_LNEW, DMUMPS_ANA_M,
+     &         MUMPS_AMD_ELT
 #if defined(OLDDFS)
       EXTERNAL DMUMPS_ANA_L
 #endif
@@ -57,10 +68,23 @@ C
         IF ( allocok .GT. 0 ) THEN
           INFO( 1 ) = -7
           INFO( 2 ) = LIW
-          RETURN
+          GOTO 90 
+        ENDIF
+        ALLOCATE( IPE8 ( N + 1 ), stat = allocok )
+        IF ( allocok .GT. 0 ) THEN
+          INFO( 1 ) = -7
+          INFO( 2 ) = (N+1)*KEEP(10)
+          GOTO 90 
+        ENDIF
+        ALLOCATE( PARENT(N), IWtemp ( N, 3 ), stat = allocok )
+        IF ( allocok .GT. 0 ) THEN
+          INFO( 1 ) = -7
+          INFO( 2 ) = 4*N
+          GOTO 90 
         ENDIF
       MPRINT= ICNTL(3)
       LP    = ICNTL(1)
+      LPOK  = ((LP.GT.0).AND.(ICNTL(4).GE.1))
       MP    = ICNTL(3)
       PROK  = ((MP.GT.0).AND.(ICNTL(4).GE.2))
       LDIAG = ICNTL(4)
@@ -102,7 +126,7 @@ C
    10 L1 = 1
       L2 = L1 + N
       IF (LIW .LT. 3*N) THEN
-          INFO(1)= -2002
+          INFO(1) = -2002
           INFO(2) = LIW
       ENDIF
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
@@ -110,7 +134,7 @@ C
         IF (LIW .LT. N+N+1) THEN
           INFO(1)= -2002
           INFO(2) = LIW
-          RETURN
+          GOTO 90 
         ENDIF
       ELSE
 #endif
@@ -118,13 +142,13 @@ C
         IF ( LIW .LT. 2*N ) THEN
           INFO(1)= -2002
           INFO(2) = LIW
-          RETURN
+          GOTO 90 
         END IF
       ELSE
         IF ( LIW .LT.  4*N+4 ) THEN
           INFO(1)= -2002
           INFO(2) = LIW
-          RETURN
+          GOTO 90 
         END IF
       ENDIF
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
@@ -136,36 +160,37 @@ C
       IF (IORD.NE.1 .AND. IORD .NE. 5) THEN
         IORD = 0
         IF (NOSUPERVAR) THEN
-          CALL DMUMPS_ANA_G1_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+          CALL DMUMPS_ANA_G1_ELT(N, NZ8, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              PTRAR(1,2), IW(L1))
+     &              IWtemp(1,2), IW(L1))
         ELSE
-         CALL DMUMPS_ANA_G11_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+         CALL DMUMPS_ANA_G11_ELT(N, NZ8, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              PTRAR(1,2), 4*N+4, IW(L1))
+     &              IWtemp(1,2), 4*N+4, IW(L1))
         ENDIF
-        LLIW = max(NZ,N)
-        ALLOCATE( IW2(LLIW), stat = allocok )
+        LLIW8 = max(NZ8,int(N,8))
+        ALLOCATE( IW2(LLIW8), stat = allocok )
         IF (allocok.GT.0) THEN
           INFO(1) = -7
-          INFO(2) = LLIW
-          RETURN
+          CALL MUMPS_SET_IERROR(LLIW8, INFO(2))
+          GOTO 90 
         ENDIF
         IF (NOSUPERVAR) THEN
-         CALL DMUMPS_ANA_G2_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+         CALL DMUMPS_ANA_G2_ELT(N, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              IW2, LLIW, PTRAR, PTRAR(1,2),
-     &              IW(L1), IWFR)
+     &              IW2, LLIW8, IPE8, IWtemp(1,2),
+     &              IW(L1), IWFR8)
         ELSE
-         CALL DMUMPS_ANA_G12_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+         CALL DMUMPS_ANA_G12_ELT(N, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              IW2, LLIW, PTRAR, PTRAR(1,2),
-     &              IW(L1), IWFR)
+     &              IW2, LLIW8, IPE8, IWtemp(1,2),
+     &              IW(L1), IWFR8)
         ENDIF
         IF (NOSUPERVAR) THEN
-         CALL MUMPS_HAMD(N, LLIW, PTRAR, IWFR, PTRAR(1,2), IW2,
+         CALL MUMPS_HAMD(N, LLIW8, IPE8, IWFR8, IWtemp(1,2), IW2,
      &   IW(L1), IKEEP,
-     &   IKEEP(1,2), NCMPA, FILS, IKEEP(1,3), IW(L2), PTRAR(1,3),
+     &   IKEEP(1,2), NCMPA, FILS, IKEEP(1,3), IW(L2), IWtemp(1,3),
+     &   IWtemp,
      &   LISTVAR_SCHUR, SIZE_SCHUR)
          IF (KEEP(60) == 1) THEN
            KEEP(20) = LISTVAR_SCHUR(1)
@@ -176,9 +201,10 @@ C
            CALL MUMPS_ABORT()
          ENDIF
         ELSE
-         CALL MUMPS_AMD_ELT(N, LLIW, PTRAR, IWFR, PTRAR(1,2), IW2, 
+         CALL MUMPS_AMD_ELT(N, LLIW8, IPE8, IWFR8, IWtemp(1,2), IW2, 
      &   IW(L1), IKEEP, 
-     &   IKEEP(1,2), NCMPA, FILS, IKEEP(1,3), IW(L2), PTRAR(1,3))
+     &   IKEEP(1,2), NCMPA, FILS, IKEEP(1,3), IW(L2), IWtemp(1,3),
+     &   IWtemp)
         ENDIF
       ELSE
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
@@ -186,20 +212,20 @@ C
          IF (PROK) THEN
           WRITE(MPRINT,'(A)') ' Ordering based on METIS'
          ENDIF
-         CALL DMUMPS_ANA_G1_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+         CALL DMUMPS_ANA_G1_ELT(N, NZ8, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              PTRAR(1,2), IW(L1))
-         LLIW = max(NZ,N)
-         ALLOCATE( IW2(LLIW), stat = allocok )
+     &              IWtemp(1,2), IW(L1))
+         LLIW8 = max(NZ8,int(N,8))
+         ALLOCATE( IW2(LLIW8), stat = allocok )
          IF (allocok.GT.0) THEN
            INFO(1) = -7
-           INFO(2) = LLIW
-           RETURN
+           CALL MUMPS_SET_IERROR(LLIW8, INFO(2))
+           GOTO 90 
          ENDIF
-         CALL DMUMPS_ANA_G2_ELTNEW(N, NZ, NELT, ELTPTR(NELT+1)-1, 
+         CALL DMUMPS_ANA_G2_ELTNEW(N, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
-     &              IW2, LLIW, IW(L2), PTRAR(1,2),
-     &              IW(L1), IWFR)
+     &              IW2, LLIW8, IPE8, IWtemp(1,2),
+     &              IW(L1), IWFR8)
 #if defined(metis4) || defined(parmetis3)
          NUMFLAG = 1
          OPT_METIS_SIZE = 8
@@ -207,7 +233,7 @@ C
          IF ( IERR .GT. 0 ) THEN
             INFO( 1 ) = -7
             INFO( 2 ) = OPT_METIS_SIZE
-            RETURN
+            GOTO 90 
          ENDIF
          OPTIONS_METIS(1) = 0
 #else
@@ -215,7 +241,7 @@ C
          IF ( IERR .GT. 0 ) THEN
             INFO( 1 ) = -7
             INFO( 2 ) = N
-            RETURN
+            GOTO 90 
          ENDIF
          DO I=1,N
             NUMFLAG(I) = 1
@@ -231,14 +257,38 @@ C
          CALL METIS_SETDEFAULTOPTIONS(OPTIONS_METIS)
          OPTIONS_METIS(18) = 1
 #endif
-         CALL METIS_NODEND(N, IW(L2), IW2(1),
+         CALL MUMPS_METIS_IDXSIZE(METIS_IDX_SIZE)
+         IF (KEEP(10).EQ.1.AND.METIS_IDX_SIZE.NE.64) THEN
+           INFO(1) = -52
+           INFO(2) = 1
+           GOTO 90
+         ENDIF
+         IF (METIS_IDX_SIZE .EQ. 32) THEN
+           CALL MUMPS_METIS_NODEND_MIXEDto32(N, IPE8, IW2(1),
 #if defined(metis4) || defined(parmetis3)
-     &        NUMFLAG,
+     &          NUMFLAG,
 #else
-     &        NUMFLAG(1),
+     &          NUMFLAG(1),
 #endif
-     &        OPTIONS_METIS,
-     &        IKEEP(1,2), IKEEP(1,1) )
+     &          OPTIONS_METIS, OPT_METIS_SIZE,
+     &          IKEEP(1,2), IKEEP(1,1), INFO(1), LP, LPOK)
+         ELSE IF (METIS_IDX_SIZE .EQ. 64) THEN
+           CALL MUMPS_METIS_NODEND_MIXEDto64(N, IPE8, IW2(1),
+#if defined(metis4) || defined(parmetis3)
+     &          NUMFLAG,
+#else
+     &          NUMFLAG(1),
+#endif
+     &          OPTIONS_METIS, OPT_METIS_SIZE,
+     &          IKEEP(1,2), IKEEP(1,1), INFO(1), 
+     &          LP, LPOK, KEEP(10) )
+         ELSE
+              WRITE(*,*)
+     &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
+     &        METIS_IDX_SIZE
+              CALL MUMPS_ABORT()
+         ENDIF
+         IF (INFO(1) .LT. 0) GOTO 90
          DEALLOCATE(IW2)
       ELSE IF (IORD.NE.1) THEN
           WRITE(*,*) IORD
@@ -258,20 +308,20 @@ C
           IW(L1+IKEEP(K,1)) = 1
          ENDIF
        ENDDO
-       CALL DMUMPS_ANA_J1_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1,
+       CALL DMUMPS_ANA_J1_ELT(N, NZ8, NELT, ELTPTR(NELT+1)-1,
      &             ELTPTR, ELTVAR, XNODEL, NODEL, 
-     &             IKEEP, PTRAR(1,2), IW(L1))
-       LLIW = NZ+N
-       ALLOCATE( IW2(LLIW), stat = allocok )
+     &             IKEEP, IWtemp(1,2), IW(L1))
+       LLIW8 = NZ8+int(N,8)
+       ALLOCATE( IW2(LLIW8), stat = allocok )
        IF (allocok.GT.0) THEN
          INFO(1) = -7
-         INFO(2) = LLIW
-         RETURN
+         CALL MUMPS_SET_IERROR(LLIW8,INFO(2))
+         GOTO 90 
        ENDIF
-       CALL DMUMPS_ANA_J2_ELT(N, NZ, NELT, ELTPTR(NELT+1)-1,
+       CALL DMUMPS_ANA_J2_ELT(N, NELT, ELTPTR(NELT+1)-1,
      &             ELTPTR, ELTVAR, XNODEL, NODEL, 
-     &             IKEEP, IW2, LLIW, PTRAR, PTRAR(1,2),
-     &             IW(L1), IWFR)
+     &             IKEEP, IW2, LLIW8, IPE8, IWtemp(1,2),
+     &             IW(L1), IWFR8)
        IF (KEEP(60) == 0) THEN
          ITEMP = 0 
        ELSE
@@ -285,19 +335,19 @@ C
            CALL MUMPS_ABORT()
          ENDIF
        ENDIF
-       CALL DMUMPS_ANA_K(N, PTRAR, IW2, LLIW, IWFR, IKEEP, 
+       CALL DMUMPS_ANA_K(N, IPE8, IW2, LLIW8, IWFR8, IKEEP, 
      &    IKEEP(1,2), IW(L1),
-     &    IW(L2), NCMPA, ITEMP)
+     &    IW(L2), NCMPA, ITEMP, IWtemp)
       ENDIF
 #if defined(OLDDFS)
-      CALL DMUMPS_ANA_L(N, PTRAR, IW(L1), IKEEP, IKEEP(1,2),
+      CALL DMUMPS_ANA_L(N, IWtemp, IW(L1), IKEEP, IKEEP(1,2),
      &     IKEEP(1,3),
-     &     NFSIZ, INFO(6), FILS, FRERE, PTRAR(1,3), NEMIN, KEEP(60))
+     &     NFSIZ, INFO(6), FILS, FRERE, IWtemp(1,3), NEMIN, KEEP(60))
 #else
-      CALL DMUMPS_ANA_LNEW(N, PTRAR, IW(L1), IKEEP, IKEEP(1,2),
+      CALL DMUMPS_ANA_LNEW(N, IWtemp, IW(L1), IKEEP, IKEEP(1,2),
      &     IKEEP(1,3),
-     &     NFSIZ, PTRAR(1,2), 
-     &     INFO(6), FILS, FRERE, PTRAR(1,3), NEMIN, 
+     &     NFSIZ, IWtemp(1,2), 
+     &     INFO(6), FILS, FRERE, IWtemp(1,3), NEMIN, 
      &     IW(L2),  KEEP(60), KEEP(20), KEEP(38),
      &     IW2,KEEP(104),IW(L2+N),KEEP(50),
      &     ICNTL(13), KEEP(37), NSLAVES, KEEP(250).EQ.1)
@@ -326,7 +376,7 @@ C
          FILS(IN) = -IFSON
       ENDIF
       CALL DMUMPS_ANA_M(IKEEP(1,2),
-     &  PTRAR(1,3), INFO(6),
+     &  IWtemp(1,3), INFO(6),
      &  INFO(5), KEEP(2),KEEP(50),
      &  KEEP(101), KEEP(108),KEEP(5),
      &  KEEP(6), KEEP(226), KEEP(253))
@@ -356,34 +406,47 @@ C
          CALL DMUMPS_CUTNODES(N, FRERE, FILS, NFSIZ,INFO(6),
      &                       NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                       MP, LDIAG, INFO(1), INFO(2))
-         IF (INFO(1).LT.0) RETURN
+         IF (INFO(1).LT.0) GOTO 90 
         ENDIF
        ENDIF
       ENDIF
-      SPLITROOT = ((ICNTL(13).GT.0) .AND. (NSLAVES.GE.ICNTL(13)))
+      SPLITROOT = ((ICNTL(13).GT.0 .AND. NSLAVES.GT.ICNTL(13)) .OR.
+     &     ICNTL(13).EQ.-1 )
+      IF (KEEP(53) .NE. 0) THEN
+         SPLITROOT = .TRUE.
+      ENDIF
+      SPLITROOT = (SPLITROOT.AND.( (KEEP(60).EQ.0) ))
       IF (SPLITROOT) THEN
          CALL DMUMPS_CUTNODES(N, FRERE, FILS, NFSIZ,INFO(6),
      &                    NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                    MP, LDIAG, INFO(1), INFO(2))
-         IF (INFO(1).LT.0) RETURN
+         IF (INFO(1).LT.0) GOTO 90 
+         IF ( KEEP(53) .NE. 0 ) THEN
+          CALL MUMPS_MAKE1ROOT( N, FRERE, FILS, NFSIZ, KEEP(20) )
+         ENDIF
       ENDIF
       IF (LDIAG.GT.2 .AND. MP.GT.0) THEN
-       K = min0(10,N)
-       IF (LDIAG.EQ.4) K = N
-       IF (K.GT.0) WRITE (MP,99997) (IKEEP(I,1),I=1,K)
-       IF (K.GT.0) WRITE (MP,99991) (IKEEP(I,2),I=1,K)
-       IF (K.GT.0) WRITE (MP,99990) (IKEEP(I,3),I=1,K)
-       IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
-       IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
-       IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
+         K = min0(10,N)
+         IF (LDIAG.EQ.4) K = N
+         IF (K.GT.0) WRITE (MP,99997) (IKEEP(I,1),I=1,K)
+         IF (K.GT.0) WRITE (MP,99991) (IKEEP(I,2),I=1,K)
+         IF (K.GT.0) WRITE (MP,99990) (IKEEP(I,3),I=1,K)
+         IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
+         IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
+         IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
       ENDIF
       GO TO 90
    40 INFO(1) = -4
       INFO(2) = K
-      IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99996) INFO(1)
-      IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99982) INFO(2)
    90 CONTINUE
-      DEALLOCATE(IW)
+      IF (INFO(1) .LT.0) THEN
+        IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99996) INFO(1)
+        IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99982) INFO(2)
+      ENDIF
+      IF (allocated(IW)) DEALLOCATE(IW)
+      IF (allocated(IPE8)) DEALLOCATE(IPE8)
+      IF (allocated(IW2)) DEALLOCATE(IW2)
+      IF (allocated(IWtemp)) DEALLOCATE(IWtemp)
       RETURN
 99999 FORMAT (/'Entering analysis phase with ...'/
      & '                N         NELT       LIW       INFO(1)'/,
@@ -467,7 +530,8 @@ C
      &  XELNOD, ELNOD, XNODEL, NODEL, 
      &  LEN, FLAG)
       IMPLICIT NONE
-      INTEGER N, NELT, NELNOD, NZ
+      INTEGER N, NELT, NELNOD
+      INTEGER(8), INTENT(OUT) :: NZ
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER LEN(N)
       INTEGER  XNODEL(N+1), NODEL(NELNOD),
@@ -490,26 +554,28 @@ C
           ENDDO
         ENDDO
       ENDDO
-      NZ = 0
+      NZ = 0_8
       DO I = 1,N
-        NZ = NZ + LEN(I)
+        NZ = NZ + int(LEN(I),8)
       ENDDO
       RETURN
       END SUBROUTINE DMUMPS_ANA_G1_ELT
-      SUBROUTINE DMUMPS_ANA_G2_ELTNEW(N, NZ, NELT, NELNOD,
+      SUBROUTINE DMUMPS_ANA_G2_ELTNEW(N, NELT, NELNOD,
      &  XELNOD, ELNOD, XNODEL, NODEL, 
      &  IW, LW, IPE, LEN, FLAG, IWFR)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD,LW,IWFR
+      INTEGER N,NELT,NELNOD
+      INTEGER(8), INTENT(IN) :: LW
+      INTEGER(8), INTENT(OUT) :: IWFR 
+      INTEGER(8), INTENT(OUT) :: IPE(N+1)
       INTEGER LEN(N)
-      INTEGER IPE(N+1)
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER  XNODEL(N+1), NODEL(NELNOD), 
      &          IW(LW), FLAG(N)
       INTEGER I,J,K1,K2,K3
-      IWFR = 1
+      IWFR = 1_8
       DO I = 1,N
-        IWFR = IWFR + LEN(I)
+        IWFR = IWFR + int(LEN(I),8)
           IPE(I) = IWFR
       ENDDO 
       IPE(N+1)=IPE(N)
@@ -533,24 +599,26 @@ C
       ENDDO
       RETURN
       END SUBROUTINE DMUMPS_ANA_G2_ELTNEW
-      SUBROUTINE DMUMPS_ANA_G2_ELT(N, NZ, NELT, NELNOD,
+      SUBROUTINE DMUMPS_ANA_G2_ELT(N, NELT, NELNOD,
      &  XELNOD, ELNOD, XNODEL, NODEL, 
      &  IW, LW, IPE, LEN, FLAG, IWFR)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD,LW,IWFR
+      INTEGER N,NELT,NELNOD
+      INTEGER(8), INTENT(IN) ::  LW
+      INTEGER(8), INTENT(OUT) :: IWFR 
+      INTEGER(8), INTENT(OUT) :: IPE(N)
       INTEGER LEN(N)
-      INTEGER IPE(N)
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER  XNODEL(N+1), NODEL(NELNOD), 
      &          IW(LW), FLAG(N)
       INTEGER I,J,K1,K2,K3
-      IWFR = 1
+      IWFR = 1_8
       DO I = 1,N
-        IWFR = IWFR + LEN(I)
+        IWFR = IWFR + int(LEN(I),8)
         IF (LEN(I).GT.0) THEN
           IPE(I) = IWFR
         ELSE
-          IPE(I) = 0
+          IPE(I) = 0_8
         ENDIF
       ENDDO 
       FLAG(1:N) = 0
@@ -561,9 +629,9 @@ C
             J = ELNOD(K3)
             IF ((J.GE.1) .AND. (J.LE.N)) THEN
               IF ((I.LT.J) .AND. (FLAG(J).NE.I)) THEN
-                IPE(I) = IPE(I) - 1
+                IPE(I) = IPE(I) - 1_8
                 IW(IPE(I)) = J
-                IPE(J) = IPE(J) - 1
+                IPE(J) = IPE(J) - 1_8
                 IW(IPE(J)) = I
                 FLAG(J) = I
               ENDIF
@@ -577,7 +645,8 @@ C
      & XELNOD, ELNOD, XNODEL, NODEL, 
      & PERM, LEN, FLAG)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD
+      INTEGER N,NELT,NELNOD
+      INTEGER(8), INTENT(OUT) :: NZ
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER PERM(N)
       INTEGER LEN(N)
@@ -601,29 +670,32 @@ C
           ENDDO
         ENDDO
       ENDDO
-      NZ = 0  
+      NZ = 0_8
       DO I = 1,N 
-        NZ = NZ + LEN(I)
+        NZ = NZ + int(LEN(I),8)
       ENDDO   
       RETURN  
       END SUBROUTINE DMUMPS_ANA_J1_ELT
-      SUBROUTINE DMUMPS_ANA_J2_ELT(N, NZ, NELT, NELNOD,
+      SUBROUTINE DMUMPS_ANA_J2_ELT(N, NELT, NELNOD,
      & XELNOD, ELNOD, XNODEL, NODEL, 
      & PERM, IW, LW, IPE, LEN, FLAG, IWFR)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD,LW,IWFR
+      INTEGER N,NELT,NELNOD
+      INTEGER(8), INTENT(IN) :: LW
+      INTEGER(8), INTENT(OUT) :: IWFR 
+      INTEGER(8), INTENT(OUT) :: IPE(N)
       INTEGER  XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER PERM(N)
-      INTEGER IPE(N), LEN(N)
+      INTEGER LEN(N)
       INTEGER XNODEL(N+1), NODEL(NELNOD), IW(LW), 
      &          FLAG(N)
       INTEGER I,J,K1,K2,K3
-      IWFR = 0
+      IWFR = 0_8
       DO I = 1,N
-        IWFR = IWFR + LEN(I) + 1
+        IWFR = IWFR + int(LEN(I) + 1,8)
         IPE(I) = IWFR 
       ENDDO
-      IWFR = IWFR + 1
+      IWFR = IWFR + 1_8
       FLAG(1:N) = 0
       DO I = 1,N
         DO K1 = XNODEL(I),XNODEL(I+1)-1
@@ -634,7 +706,7 @@ C
               IF ((I.NE.J) .AND. (FLAG(J).NE.I)) THEN
                 IF (PERM(J).GT.PERM(I)) THEN
                   IW(IPE(I)) = J
-                  IPE(I) = IPE(I) - 1
+                  IPE(I) = IPE(I) - 1_8
                   FLAG(J) = I
                 ENDIF
               ENDIF
@@ -643,30 +715,31 @@ C
         ENDDO
       ENDDO
       DO I = 1,N
-        J = IPE(I)
+        J = int(IPE(I))
         IW(J) = LEN(I)
-        IF (LEN(I).EQ.0) IPE(I) = 0
+        IF (LEN(I).EQ.0) IPE(I) = 0_8
       ENDDO
       RETURN
       END SUBROUTINE DMUMPS_ANA_J2_ELT
       SUBROUTINE DMUMPS_ANA_DIST_ELEMENTS( MYID, SLAVEF, N, 
-     &           PROCNODE, STEP, PTRAIW, PTRARW, 
+     &           PROCNODE, STEP, PTRAIW, PTRARW,
      &           NELT, FRTPTR, FRTELT, 
      &           KEEP,KEEP8, ICNTL, SYM )
       IMPLICIT NONE
       INTEGER MYID, SLAVEF, N, NELT, SYM
       INTEGER KEEP( 500 ), ICNTL( 40 )
       INTEGER(8) KEEP8(150)
-      INTEGER PTRAIW( NELT+1 ), PTRARW( NELT+1 )
+      INTEGER(8) :: PTRAIW( NELT+1 ), PTRARW( NELT+1 )
       INTEGER STEP( N )
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
       INTEGER PROCNODE( KEEP(28) )
       INTEGER MUMPS_TYPENODE, MUMPS_PROCNODE
       EXTERNAL MUMPS_TYPENODE, MUMPS_PROCNODE
-      INTEGER ELT, I, K, IPTRI, IPTRR, NVAR
+      INTEGER(8) :: IPTRI8, IPTRR8, NVAR8
+      INTEGER ELT, I, K
       INTEGER TYPE_PARALL, ITYPE, IRANK
       TYPE_PARALL = KEEP(46)
-      PTRAIW( 1:NELT ) = 0
+      PTRAIW( 1:NELT ) = 0_8
       DO I = 1, N
         IF (STEP(I).LT.0) CYCLE
         ITYPE = MUMPS_TYPENODE( PROCNODE(abs(STEP(I))), SLAVEF )
@@ -683,52 +756,52 @@ C
         ELSE 
         END IF
       END DO
-      IPTRI = 1
+      IPTRI8 = 1_8
       DO ELT = 1,NELT
-        NVAR = PTRAIW( ELT )
-        PTRAIW( ELT ) = IPTRI
-        IPTRI = IPTRI + NVAR
+        NVAR8 = PTRAIW( ELT )
+        PTRAIW( ELT ) = IPTRI8
+        IPTRI8 = IPTRI8 + NVAR8
       ENDDO
-      PTRAIW( NELT+1 ) = IPTRI
-      KEEP( 14 ) = IPTRI - 1
+      PTRAIW( NELT+1 ) = IPTRI8
+      KEEP8(27) = IPTRI8 - 1
       IF ( .TRUE. ) THEN  
         IF (SYM .EQ. 0) THEN
-          IPTRR = 1
+          IPTRR8 = 1_8
           DO ELT = 1,NELT
-            NVAR = PTRAIW( ELT+1 ) - PTRAIW( ELT )
-            PTRARW( ELT ) = IPTRR
-            IPTRR = IPTRR + NVAR*NVAR
+            NVAR8 = PTRAIW( ELT+1 ) - PTRAIW( ELT )
+            PTRARW( ELT ) = IPTRR8
+            IPTRR8 = IPTRR8 + NVAR8*NVAR8
           ENDDO
-          PTRARW( NELT+1 ) = IPTRR
+          PTRARW( NELT+1 ) = IPTRR8
         ELSE
-          IPTRR = 1
+          IPTRR8 = 1_8
           DO ELT = 1,NELT
-            NVAR = PTRAIW( ELT+1 ) - PTRAIW( ELT )
-            PTRARW( ELT ) = IPTRR
-            IPTRR = IPTRR + (NVAR*(NVAR+1))/2
+            NVAR8 = PTRAIW( ELT+1 ) - PTRAIW( ELT )
+            PTRARW( ELT ) = IPTRR8
+            IPTRR8 = IPTRR8 + (NVAR8*(NVAR8+1))/2
           ENDDO
-          PTRARW( NELT+1 ) = IPTRR
+          PTRARW( NELT+1 ) = IPTRR8
         ENDIF
       ELSE
         IF (SYM .EQ. 0) THEN
-          IPTRR = 1
+          IPTRR8 = 1_8
           DO ELT = 1,NELT
-            NVAR = PTRARW( ELT+1 ) - PTRARW( ELT )
-            PTRARW( ELT ) = IPTRR
-            IPTRR = IPTRR + NVAR*NVAR 
+            NVAR8 = PTRARW( ELT+1 ) - PTRARW( ELT )
+            PTRARW( ELT ) = IPTRR8
+            IPTRR8 = IPTRR8 + NVAR8*NVAR8
           ENDDO
-          PTRARW( NELT+1 ) = IPTRR
+          PTRARW( NELT+1 ) = IPTRR8
         ELSE
-          IPTRR = 1
+          IPTRR8 = 1_8
           DO ELT = 1,NELT
-            NVAR = PTRARW( ELT+1 ) - PTRARW( ELT )
-            PTRARW( ELT ) = IPTRR
-            IPTRR = IPTRR + (NVAR*(NVAR+1))/2  
+            NVAR8 = PTRARW( ELT+1 ) - PTRARW( ELT )
+            PTRARW( ELT ) = IPTRR8
+            IPTRR8 = IPTRR8 + (NVAR8*(NVAR8+1))/2  
           ENDDO 
-          PTRARW( NELT+1 ) = IPTRR
+          PTRARW( NELT+1 ) = IPTRR8
         ENDIF
       ENDIF 
-      KEEP( 13 ) = IPTRR - 1
+      KEEP8(26) = IPTRR8 - 1_8
       RETURN
       END SUBROUTINE DMUMPS_ANA_DIST_ELEMENTS
       SUBROUTINE DMUMPS_ELTPROC( N, NELT, ELTPROC, SLAVEF, PROCNODE )
@@ -757,10 +830,10 @@ C
       SUBROUTINE DMUMPS_FRTELT(N, NELT, NELNOD, FRERE, FILS, NA, NE,
      &           XNODEL, NODEL, FRTPTR, FRTELT, ELTNOD) 
       IMPLICIT NONE
-      INTEGER  N, NELT, NELNOD
-      INTEGER  FRERE(N), FILS(N), NA(N), NE(N)
-      INTEGER  FRTPTR(N+1), FRTELT(NELT), ELTNOD(NELT)
-      INTEGER  XNODEL(N+1), NODEL(NELNOD) 
+      INTEGER, INTENT(IN) :: N, NELT, NELNOD
+      INTEGER, INTENT(IN) :: FRERE(N), FILS(N), NA(N), NE(N)
+      INTEGER, INTENT(OUT):: FRTPTR(N+1), FRTELT(NELT), ELTNOD(NELT)
+      INTEGER, INTENT(IN) :: XNODEL(N+1), NODEL(NELNOD) 
       INTEGER, DIMENSION(:), ALLOCATABLE :: TNSTK, IPOOL
       INTEGER I, K, IFATH, allocok
       INTEGER INODE, LEAF, NBLEAF, NBROOT, III, IN
@@ -879,7 +952,8 @@ C
      &  XELNOD, ELNOD, XNODEL, NODEL, 
      &  LEN, LW, IW)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD,LW
+      INTEGER N,NELT,NELNOD,LW
+      INTEGER(8), INTENT(OUT) :: NZ
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER LEN(N)
       INTEGER XNODEL(N+1), NODEL(NELNOD),
@@ -906,7 +980,7 @@ C
         ENDIF
       ENDDO
       IW(N+1:2*N) = 0
-      NZ = 0
+      NZ = 0_8
       DO SUPVAR = 1,NSUP
         I = IW(SUPVAR)
         DO K1 = XNODEL(I),XNODEL(I+1)-1
@@ -923,28 +997,30 @@ C
             ENDIF
           ENDDO
         ENDDO
-        NZ = NZ + LEN(I)
+        NZ = NZ + int(LEN(I),8)
       ENDDO
       RETURN
       END SUBROUTINE DMUMPS_ANA_G11_ELT
-      SUBROUTINE DMUMPS_ANA_G12_ELT(N, NZ, NELT, NELNOD,
+      SUBROUTINE DMUMPS_ANA_G12_ELT(N, NELT, NELNOD,
      &  XELNOD, ELNOD, XNODEL, NODEL, 
      &  IW, LW, IPE, LEN, FLAG, IWFR)
       IMPLICIT NONE
-      INTEGER N,NZ,NELT,NELNOD,LW,IWFR
+      INTEGER N,NELT,NELNOD
+      INTEGER(8), INTENT(IN) :: LW
+      INTEGER(8), INTENT(OUT) :: IWFR 
+      INTEGER(8), INTENT(OUT) :: IPE(N)
       INTEGER XELNOD(NELT+1), ELNOD(NELNOD)
       INTEGER LEN(N)
-      INTEGER IPE(N)
       INTEGER XNODEL(N+1), NODEL(NELNOD),
      &          IW(LW), FLAG(N)
       INTEGER I,J,K1,K2,K3
-      IWFR = 1
+      IWFR = 1_8
       DO I = 1,N
         IF (LEN(I).GT.0) THEN
-          IWFR = IWFR + LEN(I)
+          IWFR = IWFR + int(LEN(I),8)
           IPE(I) = IWFR
         ELSE
-          IPE(I) = 0
+          IPE(I) = 0_8
         ENDIF
       ENDDO 
       FLAG(1:N) = 0

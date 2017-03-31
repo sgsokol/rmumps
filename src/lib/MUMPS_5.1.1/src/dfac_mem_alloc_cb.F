@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -27,7 +27,7 @@ C
       INTEGER(8) :: MIN_SPACE_IN_PLACE
       INTEGER NODE_ARG, STATE_ARG
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
       INTEGER IW(LIW),PTRIST(KEEP(28))
       INTEGER STEP(N), PIMASTER(KEEP(28))
       INTEGER MYID, IXXP
@@ -170,6 +170,10 @@ C
       LRLU   = LRLU - LREQCB
       LRLUS  = LRLUS - LREQCB_EFF
       KEEP8(67) = min(LRLUS, KEEP8(67))
+      KEEP8(70) = KEEP8(70) - LREQCB_EFF
+      KEEP8(68) = min(KEEP8(70), KEEP8(68))
+      KEEP8(71) = KEEP8(71) - LREQCB_EFF 
+      KEEP8(69) = min(KEEP8(71), KEEP8(69))
 #if ! defined(OLD_LOAD_MECHANISM)
       CALL DMUMPS_LOAD_MEM_UPDATE(SSARBR,PROCESS_BANDE,
      &              LA-LRLUS,0_8,LREQCB_EFF,KEEP,KEEP8,LRLUS)

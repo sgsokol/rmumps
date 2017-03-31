@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -30,19 +30,22 @@ C ---------------------------------------------------------------------
 C
       IMPLICIT NONE
       INCLUDE 'mpif.h'
-      INTEGER NZ_loc, M, N, IWRKSZ, OP
+      INTEGER(8) NZ_loc
+      INTEGER IWRKSZ, ISZWRKRC
+      INTEGER M, N, OP
       INTEGER NUMPROCS, MYID, COMM
       INTEGER INTSZ, RESZ
       INTEGER IRN_loc(NZ_loc)
       INTEGER JCN_loc(NZ_loc)
       DOUBLE PRECISION A_loc(NZ_loc)
-      INTEGER RPARTVEC(M), RSNDRCVSZ(2*NUMPROCS)
-      INTEGER CPARTVEC(N), CSNDRCVSZ(2*NUMPROCS)
+      INTEGER RPARTVEC(M)
+      INTEGER RSNDRCVSZ(2*NUMPROCS)
+      INTEGER CPARTVEC(N) 
+      INTEGER CSNDRCVSZ(2*NUMPROCS)
       INTEGER IWRK(IWRKSZ)
       INTEGER REGISTRE(12)
       DOUBLE PRECISION ROWSCA(M)
       DOUBLE PRECISION COLSCA(N)
-      INTEGER ISZWRKRC
       DOUBLE PRECISION WRKRC(ISZWRKRC)
       DOUBLE PRECISION ONENORMERR,INFNORMERR
 C     LOCALS
@@ -56,7 +59,8 @@ C     EXTERNALS
 C     MUST HAVE IT
       INTEGER I
       IF(SYM.EQ.0) THEN
-         CALL DMUMPS_SIMSCALEABSUNS(IRN_loc, JCN_loc, A_loc, NZ_loc,
+         CALL DMUMPS_SIMSCALEABSUNS(IRN_loc, JCN_loc, A_loc, 
+     &        NZ_loc,
      &        M, N, NUMPROCS, MYID, COMM,
      &        RPARTVEC, CPARTVEC,
      &        RSNDRCVSZ, CSNDRCVSZ, REGISTRE,
@@ -66,7 +70,8 @@ C     MUST HAVE IT
      &        NB1, NB2, NB3, EPS,
      &        ONENORMERR, INFNORMERR)  
       ELSE
-         CALL DMUMPS_SIMSCALEABSSYM(IRN_loc, JCN_loc, A_loc, NZ_loc,
+         CALL DMUMPS_SIMSCALEABSSYM(IRN_loc, JCN_loc, A_loc, 
+     &        NZ_loc,
      &        N, NUMPROCS, MYID, COMM,
      &        RPARTVEC, 
      &        RSNDRCVSZ, REGISTRE,
@@ -104,7 +109,7 @@ C      CSNDRCVSZ: send recv sizes for col operations.
 C                 to be filled when OP=1
 C      REGISTRE:  to store some pointers (size etc)
 C      IWRK: working space. when OP=1 IWRKSZ.GE.4*MAXMN
-C            when OP=2 INTSZ portion is used. Donc, IWRKSZ>INTSZ 
+C            when OP=2 INTSZ portion is used. Thus, IWRKSZ>INTSZ 
 C            when OP=2
 C      IWRKSZ: size
 C      INTSZ: to be computed when OP=1, necessary integer space to run 
@@ -122,7 +127,7 @@ C           stores communication structure in IWRK (from the start).
 C
 C      ROWSCA: space for row scaling factor; has size M
 C      COLSCA: space for col scaling factor; has size N
-C      WRKRC: real working space. when OP=1, is not accessed. Donc, it
+C      WRKRC: real working space. when OP=1, is not accessed. Thus, it
 C             can be declared to be of size 1 at OP=1 call.
 C      ISZWRKRC: size
 C      SYM: is matrix symmetric
@@ -187,25 +192,28 @@ C     and was supported by ANR-SOLSTICE project (ANR-06-CIS6-010)
 C ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'mpif.h'
-      INTEGER NZ_loc, M, N, IWRKSZ, OP
+      INTEGER(8) NZ_loc
+      INTEGER IWRKSZ, INTSZ, ISZWRKRC
+      INTEGER M, N, OP
       INTEGER NUMPROCS, MYID, COMM
-      INTEGER INTSZ, RESZ
+      INTEGER RESZ
       INTEGER IRN_loc(NZ_loc)
       INTEGER JCN_loc(NZ_loc)
       DOUBLE PRECISION A_loc(NZ_loc)
-      INTEGER RPARTVEC(M), RSNDRCVSZ(2*NUMPROCS)
-      INTEGER CPARTVEC(N), CSNDRCVSZ(2*NUMPROCS)
-      INTEGER IWRK(IWRKSZ)
+      INTEGER RPARTVEC(M) 
+      INTEGER CPARTVEC(N) 
+      INTEGER RSNDRCVSZ(2*NUMPROCS)
+      INTEGER CSNDRCVSZ(2*NUMPROCS)
       INTEGER REGISTRE(12)
+      INTEGER IWRK(IWRKSZ)
       DOUBLE PRECISION ROWSCA(M)
       DOUBLE PRECISION COLSCA(N)
-      INTEGER ISZWRKRC
       DOUBLE PRECISION WRKRC(ISZWRKRC)  
       DOUBLE PRECISION ONENORMERR,INFNORMERR
 C     LOCALS
       INTEGER IRSNDRCVNUM, ORSNDRCVNUM
-      INTEGER IRSNDRCVVOL, ORSNDRCVVOL
       INTEGER ICSNDRCVNUM, OCSNDRCVNUM
+      INTEGER IRSNDRCVVOL, ORSNDRCVVOL
       INTEGER ICSNDRCVVOL, OCSNDRCVVOL
       INTEGER  INUMMYR, INUMMYC
 C IMPORTANT POINTERS
@@ -221,7 +229,8 @@ C     FOR the scaling phase
       INTEGER NB1, NB2, NB3
       DOUBLE PRECISION EPS
 C     Iteration vars 
-      INTEGER ITER, NZIND, IR, IC
+      INTEGER ITER, IR, IC
+      INTEGER(8) :: NZIND
       DOUBLE PRECISION ELM
 C     COMM TAGS....
       INTEGER TAG_COMM_COL
@@ -306,12 +315,12 @@ C     Compute sndrcv sizes, store them for later use
 C     NUMPROCS IS 1
              IRSNDRCVNUM = 0
              ORSNDRCVNUM = 0
-             IRSNDRCVVOL = 0 
+             IRSNDRCVVOL = 0
              ORSNDRCVVOL = 0
              INUMMYR = 0
-             ICSNDRCVNUM  = 0 
+             ICSNDRCVNUM  = 0
              OCSNDRCVNUM  = 0
-             ICSNDRCVVOL = 0  
+             ICSNDRCVVOL = 0
              OCSNDRCVVOL  = 0
              INUMMYC = 0
              INTSZ = 0
@@ -466,7 +475,7 @@ C     CLEAR temporary Dr and Dc
              IF((ITER.LE.NB1).OR.(ITER > NB1+NB2)) THEN
 C     INF-NORM ITERATION
                 IF((ITER.EQ.1).OR.(OORANGEIND.EQ.1)) THEN
-                   DO NZIND=1,NZ_loc
+                   DO NZIND=1_8,NZ_loc
                       IR = IRN_loc(NZIND)
                       IC = JCN_loc(NZIND)
                       IF((IR.GE.1).AND.(IR.LE.M).AND.
@@ -585,7 +594,7 @@ C     get max of those two errors
 C     WE HAVE ITER.GT.NB1 AND ITER.LE.NB1+NB2. 
 C     ONE-NORM ITERATION
                IF((ITER .EQ.1).OR.(OORANGEIND.EQ.1))THEN
-                  DO NZIND=1,NZ_loc
+                  DO NZIND=1_8,NZ_loc
                      IR = IRN_loc(NZIND)
                      IC = JCN_loc(NZIND)
                      IF((IR.GE.1).AND.(IR.LE.M).AND.
@@ -828,7 +837,8 @@ C     and was supported by ANR-SOLSTICE project (ANR-06-CIS6-010)
 C ---------------------------------------------------------------------
       IMPLICIT NONE
       INCLUDE 'mpif.h'
-      INTEGER NZ_loc, N, IWRKSZ, OP
+      INTEGER(8) :: NZ_loc 
+      INTEGER N, IWRKSZ, OP
       INTEGER NUMPROCS, MYID, COMM
       INTEGER INTSZ, RESZ
       INTEGER IRN_loc(NZ_loc)
@@ -855,7 +865,8 @@ C     FOR the scaling phase
       INTEGER NB1, NB2, NB3
       DOUBLE PRECISION EPS
 C     Iteration vars 
-      INTEGER ITER, NZIND, IR, IC
+      INTEGER ITER, IR, IC
+      INTEGER(8) :: NZIND
       DOUBLE PRECISION ELM
 C     COMM TAGS....
       INTEGER TAG_COMM_ROW
@@ -902,7 +913,7 @@ C     IF(IWRKSZ.LT.2*MAXMN) THEN   ERROR....
      &           IWRK, IWRKSZ)
 C     
             CALL DMUMPS_NUMVOLSNDRCVSYM(MYID, NUMPROCS, N, PARTVEC,
-     &           NZ_loc, IRN_loc,JCN_loc, IRSNDRCVNUM,IRSNDRCVVOL,
+     &           NZ_loc, IRN_loc, JCN_loc, IRSNDRCVNUM,IRSNDRCVVOL,
      &           ORSNDRCVNUM, ORSNDRCVVOL,
      &           IWRK,IWRKSZ, 
      &           RSNDRCVSZ(1), RSNDRCVSZ(1+NUMPROCS), COMM)
@@ -1016,7 +1027,7 @@ C     CLEAR temporary Dr and Dc
              IF((ITER.LE.NB1).OR.(ITER > NB1+NB2)) THEN
 C     INF-NORM ITERATION
                 IF((ITER.EQ.1).OR.(OORANGEIND.EQ.1)) THEN
-                   DO NZIND=1,NZ_loc
+                   DO NZIND=1_8,NZ_loc
                       IR = IRN_loc(NZIND)
                       IC = JCN_loc(NZIND)
                       IF((IR.GE.1).AND.(IR.LE.N).AND.
@@ -1033,7 +1044,7 @@ C     INF-NORM ITERATION
                       ENDIF
                    ENDDO
                 ELSEIF(OORANGEIND.EQ.0) THEN
-                   DO NZIND=1,NZ_loc
+                   DO NZIND=1_8,NZ_loc
                       IR = IRN_loc(NZIND)
                       IC = JCN_loc(NZIND)
                       ELM = abs(A_loc(NZIND))*SCA(IR)*SCA(IC)
@@ -1101,7 +1112,7 @@ C     SINGLE PROCESSOR CASE: INF-NORM ERROR COMPUTATION
 C     WE HAVE ITER.GT.NB1 AND ITER.LE.NB1+NB2. 
 C     ONE-NORM ITERATION
                IF((ITER.EQ.1).OR.(OORANGEIND.EQ.1))THEN
-                  DO NZIND=1,NZ_loc
+                  DO NZIND=1_8,NZ_loc
                      IR = IRN_loc(NZIND)
                      IC = JCN_loc(NZIND)
                      IF((IR.GE.1).AND.(IR.LE.N).AND.
@@ -1117,7 +1128,7 @@ C     ONE-NORM ITERATION
                      ENDIF
                   ENDDO
                ELSEIF(OORANGEIND.EQ.0)THEN
-                  DO NZIND=1,NZ_loc
+                  DO NZIND=1_8,NZ_loc
                      IR = IRN_loc(NZIND)
                      IC = JCN_loc(NZIND)
                      ELM = abs(A_loc(NZIND))*SCA(IR)*SCA(IC)

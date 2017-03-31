@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -41,6 +41,7 @@ C
          FDBD_ARRAY(I)%LBUFR=-9999
          NULLIFY(FDBD_ARRAY(I)%BUFR)
        ENDDO
+       INODE_WAITED_FOR = -1
        RETURN
        END SUBROUTINE MUMPS_FDBD_INIT
        FUNCTION MUMPS_FDBD_IS_DESCBAND_STORED( INODE, IWHANDLER )

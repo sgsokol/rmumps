@@ -1,6 +1,6 @@
 #
-#  This file is part of MUMPS 5.0.1, released
-#  on Thu Jul 23 17:08:29 UTC 2015
+#  This file is part of MUMPS 5.1.1, released
+#  on Mon Mar 20 14:34:33 UTC 2017
 #
 all: libmpiseq
 
@@ -14,7 +14,7 @@ libmpiseq$(PLAT)$(LIBEXT): mpi.o mpic.o elapse.o
 	$(AR)$@ mpi.o mpic.o elapse.o
 	$(RANLIB) $@
 .f.o:
-	$(FC) $(OPTF) -w  -c $*.f $(OUTF)$*.o
+	$(FC) $(OPTF)              -c $*.f $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(CDEFS) -I. -c $*.c $(OUTC)$*.o
 

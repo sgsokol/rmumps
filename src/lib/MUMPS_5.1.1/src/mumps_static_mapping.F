@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -11,6 +11,7 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       MODULE MUMPS_STATIC_MAPPING
+      USE MUMPS_LR_COMMON
       IMPLICIT NONE
       PRIVATE
       PUBLIC :: MUMPS_DISTRIBUTE, MUMPS_RETURN_CANDIDATES,
@@ -365,108 +366,6 @@ C
       istat=0
       return
       end subroutine MUMPS_ACCEPT_L0
-      subroutine MUMPS_AMALGAMATE_SONFATH(ifather,ison,istat)
-      implicit none
-      integer,intent(in)::ifather,ison
-      integer, intent(out)::istat
-      integer in,npiv_son,in_father,in_ison,bigbrother,oldest_son,
-     &        npiv,nfront
-      DOUBLE PRECISION costm,costw
-      character (len=48):: subname
-      istat=-1
-      subname='AMALGAMATE_SONFATH'
-      if((cv_frere(ison).eq.0).or.(cv_frere(ison).eq.cv_n+1)) return
-      in=ifather
-      do while (cv_fils(in).gt.0)
-         in=cv_fils(in)
-      end do
-      if (cv_fils(in).eq.0) return 
-      in_father=in 
-      in = -cv_fils(in)
-      if (in.eq.ison) then 
-         cv_fils(in_father)=ison
-         in=ison
-         do while (cv_fils(in).gt.0)
-            in=cv_fils(in)
-         end do
-         if (cv_fils(in).eq.0) then
-            if(cv_frere(ison).gt.0) then
-               cv_fils(in)=-cv_frere(ison)
-            end if
-            cv_frere(ison)=cv_n+1
-         else
-            in=-cv_fils(in)
-            do while(cv_frere(in).gt.0)
-               in=cv_frere(in)
-            end do
-            cv_frere(in)=cv_frere(ison)
-            cv_frere(ison)=cv_n+1
-         end if
-      else 
-         oldest_son=in
-         do while((cv_frere(in).ne.ison).and.(cv_frere(in).gt.0))
-            in=cv_frere(in)
-         end do
-         if (cv_frere(in).ne.ison) return
-         bigbrother=in
-         cv_fils(in_father)=ison
-         in=ison
-         do while (cv_fils(in).gt.0)
-            in=cv_fils(in)
-         end do
-         in_ison=in
-         if (cv_fils(in).eq.0) then
-            cv_frere(bigbrother)=cv_frere(ison)
-            cv_frere(ison)=cv_n+1
-            cv_fils(in_ison)=-oldest_son
-         else
-            in=-cv_fils(in_ison)
-            cv_frere(bigbrother)=in
-            do while(cv_frere(in).gt.0)
-               in=cv_frere(in)
-            end do
-            cv_frere(in)=cv_frere(ison)
-            cv_frere(ison)=cv_n+1
-            cv_fils(in_ison)=-oldest_son
-         end if
-      end if
-      cv_nsteps = cv_nsteps - 1
-      cv_ne(ifather)=cv_ne(ifather)+cv_ne(ison)-1
-      cv_ne(ison)=0
-      in=ison
-      npiv_son=0
-      do while (in.gt.0)
-         in=cv_fils(in)
-         npiv_son=npiv_son+1
-      end do
-      cv_nfsiz(ifather)=cv_nfsiz(ifather)+npiv_son
-      cv_nfsiz(ison)=0
-      cv_info(5)=max(cv_info(5),cv_nfsiz(ifather))
-      in=ifather
-      npiv=0
-      do while (in.gt.0)
-         in=cv_fils(in)
-         npiv=npiv+1
-      end do
-      nfront=cv_nfsiz(ifather)
-      call MUMPS_CALCNODECOSTS(npiv,nfront,costw,costm)
-      cv_ncostw(ifather)=costw
-      cv_ncostm(ifather)=costm
-      cv_ncostw(ison)=0.0D0
-      cv_ncostm(ison)=0.0D0
-      if(associated(cv_tcostw)) cv_tcostw(ison)=0.0D0
-      if(associated(cv_tcostm)) cv_tcostm(ison)=0.0D0
-      cv_total_amalg=cv_total_amalg+1
-      call MUMPS_PROPMAP4AMALG(ison,ifather,ierr)
-      if(ierr.ne.0) then
-         if(cv_lp.gt.0)
-     &   write(cv_lp,*)'PROPMAP4AMALG error in ',subname
-         istat = ierr
-         return
-      end if
-      istat = 0
-      return
-      end subroutine MUMPS_AMALGAMATE_SONFATH
       subroutine MUMPS_ARRANGEL0(map_strat,layerL0end,workload,memused,
      &                           procnode,istat,respect_prop)
       implicit none
@@ -646,6 +545,7 @@ C
       return
       end function MUMPS_BIT_GET
       function MUMPS_BIT_GET4PROC(inode,procnumber)
+!DEC$ NOOPTIMIZE
       implicit none
       integer, intent(in)::inode,procnumber
       logical :: MUMPS_BIT_GET4PROC
@@ -677,15 +577,14 @@ C
       subroutine MUMPS_CALCCOSTS(istat)
       implicit none
       integer,intent(out)::istat
-      integer i,ierr
+      integer i
       DOUBLE PRECISION :: maxcostw_root
-      character (len=48):: err_rep,subname
       istat = -1
-      subname='CALCCOSTS'
       if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
      &   then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:tcost must be allocated in ',subname
+     &        write(cv_lp,*)
+     &        'Error: tcost must be allocated in MUMPS_CALCCOSTS'
          return
       end if
       maxcostw_root = 0D0
@@ -696,15 +595,9 @@ C
             cv_tcostm(i)=0.0D0
             cv_ncostm(i)=0.0D0
          elseif (cv_frere(i).eq.0) then
-            err_rep='TREECOSTS'
             cv_depth(i)=1
-            call MUMPS_TREECOSTS(i,ierr)
+            call MUMPS_TREECOSTS(i)
             maxcostw_root = max(maxcostw_root,cv_tcostw(i))
-            if (ierr.ne.0) then
-          if(cv_lp.gt.0)
-     &    write(cv_lp,*)'Failure reported by ',err_rep, ' in ',subname
-               return
-            end if
          end if
       end do
       istat = 0
@@ -722,23 +615,190 @@ C
          costw = dble(0)
          costm = dble(1)
       else
-         if(cv_keep(50).eq.0) then
-            costw= 2.0D0*dble(nfront)*dble(npiv)*dble(nfront-npiv-1)
+         if((cv_keep(486).eq.1).and.(cv_keep(471).ge.0).and.
+     &     (npiv.ge.cv_keep(490)).and.(nfront.ge.cv_keep(491))) then
+           call MUMPS_CALCNODECOSTS_BLR(npiv, nfront, costw, costm,
+     &              cv_keep(471), cv_keep(472), cv_keep(475), 
+     &              cv_keep(488), cv_keep(50))
+         else
+           if(cv_keep(50).eq.0) then
+             costw= 2.0D0*dble(nfront)*dble(npiv)*dble(nfront-npiv-1)
      &      + dble(npiv)*dble(npiv+1)*dble(2*npiv+1)/dble(3)
      &           + dble(2*nfront-npiv-1) * dble(npiv) / dble(2)
-            costm= dble(npiv)*(dble(2*nfront)-dble(npiv))
-         else
-            costw= dble(npiv) *
+             costm= dble(npiv)*(dble(2*nfront)-dble(npiv))
+           else
+             costw= dble(npiv) *
      &            (dble(nfront)*dble(nfront)+dble(2*nfront) -
      &             dble(nfront+1) * dble(npiv+1) +
      &             dble(npiv+1) * dble(2*npiv+1) / dble(6))
-            costm= dble(npiv) * dble(nfront)
+             costm= dble(npiv) * dble(nfront)
+           end if
          end if
       end if
       if((costw.lt.0.0D0).or.(costm.lt.0.0D0)) then
       endif
       return
       end subroutine MUMPS_CALCNODECOSTS
+      SUBROUTINE MUMPS_CALCNODECOSTS_BLR(NPIV, NFRONT, COSTW, COSTM,
+     &                   K471, K472, K475, K488, SYM)
+        INTEGER, INTENT(IN) :: NPIV, NFRONT, SYM, K471, K472, K475, K488
+        DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
+        INTEGER :: IBCKSZ
+        DOUBLE PRECISION :: B,R,M,N
+        M = DBLE(NPIV)
+        N = DBLE(NFRONT)
+        CALL COMPUTE_BLR_VCS(K472, IBCKSZ, K488, NPIV) 
+        B = DBLE(IBCKSZ)
+        B = MIN(B,M)
+        IF (K471.EQ.0) THEN
+          R = 1.0D0
+        ELSEIF (K471.EQ.1) THEN
+          R = SQRT(DBLE(N))
+        ELSE
+          WRITE(*,*) 'Internal error in MUMPS_CALCNODECOSTS_BLR', K471
+          CALL MUMPS_ABORT()
+        ENDIF
+        R = MIN(R,B/2)
+        IF (SYM.EQ.0) THEN
+          COSTW = M/B * B*(B+1.0D0)*(2.0D0*B+1.0D0)/3.0D0
+          IF (K475.EQ.0) THEN
+            COSTW = COSTW + 2.0D0*M/(B*B)*(N-(M+B)/2.0D0) * B*B*B
+          ELSEIF (K475.EQ.1) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*(R+B)
+          ELSEIF (K475.EQ.2) THEN
+            COSTW = COSTW + M/(B*B)*(2.0D0*N-3.0D0*M-2.0D0*B) * B*B*R
+     &                    + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*B
+          ELSEIF (K475.EQ.3) THEN
+            COSTW = COSTW + 2.0D0*M/(B*B)*(N-(M+B)/2.0D0) * B*B*R
+          ENDIF
+          COSTW = COSTW + 2.0D0*M/(B*B)*(N-(M+B)/2.0D0) * 2.0D0*B*B*R
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                  (N-M)*(N-M)*M/(B*B*B) 
+     &                + (N-M)/B*(M/B-1.0D0)*M/B 
+     &                + (M/B-1.0D0)*M/B*(2.0D0*M/B-1.0D0)/6.0D0 
+     &       )     
+          COSTM = M*(2.0D0*N-M)/(B*B) * 2.0D0*B*R
+        ELSE
+          COSTW = M/B * B*(B+1.0D0)*(2.0D0*B+1.0D0)/6.0D0
+          IF (K475.EQ.0.OR.K475.EQ.1) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*B
+          ELSEIF (K475.EQ.2) THEN
+            COSTW = COSTW + (N-M)*M/(B*B) * B*B*R
+     &                    + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*B
+          ELSEIF (K475.EQ.3) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*R
+          ENDIF
+          COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * 2.0D0*B*B*R
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                      (N-M)*(N-M)*M/(B*B*B)/2.0D0 
+     &                    + (N-M)/B*(M/B-1.0D0)*M/B/2.0D0 
+     &                    + (M/B-1.0D0)*M/B*(M/B+1.0D0)/6.0D0 
+     &       )     
+          COSTM = M*N/(B*B) * 2.0D0*B*R
+        ENDIF
+      END SUBROUTINE MUMPS_CALCNODECOSTS_BLR
+      SUBROUTINE MUMPS_COSTS_BLR_T2_MASTER(NPIV, NFRONT, 
+     &                   COSTW, COSTM, K471, K472, K475, K488, SYM)
+        INTEGER, INTENT(IN) :: NPIV, NFRONT, SYM, K471, K472, K475, K488
+        DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
+        INTEGER :: IBCKSZ
+        DOUBLE PRECISION :: B,R,M,N
+        M = DBLE(NPIV)
+        N = DBLE(NFRONT)
+        CALL COMPUTE_BLR_VCS(K472, IBCKSZ, K488, NPIV) 
+        B = DBLE(IBCKSZ)
+        B = MIN(B,M)
+        IF (K471.EQ.0) THEN
+          R = 1.0D0
+        ELSEIF (K471.EQ.1) THEN
+          R = SQRT(DBLE(N))
+        ELSE
+          WRITE(*,*) 'Internal error in ',
+     &       'MUMPS_COSTS_BLR_T2_MASTER', K471
+          CALL MUMPS_ABORT()
+        ENDIF
+        R = MIN(R,B/2)
+        IF (SYM.EQ.0) THEN
+          COSTW = M/B * B*(B+1.0D0)*(2.0D0*B+1.0D0)/3.0D0
+          IF (K475.EQ.0) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*B 
+     &                + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*B 
+          ELSEIF (K475.EQ.1) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*B 
+     &                + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*R 
+          ELSEIF (K475.EQ.2) THEN
+            COSTW = COSTW + M/(B*B)*(N-M) * B*B*R 
+     &                + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*(B+R)
+          ELSEIF (K475.EQ.3) THEN
+            COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * B*B*R 
+     &                + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*R 
+          ENDIF
+          COSTW = COSTW + M/(B*B)*(N-(M+B)/2.0D0) * 2.0D0*B*B*R 
+     &              + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * 2.0D0*B*B*R 
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                   (N-M)/B*(M/B-1.0D0)*M/B/2.0D0 
+     &                 + (M/B-1.0D0)*M/B*(2.0D0*M/B-1.0D0)/6.0D0 
+     &       )     
+          COSTM = M*N/(B*B) * 2.0D0*B*R
+        ELSE
+          COSTW = M/B * B*(B+1.0D0)*(2.0D0*B+1.0D0)/6.0D0
+          IF (K475.LE.2) THEN
+            COSTW = COSTW + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*B
+          ELSEIF (K475.EQ.3) THEN
+            COSTW = COSTW + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 * B*B*R
+          ENDIF
+          COSTW = COSTW + (M/B-1.0D0)*M/B*(M/B-1.0D0)/6.0D0 
+     &                       * 2.0D0*B*B*R 
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                   (M/B-1.0D0)*M/B*(M/B+1.0D0)/6.0D0 
+     &       )     
+          COSTM = M*M/(B*B) * 2.0D0*B*R
+        ENDIF
+      END SUBROUTINE MUMPS_COSTS_BLR_T2_MASTER
+      SUBROUTINE MUMPS_COSTS_BLR_T2_SLAVE(NPIV, NFRONT, 
+     &                NROW, COSTW, COSTM, K471, K472, K475, K488, SYM)
+        INTEGER, INTENT(IN) :: NPIV, NFRONT, SYM, K471, K472, 
+     &                         K475, K488
+        DOUBLE PRECISION, INTENT(IN) :: NROW
+        DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
+        INTEGER :: IBCKSZ
+        DOUBLE PRECISION :: B,R,M,N,P
+        M = NROW
+        N = DBLE(NFRONT)
+        P = DBLE(NPIV)
+        CALL COMPUTE_BLR_VCS(K472, IBCKSZ, K488, NPIV) 
+        B = DBLE(IBCKSZ)
+        B = MIN(B,M)
+        IF (K471.EQ.0) THEN
+          R = 1.0D0
+        ELSEIF (K471.EQ.1) THEN
+          R = SQRT(DBLE(N))
+        ELSE
+          WRITE(*,*) 'Internal error in ',
+     &       'MUMPS_COSTS_BLR_T2_SLAVE', K471
+          CALL MUMPS_ABORT()
+        ENDIF
+        R = MIN(R,B/2)
+        COSTW = 0.0D0
+        IF (K475.EQ.0) THEN
+          COSTW = COSTW + (M*P)/(B*B) * B*B*B 
+        ELSE 
+          COSTW = COSTW + (M*P)/(B*B) * B*B*R 
+        ENDIF
+        COSTW = COSTW + (M*P)/(B*B) * 2.0D0*B*B*R
+        IF (SYM.EQ.0) THEN
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                  M/B*(P/B-1.0D0)*P/B/2.0D0 
+     &                + (N-M)*M*P/(B*B*B) 
+     &       )     
+        ELSE
+          COSTW = COSTW + (4.0D0*B*R*R + 2.0D0*B*B*R) * (
+     &                  M/B*(P/B-1.0D0)*P/B/2.0D0 
+     &                + (N-M)*M*P/(B*B*B)/2.0D0 
+     &       )     
+        ENDIF
+        COSTM = M*P/(B*B) * 2.0D0*B*R
+      END SUBROUTINE MUMPS_COSTS_BLR_T2_SLAVE
       subroutine MUMPS_COSTS_LAYER_T2(layernmb,nmb_thislayer,istat)
       implicit none
       integer,intent(in)::layernmb,nmb_thislayer
@@ -798,10 +858,10 @@ C
               if (cv_keep(48).EQ.5) keep48_loc = 5
                min_needed = MUMPS_BLOC2_GET_NSLAVESMIN(
      &             cv_slavef, keep48_loc,cv_keep8(21),
-     &             cv_keep(50),nfront,ncb)
+     &             cv_keep(50),nfront,ncb, cv_keep(375))
                max_needed = MUMPS_BLOC2_GET_NSLAVESMAX(
      &             cv_slavef, keep48_loc,cv_keep8(21),
-     &             cv_keep(50),nfront,ncb)
+     &             cv_keep(50),nfront,ncb, cv_keep(375))
                if(cand_strat.eq.1) then
                   more_than_needed = 0
                elseif (cand_strat.eq.2) then
@@ -892,13 +952,14 @@ C
       DOUBLE PRECISION flop1,work_type2_thislayer,
      &        relative_weight,workmaster,nrow
       DOUBLE PRECISION save_ncostw, save_ncostm
-      LOGICAL SPLITNODE
+      LOGICAL SPLITNODE, BLRNODE
       intrinsic count,max
       character (len=48):: subname
       integer MUMPS_REG_GETKMAX, MUMPS_BLOC2_GET_NSLAVESMIN
       external MUMPS_REG_GETKMAX, MUMPS_BLOC2_GET_NSLAVESMIN
       istat=-1
       SPLITNODE=.FALSE.
+      BLRNODE=.FALSE.
       save_ncostw = 1.0D0
       save_ncostm = 1.0D0
       subname='COSTS_LAYER_T2PM'
@@ -950,7 +1011,7 @@ C
             if (cv_keep(48).EQ.5) keep48_loc = 5
             min_needed= MUMPS_BLOC2_GET_NSLAVESMIN
      &          (cv_slavef, keep48_loc,cv_keep8(21),
-     &           cv_keep(50),nfront,ncb)
+     &           cv_keep(50),nfront,ncb, cv_keep(375))
             if(min_needed.lt.1) then
                if(cv_lp.gt.0)
      &         write(cv_lp,*)'Error in ',subname,'.NEG min_needed'
@@ -1009,66 +1070,86 @@ C
             total_nmb_cand=min(total_nmb_cand,ncb)
             cv_layer_p2node(layernmb)%t2_cand(j,cv_slavef+1)
      &                                 = total_nmb_cand
-            if(cv_keep(50).eq.0) then
-               flop1=dble(2*npiv)*dble(nfront)-
+            BLRNODE = ((cv_keep(486).eq.1).and.(cv_keep(471).ge.0) .and.
+     &     (npiv.ge.cv_keep(490)).and.(nfront.ge.cv_keep(491))) 
+            IF (BLRNODE) THEN
+              call MUMPS_COSTS_BLR_T2_MASTER(npiv, nfront, 
+     &              cv_ncostw(inode), cv_ncostm(inode), 
+     &              cv_keep(471), cv_keep(472), cv_keep(475), 
+     &              cv_keep(488), cv_keep(50))
+            ELSE
+              if(cv_keep(50).eq.0) then
+                flop1=dble(2*npiv)*dble(nfront)-
      &              dble(npiv+nfront)*dble(npiv+1)
-               flop1= dble(npiv)*flop1 +
+                flop1= dble(npiv)*flop1 +
      &          dble(2 * npiv-npiv-1)*dble(npiv)/dble(2)+
      &          dble(npiv)*dble(npiv+1)*dble(2*npiv+1)/dble(3)
-            else
-               flop1=dble(npiv)*
+              else
+                flop1=dble(npiv)*
      &         ( dble(npiv)*dble(npiv)+dble(npiv)-
      &         dble(npiv*npiv+npiv+1) )+
      &         (dble(npiv)*dble(npiv+1)*dble(2*npiv+1))/dble(6)
-            endif
-            cv_ncostw(inode)=flop1
+              endif
+              cv_ncostw(inode)=flop1
+            ENDIF
             IF (SPLITNODE) THEN
              cv_layer_p2node(layernmb)%t2_candcostw(j)= 
      &       max(save_ncostw - cv_ncostw(inode), 1.0D0)
             ELSE
-             if(total_nmb_cand.gt.0) then
-               nrow = dble(max(min(dble(ncb)/dble(total_nmb_cand),
+              if(total_nmb_cand.gt.0) then
+                nrow = dble(max(min(dble(ncb)/dble(total_nmb_cand),
      &                     dble(kmax)),
      &                 dble(ncb)/dble(cv_slavef-1)))
-             elseif(cv_slavef.gt.1) then
-               nrow = dble(max(dble(kmax),
+              elseif(cv_slavef.gt.1) then
+                nrow = dble(max(dble(kmax),
      &                         dble(ncb)/dble(cv_slavef-1)))
-             else
-               nrow = dble(ncb)
-             endif
-             if(cv_keep(50).eq.0) then
-               flop1 = dble(npiv)*dble(nrow)+
+              else
+                nrow = dble(ncb)
+              endif
+              IF (BLRNODE) THEN
+                call MUMPS_COSTS_BLR_T2_SLAVE(npiv, nfront, 
+     &              nrow,           
+     &              cv_layer_p2node(layernmb)%t2_candcostw(j),
+     &              cv_layer_p2node(layernmb)%t2_candcostm(j),
+     &              cv_keep(471), cv_keep(472), cv_keep(475), 
+     &              cv_keep(488), cv_keep(50))
+              ELSE
+                if(cv_keep(50).eq.0) then
+                  flop1 = dble(npiv)*dble(nrow)+
      &                 dble(nrow)*dble(npiv)*dble(2*nfront-npiv-1)
-             else
-               ncol= nfront   
-               flop1 = dble(npiv)*dble(nrow)*
+                else
+                  ncol= nfront   
+                  flop1 = dble(npiv)*dble(nrow)*
      &          (dble(2*ncol)-dble(nrow)-dble(npiv)+dble(1))
-               workmaster = dble(npiv)*dble(npiv)*dble(npiv)/dble(3)
-               if (workmaster.gt.flop1) flop1=workmaster
-             endif
-             cv_layer_p2node(layernmb)%t2_candcostw(j)=flop1
+                  workmaster = dble(npiv)*dble(npiv)*dble(npiv)/dble(3)
+                  if (workmaster.gt.flop1) flop1=workmaster
+                endif
+                cv_layer_p2node(layernmb)%t2_candcostw(j)=flop1
+              ENDIF
             ENDIF
-            if(cv_keep(50).eq.0) then
-               cv_ncostm(inode)=dble(npiv)*dble(nfront)
-            else
-               cv_ncostm(inode)=dble(npiv)*dble(npiv)
-            endif
+            IF (.NOT.BLRNODE) THEN
+              if(cv_keep(50).eq.0) then
+                cv_ncostm(inode)=dble(npiv)*dble(nfront)
+              else
+                cv_ncostm(inode)=dble(npiv)*dble(npiv)
+              endif
+            ENDIF
             IF (SPLITNODE) THEN
-               cv_layer_p2node(layernmb)%t2_candcostm(j) = 
+              cv_layer_p2node(layernmb)%t2_candcostm(j) = 
      &          max(save_ncostm - cv_ncostm(inode), 1.0D0)
-            ELSE
-             if(cv_keep(50).eq.0) then
-               cv_layer_p2node(layernmb)%t2_candcostm(j)
+            ELSEIF (.NOT.BLRNODE) THEN
+              if(cv_keep(50).eq.0) then
+                cv_layer_p2node(layernmb)%t2_candcostm(j)
      &                                  =dble(npiv)*dble(nrow)
-             else
-               cv_layer_p2node(layernmb)%t2_candcostm(j)
+              else
+                cv_layer_p2node(layernmb)%t2_candcostm(j)
      &                                  =dble(npiv)*dble(nrow)
-             endif
-             ENDIF
-         end do
-      endif
-      istat=0
-      return
+              endif
+            ENDIF
+          end do
+        endif
+        istat=0
+        return
       end subroutine MUMPS_COSTS_LAYER_T2PM
       subroutine MUMPS_SPLIT_DURING_MAPPING(
      &     layernmb,thislayer,nmb_thislayer,
@@ -1165,8 +1246,8 @@ C
          endif
          err_rep='SPLITNODE_UPDATE'
          call MUMPS_SPLITNODE_UPDATE( inode, nfront, npiv, k1,
-     &        lnpivsplit, npivsplit, cv_keep, n,
-     &        cv_nfsiz, cv_ne, ierr)
+     &        lnpivsplit, npivsplit,
+     &        ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
      &      write(cv_lp,*)'Error reported by ',err_rep,
@@ -1190,7 +1271,7 @@ C
       integer,intent(out) ::k1,k3
       integer npiv2,nfront2,npiv_son2
       integer ncb,kmax,keep48_loc,nslaves_max,
-     &     nslaves_estim,strat,kk
+     &     nslaves_estim,strat,kk, blsize
       DOUBLE PRECISION wk_master,wk_master2,wk_slave2
       integer MUMPS_REG_GETKMAX,
      &     MUMPS_BLOC2_GET_NSLAVESMAX,
@@ -1228,19 +1309,23 @@ C
       endif
       if (cv_keep(48).EQ.5) keep48_loc = 5
       if(npropmap .gt. cv_keep(83)) then
+         blsize = cv_keep(420)
+         if (cv_keep(486).ne.0) then
+           blsize = max( cv_keep(488),cv_keep(420))
+         endif
          nslaves_max   = MUMPS_BLOC2_GET_NSLAVESMAX(
      &        cv_slavef, keep48_loc, cv_keep8(21),
      &        cv_keep(50), nfront, 
-     &        max(max(ncb,nfront-cv_keep(488)),1))
+     &        max(max(ncb,nfront-blsize),1), cv_keep(375))
          nslaves_estim = min(npropmap-1,nslaves_max)
          nslaves_estim = max(nslaves_estim,1)
       else
          nslaves_max   = MUMPS_BLOC2_GET_NSLAVESMAX(
      &        cv_slavef, keep48_loc, cv_keep8(21),
-     &        cv_keep(50), nfront, ncb )
+     &        cv_keep(50), nfront, ncb, cv_keep(375) )
          nslaves_estim = MUMPS_BLOC2_GET_NSLAVESMIN(
      &     cv_slavef, keep48_loc,cv_keep8(21),
-     &     cv_keep(50), nfront, ncb )
+     &     cv_keep(50), nfront, ncb, cv_keep(375) )
          nslaves_estim = max(nslaves_estim,1)
          nslaves_estim = min(nslaves_estim,nslaves_max)
       endif
@@ -1372,8 +1457,8 @@ C
       return
       end subroutine MUMPS_GET_MEMSPLIT_INKPART
       subroutine MUMPS_SPLITNODE_UPDATE(inode,nfront,npiv,k,
-     &     lnpivsplit, npivsplit, keep, n,
-     &     nfsiz, ne, istat)
+     &     lnpivsplit, npivsplit,
+     &     istat)
       implicit none
       integer, intent(in)::nfront,npiv
       integer, intent(in):: k
@@ -1381,9 +1466,6 @@ C
       integer, intent(in)::npivsplit(lnpivsplit)
       integer, intent(in):: inode
       integer, intent(out)::istat
-      integer, intent(inout):: keep(150)
-      integer, intent(in)  :: n
-      integer, intent(inout):: nfsiz(n), ne(n)
       integer lev,npiv_father,
      &     npiv_son,nfrontk,npivk,next_father
       DOUBLE PRECISION:: ncostm,ncostw,ncostm_ison,ncostw_ison,
@@ -1412,8 +1494,6 @@ C
          next_father = -frere(ifather)
          npiv_son=   abs(npivsplit(lev))
          npiv_father=abs(npivsplit(lev+1))
-         nfsiz(ison)=nfrontk  
-         nfsiz(ifather)=nfrontk-npiv_son
          call MUMPS_CALCNODECOSTS(npiv_father,nfrontk-npiv_son,
      &        ncostw_ifather,ncostm_ifather)
          cv_ncostw(ifather)=ncostw_ifather
@@ -2637,26 +2717,6 @@ C
       enddo
       return
       end subroutine MUMPS_MAPSUBTREE
-      subroutine MUMPS_MAX_TCOST_L0(map_strat,inode,istat)
-      implicit none
-      integer, intent(in)::map_strat
-      integer,intent(out)::inode,istat
-      character (len=48):: subname
-      subname='MAX_TCOST_L0'
-      inode=-1
-      istat=-1
-      if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
-     &   then
-         if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:tcost must be allocated in ',subname
-         return
-      end if
-      if((map_strat.ne.cv_equilib_flops).and.
-     &   (map_strat.ne.cv_equilib_mem)) return
-      inode=cv_layerl0_array(cv_layerl0_start)
-      istat=0
-      return
-      end subroutine MUMPS_MAX_TCOST_L0
       subroutine MUMPS_POSTPROCESS_MEM()
       implicit none
       integer candid,inode,index,i,j,layernmb,master,nmbcand,swapper,
@@ -3410,7 +3470,7 @@ C
      &              MUMPS_BLOC2_GET_NSLAVESMIN
      &              (cv_slavef, keep48_loc,cv_keep8(21),
      &              cv_keep(50),
-     &              nfront,ncb)
+     &              nfront,ncb, cv_keep(375))
                min_cand_needed=min(cv_slavef,min_cand_needed+1)
             else
                min_cand_needed = 0
@@ -3557,24 +3617,6 @@ C
       istat =0
       return
       end subroutine MUMPS_PROPMAP_TERM
-      subroutine MUMPS_PROPMAP4AMALG(ison,ifather,istat)
-      implicit none
-      integer,intent(in)::ison,ifather
-      integer,intent(out)::istat
-      character (len=48):: subname
-      istat= -1
-      subname='PROPMAP4AMALG'
-      call MUMPS_PROPMAP_TERM(ison,ierr)
-      if(ierr.ne.0) then
-         if(cv_lp.gt.0)
-     &        write(cv_lp,*)'PROPMAP_TERM signalled error in ',
-     &        subname
-         istat = ierr
-         return
-      end if
-      istat = 0
-      return
-      end subroutine MUMPS_PROPMAP4AMALG
       subroutine MUMPS_PROPMAP4SPLIT(inode,ifather,istat)
       implicit none
       integer,intent(in)::inode,ifather
@@ -3966,20 +4008,13 @@ C
       istat=0
       return
       end subroutine MUMPS_TERMGLOB
-      recursive subroutine MUMPS_TREECOSTS(pos,istat)
+      recursive subroutine MUMPS_TREECOSTS(pos)
       implicit none
       integer,intent(in)::pos
-      integer, intent(out)::istat
-      integer i,nfront,npiv,nextpos,ierr
-      DOUBLE PRECISION costw,costm
-      character (len=48):: subname
-      istat=-1
-      subname='TREECOSTS'
+      integer i,nfront,npiv,nextpos
       if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
      &   then
-         if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:tcost must be allocated in ',subname
-         return
+         call MUMPS_ABORT()
       end if
       nfront=cv_nfsiz(pos)
       npiv=1
@@ -3992,9 +4027,10 @@ C
             nextpos=cv_fils(nextpos)
          end if
       end do
-      call MUMPS_CALCNODECOSTS(npiv,nfront,costw,costm)
-      cv_ncostw(pos)=costw
-      cv_ncostm(pos)=costm
+      call MUMPS_CALCNODECOSTS(npiv,nfront,
+     &     cv_ncostw(pos), cv_ncostm(pos))
+      cv_tcostw(pos)=cv_ncostw(pos)
+      cv_tcostm(pos)=cv_ncostm(pos)
       if (cv_ne(pos).ne.0) then
          nextpos=cv_fils(pos)
          do while(nextpos.gt.0)
@@ -4003,20 +4039,13 @@ C
          nextpos=-nextpos
          do i=1,cv_ne(pos)
             cv_depth(nextpos)=cv_depth(pos)+1
-            call MUMPS_TREECOSTS(nextpos,ierr)
-            if (ierr.ne.0) then
-               if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Failure in recursive call to ',subname
-               return
-            end if
-            costw=costw+cv_tcostw(nextpos)
-            costm=costm+cv_tcostm(nextpos)
+            call MUMPS_TREECOSTS(nextpos)
+            cv_tcostw(pos)=cv_tcostw(pos)+cv_tcostw(nextpos)
+            cv_tcostm(pos)=cv_tcostm(pos)+cv_tcostm(nextpos)
             nextpos=cv_frere(nextpos)
          end do
       endif
-      cv_tcostw(pos) = costw
-      cv_tcostm(pos) = costm
-      istat = 0
+      return
       end subroutine MUMPS_TREECOSTS
       recursive subroutine MUMPS_TYPEINSSARBR(inode)
       implicit none

@@ -2,6 +2,72 @@
 = ChangeLog =
 -------------
 
+Changes from 5.1.0 to 5.1.1
+* Suppressed an occasional debug trace "write(6,*) " KEEP265= ", KEEP265"
+* Corrected an incorrect deallocation of POSINRHSCOMP_COL introduced in 5.1.0
+* Improved stability of Block-Low-Rank feature
+* Fix in parallel analysis
+* Correction of a case of uninitialized data access in type 2 pivoting
+
+Changes from 5.0.2 to 5.1.0
+* New feature: selective 64-bit integers (introduced only where needed)
+  to process matrices with more than 2^{31}-1 entries.
+   -mixed 32/64 bit integers for API: NNZ/NNZ_loc 64-bit
+    (NZ/NZ_LOC kept temporarily for backward compatibility)
+   - both 32 or 64 bit integer versions of external orderings 
+    (Metis/ParMetis, SCOTCH/pt-SCOTCH, PORD), can be used
+   - Error -51 when a 32-bit external ordering is invoked on 
+    a graph larger than  2^{31}-1
+* New feature (experimental), factorization based on Block-Low-Rank format,
+  (ICNTL(35) to activate it and CNTL(7) for low-rank precision)
+* Improved performance on numerically hard matrices (LU and LDLt)
+* "-DALLOW_NON_INIT" flag has disappeared and needs no longer be used
+* Fixed incorrect deallocation in case of JOB=3/ICNTL(26)=1 followed by JOB=2
+* Fixed compilation problem with Intel2017 + openMPI in [sdcz]ana_aux_par.F
+* Minor correction of memory statistics for solve
+* Use 64-bit integers where needed during the solve phase to enable 
+  large number of right-hand-sides (NRHS) in one block
+  (i.e. ICNTL(27)xN can be larger than 2^{31}-1)
+* Improved performance of solve phase
+* Allow pivoting thresholds CNTL(1) equal to 1.0
+* New error -52: when default Fortran integers are 64 bit, external
+  orderings should also have 64-bit default integers
+* New error -22, INFO(2)=16 when IRN_loc or JCN_loc not associated
+  while ICNTL(18) is set to 3
+* Missing O_BINARY flag was added to open binary files on MINGW systems
+* New error -900 that could reflect a matrix structure change between
+analysis and factorization
+
+Changes from 5.0.1 to 5.0.2
+* Suppress error on id%SCHUR_CINTERFACE in mumps_driver.F when bound
+  check is enabled and when using 2D block cyclic Schur complement
+  feature (ICNTL(19)=2 or 3) from C or Matlab interfaces
+* Problem of failed assertion in [SDCZ]MUMPS_TREAT_DESCBAND solved (static variable
+  INODE_WAITED_FOR was not initialized and was not detected by valgrind)
+* Correction of very minor memory leaks and access to uninitialized data
+* A setting of INFO(1)=-1-17 should have been INFO(1)=-17
+* Some settings of INFO(1)=-17 should have been INFO(1)=-20
+* Suppress absolute tolerance 10^-20 in pivot selection for SYM=2;
+  skip 2x2 pivot search if only 1 pivot candidate, avoid pivots
+  that are subnormal numbers (their inverse is equal to infinity)
+* Warning +2 now only occurs when solution is really close to 0
+* Occasional bug in OOC and multiple instances solved
+* Better selection of equations for bwd errors (W1 and W2) and better
+  forward error estimates on some machines with 80-bit registers
+* Improved users' guide (OOC files cleaning, permutation details, usage
+  of multithreading, clarification of MegaByte unit)
+* Cleaning of asynchronous messages after facto/solve was
+  revisited and is more robust
+* More robust suppression of integer overflow risk during
+  solve for huge ICNTL(23)
+* Improved performance of symbolic factorization in case of matrices with
+  relatively dense rows and/or with large number of Lagrange multipliers
+* Improved performance of numerical factorization phase during 
+  pivot search for symmetric indefinite matrices
+* Use of -xcore-avx2 requires !DEC$ NOOPTIMIZE in MUMPS_BIT_GET4PROC
+  with current versions of Intel compilers
+* Suppressed some temporary array creation and implicit conversions
+
 Changes from 5.0.0 to 5.0.1
 * Iterative refinement convergence check corrected (problem
   introduced in 5.0.0)
@@ -24,8 +90,8 @@ Changes from 5.0.0 to 5.0.1
 
 Changes from 4.10.0 to 5.0.0
 * Userguide revisited
-* Compatibility with metis 5.1.0/parmetis 4.0.3, and with
-  scotch/pt-scotch 6.0
+* Compatibility with Metis 5.1.0/ParMetis 4.0.3, and with
+  SCOTCH/pt-SCOTCH 6.0
 * Matlab interface updated (scaling vectors (COLSCA, ROWSCA) and
   A-1 feature ICNTL(30) are now available)
 * Improved sequential and parallel performance for computing selected entries of 
@@ -57,7 +123,7 @@ Changes from 4.10.0 to 5.0.0
 * Warning +4 has disappeared from documentation (since it
   was never occurring -- JCN never modified on exit)
 * Error code -16 now raised for the case N=0 even on distributed
-  matrices (thanks to P.Jolivet for noticing this)
+  matrices (thanks to P. Jolivet for noticing this)
 * Use BLAS3 routines for efficiency even in case of BLAS2 operations
   (-DMUMPS_USE_BLAS2 allows the use of BLAS2 routines for such
   operations)
@@ -366,7 +432,7 @@ Changes from 4.3.4 to 4.4.0
 * symmetric indefinite matrices better handled
 * Right-hand side vectors can be sparse
 * Solution can be kept distributed on the processors
-* METIS allowed for element-entry
+* Metis allowed for element-entry
 * Parallel performance and memory usage improved:
    - load is updated more often for type 2 nodes
    - scheduling under memory constraints
@@ -474,6 +540,9 @@ Changes from 4.0.4 to 4.1.4
 = Release history =
 -------------------
 
+Release 5.1.1            : March 2016
+Release 5.1.0            : Feb 2016, internal
+Release 5.0.2            : July 2016
 Release 5.0.1            : July 2015
 Release 5.0.0            : February 2015
 Release 4.10.0           : May 2011

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -122,13 +122,22 @@ C
      &     FLAG, ICMP, IWFR,
      &     IERROR, KEEP,KEEP8, ICNTL)
       IMPLICIT NONE
-      INTEGER N,NZ,NCMP,LW,IWFR,IERROR
-      INTEGER ICNTL(40),KEEP(500)
-      INTEGER(8) KEEP8(150)
-      INTEGER IRN(NZ),ICN(NZ),IW(LW),PIV(N),IPE(N+1)
-      INTEGER LEN(N),IQ(N),FLAG(N),ICMP(N) 
-      INTEGER MP,N11,N22,NDUP
-      INTEGER I,K,J,N1,LAST,K1,K2,L
+      INTEGER, intent(in)     :: N
+      INTEGER(8), intent(in)  :: NZ, LW
+      INTEGER, intent(in)     :: IRN(NZ), ICN(NZ), PIV(N)
+      INTEGER, intent(in)     :: ICNTL(40)
+      INTEGER, intent(in)     :: KEEP(500)
+      INTEGER(8), intent(in)  :: KEEP8(150)
+      INTEGER, intent(out)    :: NCMP, IERROR
+      INTEGER(8), intent(out) :: IWFR, IPE(N+1)
+      INTEGER, intent(out)    :: IW(LW) 
+      INTEGER, intent(out)    :: LEN(N)
+      INTEGER(8), intent(out) :: IQ(N)
+      INTEGER, intent(out)    :: FLAG(N), ICMP(N)
+      INTEGER    :: MP, N11, N22
+      INTEGER    :: I, J, N1, K
+      INTEGER(8) :: NDUP, L, K8, K1, K2, LAST
+      INTRINSIC nint
       MP = ICNTL(2)
       IERROR = 0
       N22 = KEEP(93)
@@ -156,9 +165,9 @@ C
          J = PIV(I)
          ICMP(J) = 0
       ENDDO
-      DO K=1,NZ
-         I = IRN(K)
-         J = ICN(K)
+      DO K8=1,NZ
+         I = IRN(K8)
+         J = ICN(K8)
          IF ((I.GT.N).OR.(J.GT.N).OR.(I.LT.1)
      &        .OR.(J.LT.1)) THEN
             IERROR = IERROR + 1
@@ -166,30 +175,28 @@ C
             I = ICMP(I)
             J = ICMP(J)
             IF (I.NE.J) THEN
-               IPE(I) = IPE(I) + 1
-               IPE(J) = IPE(J) + 1
+               IPE(I) = IPE(I) + 1_8
+               IPE(J) = IPE(J) + 1_8
             ENDIF
          ENDIF
       ENDDO
-      IQ(1) = 1
+      IQ(1) = 1_8
       N1 = NCMP - 1
       IF (N1.GT.0) THEN
          DO I=1,N1
             IQ(I+1) = IPE(I) + IQ(I)
          ENDDO 
       ENDIF
-      LAST = max(IPE(NCMP)+IQ(NCMP)-1,IQ(NCMP))
+      LAST = max(IPE(NCMP)+IQ(NCMP)-1_8,IQ(NCMP))
       DO I = 1,NCMP
          FLAG(I) = 0
          IPE(I)  = IQ(I)
       ENDDO
-      DO K=1,LAST
-        IW(K) = 0
-      ENDDO
-      IWFR = LAST + 1
-      DO K=1,NZ
-         I = IRN(K)
-         J = ICN(K)
+      IW(1:LAST) = 0
+      IWFR = LAST + 1_8
+      DO K8=1,NZ
+         I = IRN(K8)
+         J = ICN(K8)
          IF ((I.GT.N).OR.(J.GT.N).OR.(I.LT.1)
      &        .OR.(J.LT.1)) CYCLE
          I = ICMP(I)
@@ -198,65 +205,62 @@ C
           IF (I.LT.J) THEN
             IF ((I.GE.1).AND.(J.LE.N)) THEN
              IW(IQ(I)) = -J
-             IQ(I)     = IQ(I) + 1 
+             IQ(I)     = IQ(I) + 1_8
             ENDIF
           ELSE
             IF ((J.GE.1).AND.(I.LE.N)) THEN
              IW(IQ(J)) = -I
-             IQ(J)     = IQ(J) + 1
+             IQ(J)     = IQ(J) + 1_8
             ENDIF
           ENDIF
          ENDIF
       ENDDO
-      NDUP = 0
+      NDUP = 0_8
       DO I=1,NCMP
          K1 = IPE(I) 
-         K2 = IQ(I) -1
+         K2 = IQ(I) -1_8
          IF (K1.GT.K2) THEN
             LEN(I) = 0
-            IQ(I)  = 0
          ELSE
-            DO K=K1,K2
-               J     = -IW(K)
+            DO K8=K1,K2
+               J     = -IW(K8)
                IF (J.LE.0) GO TO 250
                L     = IQ(J) 
-               IQ(J) = L + 1
+               IQ(J) = L + 1_8
                IF (FLAG(J).EQ.I) THEN
-                  NDUP = NDUP + 1
+                  NDUP = NDUP + 1_8
                   IW(L) = 0
-                  IW(K) = 0
+                  IW(K8) = 0
                ELSE
                   IW(L)   = I
-                  IW(K)   = J
+                  IW(K8)   = J
                   FLAG(J) = I
                ENDIF
             ENDDO
- 250        IQ(I) = IQ(I) - IPE(I)
-            IF (NDUP.EQ.0) LEN(I) = IQ(I)
+ 250        LEN(I) = int(IQ(I) - IPE(I))
          ENDIF
       ENDDO
-      IF (NDUP.NE.0) THEN
-         IWFR = 1
+      IF (NDUP.NE.0_8) THEN
+         IWFR = 1_8
          DO I=1,NCMP
             K1 = IPE(I) 
-            IF (IQ(I).EQ.0) THEN
-               LEN(I) = 0
+            IF (LEN(I).EQ.0) THEN
                IPE(I) = IWFR
                CYCLE
             ENDIF
-            K2 = K1 + IQ(I) - 1
+            K2 = K1 + LEN(I) - 1
             L = IWFR
             IPE(I) = IWFR
-            DO K=K1,K2
-               IF (IW(K).NE.0) THEN
-                  IW(IWFR) = IW(K)
-                  IWFR     = IWFR + 1
+            DO K8=K1,K2
+               IF (IW(K8).NE.0) THEN
+                  IW(IWFR) = IW(K8)
+                  IWFR     = IWFR + 1_8
                ENDIF
             ENDDO
-            LEN(I) = IWFR - L 
+            LEN(I) = int(IWFR - L)
          ENDDO
       ENDIF
-      IPE(NCMP+1) = IPE(NCMP) + LEN(NCMP)
+      IPE(NCMP+1) = IPE(NCMP) + int(LEN(NCMP),8)
       IWFR = IPE(NCMP+1)
       RETURN
       END SUBROUTINE DMUMPS_LDLT_COMPRESS
@@ -265,14 +269,18 @@ C
      &     ICNTL, WEIGHT,MARKED,FLAG,
      &     PIV_OUT, INFO)
       IMPLICIT NONE
-      INTEGER N, NE, ICNTL(10), INFO(10),LSC
-      INTEGER CPERM(N),PIV_OUT(N),IP(N+1),IRN(NE), DIAG(N)
-      DOUBLE PRECISION SCALING(LSC),WEIGHT(N+2)
-      INTEGER MARKED(N),FLAG(N)
-      INTEGER NUM1,NUM2,NUMTOT,PATH_LENGTH,NLAST
-      INTEGER I,CUR_EL,CUR_EL_PATH,CUR_EL_PATH_NEXT,BEST_BEG
-      INTEGER L1,L2,PTR_SET1,PTR_SET2,TUP,T22
-      DOUBLE PRECISION BEST_SCORE,CUR_VAL,TMP,VAL
+      INTEGER, INTENT(IN)    :: N
+      INTEGER(8), INTENT(IN) :: NE
+      INTEGER :: ICNTL(10), INFO(10),LSC
+      INTEGER :: CPERM(N),PIV_OUT(N), IRN(NE), DIAG(N)
+      INTEGER(8), INTENT(IN) :: IP(N+1)
+      DOUBLE PRECISION    :: SCALING(LSC),WEIGHT(N+2)
+      INTEGER :: MARKED(N),FLAG(N)
+      INTEGER :: NUM1,NUM2,NUMTOT,PATH_LENGTH,NLAST
+      INTEGER :: I,BEST_BEG, CUR_EL,CUR_EL_PATH,CUR_EL_PATH_NEXT
+      INTEGER :: L1,L2,TUP,T22
+      INTEGER(8) :: PTR_SET1,PTR_SET2
+      DOUBLE PRECISION    :: BEST_SCORE,CUR_VAL,TMP,VAL
       DOUBLE PRECISION INITSCORE, DMUMPS_UPDATESCORE, 
      &     DMUMPS_UPDATE_INVERSE, DMUMPS_METRIC2x2
       LOGICAL VRAI,FAUX,MAX_CARD_DIAG,USE_SCALING
@@ -330,8 +338,8 @@ C
          MARKED(CUR_EL) = 0
          WEIGHT(1) = INITSCORE
          WEIGHT(2) = INITSCORE
-         L1 = IP(CUR_EL+1)-IP(CUR_EL)
-         L2 = IP(CUR_EL_PATH+1)-IP(CUR_EL_PATH)
+         L1 = int(IP(CUR_EL+1)-IP(CUR_EL))
+         L2 = int(IP(CUR_EL_PATH+1)-IP(CUR_EL_PATH))
          PTR_SET1 = IP(CUR_EL)
          PTR_SET2 = IP(CUR_EL_PATH)
          IF(USE_SCALING) THEN
@@ -349,8 +357,8 @@ C
             PATH_LENGTH = PATH_LENGTH+1
             MARKED(CUR_EL_PATH) = 0
             CUR_EL_PATH_NEXT = CPERM(CUR_EL_PATH)
-            L1 = IP(CUR_EL_PATH+1)-IP(CUR_EL_PATH)
-            L2 = IP(CUR_EL_PATH_NEXT+1)-IP(CUR_EL_PATH_NEXT)
+            L1 = int(IP(CUR_EL_PATH+1)-IP(CUR_EL_PATH))
+            L2 = int(IP(CUR_EL_PATH_NEXT+1)-IP(CUR_EL_PATH_NEXT))
             PTR_SET1 = IP(CUR_EL_PATH)
             PTR_SET2 = IP(CUR_EL_PATH_NEXT)
             IF(USE_SCALING) THEN
@@ -541,32 +549,40 @@ C
       RETURN
       END SUBROUTINE DMUMPS_EXPAND_PERM_SCHUR
       SUBROUTINE DMUMPS_GNEW_SCHUR
-     & (NA,N,NZ, IRN, ICN, IW, LW, IPE, LEN,
+     & (NA, N, NZ, IRN, ICN, IW, LW, IPE, LEN,
      & IQ, FLAG, IWFR,
      & NRORM, NIORM, IFLAG,IERROR, ICNTL, 
-     & symmetry, SYM, MedDens, NBQD, AvgDens, 
-     & LISTVAR_SCHUR, SIZE_SCHUR, ATOAO, AOTOA,
-     & KEEP264)
+     & symmetry, SYM, NBQD, AvgDens,
+     & KEEP264, KEEP265, 
+     & LISTVAR_SCHUR, SIZE_SCHUR, ATOAO, AOTOA
+     & )
       IMPLICIT NONE
-      INTEGER, INTENT(IN)  :: NA,N,NZ,LW
+      INTEGER, intent(in)    :: NA
+      INTEGER, intent(in)    :: N, SYM
+      INTEGER(8), intent(in) :: NZ, LW
+      INTEGER, intent(in)    :: ICNTL(40)
+      INTEGER, intent(in)    :: IRN(NZ), ICN(NZ) 
       INTEGER, INTENT(IN)  :: SIZE_SCHUR, LISTVAR_SCHUR(SIZE_SCHUR)
-      INTEGER, INTENT(IN)  :: IRN(NZ), ICN(NZ) 
-      INTEGER, INTENT(IN)  :: ICNTL(40), SYM
-      INTEGER, INTENT(INOUT) :: IFLAG
-      INTEGER, INTENT(OUT) :: IERROR,NRORM,NIORM,IWFR
-      INTEGER, INTENT(OUT) :: AOTOA(N)
-      INTEGER, INTENT(OUT) :: ATOAO(NA)  
-      INTEGER, INTENT(OUT) :: LEN(N), IPE(N+1)
-      INTEGER, INTENT(OUT) :: symmetry, 
-     &                        MedDens, NBQD, AvgDens
-      INTEGER, INTENT(OUT) :: FLAG(N), IW(LW), IQ(N)
-      INTEGER, INTENT(OUT) :: KEEP264
-      INTEGER MP, MPG
-      INTEGER I,K,J,N1,LAST,NDUP,K1,K2,L
-      INTEGER NBERR, THRESH, IAO
-      INTEGER NZOFFA, NDIAGA
-      DOUBLE PRECISION RSYM
+      INTEGER, intent(out)   :: IERROR, symmetry
+      INTEGER, intent(out)   :: NBQD, AvgDens
+      INTEGER, intent(out)   :: LEN(N), IW(LW)
+      INTEGER(8), intent(out):: IWFR
+      INTEGER(8), intent(out):: NRORM, NIORM
+      INTEGER(8), intent(out):: IPE(N+1)
+      INTEGER, INTENT(OUT) :: AOTOA(N) 
+      INTEGER, INTENT(OUT) :: ATOAO(NA)
+      INTEGER, intent(inout) :: IFLAG, KEEP264 
+      INTEGER, intent(in)    :: KEEP265
+      INTEGER(8), intent(out):: IQ(N)
+      INTEGER, intent(out)   :: FLAG(N)
+      INTEGER    :: MP, MPG, I, J, N1
+      INTEGER    :: NBERR, THRESH, IAO
+      INTEGER(8) :: K8, K1, K2, LAST, NDUP
+      INTEGER(8) :: NZOFFA, NDIAGA, L, N8
+      DOUBLE PRECISION       :: RSYM
       INTRINSIC nint
+      MP = ICNTL(2)
+      MPG= ICNTL(3)
       ATOAO(1:NA) = 0
       DO I = 1, SIZE_SCHUR
         ATOAO(LISTVAR_SCHUR(I)) = -1
@@ -578,60 +594,118 @@ C
         ATOAO(I)   = IAO
         AOTOA(IAO) = I
       ENDDO
-      MP = ICNTL(2)
-      MPG= ICNTL(3)
-      NIORM  = 3*N
+      NZOFFA = 0_8
       NDIAGA = 0
       IERROR = 0
-      IPE(1:N+1) = 0
-      DO K=1,NZ
-        I = IRN(K)
-        J = ICN(K)
-        IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
+      N8     = int(N,8)
+      DO I=1,N+1
+        IPE(I) = 0_8
+      ENDDO
+      IF (KEEP264.EQ.0) THEN
+       IF ((SYM.EQ.0).AND.(KEEP265.EQ.-1)) THEN
+        DO K8=1_8,NZ
+         I = IRN(K8)
+         J = ICN(K8)
+         IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
      &                          .OR.(J.LT.1)) THEN
            IERROR = IERROR + 1
-        ELSE
+         ELSE
           I = ATOAO(I)
           J = ATOAO(J)
           IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
           IF (I.NE.J) THEN
-           IPE(I) = IPE(I) + 1
-           IPE(J) = IPE(J) + 1
-           NIORM  = NIORM + 1
+           IPE(I) = IPE(I) + 1_8
+           NZOFFA  = NZOFFA + 1_8
           ELSE
-           NDIAGA = NDIAGA + 1
+           NDIAGA = NDIAGA + 1_8
           ENDIF
-        ENDIF
-      ENDDO
-      NZOFFA  = NIORM - 3*N
-      IF (IERROR.GE.1) THEN
+         ENDIF
+        ENDDO
+       ELSE
+        DO K8=1_8,NZ
+         I = IRN(K8)
+         J = ICN(K8)
+         IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
+     &                          .OR.(J.LT.1)) THEN
+           IERROR = IERROR + 1
+         ELSE
+          I = ATOAO(I)
+          J = ATOAO(J)
+          IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+          IF (I.NE.J) THEN
+           IPE(I) = IPE(I) + 1_8
+           IPE(J) = IPE(J) + 1_8
+           NZOFFA  = NZOFFA + 1_8
+          ELSE
+           NDIAGA = NDIAGA + 1_8
+          ENDIF
+         ENDIF
+        ENDDO
+       ENDIF
+       IF (IERROR.GE.1) THEN
         KEEP264 = 0
-      ELSE
+       ELSE
         KEEP264 = 1
+       ENDIF
+      ELSE
+       IF ((SYM.EQ.0).AND.(KEEP265.EQ.-1)) THEN
+        DO K8=1_8,NZ
+         I = IRN(K8)
+         J = ICN(K8)
+         I = ATOAO(I)
+         J = ATOAO(J)
+         IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+         IF (I.EQ.J) THEN
+           NDIAGA = NDIAGA + 1_8
+         ELSE 
+           IPE(I) = IPE(I) + 1_8
+           NZOFFA = NZOFFA + 1_8
+         ENDIF
+        ENDDO
+       ELSE
+        DO K8=1_8,NZ
+         I = IRN(K8)
+         J = ICN(K8)
+         I = ATOAO(I)
+         J = ATOAO(J)
+         IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+         IF (I.NE.J) THEN
+           IPE(I) = IPE(I) + 1_8
+           IPE(J) = IPE(J) + 1_8
+           NZOFFA  = NZOFFA + 1_8
+         ELSE
+           NDIAGA = NDIAGA + 1_8
+         ENDIF
+        ENDDO
+       ENDIF
       ENDIF
+      NIORM  = NZOFFA + 3_8*N8
       IF (IERROR.GE.1) THEN
          NBERR  = 0
-         IF (mod(IFLAG,2).EQ.0) IFLAG  = IFLAG+1
+         IF (mod(IFLAG,2) .EQ. 0) IFLAG = IFLAG+1
          IF ((MP.GT.0).AND.(ICNTL(4).GE.2))  THEN 
           WRITE (MP,99999) 
-          DO 70 K=1,NZ
-           I = IRN(K)
-           J = ICN(K)
+          DO 70 K8=1_8,NZ
+           I = IRN(K8)
+           J = ICN(K8)
            IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
      &                            .OR.(J.LT.1)) THEN
             NBERR = NBERR + 1
             IF (NBERR.LE.10)  THEN
-               IF (mod(K,10).GT.3 .OR. mod(K,10).EQ.0 .OR.
-     &             (10.LE.K .AND. K.LE.20)) THEN
-                 WRITE (MP,'(I8,A,I8,A,I8,A)')
-     &             K,'th entry (in row',I,' and column',J,') ignored'
+               IF (mod(K8,10_8).GT.3_8 .OR. mod(K8,10_8).EQ.0_8 .OR.
+     &             (10_8.LE.K8 .AND. K8.LE.20_8)) THEN
+                 WRITE (MP,'(I16,A,I10,A,I10,A)')
+     &             K8,'th entry (in row',I,' and column',J,') ignored'
                ELSE
-                 IF (mod(K,10).EQ.1) WRITE(MP,'(I8,A,I8,A,I8,A)')
-     &             K,'st entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K,10).EQ.2) WRITE(MP,'(I8,A,I8,A,I8,A)')
-     &             K,'nd entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K,10).EQ.3) WRITE(MP,'(I8,A,I8,A,I8,A)')
-     &             K,'rd entry (in row',I,' and column',J,') ignored'
+                 IF (mod(K8,10_8).EQ.1_8) 
+     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+     &             K8,'st entry (in row',I,' and column',J,') ignored'
+                 IF (mod(K8,10_8).EQ.2_8) 
+     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+     &             K8,'nd entry (in row',I,' and column',J,') ignored'
+                 IF (mod(K8,10_8).EQ.3_8) 
+     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+     &             K8,'rd entry (in row',I,' and column',J,') ignored'
                ENDIF
             ELSE
                GO TO 100
@@ -640,23 +714,58 @@ C
    70     CONTINUE
          ENDIF
       ENDIF
-  100 NRORM = NIORM - 2*N
-      IQ(1) = 1
+  100 NRORM = NIORM - 2_8*N8
+      IQ(1) = 1_8
       N1 = N - 1
       IF (N1.GT.0) THEN
-        DO 110 I=1,N1
+        DO I=1,N1
             IQ(I+1) = IPE(I) + IQ(I) 
-  110   CONTINUE
+        ENDDO
       ENDIF
       LAST = max(IPE(N)+IQ(N)-1,IQ(N))
       FLAG(1:N) = 0
       IPE(1:N)  = IQ(1:N)
       IW(1:LAST) = 0
-      IWFR = LAST + 1
+      IWFR = LAST + 1_8
       IF (KEEP264 .EQ. 0) THEN
-        DO K=1,NZ
-          I = IRN(K)
-          J = ICN(K)
+       IF ((SYM.EQ.0).AND.(KEEP265.EQ.-1)) THEN
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
+          IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
+     &                           .OR.(J.LT.1)) CYCLE
+          I = ATOAO(I)
+          J = ATOAO(J)
+          IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+          IF (I.NE.J) THEN
+              IF ((J.GE.1).AND.(I.LE.N)) THEN
+                IW(IQ(I)) = J
+                IQ(I)     = IQ(I) + 1
+              ENDIF
+          ENDIF
+        ENDDO
+       ELSE IF (KEEP265.EQ.1) THEN
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
+          IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
+     &                           .OR.(J.LT.1)) CYCLE
+          I = ATOAO(I)
+          J = ATOAO(J)
+          IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+          IF (I.NE.J) THEN
+              IF ((J.GE.1).AND.(I.LE.N)) THEN
+                IW(IQ(J)) = I
+                IQ(J)     = IQ(J) + 1
+                IW(IQ(I)) = J
+                IQ(I)     = IQ(I) + 1
+              ENDIF
+          ENDIF
+        ENDDO
+       ELSE 
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
           IF ((I.GT.NA).OR.(J.GT.NA).OR.(I.LT.1)
      &                           .OR.(J.LT.1)) CYCLE
           I = ATOAO(I)
@@ -664,19 +773,51 @@ C
           IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
           IF (I.NE.J) THEN
             IF (I.LT.J) THEN
-              IW(IQ(I)) = -J
-              IQ(I)     = IQ(I) + 1 
+              IF ((I.GE.1).AND.(J.LE.N)) THEN
+                IW(IQ(I)) = -J
+                IQ(I)     = IQ(I) + 1 
+              ENDIF
             ELSE
-              IW(IQ(J)) = -I
-              IQ(J)     = IQ(J) + 1
+              IF ((J.GE.1).AND.(I.LE.N)) THEN
+                IW(IQ(J)) = -I
+                IQ(J)     = IQ(J) + 1
+              ENDIF
             ENDIF
           ENDIF
         ENDDO
+       ENDIF 
       ELSE
-        DO K=1,NZ
-          I = IRN(K)
+       IF ((SYM.EQ.0).AND.(KEEP265.EQ.-1)) THEN
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
           I = ATOAO(I)
-          J = ICN(K)
+          J = ATOAO(J)
+          IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+          IF (I.NE.J) THEN
+               IW(IQ(I)) = J
+               IQ(I)     = IQ(I) + 1
+          ENDIF
+        ENDDO
+       ELSE IF (KEEP265.EQ.1) THEN
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
+          I = ATOAO(I)
+          J = ATOAO(J)
+          IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
+          IF (I.NE.J) THEN
+               IW(IQ(J)) = I
+               IQ(J)     = IQ(J) + 1
+               IW(IQ(I)) = J
+               IQ(I)     = IQ(I) + 1
+          ENDIF
+        ENDDO
+       ELSE
+        DO K8=1_8,NZ
+          I = IRN(K8)
+          J = ICN(K8)
+          I = ATOAO(I)
           J = ATOAO(J)
           IF ((I.LT.0).OR.(J.LT.0)) CYCLE  
           IF (I.NE.J) THEN
@@ -689,97 +830,100 @@ C
             ENDIF
           ENDIF
         ENDDO
+       ENDIF
       ENDIF
-      NDUP = 0
-      DO 260 I=1,N
+      IF (KEEP265.EQ.0) THEN
+       NDUP = 0_8
+       DO I=1,N
         K1 = IPE(I) 
-        K2 = IQ(I) -1
+        K2 = IQ(I) - 1_8
         IF (K1.GT.K2) THEN
          LEN(I) = 0
-         IQ(I)  = 0
         ELSE
-         DO 240 K=K1,K2
-           J     = -IW(K)
-           IF (J.LE.0) GO TO 250
+         DO K8=K1,K2
+           J     = -IW(K8)
+           IF (J.LE.0) EXIT
            L     = IQ(J) 
            IQ(J) = L + 1
            IF (FLAG(J).EQ.I) THEN
-            NDUP = NDUP + 1
-            IW(L) = 0
-            IW(K) = 0
+            NDUP = NDUP + 1_8
+            IW(K8) = 0
            ELSE
             IW(L)   = I
-            IW(K)   = J
+            IW(K8)  = J
             FLAG(J) = I
            ENDIF
-  240    CONTINUE
-  250    IQ(I) = IQ(I) - IPE(I)
-         IF (NDUP.EQ.0) LEN(I) = IQ(I)
+         END DO  
+         LEN(I) = int(IQ(I) - IPE(I))
         ENDIF
-  260 CONTINUE
-      IF (NDUP.NE.0) THEN
-       IWFR = 1
-       DO 280 I=1,N
-         IF (IQ(I).EQ.0) THEN
-             LEN(I) = 0
+       ENDDO
+       IF (NDUP.NE.0_8) THEN
+        IWFR = 1_8
+        DO I=1,N
+         IF (LEN(I).EQ.0) THEN
             IPE(I) = IWFR
-            GOTO 280
+            CYCLE
          ENDIF
          K1 = IPE(I) 
-         K2 = K1 + IQ(I) - 1
+         K2 = K1 + LEN(I) - 1
          L = IWFR
          IPE(I) = IWFR
-         DO 270 K=K1,K2
-           IF (IW(K).NE.0) THEN
-            IW(IWFR) = IW(K)
-            IWFR     = IWFR + 1
+         DO 270 K8=K1,K2
+           IF (IW(K8).NE.0) THEN
+            IW(IWFR) = IW(K8)
+            IWFR     = IWFR + 1_8
            ENDIF
   270    CONTINUE
-         LEN(I) = IWFR - L 
-  280  CONTINUE
-      ENDIF
-      IPE(N+1) = IPE(N) + LEN(N)
-      IWFR = IPE(N+1)
+         LEN(I) = int(IWFR - L)
+        ENDDO
+       ENDIF
+       IPE(N+1) = IPE(N) + int(LEN(N),8)
+       IWFR = IPE(N+1)
+      ELSE 
+       IPE(1) = 1_8
+       DO I = 1, N
+        LEN(I) = int(IQ(I) - IPE(I))
+       ENDDO
+       DO I = 1, N
+        IPE(I+1) = IPE(I) + int(LEN(I),8)
+       ENDDO
+       IWFR = IPE(N+1)
+      ENDIF  
+      symmetry = 100  
       IF (SYM.EQ.0) THEN
-      RSYM =  dble(NDIAGA+2*NZOFFA - (IWFR-1))/
+      RSYM =  dble(NDIAGA+2_8*NZOFFA - (IWFR-1_8))/
      &            dble(NZOFFA+NDIAGA) 
+      IF ((KEEP265.EQ.0) .AND. (NZOFFA - (IWFR-1_8)).EQ.0_8) THEN
+      ENDIF
       symmetry = nint (100.0D0*RSYM)
-         IF (MPG .GT. 0)
-     &  write(MPG,'(A,I5)') 
-     &  ' ... Structural symmetry (in percent)=', symmetry
-        IF (MP.GT.0 .AND. MPG.NE.MP)
-     &  write(MP,'(A,I5)') 
-     &  ' ... Structural symmetry (in percent)=', symmetry
+         IF ((MPG .GT. 0).AND.(ICNTL(4).GE.2) )
+     &  write(MPG,'(A,A,I5)') 
+     & ' Case of Schur:',
+     & ' structural symmetry (in percent) of interior block=', 
+     &   symmetry
+        IF (MP.GT.0 .AND. MPG.NE.MP.AND. (ICNTL(4).GE.2) )
+     &  write(MP,'(A,A,I5)') 
+     & ' Case of Schur:',
+     & ' structural symmetry (in percent) of interior block=', 
+     &   symmetry
       ELSE
        symmetry = 100
       ENDIF
-      AvgDens = nint(dble(IWFR-1)/dble(N))
+      AvgDens = nint(dble(IWFR-1_8)/dble(N))
       THRESH  = AvgDens*50 - AvgDens/10 + 1
       NBQD    = 0
       IF (N.GT.2) THEN
-        IQ(1:N) = 0
         DO I= 1, N
-          K = max(LEN(I),1)
-          IQ(K) = IQ(K) + 1
-          IF (K.GT.THRESH) NBQD = NBQD+1
+          J = max(LEN(I),1)
+          IF (J.GT.THRESH) NBQD = NBQD+1
         ENDDO
-        K = 0
-        MedDens = 0
-        DO WHILE (K .LT. (N/2))
-         MedDens = MedDens + 1
-         K       = K+IQ(MedDens)
-        ENDDO
-      ELSE
-        MedDens = AvgDens
       ENDIF
-         IF (MPG .GT. 0)
-     &  write(MPG,'(A,3I5)') 
-     &  ' Density: NBdense, Average, Median   =',
-     &  NBQD, AvgDens, MedDens
-        IF (MP.GT.0 .AND. MPG.NE.MP)
-     &  write(MP,'(A,3I5)') 
-     &  ' Density: NBdense, Average, Median   =',
-     &  NBQD, AvgDens, MedDens
+      IF (MPG .GT. 0.AND.(ICNTL(4).GE.2))
+     &  write(MPG,'(A,1I5)') 
+     &  ' Average density of rows/columns =', AvgDens
+        IF (MP.GT.0 .AND. MPG.NE.MP.AND.(ICNTL(4).GE.2))
+     &  write(MPG,'(A,1I5)') 
+     &  ' Average density of rows/columns =', AvgDens
       RETURN
 99999 FORMAT (/'*** Warning message from analysis routine ***')
       END SUBROUTINE DMUMPS_GNEW_SCHUR

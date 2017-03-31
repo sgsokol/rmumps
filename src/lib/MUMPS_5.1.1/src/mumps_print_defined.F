@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -15,8 +15,8 @@ C
       INTEGER, INTENT(IN) :: MPG
       IF (MPG.LE.0) RETURN
       write(MPG,*) "================================================="
-#if defined(ALLOW_NON_INIT)
-      write(MPG,*) "MUMPS compiled with option -DALLOW_NON_INIT"
+#if defined(ZERO_TRIANGLE)
+      write(MPG,*) "MUMPS compiled with option -DZERO_TRIANGLE"
 #endif
 #if defined(DETERMINISTIC_PARALLEL_GRAPH)
       write(MPG,*) "MUMPS compiled with option"
@@ -30,9 +30,6 @@ C
 #endif
 #if defined(MUMPS_F2003)
       write(MPG,*) "MUMPS compiled with option -DMUMPS_F2003"
-#endif
-#if defined(MUMPS_OPENMP)
-      write(MPG,*) "MUMPS compiled with option -DMUMPS_OPENMP"
 #endif
 #if defined(OLD_OOC_NOPANEL)
       write(MPG,*) "MUMPS compiled with option -DOLD_OOC_NOPANEL"
@@ -51,6 +48,9 @@ C
 #endif
 #if defined(MUMPS_USE_BLAS2)
       write(MPG,*) "MUMPS compiled with option -DMUMPS_USE_BLAS2"
+#endif
+#if defined(BLR_MT)
+      write(MPG,*) "MUMPS compiled with option -DBLR_MT"
 #endif
       write(MPG,*) "================================================="
       RETURN

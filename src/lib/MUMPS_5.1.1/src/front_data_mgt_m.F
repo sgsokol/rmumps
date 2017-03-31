@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -28,6 +28,13 @@ C     'A' is for active type 2 fronts: list must
 C         be empty at the end of the factorization
 C
 C     'F' will be for general fronts -- not used currently
+C         except for type 2 symmetric active fronts
+C         to store block-low-rank information.
+C         This mechanism should be generalized to
+C         store low-rank information of all fronts
+C         that will be passed from factorization to
+C         solve (which implies keeping track of them
+C         in the main MUMPS structure).
 C
 C     Only handlers are managed in this module.
 C     The data itself is in the module above using it.
@@ -123,6 +130,7 @@ C         Should not be called twice or when array is unassociated
       ENDIF
       RETURN
       END SUBROUTINE MUMPS_FDM_END
+C
 C
       SUBROUTINE MUMPS_FDM_START_IDX(WHAT, FROM, IWHANDLER, INFO)
 C

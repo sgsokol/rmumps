@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -29,7 +29,7 @@ C
       INTEGER MYID
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER BUFR( LBUFR )
       INTEGER(8) :: IPTRLU, LRLU, LRLUS, LA
@@ -61,6 +61,7 @@ C
       INTEGER :: INFO_TMP(2)
 #else
 #endif
+      INTEGER :: LRSTATUS
       INODE = BUFR( 2 )
       NBPROCFILS = BUFR( 3 )
       NROW = BUFR( 4 )
@@ -68,6 +69,8 @@ C
       NASS = BUFR( 6 )
       NFRONT = BUFR( 7 )
       NSLAVES_RECU = BUFR( 8 )
+      LRSTATUS =  BUFR( 9 )
+      IBUFR    = 10
 #if ! defined(NO_FDM_DESCBAND)
       IWHANDLER_LOC = IWHANDLER_IN
       IF ((IWHANDLER_IN .LE. 0) .AND.
@@ -108,15 +111,16 @@ C
       IF ( IFLAG .LT. 0 ) RETURN
       PTRIST(STEP(INODE)) = IWPOSCB + 1
       PTRAST(STEP(INODE)) = IPTRLU  + 1_8
-#if ! defined(NO_FDM_DESCBAND)
+#     if ! defined(NO_FDM_DESCBAND)
  555  CONTINUE
-#endif
-      IBUFR = 9
-#if ! defined(NO_FDM_DESCBAND)
-      IF ((IWHANDLER_IN .LE. 0) .AND.
-     &   (INODE .NE. INODE_WAITED_FOR)) RETURN
-      IW(IWPOSCB+1+XXA) = IWHANDLER_LOC
-#endif
+#     endif
+#     if ! defined(NO_FDM_DESCBAND)
+        IF ((IWHANDLER_IN .LE. 0) .AND.
+     &     (INODE .NE. INODE_WAITED_FOR)) THEN
+          RETURN
+        ENDIF
+        IW(IWPOSCB+1+XXA) = IWHANDLER_LOC
+#     endif
       IW( IWPOSCB + 1+KEEP(IXSZ) ) = NCOL
       IW( IWPOSCB + 2+KEEP(IXSZ) ) = - NASS
       IW( IWPOSCB + 3+KEEP(IXSZ) ) = NROW
@@ -130,11 +134,11 @@ C
       IF ( KEEP(50) .eq. 0 ) THEN
         IW( IWPOSCB + 7+KEEP(IXSZ) ) = S_ROOTBAND_INIT
         IF (NSLAVES_RECU.GT.0) THEN
-         write(6,*) " Internal error in DMUMPS_PROCESS_DESC_BANDE "
-         CALL MUMPS_ABORT()
+          write(6,*) " Internal error in DMUMPS_PROCESS_DESC_BANDE "
+          CALL MUMPS_ABORT()
         ENDIF
       ELSE
-        IW( IWPOSCB + 7+KEEP(IXSZ) ) = 0
+        IW( IWPOSCB+7+KEEP(IXSZ) ) = huge(IW(IWPOSCB+7+KEEP(IXSZ)))
         IW( IWPOSCB + 8+KEEP(IXSZ) ) = NFRONT
         IW( IWPOSCB + 9+KEEP(IXSZ) ) = S_ROOTBAND_INIT
         IW( IWPOSCB + 7+XTRA_SLAVES_SYM+KEEP(IXSZ):
@@ -142,9 +146,10 @@ C
      &       BUFR( IBUFR: IBUFR - 1 + NSLAVES_RECU )
       END IF
       TNBPROCFILS(STEP( INODE )) = NBPROCFILS
-#if ! defined(NO_XXNBPR)
+#     if ! defined(NO_XXNBPR)
       IW(IWPOSCB+1+XXNBPR)=NBPROCFILS
-#endif
+#     endif
+      IW(IWPOSCB+1+XXLR)=LRSTATUS
       IF (NBPROCFILS .EQ. 0) THEN
       ENDIF
       RETURN
@@ -166,17 +171,18 @@ C
      &
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE,
      &    STACK_RIGHT_AUTHORIZED
+     &    , LRGROUPS
      & )
-#if ! defined(NO_FDM_DESCBAND)
+#     if ! defined(NO_FDM_DESCBAND)
       USE MUMPS_FAC_DESCBAND_DATA_M
-#endif
+#     endif
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       INTEGER, INTENT(IN) :: INODE  
       TYPE (DMUMPS_ROOT_STRUC) :: root
       INTEGER KEEP(500), ICNTL(40)
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION       DKEEP(130)
+      DOUBLE PRECISION       DKEEP(230)
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER COMM_LOAD, ASS_IRECV
       INTEGER BUFR( LBUFR )
@@ -185,6 +191,7 @@ C
       INTEGER N, LIW
       INTEGER IW( LIW )
       DOUBLE PRECISION A( LA )
+      INTEGER, intent(in) :: LRGROUPS(N)
       INTEGER(8) :: PTRAST(KEEP(28))
       INTEGER(8) :: PTRFAC(KEEP(28))
       INTEGER(8) :: PAMASTER(KEEP(28))
@@ -204,12 +211,12 @@ C
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
       INTEGER ITLOC( N + KEEP(253) ), FILS( N )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
-      INTEGER PTRARW( LPTRAR ), PTRAIW( LPTRAR )
+      INTEGER(8), INTENT(IN) :: PTRARW( LPTRAR ), PTRAIW( LPTRAR )
       INTEGER ND( KEEP(28) ), FRERE( KEEP(28) )
       INTEGER ISTEP_TO_INIV2(KEEP(71)),
      &        TAB_POS_IN_PERE(SLAVEF+2,max(1,KEEP(56)))
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max(1,KEEP(13)) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
+      INTEGER INTARR( KEEP8(27) )
       LOGICAL, intent(in) :: STACK_RIGHT_AUTHORIZED
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
@@ -225,10 +232,10 @@ C
       EXTERNAL MUMPS_PROCNODE
       SRC_DESCBAND = MUMPS_PROCNODE( PROCNODE_STEPS(STEP(INODE)),
      &           SLAVEF )
-#if ! defined(NO_FDM_DESCBAND)
+#     if ! defined(NO_FDM_DESCBAND)
       IF (MUMPS_FDBD_IS_DESCBAND_STORED( INODE, IWHANDLER )) THEN 
         CALL MUMPS_FDBD_RETRIEVE_DESCBAND(IWHANDLER, DESCBAND_STRUC)
-        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1:),
+        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1),
      &       DESCBAND_STRUC%LBUFR,
      &       LBUFR_BYTES,
      &       IWPOS, IWPOSCB,
@@ -242,11 +249,12 @@ C
         CALL MUMPS_FDBD_FREE_DESCBAND_STRUC(IW(PTRIST(STEP(INODE))+XXA))
       ELSE 
         IF (INODE_WAITED_FOR.GT.0) THEN
-          WRITE(*,*) " Internal error 1 in DMUMPS_TREAT_DESCBAND "
+          WRITE(*,*) " Internal error 1 in DMUMPS_TREAT_DESCBAND",
+     &    INODE, INODE_WAITED_FOR
           CALL MUMPS_ABORT()
         ENDIF
         INODE_WAITED_FOR = INODE
-#endif
+#     endif
       DO WHILE (PTRIST(STEP(INODE)) .EQ. 0)
         BLOCKING = .TRUE.
         SET_IRECV = .FALSE.
@@ -261,26 +269,25 @@ C
      &    PTLUST, PTRFAC,
      &    PTRAST, STEP, PIMASTER, PAMASTER, NSTK_S, COMP,
      &    IFLAG, IERROR, COMM,
-     &    NBPROCFILS,
-     &    IPOOL, LPOOL, LEAF,
+     &    NBPROCFILS, IPOOL, LPOOL, LEAF,
      &    NBFIN, MYID, SLAVEF,
-     &
      &    root, OPASSW, OPELIW, ITLOC, RHS_MUMPS,
      &    FILS, PTRARW, PTRAIW,
      &    INTARR, DBLARR, ICNTL, KEEP,KEEP8,DKEEP, ND, FRERE,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE, .TRUE. 
-     &     )
+     &    , LRGROUPS
+     &    )
         IF (IFLAG .LT. 0) THEN
           RETURN
         ENDIF
       ENDDO
-#if ! defined(NO_FDM_DESCBAND)
+#     if ! defined(NO_FDM_DESCBAND)
         INODE_WAITED_FOR = -1
       ENDIF
-#endif
+#     endif
       RETURN
  500  CONTINUE
-      CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+      CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
       RETURN
       END SUBROUTINE DMUMPS_TREAT_DESCBAND

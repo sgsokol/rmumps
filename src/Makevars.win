@@ -1,10 +1,10 @@
-DMUMPS=lib/MUMPS_5.0.1
+DMUMPS=lib/MUMPS_5.1.1
 
-PKG_CXXFLAGS=-I$(DMUMPS)/include
-PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_CXXFLAGS=-I$(DMUMPS)/include $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -lpthread $(SHLIB_OPENMP_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 $(SHLIB): lib/liballmumps.a lib/libscotch.a
 
 lib/liballmumps.a:
-	$(MAKE) -C lib -f Makefile.win \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="$(LDFLAGS)" INC_OS=".win"
+	$(MAKE) -C lib \
+	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS) $(SHLIB_OPENMP_CFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS) $(SHLIB_OPENMP_FCFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" LDFLAGS="$(LDFLAGS) $(SHLIB_OPENMP_CFLAGS)" INC_OS=".win"

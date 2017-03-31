@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -22,15 +22,16 @@ C
      &   IPOOL, LPOOL, LEAF, ND, FRERE_STEPS, LPTRAR, NELT,
      &   FRTPTR, FRTELT, 
      &   ISTEP_TO_INIV2, TAB_POS_IN_PERE 
+     &               , LRGROUPS
      &   )
       USE DMUMPS_LOAD
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       TYPE (DMUMPS_ROOT_STRUC) :: root
       INTEGER ICNTL( 40 ), KEEP( 500 )
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER COMM_LOAD, ASS_IRECV, MSGLEN
       INTEGER BUFR( LBUFR )
@@ -47,12 +48,13 @@ C
       INTEGER NBPROCFILS( KEEP(28) )
       INTEGER IW( LIW )
       DOUBLE PRECISION A( LA )
+      INTEGER, intent(in) :: LRGROUPS(N)
       INTEGER ITLOC( N + KEEP(253)), NSTK_S( KEEP(28) ), FILS( N )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
       INTEGER ND(KEEP(28)), FRERE_STEPS( KEEP(28) )
-      INTEGER PTRARW( LPTRAR ), PTRAIW( LPTRAR )
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max( 1,KEEP(13)) )
+      INTEGER(8), INTENT(IN) :: PTRARW( LPTRAR ), PTRAIW( LPTRAR )
+      INTEGER INTARR( KEEP8(27) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
       DOUBLE PRECISION OPASSW, OPELIW
       INTEGER COMM, MYID, IFLAG, IERROR
       INTEGER LEAF, LPOOL 
@@ -123,6 +125,7 @@ C
      &     INTARR, DBLARR, ICNTL,KEEP,KEEP8,DKEEP,ND, FRERE_STEPS,
      &     LPTRAR, NELT, FRTPTR, FRTELT, 
      &     ISTEP_TO_INIV2, TAB_POS_IN_PERE, .TRUE. 
+     &               , LRGROUPS
      &     )
           IF (IFLAG.LT.0) RETURN
       ENDIF
@@ -137,7 +140,7 @@ C
             IF ( LRLUS .LT. LREQA ) THEN
                IFLAG = -9
                CALL MUMPS_SET_IERROR( LREQA - LRLUS, IERROR )
-               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
                RETURN
             END IF
             CALL DMUMPS_COMPRE_NEW(N, KEEP(28), IW, LIW, A, LA,
@@ -150,13 +153,13 @@ C
                WRITE(*,*) 'LRLU,LRLUS=',LRLU,LRLUS
                IFLAG = -9
                CALL MUMPS_SET_IERROR( LREQA - LRLUS, IERROR )
-               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
                RETURN
             END IF
             IF ( IWPOS + LREQI - 1 .GT. IWPOSCB ) THEN
                IFLAG  = -8
                IERROR = IWPOS + LREQI - 1 - IWPOSCB
-               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
                RETURN
             END IF
          END IF
@@ -165,6 +168,10 @@ C
          POSCONTRIB = POSFAC
          POSFAC = POSFAC + LREQA
          KEEP8(67) = min(LRLUS, KEEP8(67))
+         KEEP8(70) = KEEP8(70) - LREQA
+         KEEP8(68) = min(KEEP8(70), KEEP8(68))
+         KEEP8(71) = KEEP8(71) - LREQA
+         KEEP8(69) = min(KEEP8(71), KEEP8(69))
          CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &        LA-LRLUS,0_8,LREQA,KEEP,KEEP8,LRLUS)
          IF  ( SLAVE_NODE ) THEN
@@ -273,10 +280,10 @@ C
                IF(NFS4FATHER .GT. 0) THEN
                   CALL DMUMPS_BUF_MAX_ARRAY_MINSIZE(NFS4FATHER,IERR)
                   IF (IERR .NE. 0) THEN
-                        IERROR         = BUF_LMAX_ARRAY
-                        IFLAG          = -13
-                        CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
-                        RETURN
+                      IERROR         = BUF_LMAX_ARRAY
+                      IFLAG          = -13
+                      CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
+                      RETURN
                   ENDIF
                   CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
      &                 BUF_MAX_ARRAY,
@@ -350,6 +357,8 @@ C
          IWPOS = IWPOS - LREQI
          LRLU = LRLU + LREQA
          LRLUS = LRLUS + LREQA
+         KEEP8(70) = KEEP8(70) + LREQA
+         KEEP8(71) = KEEP8(71) + LREQA
          POSFAC = POSFAC - LREQA
          CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &        LA-LRLUS,0_8,-LREQA,KEEP,KEEP8,LRLUS)

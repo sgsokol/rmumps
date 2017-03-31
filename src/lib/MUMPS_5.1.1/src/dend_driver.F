@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -13,12 +13,13 @@ C
       SUBROUTINE DMUMPS_END_DRIVER( id )
       USE DMUMPS_OOC
       USE DMUMPS_STRUC_DEF
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       IMPLICIT NONE
       include 'mpif.h'
       TYPE( DMUMPS_STRUC ) :: id
       LOGICAL I_AM_SLAVE
-      INTEGER IERR, MASTER
+      INTEGER IERR
+      INTEGER MASTER
       PARAMETER ( MASTER = 0 )
 C
       I_AM_SLAVE = ( id%MYID .ne. MASTER .OR. id%KEEP(46) .NE. 0 )
@@ -74,9 +75,7 @@ C  ---------------------------------
         DEALLOCATE(id%MAPPING)
         NULLIFY(id%MAPPING)
       END IF
-C  Schur is now user-data
-C      IF (associated(id%SCHUR)) DEALLOCATE(id%SCHUR)
-       NULLIFY(id%SCHUR_CINTERFACE)
+      NULLIFY(id%SCHUR_CINTERFACE)
 C
 C     -------------------------------------
 C     Always deallocate scaling arrays
@@ -101,10 +100,6 @@ C     -------------------------------------
         DEALLOCATE(id%PTRFAC)
         NULLIFY(id%PTRFAC)
       END IF
-      IF (associated(id%POIDS)) THEN
-        DEALLOCATE(id%POIDS)
-        NULLIFY(id%POIDS)
-      ENDIF
       IF (associated(id%IS)) THEN
         DEALLOCATE(id%IS)
         NULLIFY(id%IS)
@@ -184,6 +179,7 @@ c     ---------------------
       IF (associated(id%RHSCOMP)) THEN
         DEALLOCATE(id%RHSCOMP)
         NULLIFY(id%RHSCOMP)
+        id%KEEP8(25)=0_8
       ENDIF
       IF (associated(id%POSINRHSCOMP_ROW)) THEN
         DEALLOCATE(id%POSINRHSCOMP_ROW)
@@ -192,6 +188,7 @@ c     ---------------------
       IF (id%POSINRHSCOMP_COL_ALLOC) THEN
         DEALLOCATE(id%POSINRHSCOMP_COL)
         NULLIFY(id%POSINRHSCOMP_COL)
+        id%POSINRHSCOMP_COL_ALLOC = .FALSE.
       ENDIF
 C     ------------------------------------------------
 C     For hybrid host and element entry,
@@ -314,28 +311,46 @@ C     Node partitionning (only allocated on slaves)
         DEALLOCATE(id%COST_TRAV)
         NULLIFY(id%COST_TRAV)
       ENDIF
+      IF (associated(id%CB_SON_SIZE)) THEN
+        DEALLOCATE(id%CB_SON_SIZE)
+        NULLIFY(id%CB_SON_SIZE)
+      ENDIF
+      IF (associated(id%SUP_PROC)) THEN
+         DEALLOCATE(id%SUP_PROC)
+         NULLIFY(id%SUP_PROC)
+      ENDIF
 c     IF (id%KEEP(201).GT.0) THEN
-        IF(associated (id%OOC_INODE_SEQUENCE))THEN
-           DEALLOCATE(id%OOC_INODE_SEQUENCE)
-           NULLIFY(id%OOC_INODE_SEQUENCE)
-        ENDIF
-        IF(associated (id%OOC_TOTAL_NB_NODES))THEN
-           DEALLOCATE(id%OOC_TOTAL_NB_NODES)
-           NULLIFY(id%OOC_TOTAL_NB_NODES)
-        ENDIF
-        IF(associated (id%OOC_SIZE_OF_BLOCK))THEN
-           DEALLOCATE(id%OOC_SIZE_OF_BLOCK)
-           NULLIFY(id%OOC_SIZE_OF_BLOCK)
-        ENDIF
-        IF(associated (id%OOC_VADDR))THEN
-           DEALLOCATE(id%OOC_VADDR)
-           NULLIFY(id%OOC_VADDR)
-        ENDIF
-        IF(associated (id%OOC_NB_FILES))THEN
-           DEALLOCATE(id%OOC_NB_FILES)
-           NULLIFY(id%OOC_NB_FILES)
-        ENDIF
+      IF(associated (id%OOC_INODE_SEQUENCE))THEN
+         DEALLOCATE(id%OOC_INODE_SEQUENCE)
+         NULLIFY(id%OOC_INODE_SEQUENCE)
+      ENDIF
+      IF(associated (id%OOC_TOTAL_NB_NODES))THEN
+         DEALLOCATE(id%OOC_TOTAL_NB_NODES)
+         NULLIFY(id%OOC_TOTAL_NB_NODES)
+      ENDIF
+      IF(associated (id%OOC_SIZE_OF_BLOCK))THEN
+         DEALLOCATE(id%OOC_SIZE_OF_BLOCK)
+         NULLIFY(id%OOC_SIZE_OF_BLOCK)
+      ENDIF
+      IF(associated (id%OOC_VADDR))THEN
+         DEALLOCATE(id%OOC_VADDR)
+         NULLIFY(id%OOC_VADDR)
+      ENDIF
+      IF(associated (id%OOC_NB_FILES))THEN
+         DEALLOCATE(id%OOC_NB_FILES)
+         NULLIFY(id%OOC_NB_FILES)
+      ENDIF
 c     ENDIF
+!     IF(id%KEEP(486).NE.0) THEN
+        IF (associated(id%LRGROUPS)) THEN
+           DEALLOCATE(id%LRGROUPS)
+           NULLIFY(id%LRGROUPS)
+        ENDIF
+!     ENDIF
+        IF (associated(id%SINGULAR_VALUES)) THEN
+           DEALLOCATE(id%SINGULAR_VALUES)
+           NULLIFY(id%SINGULAR_VALUES)
+        ENDIF        
 C     ----------------------------------------------
 C     Deallocate S only after finishing the receives
 C     (S is normally the largest memory available)
@@ -343,7 +358,6 @@ C     ----------------------------------------------
       IF (id%KEEP8(24).EQ.0_8) THEN
 C       -- deallocate only when not provided/allocated by the user
         IF (associated(id%S))        DEALLOCATE(id%S)
-      ELSE
       ENDIF
       NULLIFY(id%S)
       IF (I_AM_SLAVE) THEN
@@ -372,64 +386,33 @@ C Mapping information used during solve
         DEALLOCATE(id%WORKING)
         NULLIFY(id%WORKING)
       END IF
+      IF (associated(id%IPOOL_AFTER_L0_OMP)) THEN
+        DEALLOCATE(id%IPOOL_AFTER_L0_OMP)
+        NULLIFY(id%IPOOL_AFTER_L0_OMP)
+      END IF
+      IF (associated(id%IPOOL_BEFORE_L0_OMP)) THEN
+        DEALLOCATE(id%IPOOL_BEFORE_L0_OMP)
+        NULLIFY(id%IPOOL_BEFORE_L0_OMP)
+      END IF
+      IF (associated(id%PHYS_L0_OMP)) THEN
+        DEALLOCATE(id%PHYS_L0_OMP)
+        NULLIFY(id%PHYS_L0_OMP)
+      END IF
+      IF (associated(id%VIRT_L0_OMP)) THEN
+        DEALLOCATE(id%VIRT_L0_OMP)
+        NULLIFY(id%VIRT_L0_OMP)
+      END IF
+      IF (associated(id%PERM_L0_OMP)) THEN
+        DEALLOCATE(id%PERM_L0_OMP)
+        NULLIFY(id%PERM_L0_OMP)
+      END IF
+      IF (associated(id%PTR_LEAFS_L0_OMP)) THEN
+        DEALLOCATE(id%PTR_LEAFS_L0_OMP)
+        NULLIFY(id%PTR_LEAFS_L0_OMP)
+      END IF
+      IF (associated(id%L0_OMP_MAPPING)) THEN
+        DEALLOCATE(id%L0_OMP_MAPPING)
+        NULLIFY(id%L0_OMP_MAPPING)
+      END IF
       RETURN
       END SUBROUTINE DMUMPS_END_DRIVER
-      SUBROUTINE DMUMPS_FINISH_RECV(MYID,COMM,S,MAXS,MAXS_BYTES)
-      IMPLICIT NONE
-C
-C  Purpose : 
-C  =======
-C
-C  Terminate pending requests. On many systems, cancellation
-C  is implemented on the receiver side, but not on the sender side.
-C
-C  Note : To avoid an MPI error on reception, on some implementations
-C         the only way to empty the MPI receive buffers is to
-C         receive the complete message. As S should be the largest
-C         array available, we try to receive into S. This is a
-C         bit awkward, but even the handling of errors is not
-C         possible with some implementations !!
-C
-      INCLUDE 'mpif.h'
-      INTEGER :: IERR
-      INTEGER :: STATUS(MPI_STATUS_SIZE)
-C
-C  Arguments :
-C  =========
-C
-      INTEGER COMM, MYID, MAXS, MAXS_BYTES
-      INTEGER S( MAXS )
-C
-C  Local variables
-C  ===============
-C
-      INTEGER MSGTAG, MSGSOU, MSGLEN
-      LOGICAL FLAG
-      FLAG = .TRUE.
-      DO WHILE ( FLAG )
-        CALL MPI_IPROBE( MPI_ANY_SOURCE, MPI_ANY_TAG, COMM,
-     &                   FLAG, STATUS, IERR )
-        IF (FLAG) THEN
-          MSGTAG=STATUS(MPI_TAG)
-          MSGSOU=STATUS(MPI_SOURCE)
-          CALL MPI_GET_COUNT(STATUS,MPI_PACKED,MSGLEN,IERR)
-C         -------------------------------------
-C         We hope that buffer S is large enough
-C         -------------------------------------
-          IF (MSGLEN <= MAXS_BYTES) THEN
-            CALL MPI_RECV(S(1),MAXS_BYTES,MPI_PACKED,
-     &      MSGSOU, MSGTAG, COMM, STATUS, IERR)
-          ELSE
-C           We have to exit from the while,
-C           otherwise we are in an infinite
-C           loop
-            EXIT
-          ENDIF
-c         CALL MPI_ERRHANDLER_SET( COMM, MPI_ERRORS_ARE_FATAL, IERR )
-        END IF
-      END DO
-C     Barrier for safety: in case DMUMPS_FINISH_RECV
-C     is followed by deallocation of send buffers.
-      CALL MPI_BARRIER( COMM, IERR )
-      RETURN
-      END SUBROUTINE DMUMPS_FINISH_RECV

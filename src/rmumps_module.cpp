@@ -13,6 +13,10 @@ using namespace Rcpp;
 #define USE_COMM_WORLD -987654
 #define ICNTL(I) icntl[(I)-1] /* macro s.t. indices match documentation */
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "../inst/include/rmumps.h"
 Rmumps::~Rmumps() { clean(); }
 void Rmumps::clean() {
@@ -26,6 +30,16 @@ bool Rmumps::get_copy() {
 }
 void Rmumps::set_copy(bool copy_) {
   copy=copy_;
+}
+int Rmumps::get_ncore() {
+  return ncore;
+}
+void Rmumps::set_ncore(int ncore_) {
+#ifdef _OPENMP
+  ncore=ncore_;
+#else
+  ncore=1;
+#endif
 }
 int Rmumps::get_sym() {
   return param.sym;
@@ -62,7 +76,16 @@ void Rmumps::do_job(int job) {
     break;
   }
   param.job=job;
+  // set core number to use in openmp
+//#ifdef _OPENMP
+//#pragma omp parallel
+  //{
+  //omp_set_num_threads(ncore);
+//#endif
   dmumps_c(&param);
+//#ifdef _OPENMP
+//  }
+//#endif
   if (param.info[0] != 0) {
     //clean();
     stop("rmumps: info[1]=%d, info[2]=%d", param.info[0], param.info[1]);
@@ -588,6 +611,7 @@ void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_
 
 void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) {
   this->sym=sym;
+  this->ncore=1;
   /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
   param.job=JOB_INIT;
   param.keep[39]=0; // otherwise valgrind complaints
@@ -644,6 +668,7 @@ RCPP_MODULE(mod_Rmumps){
   .property("mrhs", &Rmumps::get_mrhs, &Rmumps::set_mrhs)
   .field("copy", &Rmumps::copy, "copy or not input parameters")
   .field_readonly("sym", &Rmumps::sym)
+  .field("ncore", &Rmumps::ncore, "how many cores to use within OpenMP regions")
   
   .method("symbolic", &Rmumps::symbolic , "Analyze sparsity pattern")
   .method("numeric", &Rmumps::numeric, "Factorize sparse matrix")

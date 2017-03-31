@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -419,11 +419,10 @@ C
       END SUBROUTINE MUMPS_SORT_INT_DEC
       SUBROUTINE MUMPS_ABORT()
       IMPLICIT NONE
-C      INCLUDE 'mpif.h'
-C      INTEGER IERR, IERRCODE
-C      IERRCODE = -99
-C      CALL MPI_ABORT(MPI_COMM_WORLD, IERRCODE, IERR)
-      CALL REXIT("MUMPS abort")
+      INCLUDE 'mpif.h'
+      INTEGER IERR, IERRCODE
+      IERRCODE = -99
+      CALL MPI_ABORT(MPI_COMM_WORLD, IERRCODE, IERR)
       RETURN
       END SUBROUTINE MUMPS_ABORT
       SUBROUTINE MUMPS_GET_PERLU(KEEP12,ICNTL14,
@@ -479,476 +478,6 @@ C      CALL MPI_ABORT(MPI_COMM_WORLD, IERRCODE, IERR)
       OUT=int(DOUT,kind=8)
       RETURN
       END SUBROUTINE MUMPS_ALLREDUCEI8
-      SUBROUTINE MUMPS_IREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,
-     &     STRING, MEMCNT, ERRCODE)
-      INTEGER, POINTER             :: ARRAY(:)
-      INTEGER                      :: INFO(:)
-      INTEGER                      :: MINSIZE, LP
-      LOGICAL, OPTIONAL            :: FORCE
-      LOGICAL, OPTIONAL            :: COPY
-      CHARACTER, OPTIONAL          :: STRING*(*)
-      INTEGER, OPTIONAL            :: ERRCODE, MEMCNT
-      LOGICAL                      :: ICOPY, IFORCE
-      INTEGER, POINTER             :: TEMP(:)
-      INTEGER                      :: I, IERR, ERRTPL(2)
-      CHARACTER(len=60)            :: FMTA, FMTD
-      IF(present(COPY)) THEN
-         ICOPY = COPY
-      ELSE
-         ICOPY = .FALSE.
-      END IF
-      IF (present(FORCE)) THEN
-         IFORCE = FORCE
-      ELSE
-         IFORCE = .FALSE.
-      END IF
-      IF (present(STRING)) THEN
-         FMTA = "Allocation failed inside realloc: "//STRING
-         FMTD = "Deallocation failed inside realloc: "//STRING
-      ELSE
-         FMTA = "Allocation failed inside realloc: "
-         FMTD = "Deallocation failed inside realloc: "
-      END IF
-      IF (present(ERRCODE)) THEN
-         ERRTPL(1) = ERRCODE
-         ERRTPL(2) = MINSIZE
-      ELSE
-         ERRTPL(1) = -13
-         ERRTPL(2) = MINSIZE
-      END IF
-      IF(ICOPY) THEN
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               allocate(TEMP(MINSIZE), STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               ELSE
-                  IF(present(MEMCNT))MEMCNT = MEMCNT+MINSIZE
-               END IF
-               DO I=1, min(size(ARRAY), MINSIZE)
-                  TEMP(I) = ARRAY(I)
-               END DO
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-               NULLIFY(ARRAY)
-               ARRAY => TEMP
-               NULLIFY(TEMP)
-            END IF
-         ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
-            RETURN
-         END IF
-      ELSE
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-            ELSE
-               RETURN
-            END IF
-         END IF
-         allocate(ARRAY(MINSIZE), STAT=IERR)
-         IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
-            INFO(1:2) = ERRTPL
-            RETURN
-         ELSE
-            IF(present(MEMCNT)) MEMCNT = MEMCNT+MINSIZE
-         END IF
-      END IF
-      RETURN
-      END SUBROUTINE MUMPS_IREALLOC
-      SUBROUTINE MUMPS_SREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,
-     &     STRING, MEMCNT, ERRCODE)
-      REAL(kind(1.E0)), POINTER    :: ARRAY(:)
-      INTEGER                      :: INFO(:)
-      INTEGER                      :: MINSIZE, LP
-      LOGICAL, OPTIONAL            :: FORCE
-      LOGICAL, OPTIONAL            :: COPY
-      CHARACTER, OPTIONAL          :: STRING*(*)
-      INTEGER, OPTIONAL            :: ERRCODE, MEMCNT
-      LOGICAL                      :: ICOPY, IFORCE
-      REAL(kind(1.E0)), POINTER             :: TEMP(:)
-      INTEGER                      :: I, IERR, ERRTPL(2)
-      CHARACTER(len=60)            :: FMTA, FMTD
-      IF(present(COPY)) THEN
-         ICOPY = COPY
-      ELSE
-         ICOPY = .FALSE.
-      END IF
-      IF (present(FORCE)) THEN
-         IFORCE = FORCE
-      ELSE
-         IFORCE = .FALSE.
-      END IF
-      IF (present(STRING)) THEN
-         FMTA = "Allocation failed inside realloc: "//STRING
-         FMTD = "Deallocation failed inside realloc: "//STRING
-      ELSE
-         FMTA = "Allocation failed inside realloc: "
-         FMTD = "Deallocation failed inside realloc: "
-      END IF
-      IF (present(ERRCODE)) THEN
-         ERRTPL(1) = ERRCODE
-         ERRTPL(2) = MINSIZE
-      ELSE
-         ERRTPL(1) = -13
-         ERRTPL(2) = MINSIZE
-      END IF
-      IF(ICOPY) THEN
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               allocate(TEMP(MINSIZE), STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               ELSE
-                  IF(present(MEMCNT))MEMCNT = MEMCNT+MINSIZE
-               END IF
-               DO I=1, min(size(ARRAY), MINSIZE)
-                  TEMP(I) = ARRAY(I)
-               END DO
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-               NULLIFY(ARRAY)
-               ARRAY => TEMP
-               NULLIFY(TEMP)
-            END IF
-         ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
-            RETURN
-         END IF
-      ELSE
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-            ELSE
-               RETURN
-            END IF
-         END IF
-         allocate(ARRAY(MINSIZE), STAT=IERR)
-         IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
-            INFO(1:2) = ERRTPL
-            RETURN
-         ELSE
-            IF(present(MEMCNT)) MEMCNT = MEMCNT+MINSIZE
-         END IF
-      END IF
-      RETURN
-      END SUBROUTINE MUMPS_SREALLOC
-      SUBROUTINE MUMPS_DREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,
-     &     STRING, MEMCNT, ERRCODE)
-      REAL(kind(1.D0)), POINTER    :: ARRAY(:)
-      INTEGER                      :: INFO(:)
-      INTEGER                      :: MINSIZE, LP
-      LOGICAL, OPTIONAL            :: FORCE
-      LOGICAL, OPTIONAL            :: COPY
-      CHARACTER, OPTIONAL          :: STRING*(*)
-      INTEGER, OPTIONAL            :: ERRCODE, MEMCNT
-      LOGICAL                      :: ICOPY, IFORCE
-      REAL(kind(1.D0)), POINTER    :: TEMP(:)
-      INTEGER                      :: I, IERR, ERRTPL(2)
-      CHARACTER(len=60)            :: FMTA, FMTD
-      IF(present(COPY)) THEN
-         ICOPY = COPY
-      ELSE
-         ICOPY = .FALSE.
-      END IF
-      IF (present(FORCE)) THEN
-         IFORCE = FORCE
-      ELSE
-         IFORCE = .FALSE.
-      END IF
-      IF (present(STRING)) THEN
-         FMTA = "Allocation failed inside realloc: "//STRING
-         FMTD = "Deallocation failed inside realloc: "//STRING
-      ELSE
-         FMTA = "Allocation failed inside realloc: "
-         FMTD = "Deallocation failed inside realloc: "
-      END IF
-      IF (present(ERRCODE)) THEN
-         ERRTPL(1) = ERRCODE
-         ERRTPL(2) = MINSIZE
-      ELSE
-         ERRTPL(1) = -13
-         ERRTPL(2) = MINSIZE
-      END IF
-      IF(ICOPY) THEN
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               allocate(TEMP(MINSIZE), STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               ELSE
-                  IF(present(MEMCNT))MEMCNT = MEMCNT+MINSIZE
-               END IF
-               DO I=1, min(size(ARRAY), MINSIZE)
-                  TEMP(I) = ARRAY(I)
-               END DO
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-               NULLIFY(ARRAY)
-               ARRAY => TEMP
-               NULLIFY(TEMP)
-            END IF
-         ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
-            RETURN
-         END IF
-      ELSE
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-            ELSE
-               RETURN
-            END IF
-         END IF
-         allocate(ARRAY(MINSIZE), STAT=IERR)
-         IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
-            INFO(1:2) = ERRTPL
-            RETURN
-         ELSE
-            IF(present(MEMCNT)) MEMCNT = MEMCNT+MINSIZE
-         END IF
-      END IF
-      RETURN
-      END SUBROUTINE MUMPS_DREALLOC
-      SUBROUTINE MUMPS_CREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,
-     &     STRING, MEMCNT, ERRCODE)
-      COMPLEX(kind((1.E0,1.E0))), POINTER             :: ARRAY(:)
-      INTEGER                      :: INFO(:)
-      INTEGER                      :: MINSIZE, LP
-      LOGICAL, OPTIONAL            :: FORCE
-      LOGICAL, OPTIONAL            :: COPY
-      CHARACTER, OPTIONAL          :: STRING*(*)
-      INTEGER, OPTIONAL            :: ERRCODE, MEMCNT
-      LOGICAL                      :: ICOPY, IFORCE
-      COMPLEX(kind((1.E0,1.E0))), POINTER             :: TEMP(:)
-      INTEGER                      :: I, IERR, ERRTPL(2)
-      CHARACTER(len=60)            :: FMTA, FMTD
-      IF(present(COPY)) THEN
-         ICOPY = COPY
-      ELSE
-         ICOPY = .FALSE.
-      END IF
-      IF (present(FORCE)) THEN
-         IFORCE = FORCE
-      ELSE
-         IFORCE = .FALSE.
-      END IF
-      IF (present(STRING)) THEN
-         FMTA = "Allocation failed inside realloc: "//STRING
-         FMTD = "Deallocation failed inside realloc: "//STRING
-      ELSE
-         FMTA = "Allocation failed inside realloc: "
-         FMTD = "Deallocation failed inside realloc: "
-      END IF
-      IF (present(ERRCODE)) THEN
-         ERRTPL(1) = ERRCODE
-         ERRTPL(2) = MINSIZE
-      ELSE
-         ERRTPL(1) = -13
-         ERRTPL(2) = MINSIZE
-      END IF
-      IF(ICOPY) THEN
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               allocate(TEMP(MINSIZE), STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               ELSE
-                  IF(present(MEMCNT))MEMCNT = MEMCNT+MINSIZE
-               END IF
-               DO I=1, min(size(ARRAY), MINSIZE)
-                  TEMP(I) = ARRAY(I)
-               END DO
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-               NULLIFY(ARRAY)
-               ARRAY => TEMP
-               NULLIFY(TEMP)
-            END IF
-         ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
-            RETURN
-         END IF
-      ELSE
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-            ELSE
-               RETURN
-            END IF
-         END IF
-         allocate(ARRAY(MINSIZE), STAT=IERR)
-         IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
-            INFO(1:2) = ERRTPL
-            RETURN
-         ELSE
-            IF(present(MEMCNT)) MEMCNT = MEMCNT+MINSIZE
-         END IF
-      END IF
-      RETURN
-      END SUBROUTINE MUMPS_CREALLOC
-      SUBROUTINE MUMPS_ZREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,
-     &     STRING, MEMCNT, ERRCODE)
-      COMPLEX(kind((1.D0,1.D0))), POINTER             :: ARRAY(:)
-      INTEGER                      :: INFO(:)
-      INTEGER                      :: MINSIZE, LP
-      LOGICAL, OPTIONAL            :: FORCE
-      LOGICAL, OPTIONAL            :: COPY
-      CHARACTER, OPTIONAL          :: STRING*(*)
-      INTEGER, OPTIONAL            :: ERRCODE, MEMCNT
-      LOGICAL                      :: ICOPY, IFORCE
-      COMPLEX(kind((1.D0,1.D0))), POINTER             :: TEMP(:)
-      INTEGER                      :: I, IERR, ERRTPL(2)
-      CHARACTER(len=60)            :: FMTA, FMTD
-      IF(present(COPY)) THEN
-         ICOPY = COPY
-      ELSE
-         ICOPY = .FALSE.
-      END IF
-      IF (present(FORCE)) THEN
-         IFORCE = FORCE
-      ELSE
-         IFORCE = .FALSE.
-      END IF
-      IF (present(STRING)) THEN
-         FMTA = "Allocation failed inside realloc: "//STRING
-         FMTD = "Deallocation failed inside realloc: "//STRING
-      ELSE
-         FMTA = "Allocation failed inside realloc: "
-         FMTD = "Deallocation failed inside realloc: "
-      END IF
-      IF (present(ERRCODE)) THEN
-         ERRTPL(1) = ERRCODE
-         ERRTPL(2) = MINSIZE
-      ELSE
-         ERRTPL(1) = -13
-         ERRTPL(2) = MINSIZE
-      END IF
-      IF(ICOPY) THEN
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               allocate(TEMP(MINSIZE), STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               ELSE
-                  IF(present(MEMCNT))MEMCNT = MEMCNT+MINSIZE
-               END IF
-               DO I=1, min(size(ARRAY), MINSIZE)
-                  TEMP(I) = ARRAY(I)
-               END DO
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-               NULLIFY(ARRAY)
-               ARRAY => TEMP
-               NULLIFY(TEMP)
-            END IF
-         ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
-            RETURN
-         END IF
-      ELSE
-         IF(associated(ARRAY)) THEN
-            IF ((size(ARRAY) .LT. MINSIZE) .OR.
-     &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
-               IF(present(MEMCNT))MEMCNT = MEMCNT-size(ARRAY)
-               deallocate(ARRAY, STAT=IERR)
-               IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
-                  INFO(1:2) = ERRTPL
-                  RETURN
-               END IF
-            ELSE
-               RETURN
-            END IF
-         END IF
-         allocate(ARRAY(MINSIZE), STAT=IERR)
-         IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
-            INFO(1:2) = ERRTPL
-            RETURN
-         ELSE
-            IF(present(MEMCNT)) MEMCNT = MEMCNT+MINSIZE
-         END IF
-      END IF
-      RETURN
-      END SUBROUTINE MUMPS_ZREALLOC
       SUBROUTINE MUMPS_SETI8TOI4(I8, I4)
       IMPLICIT NONE
       INTEGER   , INTENT(OUT) :: I4
@@ -1206,3 +735,99 @@ C      CALL MPI_ABORT(MPI_COMM_WORLD, IERRCODE, IERR)
       RETURN
       END SUBROUTINE CHECK_EQUAL
 #endif
+      SUBROUTINE MUMPS_GET_PROC_PER_NODE(K414, MyID, NbProcs, COMM)
+      IMPLICIT NONE
+      INCLUDE 'mpif.h'
+      INTEGER :: K414, MyID, NbProcs, COMM, ALLOCOK
+      INTEGER :: ierr,MyNAME_length,MyNAME_length_RCV,i,j
+      CHARACTER(len=MPI_MAX_PROCESSOR_NAME) :: MyNAME
+      CHARACTER, dimension(:), allocatable :: MyNAME_TAB,MyName_TAB_RCV
+      logical :: SAME_NAME
+      call MPI_GET_PROCESSOR_NAME(MyNAME, MyNAME_length, ierr)
+      allocate(MyName_TAB(MyNAME_length), STAT=ALLOCOK)
+      IF(ALLOCOK.LT.0) THEN
+         write(*,*) "Allocation error in MUMPS_GET_PROC_PER_NODE"
+         call MUMPS_ABORT()
+      ENDIF
+      DO i=1, MyNAME_length
+         MyNAME_TAB(i) = MyNAME(i:i)
+      ENDDO
+      K414=0
+      do i=0, NbProcs-1
+         if(MyID .eq. i) then
+            MyNAME_length_RCV  = MyNAME_length
+         else
+            MyNAME_length_RCV = 0
+         endif
+         call MPI_BCAST(MyNAME_length_RCV,1,MPI_INTEGER,
+     &        i,COMM,ierr)
+         allocate(MyNAME_TAB_RCV(MyNAME_length_RCV), STAT=ALLOCOK)
+         IF(ALLOCOK.LT.0) THEN
+            write(*,*) "Allocation error in MUMPS_GET_PROC_PER_NODE"
+            call MUMPS_ABORT()
+         ENDIF
+         if(MyID .eq. i) then
+            MyNAME_TAB_RCV = MyNAME_TAB
+         endif
+         call MPI_BCAST(MyNAME_TAB_RCV,MyNAME_length_RCV,MPI_CHARACTER,
+     &        i,COMM,ierr)
+         SAME_NAME=.FALSE.
+         IF(MyNAME_length .EQ. MyNAME_length_RCV) THEN
+            DO J=1, MyNAME_length
+               IF(MyNAME_TAB(J) .NE. MyNAME_TAB_RCV(J)) THEN
+                  goto 100
+               ENDIF
+            ENDDO
+            SAME_NAME=.TRUE.
+         ENDIF
+ 100     continue
+         IF(SAME_NAME) k414=k414+1
+         deallocate(MyName_TAB_RCV)
+      enddo
+      deallocate(MyName_TAB)
+      END SUBROUTINE MUMPS_GET_PROC_PER_NODE
+      SUBROUTINE MUMPS_COPY_INT_32TO64 (INTAB, SIZETAB, OUTTAB8)
+      INTEGER, intent(in)     ::  SIZETAB
+      INTEGER, intent(in)     ::  INTAB(SIZETAB)
+      INTEGER(8), intent(out) ::  OUTTAB8(SIZETAB)
+      INTEGER :: I
+      DO I=1,SIZETAB
+       OUTTAB8(I) = int(INTAB(I),8)
+      ENDDO
+      RETURN
+      END SUBROUTINE MUMPS_COPY_INT_32TO64
+      SUBROUTINE MUMPS_COPY_INT_32TO64_64C(INTAB, SIZETAB8, OUTTAB8)
+      INTEGER(8), intent(in)  ::  SIZETAB8
+      INTEGER, intent(in)     ::  INTAB(SIZETAB8)
+      INTEGER(8), intent(out) ::  OUTTAB8(SIZETAB8)
+      INTEGER(8) :: I8
+      LOGICAL    :: OMP_FLAG
+      OMP_FLAG = (SIZETAB8 .GE.500000_8 )
+!$OMP PARALLEL DO PRIVATE(I8)
+!$OMP&         IF(OMP_FLAG)
+      DO I8=1_8, SIZETAB8
+       OUTTAB8(I8) = int(INTAB(I8),8)
+      ENDDO
+!$OMP END PARALLEL DO
+      RETURN
+      END SUBROUTINE MUMPS_COPY_INT_32TO64_64C
+      SUBROUTINE MUMPS_COPY_INT_64TO32 (INTAB8, SIZETAB, OUTTAB)
+      INTEGER, intent(in)    ::  SIZETAB
+      INTEGER(8), intent(in) ::  INTAB8(SIZETAB)
+      INTEGER, intent(out)   ::  OUTTAB(SIZETAB)
+      INTEGER :: I
+      DO I=1,SIZETAB
+       OUTTAB(I) = int(INTAB8(I))
+      ENDDO
+      RETURN
+      END SUBROUTINE MUMPS_COPY_INT_64TO32
+      SUBROUTINE MUMPS_GET_NNZ_INTERNAL( NNZ, NZ, NNZ_i )
+      INTEGER   , INTENT(IN)  :: NZ
+      INTEGER(8), INTENT(IN)  :: NNZ
+      INTEGER(8), INTENT(OUT) :: NNZ_i
+      IF (NNZ > 0_8) THEN
+        NNZ_i = NNZ
+      ELSE
+        NNZ_i = int(NZ, 8)
+      ENDIF
+      END SUBROUTINE MUMPS_GET_NNZ_INTERNAL

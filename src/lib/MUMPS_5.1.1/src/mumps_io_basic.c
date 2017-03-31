@@ -1,10 +1,10 @@
 /*
  *
- *  This file is part of MUMPS 5.0.1, released
- *  on Thu Jul 23 17:08:29 UTC 2015
+ *  This file is part of MUMPS 5.1.1, released
+ *  on Mon Mar 20 14:34:33 UTC 2017
  *
  *
- *  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+ *  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
  *  University of Bordeaux.
  *
  *  This version of MUMPS is provided to you free of charge. It is
@@ -469,6 +469,10 @@ MUMPS_INT mumps_init_file_structure(MUMPS_INT* _myid, long long *total_size_io,M
     case 0:
 #if ! defined( MUMPS_WIN32 )
       (mumps_files+i)->mumps_flag_open=mumps_flag_open|O_WRONLY|O_CREAT|O_TRUNC;
+#  if defined(__MINGW32__)
+      /* O_BINARY necessary */
+      (mumps_files+i)->mumps_flag_open=(mumps_files+i)->mumps_flag_open|O_BINARY;
+#  endif
 #else
       strcpy((mumps_files+i)->mumps_flag_open,"wb");
 #endif
@@ -476,6 +480,10 @@ MUMPS_INT mumps_init_file_structure(MUMPS_INT* _myid, long long *total_size_io,M
     case 1:
 #if ! defined( MUMPS_WIN32 )
       (mumps_files+i)->mumps_flag_open=mumps_flag_open|O_RDONLY|O_CREAT|O_TRUNC;
+#  if defined(__MINGW32__)
+      /* O_BINARY necessary */
+      (mumps_files+i)->mumps_flag_open=(mumps_files+i)->mumps_flag_open|O_BINARY;
+#  endif
 #else
       strcpy((mumps_files+i)->mumps_flag_open,"rb");
 #endif
@@ -483,6 +491,10 @@ MUMPS_INT mumps_init_file_structure(MUMPS_INT* _myid, long long *total_size_io,M
     case 2:
 #if ! defined( MUMPS_WIN32 )
       (mumps_files+i)->mumps_flag_open=mumps_flag_open|O_RDWR|O_CREAT|O_TRUNC;
+#  if defined(__MINGW32__)
+      /* O_BINARY necessary */
+      (mumps_files+i)->mumps_flag_open=(mumps_files+i)->mumps_flag_open|O_BINARY;
+#  endif
 #else
       strcpy((mumps_files+i)->mumps_flag_open,"rwb");
 #endif

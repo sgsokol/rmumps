@@ -1,273 +1,63 @@
-DLIB=$(realpath .)
-DMUMPS=MUMPS_5.0.1
+#DMUMPS=MUMPS_5.0.1
+DMUMPS=MUMPS_5.1.1
 DMETIS=metis-5.1.0
 DSCOTCH=scotch_6.0.4
+DLIB=../lib
 ARITH = d
-FLAGS.MPI=-I$(DMUMPS)/libseq
-FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) -I$(DMUMPS)/include
-FLAGS.PORD=-I$(DMUMPS)/PORD/include
-FLAGS.SCOTCH=-I$(DSCOTCH)/include
-FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX #-DMINGW
+FLAGS.MPI=-I../libseq
+FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -I../include
+FLAGS.PORD=-I../PORD/include
+FLAGS.SCOTCH=-I../../$(DSCOTCH)/include
+FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX
+ifeq "$(INC_OS)" ".win"
+ FLAGS.GKlib += -DMINGW
+endif
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
-PKG_CXXFLAGS=$(FLAGS.MUMPS) #-DINTSIZE64
-PKG_CFLAGS=$(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH) $(FLAGS.GKlib) $(FLAGS.metis) #-DINTSIZE64
-PKG_FFLAGS = -w $(FLAGS.MUMPS) $(FLAGS.MPI) #-fdefault-integer-8 -fcray-pointer
+PKG_CXXFLAGS += $(FLAGS.MUMPS) #-DINTSIZE64
+PKG_CFLAGS += -DAdd_ #-DINTSIZE64
+#PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
+PKG_FCFLAGS += $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
 
-SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMUMPS)/libseq/*.c $(DMUMPS)/PORD/lib/*.c $(DMETIS)/GKlib/*.c)
-SOURCES.f = $(wildcard $(DMUMPS)/libseq/*.f)
+SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMETIS)/GKlib/*.c)
 
-.PHONY: all allmumps
+FUSELIBS=$(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/libseq/libmpiseq.a $(DMUMPS)/PORD/lib/libpord.a $(DMETIS)/libmetis/libmetis.a
 
-all: allmumps scotchlibs
+#$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))
 
-OBJS_COMMON_MOD = $(addprefix $(DMUMPS)/src/,\
-        ana_omp_m.o\
-        tools_common_mod.o\
-        mumps_static_mapping.o\
-        mumps_sol_es.o\
-        fac_future_niv2_mod.o\
-        mumps_comm_ibcast.o\
-        mumps_ooc_common.o\
-        double_linked_list.o\
-        fac_asm_build_sort_index_m.o\
-        fac_asm_build_sort_index_ELT_m.o\
-        omp_tps_common_m.o\
-        mumps_l0_omp_m.o\
-        front_data_mgt_m.o\
-        fac_maprow_data_m.o\
-        fac_descband_data_m.o\
-        fac_ibct_data_m.o)
+.PHONY: all allmumps scotchlibs
 
-OBJS_COMMON_OTHER = $(addprefix $(DMUMPS)/src/,\
-        ana_orderings.o\
-        ana_AMDMF.o\
-        bcast_errors.o\
-        estim_flops.o\
-        mumps_type_size.o \
-        mumps_type2_blocking.o \
-        mumps_version.o \
-        tools_common.o \
-        mumps_print_defined.o \
-        mumps_common.o\
-        mumps_orderings.o\
-        mumps_size.o\
-        mumps_io.o\
-        mumps_io_basic.o\
-        mumps_io_thread.o\
-        mumps_io_err.o\
-        ana_set_ordering.o\
-        mumps_numa.o)
+all: allmumps
 
-OBJS_MOD = $(addprefix $(DMUMPS)/src/,\
-        $(ARITH)mumps_struc_def.o\
-        $(ARITH)mumps_comm_buffer.o\
-        $(ARITH)mumps_load.o\
-        $(ARITH)mumps_lr_data_m.o\
-        $(ARITH)mumps_ooc_buffer.o\
-        $(ARITH)mumps_ooc.o\
-        $(ARITH)ana_aux_par.o \
-        $(ARITH)ana_lr.o\
-        $(ARITH)fac_asm_master_m.o\
-        $(ARITH)fac_asm_master_ELT_m.o\
-        $(ARITH)omp_tps_m.o\
-        $(ARITH)static_ptr_m.o\
-        $(ARITH)lr_core.o\
-        $(ARITH)fac_lr.o\
-        $(ARITH)fac_omp_m.o\
-        $(ARITH)fac_front_aux.o\
-        $(ARITH)fac_front_type2_aux.o\
-        $(ARITH)fac_front_LU_type1.o\
-        $(ARITH)fac_front_LU_type2.o\
-        $(ARITH)fac_front_LDLT_type1.o\
-        $(ARITH)fac_front_LDLT_type2.o\
-        $(ARITH)fac_par_m.o\
-        )
-
-OBJS_OTHER = $(addprefix $(DMUMPS)/src/,\
-        $(ARITH)ini_driver.o\
-        $(ARITH)ana_driver.o\
-        $(ARITH)fac_driver.o\
-        $(ARITH)sol_driver.o\
-        $(ARITH)end_driver.o\
-        $(ARITH)ana_aux_ELT.o\
-        $(ARITH)ana_aux.o\
-        $(ARITH)ana_dist_m.o\
-        $(ARITH)ana_LDLT_preprocess.o\
-        $(ARITH)ana_reordertree.o\
-        $(ARITH)arrowheads.o\
-        $(ARITH)bcast_int.o\
-        $(ARITH)fac_asm_ELT.o\
-        $(ARITH)fac_asm.o\
-        $(ARITH)fac_b.o\
-        $(ARITH)fac_distrib_distentry.o\
-        $(ARITH)fac_distrib_ELT.o\
-        $(ARITH)fac_lastrtnelind.o\
-        $(ARITH)fac_mem_alloc_cb.o\
-        $(ARITH)fac_mem_compress_cb.o\
-        $(ARITH)fac_mem_free_block_cb.o\
-        $(ARITH)fac_mem_stack_aux.o\
-        $(ARITH)fac_mem_stack.o\
-        $(ARITH)fac_process_band.o\
-        $(ARITH)fac_process_blfac_slave.o\
-        $(ARITH)fac_process_blocfacto_LDLT.o\
-        $(ARITH)fac_process_blocfacto.o\
-        $(ARITH)fac_process_bf.o\
-        $(ARITH)fac_process_end_facto_slave.o\
-        $(ARITH)fac_process_contrib_type1.o\
-        $(ARITH)fac_process_contrib_type2.o\
-        $(ARITH)fac_process_contrib_type3.o\
-        $(ARITH)fac_process_maprow.o\
-        $(ARITH)fac_process_master2.o\
-        $(ARITH)fac_process_message.o\
-        $(ARITH)fac_process_root2slave.o\
-        $(ARITH)fac_process_root2son.o\
-        $(ARITH)fac_process_rtnelind.o\
-        $(ARITH)fac_root_parallel.o\
-        $(ARITH)fac_scalings.o\
-        $(ARITH)fac_determinant.o\
-        $(ARITH)fac_scalings_simScaleAbs.o\
-        $(ARITH)fac_scalings_simScale_util.o\
-        $(ARITH)fac_sol_pool.o\
-        $(ARITH)fac_type3_symmetrize.o\
-        $(ARITH)ini_defaults.o\
-        mumps_c.o\
-        $(ARITH)mumps_driver.o\
-        $(ARITH)mumps_f77.o\
-        $(ARITH)mumps_iXamax.o\
-        $(ARITH)ana_mtrans.o\
-        $(ARITH)ooc_panel_piv.o\
-        $(ARITH)rank_revealing.o\
-        $(ARITH)sol_aux.o\
-        $(ARITH)sol_bwd_aux.o\
-        $(ARITH)sol_bwd.o\
-        $(ARITH)sol_c.o\
-        $(ARITH)sol_fwd_aux.o\
-        $(ARITH)sol_fwd.o\
-        $(ARITH)sol_matvec.o\
-        $(ARITH)sol_root_parallel.o\
-        $(ARITH)tools.o\
-        $(ARITH)type3_root.o\
-        $(ARITH)mumps_restart.o)
-# Dependencies between modules:
-pre = $(DMUMPS)/src/
-$(pre)$(ARITH)mumps_load.o:		$(pre)$(ARITH)mumps_comm_buffer.o \
-        $(pre)$(ARITH)mumps_struc_def.o \
-        $(pre)fac_future_niv2_mod.o
-$(pre)$(ARITH)mumps_ooc.o: 		$(pre)$(ARITH)mumps_struc_def.o \
-        $(pre)$(ARITH)mumps_ooc_buffer.o \
-        $(pre)mumps_ooc_common.o
-$(pre)$(ARITH)mumps_driver.o: 	$(pre)$(ARITH)static_ptr_m.o
-$(pre)$(ARITH)mumps_ooc_buffer.o: 	$(pre)mumps_ooc_common.o
-$(pre)$(ARITH)ana_aux_par.o:          $(pre)$(ARITH)mumps_struc_def.o \
-        $(pre)tools_common_mod.o
-$(pre)$(ARITH)mumps_comm_buffer.o:	$(pre)mumps_comm_ibcast.o
-$(pre)$(ARITH)fac_asm_master_m.o:	$(pre)omp_tps_common_m.o \
-        $(pre)fac_ibct_data_m.o \
-        $(pre)$(ARITH)omp_tps_m.o \
-        $(pre)fac_asm_build_sort_index_m.o \
-        $(pre)$(ARITH)mumps_comm_buffer.o \
-        $(pre)$(ARITH)mumps_load.o
-$(pre)$(ARITH)fac_lastrtnelind.o:     $(pre)$(ARITH)mumps_load.o
-$(pre)$(ARITH)fac_asm_master_ELT_m.o:	$(pre)omp_tps_common_m.o \
-        $(pre)fac_ibct_data_m.o \
-        $(pre)$(ARITH)omp_tps_m.o \
-        $(pre)fac_asm_build_sort_index_ELT_m.o \
-        $(pre)$(ARITH)mumps_comm_buffer.o \
-        $(pre)$(ARITH)mumps_load.o
-$(pre)$(ARITH)fac_omp_m.o:		$(pre)$(ARITH)fac_asm_master_m.o\
-        $(pre)$(ARITH)fac_asm_master_ELT_m.o\
-        $(pre)$(ARITH)fac_front_LU_type1.o\
-        $(pre)$(ARITH)fac_front_LDLT_type1.o\
-        $(pre)$(ARITH)mumps_load.o\
-        $(pre)$(ARITH)omp_tps_m.o\
-        $(pre)omp_tps_common_m.o\
-        $(pre)mumps_l0_omp_m.o
-$(pre)$(ARITH)ana_lr.o:		$(pre)$(ARITH)lr_core.o
-$(pre)$(ARITH)mumps_lr_data_m.o:	$(pre)$(ARITH)lr_core.o\
-        $(pre)$(ARITH)mumps_struc_def.o
-$(pre)$(ARITH)fac_lr.o:		$(pre)$(ARITH)lr_core.o\
-        $(pre)$(ARITH)ana_lr.o
-$(pre)$(ARITH)fac_par_m.o:            $(pre)$(ARITH)mumps_load.o\
-        $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)$(ARITH)fac_lr.o\
-        $(pre)$(ARITH)fac_asm_master_m.o\
-        $(pre)$(ARITH)fac_asm_master_ELT_m.o\
-        $(pre)$(ARITH)omp_tps_m.o\
-        $(pre)$(ARITH)fac_front_LU_type1.o\
-        $(pre)$(ARITH)fac_front_LU_type2.o\
-        $(pre)$(ARITH)fac_front_LDLT_type1.o\
-        $(pre)$(ARITH)fac_front_LDLT_type2.o\
-        $(pre)omp_tps_common_m.o\
-        $(pre)mumps_l0_omp_m.o
-
-$(pre)$(ARITH)fac_front_aux.o     : $(pre)$(ARITH)mumps_comm_buffer.o\
-        $(pre)$(ARITH)mumps_load.o\
-        $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)mumps_ooc_common.o\
-        $(pre)mumps_l0_omp_m.o\
-        $(pre)mumps_comm_ibcast.o
-
-$(pre)$(ARITH)fac_front_type2_aux.o : $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)$(ARITH)fac_front_aux.o
-
-$(pre)$(ARITH)fac_front_LU_type1.o   : $(pre)$(ARITH)fac_front_aux.o\
-        $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)$(ARITH)lr_core.o\
-        $(pre)$(ARITH)ana_lr.o\
-        $(pre)$(ARITH)fac_lr.o
-$(pre)$(ARITH)fac_front_LU_type2.o   : $(pre)$(ARITH)fac_front_aux.o\
-        $(pre)$(ARITH)fac_front_type2_aux.o\
-        $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)$(ARITH)lr_core.o\
-        $(pre)$(ARITH)ana_lr.o\
-        $(pre)$(ARITH)fac_lr.o\
-        $(pre)fac_ibct_data_m.o
-
-$(pre)$(ARITH)fac_front_LDLT_type1.o : $(pre)$(ARITH)fac_front_aux.o\
-        $(pre)$(ARITH)mumps_ooc.o
-
-$(pre)$(ARITH)fac_front_LDLT_type2.o : $(pre)$(ARITH)fac_front_aux.o\
-        $(pre)$(ARITH)fac_front_type2_aux.o\
-        $(pre)$(ARITH)mumps_ooc.o\
-        $(pre)$(ARITH)mumps_load.o\
-        $(pre)fac_ibct_data_m.o
-
-$(pre)fac_maprow_data_m.o:              $(pre)front_data_mgt_m.o
-$(pre)fac_descband_data_m.o:            $(pre)front_data_mgt_m.o
-$(pre)fac_ibct_data_m.o  :              $(pre)front_data_mgt_m.o
-$(pre)ana_omp_m.o:                      $(pre)double_linked_list.o
-$(pre)mumps_comm_ibcast.o:              $(pre)fac_future_niv2_mod.o
-$(pre)fac_asm_build_sort_index_m.o:     $(pre)omp_tps_common_m.o
-$(pre)fac_asm_build_sort_index_ELT_m.o: $(pre)omp_tps_common_m.o
-
-# Compile modules before the rest
-$(OBJS_COMMON_OTHER):$(OBJS_COMMON_MOD)
-$(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
-
-OBJECTS.lib = $(SOURCES.C:.c=.o) $(SOURCES.f:.f=.o) $(OBJS_COMMON_MOD) $(OBJS_MOD) $(OBJS_COMMON_OTHER) $(OBJS_OTHER)
-OBJECTS = $(OBJECTS.lib) rmumps_module.o RcppExports.o
 scotchlibs:
-	(cd $(DSCOTCH)/src && \
-        $(MAKE) INC_OS="$(INC_OS)" scotch esmumps && \
-        cp esmumps/libesmumps.a libscotch/libscotch.a libscotch/libscotcherr.a $(DLIB)/ )
-libesmumps.a : scotchlibs
-libscotch.a : scotchlibs
-libscotcherr.a : scotchlibs
+	$(MAKE) -C $(DSCOTCH)/src INC_OS="$(INC_OS)" scotch esmumps
+	mkdir -p $(DLIB)
+	mv -f $(DSCOTCH)/lib/libscotch.a $(DSCOTCH)/lib/libscotcherr.a $(DSCOTCH)/src/esmumps/libesmumps.a $(DLIB)/
+metislib: $(SOURCES.C:.c=.o) 
+	$(AR) cvrs $(DMETIS)/libmetis/libmetis.a $^
 
-allmumps: $(OBJECTS.lib)
-	$(AR) cvrs liballmumps.a $(OBJECTS.lib)
-	$(RANLIB) liballmumps.a
+#allmumps: scotchlibs $(FUSELIBS)
+#	mkdir -p $(DLIB) && $(AR) cqT $(DLIB)/MUMPS_thin $(FUSELIBS)
+#	@(cd $(DLIB) && \
+#	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)
+#	$(RM) $(DLIB)/MUMPS_thin $^
+#	$(RANLIB) $(DLIB)/liballmumps.a
+#	echo $(CURDIR)
+allmumps: scotchlibs metislib
+	@(mkdir -p $(DMUMPS)/lib)
+	#$(MAKE) -C $(DMUMPS)/libseq CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS)" PKG_FCFLAGS="$(PKG_FCFLAGS)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
+	$(MAKE) -C $(DMUMPS) mumps_lib ARITH=$(ARITH) CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH)" PKG_FCFLAGS="$(PKG_FCFLAGS)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
+	$(AR) cqT $(DLIB)/MUMPS_thin $(FUSELIBS)
+	@(cd $(DLIB) && \
+	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)
+	$(RANLIB) $(DLIB)/liballmumps.a
 
 clean:
-	$(RM) $(OBJECTS.lib) $(DLIB)/tmp/*
-	@(cd $(DMUMPS)/src && $(MAKE) -f Makevars.win distclean)
-	@(cd $(DSCOTCH)/src && $(MAKE) realclean)
+	$(RM) $(DMUMPS)/PORD/lib/*.[oa] $(DMUMPS)/libseq/*.[oa] $(DMETIS)/GKlib/*.[oa] $(DMETIS)/libmetis/*.[oa]
+	@(cd $(DSCOTCH)/src && $(MAKE) clean)
+	@(cd $(DMUMPS)/src && $(MAKE) clean)
+#	@(cd $(DMUMPS)/src && $(MAKE) -f Makevars.win distclean)
 distclean: clean
-	$(RM) liballmumps.a libesmumps.a libscotch.a libscotcherr.a
+	$(RM) lib*/lib*.*
 .c.o:
-	$(CC) $(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS) -c $< -o $@
-.f.o:
-	$(FC) $(FCFLAGS) $(FPICFLAGS) $(PKG_FFLAGS) -c $< -o $@
-.F.o:
-	$(FC) $(FCFLAGS) $(FPICFLAGS) $(PKG_FFLAGS) -c $< -o $@
+	$(CC) $(PKG_CFLAGS) $(FLAGS.GKlib) $(FLAGS.metis) -c $< -o $@

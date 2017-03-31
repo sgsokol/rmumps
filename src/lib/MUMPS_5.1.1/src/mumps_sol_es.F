@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -219,8 +219,8 @@ C
       INTEGER, INTENT(IN) :: UNS_PERM_INV(SIZE_UNS_PERM_INV)
       INTEGER, INTENT(INOUT):: RHS_BOUNDS(2*NSTEPS)
       INTEGER, INTENT(IN) :: mode 
-      INTEGER :: I, ICOL, J, JAM1, node, bound
-      RHS_BOUNDS=0
+      INTEGER :: I, ICOL, JPTR, J, JAM1, node, bound
+      RHS_BOUNDS = 0
       ICOL = 0 
       DO I = 1, NBCOL
         IF ( (IRHS_PTR(I+1)-IRHS_PTR(I)).EQ.0) CYCLE
@@ -240,11 +240,13 @@ C
           ELSE
             RHS_BOUNDS(2*node) = bound + nb_sparse - 1
           END IF
-        ELSE 
-          DO J=IRHS_PTR(I),IRHS_PTR(I+1)-1
-            JAM1 = IRHS_SPARSE(J)
-            IF (K23.NE.0) JAM1 = UNS_PERM_INV(JAM1)
-            node = abs(STEP(JAM1))
+        ELSE  
+          DO JPTR = IRHS_PTR(I), IRHS_PTR(I+1)-1
+            J = IRHS_SPARSE(JPTR)
+            IF ( mode .EQ. 1 ) THEN
+              IF (K23.NE.0) J = UNS_PERM_INV(J)
+            ENDIF
+            node = abs(STEP(J))
             IF(RHS_BOUNDS(2*node - 1).EQ.0) THEN
               RHS_BOUNDS(2*node - 1) = bound
               RHS_BOUNDS(2*node)     = bound + nb_sparse - 1
@@ -254,6 +256,7 @@ C
           END DO
         END IF
       END DO
+      RETURN
       END SUBROUTINE MUMPS_INITIALIZE_RHS_BOUNDS
       SUBROUTINE MUMPS_PROPAGATE_RHS_BOUNDS(
      & pruned_leaves, nb_pruned_leaves,
@@ -392,6 +395,96 @@ C
       RETURN
       END SUBROUTINE MUMPS_CHAIN_PRUN_NODES_STATS
       END MODULE MUMPS_SOL_ES
+      SUBROUTINE MUMPS_PERMUTE_RHS_GS
+     &          (LP, LPOK, PROKG, MPG, PERM_STRAT, 
+     &           SYM_PERM, N, NRHS,
+     &           IRHS_PTR, SIZE_IRHS_PTR, 
+     &           IRHS_SPARSE, NZRHS, 
+     &           PERM_RHS, IERR
+     &         )
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: LP, MPG, PERM_STRAT, N, NRHS, 
+     &                       SIZE_IRHS_PTR,
+     &                       NZRHS
+      LOGICAL, INTENT(IN) :: LPOK, PROKG
+      INTEGER, INTENT(IN) :: SYM_PERM(N)
+      INTEGER, INTENT(IN) :: IRHS_PTR(SIZE_IRHS_PTR)
+      INTEGER, INTENT(IN) :: IRHS_SPARSE(NZRHS)
+      INTEGER, INTENT(OUT) :: PERM_RHS(NRHS)
+      INTEGER, INTENT(OUT) :: IERR
+      INTEGER :: I,J,K, POSINPERMRHS, JJ,
+     &           KPOS
+      INTEGER, ALLOCATABLE :: ROW_REFINDEX(:)
+      IERR = 0
+      IF ((PERM_STRAT.NE.-1).AND.(PERM_STRAT.NE.1)) THEN
+       IERR=-1
+       IF (LPOK)
+     & WRITE(LP,*) " INTERNAL ERROR -1 in ",
+     &       " MUMPS_PERMUTE_RHS_GS, PERM_STRAT =", PERM_STRAT, 
+     &       " is out of range "
+       RETURN
+      ENDIF
+      IF (PERM_STRAT.EQ.-1) THEN
+       DO I=1,NRHS
+        PERM_RHS(I) = I
+       END DO
+       GOTO 490
+      ENDIF
+      ALLOCATE(ROW_REFINDEX(NRHS), STAT=IERR)
+      IF (IERR.GT.0) THEN
+       IERR=-1
+       IF (LPOK)
+     & WRITE(LP,*) " ERROR -2 : ", 
+     &   " ALLOCATE IN MUMPS_PERMUTE_RHS_GS OF SIZE :",
+     &   NRHS
+       RETURN
+      ENDIF
+      DO I=1,NRHS
+        IF (IRHS_PTR(I+1)-IRHS_PTR(I).LE.0) THEN
+          IERR =  1
+          IF (I.EQ.1) THEN
+            ROW_REFINDEX(I) = IRHS_SPARSE(IRHS_PTR(I))
+          ELSE
+            ROW_REFINDEX(I) = ROW_REFINDEX(I-1)
+          ENDIF
+        ELSE
+          ROW_REFINDEX(I) = IRHS_SPARSE(IRHS_PTR(I))
+        ENDIF
+      END DO
+      POSINPERMRHS = 0
+      DO I=1,NRHS
+       KPOS = N+1 
+       JJ   = 0   
+       DO J=1,NRHS
+        K = ROW_REFINDEX(J)
+        IF (K.LE.0) CYCLE 
+        IF (SYM_PERM(K).LT.KPOS) THEN
+         KPOS = SYM_PERM(K)
+         JJ   = J
+        ENDIF
+       END DO
+       IF (JJ.EQ.0) THEN
+         IERR = -3 
+         IF (LPOK)
+     &   WRITE(LP,*) " INTERNAL ERROR -3 in ",
+     &       " MUMPS_PERMUTE_RHS_GS "
+         GOTO 500
+       ENDIF
+       POSINPERMRHS           = POSINPERMRHS + 1
+       PERM_RHS(POSINPERMRHS) = JJ
+       ROW_REFINDEX(JJ)       = -ROW_REFINDEX(JJ)
+      END DO
+      IF (POSINPERMRHS.NE.NRHS) THEN
+         IF (LPOK)
+     &   WRITE(LP,*) " INTERNAL ERROR -4 in ",
+     &       " MUMPS_PERMUTE_RHS_GS ", maxval(ROW_REFINDEX)
+         IERR = -4
+         GOTO 500
+      ENDIF
+  490 CONTINUE
+ 500  CONTINUE
+      IF (allocated(ROW_REFINDEX)) DEALLOCATE(ROW_REFINDEX)
+      END SUBROUTINE MUMPS_PERMUTE_RHS_GS
       SUBROUTINE MUMPS_PERMUTE_RHS_AM1
      &          (PERM_STRAT, SYM_PERM,
      &           IRHS_PTR, NHRS,
@@ -471,7 +564,7 @@ C
      &                        PROCNODE(NSTEPS),
      &                        SLAVEF,
      &                        n_select, MPG
-       LOGICAL, INTENT(IN) :: behaviour_L0,
+      LOGICAL, INTENT(IN) :: behaviour_L0,
      &                        reorder, PROKG
       INTEGER, INTENT(INOUT) :: PERM_RHS(SIZE_PERM)
       INTEGER :: I, J, K,

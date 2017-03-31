@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -20,21 +20,22 @@ C
       INTEGER MYID, N, SLAVEF
       INTEGER KEEP( 500 ), ICNTL( 40 )
       INTEGER(8) KEEP8(150)
-      INTEGER PROCNODE( KEEP(28) ), STEP( N ),
-     &        PTRAIW( N ), PTRARW( N )
+      INTEGER PROCNODE( KEEP(28) ), STEP( N )
+      INTEGER(8), INTENT(INOUT) :: PTRAIW( N ), PTRARW( N )
       INTEGER ISTEP_TO_INIV2(KEEP(71))
       LOGICAL I_AM_CAND(max(1,KEEP(56)))
       LOGICAL I_AM_SLAVE
       LOGICAL I_AM_CAND_LOC
       INTEGER MUMPS_TYPENODE, MUMPS_PROCNODE, MUMPS_TYPESPLIT
       EXTERNAL MUMPS_TYPENODE, MUMPS_PROCNODE, MUMPS_TYPESPLIT
-      INTEGER ISTEP, I, IPTRI, IPTRR, NCOL, NROW, allocok
+      INTEGER ISTEP, I, NCOL, NROW, allocok
       INTEGER TYPE_PARALL, ITYPE, IRANK, INIV2, TYPESPLIT 
       LOGICAL T4_MASTER_CONCERNED
+      INTEGER(8) :: IPTRI, IPTRR
       TYPE_PARALL = KEEP(46)
       I_AM_SLAVE = (KEEP(46).EQ.1 .OR. MYID.NE.0)
-      KEEP(14) = 0
-      KEEP(13) = 0
+      KEEP8(26) = 0_8
+      KEEP8(27) = 0_8
       DO I = 1, N
         ISTEP=abs(STEP(I))
         ITYPE = MUMPS_TYPENODE( PROCNODE(ISTEP), SLAVEF )
@@ -68,24 +69,24 @@ C
      &       .OR.
      &       ( T4_MASTER_CONCERNED ) 
      &     ) THEN
-          KEEP( 14 ) = KEEP( 14 ) + 3 + PTRAIW( I ) + PTRARW( I )
-          KEEP( 13 ) = KEEP( 13 ) + 1 + PTRAIW( I ) + PTRARW( I )
+          KEEP8(26) = KEEP8(26) + 1_8 + PTRAIW(I)+PTRARW(I)
+          KEEP8(27) = KEEP8(27) + 3_8 + PTRAIW(I)+PTRARW(I)
         ELSE IF ( ITYPE .EQ. 3 ) THEN
         ELSE IF ( ITYPE .EQ. 2 .AND. I_AM_CAND_LOC ) THEN
-           PTRARW( I ) = 0
-           KEEP(14) = KEEP(14) + 3 + PTRAIW( I ) + PTRARW( I )
-           KEEP(13) = KEEP(13) + 1 + PTRAIW( I ) + PTRARW( I )
+           PTRARW( I ) = 0_8
+           KEEP8(26) = KEEP8(26) + 1_8 + PTRAIW(I)+PTRARW(I)
+           KEEP8(27) = KEEP8(27) + 3_8 + PTRAIW(I)+PTRARW(I)
         END IF
       END DO
       IF ( associated( id%INTARR ) ) THEN
         DEALLOCATE( id%INTARR )
         NULLIFY( id%INTARR )
       END IF
-      IF ( KEEP(14) > 0 ) THEN
-      ALLOCATE( id%INTARR( KEEP(14) ), stat = allocok )
+      IF ( KEEP8(27) > 0 ) THEN
+      ALLOCATE( id%INTARR( KEEP8(27) ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
         id%INFO(1) = -7
-        id%INFO(2) = KEEP(14)
+        CALL  MUMPS_SET_IERROR(KEEP8(27),id%INFO(2))
         RETURN
       END IF
       ELSE
@@ -96,8 +97,8 @@ C
         RETURN
       END IF
       END IF
-      IPTRI = 1
-      IPTRR = 1
+      IPTRI = 1_8
+      IPTRR = 1_8
       DO I = 1, N
         ISTEP = abs(STEP(I))
         ITYPE = MUMPS_TYPENODE( PROCNODE(ISTEP), SLAVEF )
@@ -134,36 +135,36 @@ C
      & .or.
      &      ( T4_MASTER_CONCERNED )
      &     )  THEN
-          NCOL = PTRAIW( I )
-          NROW = PTRARW( I )
+          NCOL = int(PTRAIW( I ))
+          NROW = int(PTRARW( I ))
           id%INTARR( IPTRI     ) = NCOL
           id%INTARR( IPTRI + 1 ) = -NROW
           id%INTARR( IPTRI + 2 ) = I
           PTRAIW( I ) = IPTRI
           PTRARW( I ) = IPTRR
-          IPTRI = IPTRI + NCOL + NROW + 3
-          IPTRR = IPTRR + NCOL + NROW + 1
+          IPTRI = IPTRI + int(NCOL + NROW + 3,8)
+          IPTRR = IPTRR + int(NCOL + NROW + 1,8)
         ELSE IF ( ITYPE .eq. 2  .AND. I_AM_CAND_LOC ) THEN
-           NCOL = PTRAIW( I )
+           NCOL = int(PTRAIW( I ))
            NROW = 0
            id%INTARR( IPTRI     ) = NCOL
            id%INTARR( IPTRI + 1 ) = -NROW
            id%INTARR( IPTRI + 2 ) = I
            PTRAIW( I ) = IPTRI
            PTRARW( I ) = IPTRR
-           IPTRI = IPTRI + NCOL + NROW + 3
-           IPTRR = IPTRR + NCOL + NROW + 1
+           IPTRI = IPTRI + int(NCOL + NROW + 3, 8)
+           IPTRR = IPTRR + int(NCOL + NROW + 1, 8)
         ELSE
-          PTRAIW(I) = 0
-          PTRARW(I) = 0
+          PTRAIW(I) = 0_8
+          PTRARW(I) = 0_8
         END IF
       END DO
-      IF ( IPTRI - 1 .NE. KEEP(14) ) THEN
+      IF ( IPTRI - 1_8 .NE. KEEP8(27) ) THEN
         WRITE(*,*) 'Error 1 in ana_arrowheads',  
-     &      ' IPTRI - 1, KEEP(14)=', IPTRI - 1, KEEP(14)
+     &      ' IPTRI - 1, KEEP8(27)=', IPTRI - 1, KEEP8(27)
         CALL MUMPS_ABORT()
       END IF
-      IF ( IPTRR - 1 .NE. KEEP(13) ) THEN
+      IF ( IPTRR - 1_8 .NE. KEEP8(26) ) THEN
         WRITE(*,*) 'Error 2 in ana_arrowheads'
         CALL MUMPS_ABORT()
       END IF
@@ -174,11 +175,12 @@ C
      &   LSCAL,COLSCA,ROWSCA,
      &   MYID, SLAVEF, PROCNODE_STEPS, NBRECORDS,
      &   LP, COMM, root, KEEP, KEEP8, FILS, RG2L,
-     &   INTARR, DBLARR, PTRAIW, PTRARW, FRERE_STEPS,
+     &   INTARR, LINTARR, DBLARR, LDBLARR, PTRAIW, PTRARW, FRERE_STEPS,
      &   STEP, A, LA, ISTEP_TO_INIV2, I_AM_CAND, CANDIDATES )
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
-      INTEGER N,NZ, COMM, NBRECORDS
+      INTEGER    :: N, COMM, NBRECORDS
+      INTEGER(8), INTENT(IN) :: NZ
       INTEGER KEEP( 500 )
       INTEGER(8) KEEP8(150)
       DOUBLE PRECISION ASPK(NZ)
@@ -192,11 +194,14 @@ C
       INTEGER CANDIDATES(SLAVEF+1, max(1,KEEP(56)))
       LOGICAL LSCAL
       TYPE (DMUMPS_ROOT_STRUC) :: root
-      INTEGER(8) :: LA
-      INTEGER PTRAIW( N ), PTRARW( N ), FRERE_STEPS( KEEP(28) )
-      INTEGER STEP(N)
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION A( LA ), DBLARR(max(1,KEEP(13)))
+      INTEGER(8), INTENT(IN)    :: LA
+      INTEGER(8), INTENT(INOUT) :: PTRAIW( N ), PTRARW( N ) 
+      INTEGER    :: FRERE_STEPS( KEEP(28) )
+      INTEGER    :: STEP(N)
+      INTEGER(8) :: LINTARR, LDBLARR
+      INTEGER    :: INTARR( LINTARR )
+      DOUBLE PRECISION    :: DBLARR( LDBLARR )
+      DOUBLE PRECISION    :: A( LA )
       INTEGER, DIMENSION(:,:), ALLOCATABLE :: BUFI
       DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: BUFR
       INTEGER MUMPS_PROCNODE, MUMPS_TYPENODE, numroc, 
@@ -204,7 +209,7 @@ C
       EXTERNAL MUMPS_PROCNODE, MUMPS_TYPENODE, numroc, 
      &        MUMPS_TYPESPLIT
       DOUBLE PRECISION VAL
-      INTEGER IOLD,JOLD,INEW,JNEW,ISEND,JSEND,DEST,I,K,IARR
+      INTEGER IOLD,JOLD,INEW,JNEW,ISEND,JSEND,DEST,I,IARR
       INTEGER IPOSROOT, JPOSROOT
       INTEGER IROW_GRID, JCOL_GRID
       INTEGER INODE, ISTEP
@@ -214,9 +219,9 @@ C
       INTEGER(8) :: PTR_ROOT
       INTEGER TYPENODE_TMP, MASTER_NODE
       LOGICAL I_AM_CAND_LOC, I_AM_SLAVE
-      INTEGER I1, IA, JARR, ILOCROOT, JLOCROOT
-      INTEGER IS1, ISHIFT, IIW, IS, IAS
+      INTEGER JARR, ILOCROOT, JLOCROOT
       INTEGER allocok, INIV2, TYPESPLIT, T4MASTER
+      INTEGER(8) ::  I1, IA, IIW, IS1, IS, IAS, ISHIFT, K
       INTEGER NCAND
       LOGICAL T4_MASTER_CONCERNED
       DOUBLE PRECISION ZERO
@@ -413,9 +418,9 @@ C
               DBLARR( IA ) = DBLARR( IA ) + VAL
             ELSE
               IS1 =  PTRAIW(IARR)
-              ISHIFT      = INTARR(IS1) + IW4(IARR,2)
+              ISHIFT      = int(INTARR(IS1) + IW4(IARR,2),8)
               IW4(IARR,2) = IW4(IARR,2) - 1
-              IIW         = IS1 + ISHIFT + 2
+              IIW         = IS1 + ISHIFT + 2_8
               INTARR(IIW)     = JARR
               IS          = PTRARW(IARR)
               IAS         = IS + ISHIFT
@@ -423,9 +428,9 @@ C
             END IF
           ELSE
             IARR = -IARR
-            ISHIFT      = PTRAIW(IARR)+IW4(IARR,1)+2
+            ISHIFT      = int(PTRAIW(IARR)+IW4(IARR,1)+2,8)
             INTARR(ISHIFT)  = JARR
-            IAS         = PTRARW(IARR)+IW4(IARR,1)
+            IAS         = PTRARW(IARR)+int(IW4(IARR,1),8)
             IW4(IARR,1) = IW4(IARR,1) - 1
             DBLARR(IAS)      = VAL
             IF ( (KEEP(50) .NE. 0 .OR. KEEP(234).NE.0 .OR. .TRUE.)
@@ -615,10 +620,10 @@ C
      &   )
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
-      INTEGER N, MYID, LDBLARR, LINTARR,
-     &        COMM
+      INTEGER N, MYID, COMM
+      INTEGER(8), INTENT(IN) :: LDBLARR, LINTARR
       INTEGER INTARR(LINTARR) 
-      INTEGER PTRAIW(N), PTRARW(N) 
+      INTEGER(8), INTENT(IN) :: PTRAIW(N), PTRARW(N) 
       INTEGER   KEEP(500)
       INTEGER(8) KEEP8(150)
       INTEGER(8), intent(IN) :: LA
@@ -627,17 +632,18 @@ C
       DOUBLE PRECISION A( LA )
       INTEGER INFO1, INFO2
       DOUBLE PRECISION DBLARR(LDBLARR)
+      INTEGER FRERE_STEPS( KEEP(28) ), STEP(N)
       TYPE (DMUMPS_ROOT_STRUC) :: root
       INTEGER, POINTER, DIMENSION(:) :: BUFI
       DOUBLE PRECISION, POINTER, DIMENSION(:) :: BUFR
       INTEGER, POINTER, DIMENSION(:,:) :: IW4
       LOGICAL FINI 
-      INTEGER IREC, NB_REC, IARR, JARR, IA, I1, I, allocok
-      INTEGER IS, IS1, ISHIFT, IIW, IAS
+      INTEGER IREC, NB_REC, IARR, JARR, I, allocok
+      INTEGER(8) :: I18, IA8, IS18, IIW8, IS8, IAS8
+      INTEGER ISHIFT
       INTEGER LOCAL_M, LOCAL_N, ILOCROOT, JLOCROOT, 
      &        IPOSROOT, JPOSROOT, TAILLE,
      &        IPROC
-      INTEGER FRERE_STEPS( KEEP(28) ), STEP(N)
       INTEGER(8) :: PTR_ROOT
       INTEGER ARROW_ROOT, TYPE_PARALL
       INTEGER MUMPS_TYPENODE, MUMPS_PROCNODE
@@ -696,13 +702,13 @@ C
       END IF
       FINI = .FALSE.
       DO I=1,N
-       I1 = PTRAIW(I)
-       IA = PTRARW(I)
-       IF (IA.GT.0) THEN
-        DBLARR(IA) = ZERO
-        IW4(I,1) = INTARR(I1)
-        IW4(I,2) = -INTARR(I1+1)
-        INTARR(I1+2)=I
+       I18 = PTRAIW(I)
+       IA8 = PTRARW(I)
+       IF (IA8.GT.0_8) THEN
+        DBLARR(IA8) = ZERO
+        IW4(I,1) = INTARR(I18)
+        IW4(I,2) = -INTARR(I18+1_8)
+        INTARR(I18+2)=I
        ENDIF
       ENDDO
       DO WHILE (.NOT.FINI) 
@@ -757,25 +763,25 @@ C
            ENDIF
         ELSE IF (IARR.GE.0) THEN
          IF (IARR.EQ.JARR) THEN
-          IA = PTRARW(IARR)
-          DBLARR(IA) = DBLARR(IA) + VAL
+          IA8 = PTRARW(IARR)
+          DBLARR(IA8) = DBLARR(IA8) + VAL
          ELSE
-          IS1 =  PTRAIW(IARR)
-          ISHIFT      = INTARR(IS1) + IW4(IARR,2)
-          IW4(IARR,2) = IW4(IARR,2) - 1
-          IIW         = IS1 + ISHIFT + 2
-          INTARR(IIW)     = JARR
-          IS          = PTRARW(IARR)
-          IAS         = IS + ISHIFT
-          DBLARR(IAS) = VAL
+          IS18 =  PTRAIW(IARR)
+          ISHIFT       = INTARR(IS18) + IW4(IARR,2)
+          IW4(IARR,2)  = IW4(IARR,2) - 1
+          IIW8         = IS18 + ISHIFT + 2
+          INTARR(IIW8) = JARR
+          IS8          = PTRARW(IARR)
+          IAS8         = IS8 + ISHIFT
+          DBLARR(IAS8) = VAL
          ENDIF
         ELSE
            IARR = -IARR
-           ISHIFT      = PTRAIW(IARR)+IW4(IARR,1)+2
-           INTARR(ISHIFT)  = JARR
-           IAS         = PTRARW(IARR)+IW4(IARR,1)
-           IW4(IARR,1) = IW4(IARR,1) - 1
-           DBLARR(IAS)      = VAL
+           IS8          = PTRAIW(IARR)+IW4(IARR,1)+2
+           INTARR(IS8)  = JARR
+           IAS8         = PTRARW(IARR)+IW4(IARR,1)
+           IW4(IARR,1)  = IW4(IARR,1) - 1
+           DBLARR(IAS8) = VAL
            IF ( (KEEP(50) .NE. 0 .OR. KEEP(234).NE.0 .OR. .TRUE.)
      &          .AND.  IW4(IARR,1) .EQ. 0 
      &          .AND. STEP(IARR) > 0 ) THEN

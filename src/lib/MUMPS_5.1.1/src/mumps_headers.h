@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -20,10 +20,19 @@ C     XXN    ->  node number
 C     XXP    ->  pointer to previous record
 C     XXA    ->  active fronts data management
 C     XXF    ->  reserved
+C     XXLR   ->  Low rank status of a node (0=FR, 
+C                                           1=LowRank CB only
+C                                           2=LowRank factors/panels only
+C                                           3=LowRank CB+factor/panel)
+C     XXEBF  ->  End of Blocfacto (0=not yet, 1=finished)  
+C REMARK: .h file could be replaced by a module with functions to get node status
+C          added in the module.
 C 
       INTEGER, PARAMETER :: XXI = 0, XXR = 1, XXS = 3, XXN = 4, XXP = 5
-      INTEGER, PARAMETER :: XXA = 6, XXF = 7
-      INTEGER, PARAMETER :: XXNBPR = 8
+      INTEGER, PARAMETER :: XXA = 6, XXF = 7 
+      INTEGER, PARAMETER :: XXLR = 8
+      INTEGER, PARAMETER :: XXNBPR = 9
+      INTEGER, PARAMETER :: XXEBF = 10
 C 
 C     Size of header in incore and out-of-core
 C
@@ -32,8 +41,8 @@ C
 C     At the moment, all headers are of the same size because
 C     no OOC specific information are stored in header.
 CM     other OOC specific information directly in the headers.
-      PARAMETER (XSIZE_IC=9,XSIZE_OOC_SYM=9,XSIZE_OOC_UNSYM=9,
-     &           XSIZE_OOC_NOPANEL=9)
+      PARAMETER (XSIZE_IC=11,XSIZE_OOC_SYM=11,XSIZE_OOC_UNSYM=11,
+     &           XSIZE_OOC_NOPANEL=11)
 C
 C     -------------------------------------------------------
 C     Position of header size (formerly XSIZE) in KEEP array.

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -13,9 +13,12 @@ C
       SUBROUTINE DMUMPS_COMPRESS_LU(SIZE_INPLACE,
      &MYID,N,IOLDPS,TYPE,IW, LIW, A, LA,
      &POSFAC, LRLU, LRLUS, IWPOS, PTRAST, PTRFAC, STEP, KEEP,KEEP8,
-     &SSARBR,INODE,IERR)
+     &SSARBR,INODE,IERR
+     & , LRGROUPS, NASS
+     &)
       USE DMUMPS_LOAD
       USE DMUMPS_OOC
+      USE DMUMPS_LR_CORE
       IMPLICIT NONE
       INTEGER MYID
       INTEGER IOLDPS, TYPE, LIW, N, KEEP(500)
@@ -29,12 +32,14 @@ C
       INTEGER (8) :: PTRFAC(KEEP(28))
       LOGICAL SSARBR
       INTEGER IOLDSHIFT, IPSSHIFT
+      INTEGER LRGROUPS(N), NASS
       INCLUDE 'mumps_headers.h'
       INTEGER LCONT, NELIM, NROW, NPIV, INTSIZ
       INTEGER NFRONT, NSLAVES
       INTEGER IPS, IPSIZE
       INTEGER(8) :: SIZELU, SIZECB, IAPOS, I
       LOGICAL MOVEPTRAST
+      LOGICAL LRCOMPRESS_PANEL
       INTEGER INODE
       INTEGER IERR
       IERR=0
@@ -56,6 +61,7 @@ C
       NSLAVES= IW( IOLDSHIFT + 5 )
       NFRONT = LCONT + NPIV
       INTSIZ = IW(IOLDPS+XXI)
+      LRCOMPRESS_PANEL = (IW(IOLDPS+XXLR).GE.2)
       IF ( (NSLAVES > 0  .AND. TYPE .NE. 2) .OR. 
      &   (NSLAVES .eq. 0 .AND. TYPE .EQ. 2 ) ) THEN
           WRITE(*,*) ' ERROR 3 compressLU: problem with level of inode'
@@ -154,10 +160,17 @@ C
         POSFAC = POSFAC  - (SIZECB+SIZELU)
         LRLU   = LRLU    + (SIZECB+SIZELU)
         LRLUS  = LRLUS   + (SIZECB+SIZELU) - SIZE_INPLACE
+        KEEP8(70) = KEEP8(70) + (SIZECB+SIZELU) - SIZE_INPLACE 
+        KEEP8(71) = KEEP8(71) + (SIZECB+SIZELU) - SIZE_INPLACE 
       ELSE
         POSFAC = POSFAC - SIZECB
         LRLU   = LRLU   + SIZECB
         LRLUS  = LRLUS  + SIZECB - SIZE_INPLACE
+        KEEP8(70) = KEEP8(70) + SIZECB - SIZE_INPLACE 
+        KEEP8(71) = KEEP8(71) + SIZECB - SIZE_INPLACE 
+        IF (LRCOMPRESS_PANEL) THEN
+          KEEP8(71) = KEEP8(71) + SIZELU
+        ENDIF
       ENDIF
  500  CONTINUE
       CALL DMUMPS_LOAD_MEM_UPDATE(SSARBR,.FALSE.,
@@ -180,7 +193,7 @@ C
      &        TYPE_SON
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
       INTEGER(8) :: PTRAST(KEEP(28)), PAMASTER(KEEP(28))
       INTEGER PTRIST(KEEP(28)), STEP(N), 
      & PIMASTER(KEEP(28)), IW(LIW)
@@ -198,6 +211,7 @@ C
      &        IOLDPS_CB
       LOGICAL LAST_CALL
       TYPE(IO_BLOCK) :: MonBloc 
+      INTEGER LRSTATUS
       INCLUDE 'mumps_headers.h'
       DOUBLE PRECISION ZERO
       PARAMETER (ZERO=0.0d0)
@@ -205,6 +219,7 @@ C
       NCOL_L = IW( PTRIST(STEP( ISON )) + 3 + KEEP(IXSZ) )
       NROW_L = IW( PTRIST(STEP( ISON )) + 2 + KEEP(IXSZ) )
       NSLAVES_L = IW( PTRIST(STEP( ISON )) + 5 + KEEP(IXSZ) )
+      LRSTATUS = IW( PTRIST(STEP( ISON )) + XXLR)
       LDA_BAND = NCOL_L + IW( PTRIST(STEP( ISON )) + KEEP(IXSZ) )
       IF  ( KEEP(50) .eq. 0 ) THEN
         NFRONT = LDA_BAND
@@ -281,6 +296,8 @@ C
         LRLU = LRLU - LREQA
         LRLUS = LRLUS - LREQA
         KEEP8(67) = min(LRLUS, KEEP8(67))
+        KEEP8(70) = KEEP8(70) - LREQA
+        KEEP8(68) = min(KEEP8(70), KEEP8(68))
         IF(KEEP(201).NE.2)THEN
            CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &          LA-LRLUS,LREQA,LREQA,KEEP,KEEP8,LRLUS)
@@ -297,6 +314,7 @@ C
       CALL MUMPS_STOREI8(LREQA_HEADER, IW(POSI+XXR))
       IW(POSI+XXS)=-9999
       IW(POSI+XXS+1:POSI+KEEP(IXSZ)-1)=-99999
+      IW(POSI+XXLR) = LRSTATUS
       POSI=POSI+KEEP(IXSZ)
       IW( POSI     ) = - NCOL_L
       IW( POSI + 1 ) =   NROW_L
@@ -339,6 +357,8 @@ C
         POSFAC = POSFAC - LREQA
         LRLU = LRLU + LREQA
         LRLUS = LRLUS + LREQA
+        KEEP8(70) = KEEP8(70) + LREQA
+        KEEP8(71) = KEEP8(71) + LREQA
         CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &            LA-LRLUS,LREQA,0_8,KEEP,KEEP8,LRLUS)
       ENDIF
@@ -371,13 +391,13 @@ C
  90   CONTINUE
       RETURN
  700  CONTINUE
-      CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+      CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
       RETURN
       END SUBROUTINE DMUMPS_STACK_BAND
       SUBROUTINE DMUMPS_FREE_BAND( N, ISON, 
      &    PTRIST, PTRAST, IW, LIW, A, LA, 
      &    LRLU, LRLUS, IWPOSCB,
-     &    IPTRLU, STEP, MYID, KEEP, TYPE_SON
+     &    IPTRLU, STEP, MYID, KEEP, KEEP8, TYPE_SON
      &     )
       IMPLICIT NONE
       include 'mumps_headers.h'
@@ -402,7 +422,7 @@ C
       RETURN
       END SUBROUTINE DMUMPS_FREE_BAND
       SUBROUTINE DMUMPS_MAX_MEM( KEEP,KEEP8,
-     &           MYID, N, NELT, NA, LNA, NZ, NA_ELT, NSLAVES,
+     &           MYID, N, NELT, NA, LNA, NNZ8, NA_ELT8, NSLAVES,
      &           MEMORY_MBYTES, EFF, OOC_STRAT, PERLU_ON,
      &           MEMORY_BYTES )
       IMPLICIT NONE
@@ -410,7 +430,8 @@ C
       INTEGER,   INTENT(IN)  :: OOC_STRAT
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      INTEGER MYID, N, NELT, NSLAVES, LNA, NZ, NA_ELT
+      INTEGER MYID, N, NELT, NSLAVES, LNA
+      INTEGER(8) :: NA_ELT8, NNZ8
       INTEGER(8), INTENT(IN) :: NA(LNA)
       INTEGER(8), INTENT(OUT) :: MEMORY_BYTES
       INTEGER,   INTENT(OUT) :: MEMORY_MBYTES
@@ -498,13 +519,13 @@ C
         NB_INT = NB_INT + OOC_NB_FILE_TYPE * NSTEPS8 * I8OVERI
         NB_INT = NB_INT + OOC_NB_FILE_TYPE * NSTEPS8
       ENDIF
-      NB_REAL = NB_REAL + int(KEEP(13),8)
+      NB_REAL = NB_REAL + KEEP8(26)
       IF (KEEP(252).EQ.1 .AND. .NOT. I_AM_MASTER) THEN
         NB_REAL = NB_REAL + N8
       ENDIF
       IF ( .not. ( I_AM_SLAVE .and. I_AM_MASTER .and. KEEP(52) .eq. 0
      &         .and. KEEP(55) .ne. 0 ) ) THEN
-        NB_INT  = NB_INT  + int(KEEP(14),8)
+        NB_INT  = NB_INT  + KEEP8(14)
       END IF
       IF ( I_AM_SLAVE .and. KEEP(38) .ne. 0 ) THEN
         NB_INT = NB_INT + 2_8 * N8
@@ -513,9 +534,13 @@ C
       TEMPR = 0_8
       NBRECORDS = KEEP(39)
       IF (KEEP(55).eq.0) THEN
-        NBRECORDS = min(KEEP(39), NZ)
+        IF (NNZ8 < int(NBRECORDS,8)) THEN
+          NBRECORDS=int(NNZ8)
+        ENDIF
       ELSE
-        NBRECORDS = min(KEEP(39), NA_ELT)
+        IF (NA_ELT8 < int(NBRECORDS,8)) THEN
+          NBRECORDS=int(NA_ELT8)
+        ENDIF
       ENDIF
       IF ( KEEP(54) .eq. 0 ) THEN
         IF ( I_AM_MASTER ) THEN
@@ -554,7 +579,7 @@ C
         ENDIF
         DMUMPS_LBUFR_BYTES8 = DMUMPS_LBUFR_BYTES8
      &        + int( 2.0D0 * dble(max(PERLU,MIN_PERLU))*
-     &        dble(DMUMPS_LBUFR_BYTES8)/100D0)
+     &        dble(DMUMPS_LBUFR_BYTES8)/100D0,8)
         DMUMPS_LBUFR_BYTES8 = min(DMUMPS_LBUFR_BYTES8,
      &                            int(huge (KEEP(43))-100,8))
         NB_BYTES = NB_BYTES + DMUMPS_LBUFR_BYTES8
@@ -594,8 +619,13 @@ C
         NB_INT = NB_INT + NSTEPS8
         NB_INT = NB_INT + NSTEPS8 * I8OVERI
         NB_INT = NB_INT + N8 + 4_8 * NSTEPS8 +
-     &           MUMPS_GET_POOL_LENGTH(NA(1), KEEP, KEEP8)
+     &           int(MUMPS_GET_POOL_LENGTH(NA(1), KEEP, KEEP8),8)
         NB_INT = NB_INT + 2_8 * NSTEPS8 * I8OVERI
+        IF (KEEP(486).NE.0) THEN
+         NB_INT = NB_INT + N8
+         NB_REAL = NB_REAL + 
+     &       int(KEEP(127),8)*int(KEEP(488),8)
+        ENDIF
       END IF
       MEMORY_BYTES = NB_BYTES + NB_INT * int(KEEP(34),8) +
      &               NB_REAL * int(KEEP(35),8)
@@ -642,15 +672,16 @@ C
       ENDDO
       RETURN
       END SUBROUTINE DMUMPS_COMPUTE_MAXPERCOL
-      SUBROUTINE DMUMPS_SIZE_IN_STRUCT (id, NB_INT,NB_CMPLX )
+      SUBROUTINE DMUMPS_SIZE_IN_STRUCT (id, NB_INT,NB_CMPLX,NB_CHAR )
       USE DMUMPS_STRUC_DEF
       IMPLICIT NONE
       TYPE(DMUMPS_STRUC) :: id
       INTEGER(8) NB_INT, NB_CMPLX 
-      INTEGER(8) NB_REAL
+      INTEGER(8) NB_REAL,NB_CHAR
       NB_INT        = 0_8
       NB_CMPLX      = 0_8
       NB_REAL       = 0_8
+      NB_CHAR       = 0_8
       IF (associated(id%IS))          NB_INT=NB_INT+size(id%IS)
       IF (associated(id%IS1))         NB_INT=NB_INT+size(id%IS1)
       NB_INT=NB_INT+size(id%KEEP)
@@ -658,7 +689,6 @@ C
       NB_INT=NB_INT+size(id%INFO)
       NB_INT=NB_INT+size(id%INFOG)
       IF (associated(id%MAPPING))     NB_INT=NB_INT+size(id%MAPPING)
-      IF (associated(id%POIDS))       NB_INT=NB_INT+size(id%POIDS)
       IF (associated(id%BUFR))        NB_INT=NB_INT+size(id%BUFR)
       IF (associated(id%STEP))        NB_INT=NB_INT+size(id%STEP)
       IF (associated(id%NE_STEPS  ))  NB_INT=NB_INT+size(id%NE_STEPS  )
@@ -667,7 +697,8 @@ C
       IF (associated(id%FRERE_STEPS)) NB_INT=NB_INT+size(id%FRERE_STEPS)
       IF (associated(id%DAD_STEPS))   NB_INT=NB_INT+size(id%DAD_STEPS)
       IF (associated(id%FILS))        NB_INT=NB_INT+size(id%FILS)
-      IF (associated(id%PTRAR))       NB_INT=NB_INT+size(id%PTRAR)
+      IF (associated(id%PTRAR))
+     &     NB_INT=NB_INT+size(id%PTRAR)* id%KEEP(10)
       IF (associated(id%FRTPTR))      NB_INT=NB_INT+size(id%FRTPTR)
       NB_INT=NB_INT+size(id%KEEP8) * id%KEEP(10)
       IF (associated(id%PTRFAC)) NB_INT=NB_INT+size(id%PTRFAC) *
@@ -681,7 +712,11 @@ C
       IF (associated(id%INTARR)) NB_INT=NB_INT+size(id%INTARR)
       IF (associated(id%ELTPROC))  NB_INT=NB_INT+size(id%ELTPROC)
       IF (associated(id%CANDIDATES))
-     &  NB_INT=NB_INT+size(id%CANDIDATES)
+     &     NB_INT=NB_INT+size(id%CANDIDATES)
+      IF (associated(id%SYM_PERM))
+     &     NB_INT=NB_INT+size(id%SYM_PERM)
+      IF (associated(id%UNS_PERM))
+     &  NB_INT=NB_INT+size(id%UNS_PERM)
       IF       (associated(id%ISTEP_TO_INIV2))
      &  NB_INT=NB_INT+size(id%ISTEP_TO_INIV2)
       IF       (associated(id%FUTURE_NIV2))
@@ -693,23 +728,33 @@ C
       IF (associated(id%MEM_DIST)) 
      &  NB_INT=NB_INT+size(id%MEM_DIST)
       IF (associated(id%POSINRHSCOMP_ROW))
-     &  NB_INT=NB_INT+size(id%POSINRHSCOMP_ROW)
+     &     NB_INT=NB_INT+size(id%POSINRHSCOMP_ROW)
+      IF(id%POSINRHSCOMP_COL_ALLOC.AND.associated(id%POSINRHSCOMP_COL))
+     &     NB_INT=NB_INT+size(id%POSINRHSCOMP_COL)
       IF       (associated(id%MEM_SUBTREE))
-     &  NB_INT=NB_INT+size(id%MEM_SUBTREE)
+     &  NB_REAL=NB_REAL+size(id%MEM_SUBTREE)*(id%KEEP(35)/id%KEEP(16))
       IF       (associated(id%MY_ROOT_SBTR))
      &  NB_INT=NB_INT+size(id%MY_ROOT_SBTR)
       IF       (associated(id%MY_FIRST_LEAF))
      &  NB_INT=NB_INT+size(id%MY_FIRST_LEAF)
       IF (associated(id%MY_NB_LEAF)) NB_INT=NB_INT+size(id%MY_NB_LEAF)
       IF (associated(id%DEPTH_FIRST)) NB_INT=NB_INT+size(id%DEPTH_FIRST)
-      IF (associated(id%COST_TRAV)) NB_INT=NB_INT+size(id%COST_TRAV)
+      IF (associated(id%DEPTH_FIRST_SEQ))
+     &     NB_INT=NB_INT+size(id%DEPTH_FIRST_SEQ)
+      IF (associated(id%SBTR_ID)) NB_INT=NB_INT+size(id%SBTR_ID)
+      IF (associated(id%SCHED_DEP)) NB_INT=NB_INT+size(id%SCHED_DEP)
+      IF (associated(id%SCHED_GRP)) NB_INT=NB_INT+size(id%SCHED_GRP)
+      IF (associated(id%SCHED_SBTR)) NB_INT=NB_INT+size(id%SCHED_SBTR)
+      IF (associated(id%CROIX_MANU)) NB_INT=NB_INT+size(id%CROIX_MANU)
+      IF (associated(id%COST_TRAV))
+     &     NB_REAL=NB_REAL+size(id%COST_TRAV)*(id%KEEP(35)/id%KEEP(16))
       IF (associated(id%CB_SON_SIZE)) NB_INT=NB_INT+size(id%CB_SON_SIZE)
       IF       (associated(id%OOC_INODE_SEQUENCE))
      &  NB_INT=NB_INT+size(id%OOC_INODE_SEQUENCE)
       IF       (associated(id%OOC_SIZE_OF_BLOCK))
-     &  NB_INT=NB_INT+size(id%OOC_SIZE_OF_BLOCK)
+     &  NB_INT=NB_INT+size(id%OOC_SIZE_OF_BLOCK)*id%KEEP(10)
       IF       (associated(id%OOC_VADDR)) 
-     &  NB_INT=NB_INT+size(id%OOC_VADDR)
+     &  NB_INT=NB_INT+size(id%OOC_VADDR)*id%KEEP(10)
       IF       (associated(id%OOC_TOTAL_NB_NODES))
      &  NB_INT=NB_INT+size(id%OOC_TOTAL_NB_NODES)
       IF       (associated(id%OOC_NB_FILES))
@@ -718,15 +763,64 @@ C
      &  NB_INT=NB_INT+size(id%OOC_FILE_NAME_LENGTH)
       IF (associated(id%PIVNUL_LIST)) NB_INT=NB_INT+size(id%PIVNUL_LIST)
       IF (associated(id%SUP_PROC))    NB_INT=NB_INT+size(id%SUP_PROC)
+      IF (associated(id%IPTR_WORKING))
+     &     NB_INT=NB_INT+size(id%IPTR_WORKING)
+      IF (associated(id%WORKING)) NB_INT=NB_INT+size(id%WORKING)
+      IF (associated(id%LRGROUPS))
+     &     NB_INT=NB_INT+size(id%LRGROUPS)
+      IF (associated(id%IPOOL_BEFORE_L0_OMP))
+     &     NB_INT=NB_INT+size(id%IPOOL_BEFORE_L0_OMP)
+      IF (associated(id%IPOOL_AFTER_L0_OMP))
+     &     NB_INT=NB_INT+size(id%IPOOL_AFTER_L0_OMP)
+      IF (associated(id%PHYS_L0_OMP))
+     &     NB_INT=NB_INT+size(id%PHYS_L0_OMP)
+      IF (associated(id%VIRT_L0_OMP))
+     &     NB_INT=NB_INT+size(id%VIRT_L0_OMP)
+      IF (associated(id%PERM_L0_OMP))
+     &     NB_INT=NB_INT+size(id%PERM_L0_OMP)
+      IF (associated(id%PTR_LEAFS_L0_OMP))
+     &     NB_INT=NB_INT+size(id%PTR_LEAFS_L0_OMP)
+      IF (associated(id%L0_OMP_MAPPING))
+     &     NB_INT=NB_INT+size(id%L0_OMP_MAPPING)
+      IF (associated(id%SINGULAR_VALUES))
+     &     NB_REAL=NB_REAL+size(id%SINGULAR_VALUES)
+      IF (associated(id%root%RG2L_COL))
+     &     NB_INT=NB_INT+size(id%root%RG2L_COL)
+      IF (associated(id%root%RG2L_ROW))
+     &     NB_INT=NB_INT+size(id%root%RG2L_ROW)
+      IF (associated(id%root%IPIV))
+     &     NB_INT=NB_INT+size(id%root%IPIV)
+      IF (associated(id%root%RHS_CNTR_MASTER_ROOT))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%RHS_CNTR_MASTER_ROOT)
+      IF (associated(id%root%SCHUR_POINTER))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%SCHUR_POINTER)
+      IF (associated(id%root%QR_TAU))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%QR_TAU)
+      IF (associated(id%root%RHS_ROOT))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%RHS_ROOT)
+      IF (associated(id%root%SVD_U))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%SVD_U)
+      IF (associated(id%root%SVD_VT))
+     &     NB_CMPLX=NB_CMPLX+size(id%root%SVD_VT)
+      IF (associated(id%root%SINGULAR_VALUES))
+     &     NB_REAL=NB_REAL+size(id%root%SINGULAR_VALUES)
       IF (associated(id%DBLARR))  NB_CMPLX=NB_CMPLX+size(id%DBLARR)
       IF (associated(id%RHSCOMP)) NB_CMPLX=NB_CMPLX+size(id%RHSCOMP)
       IF (associated(id%S))       NB_CMPLX=NB_CMPLX+id%KEEP8(23)
-      IF (associated(id%COLSCA))  NB_REAL=NB_REAL+size(id%COLSCA)
-      IF (associated(id%ROWSCA))  NB_REAL=NB_REAL+size(id%ROWSCA)
+      IF (associated(id%COLSCA).AND.(id%KEEP(52).NE.-1))
+     &     NB_REAL=NB_REAL+size(id%COLSCA)
+      IF (associated(id%ROWSCA).AND.(id%KEEP(52).NE.-1))
+     &     NB_REAL=NB_REAL+size(id%ROWSCA)
       NB_REAL=NB_REAL+size(id%CNTL)
       NB_REAL=NB_REAL+size(id%RINFO)
       NB_REAL=NB_REAL+size(id%RINFOG)
       NB_REAL=NB_REAL+size(id%DKEEP)
+      NB_CHAR=NB_CHAR+len(id%VERSION_NUMBER)
+      NB_CHAR=NB_CHAR+len(id%OOC_TMPDIR)
+      NB_CHAR=NB_CHAR+len(id%OOC_PREFIX)
+      NB_CHAR=NB_CHAR+len(id%WRITE_PROBLEM)
+      NB_CHAR=NB_CHAR+len(id%SAVE_DIR)
+      NB_CHAR=NB_CHAR+len(id%SAVE_PREFIX)
       NB_CMPLX = NB_CMPLX + NB_REAL
       RETURN
       END SUBROUTINE DMUMPS_SIZE_IN_STRUCT 

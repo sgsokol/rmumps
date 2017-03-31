@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -249,7 +249,7 @@ C
       ENDIF
       FILE_FLAG_TAB(1:OOC_NB_FILE_TYPE)=0
       IERR=0
-      TMP=int(id%KEEP8(11)/1000000_8,kind=4)+1
+      TMP=int(id%KEEP8(11)/1000000_8)+1
       IF((id%KEEP(201).EQ.1).AND.(id%KEEP(50).EQ.0)
      &   ) THEN
          TMP=max(1,TMP/2)
@@ -271,7 +271,7 @@ C
       RETURN
       END SUBROUTINE DMUMPS_OOC_INIT_FACTO
       SUBROUTINE DMUMPS_NEW_FACTOR(INODE,PTRFAC,KEEP,KEEP8,
-     &           A,LA,SIZE,IERR)
+     &     A,LA,SIZE,IERR)
       USE DMUMPS_OOC_BUFFER
       IMPLICIT NONE
       INTEGER INODE,KEEP(500)
@@ -520,24 +520,26 @@ C
       CHARACTER(len=1):: TMP_NAME(350)
       IERR=0
       K=1
-      IF(associated(id%OOC_FILE_NAMES).AND.
-     &     associated(id%OOC_FILE_NAME_LENGTH))THEN
-         DO I1=1,id%OOC_NB_FILE_TYPE
-            DO I=1,id%OOC_NB_FILES(I1)
-               DO J=1,id%OOC_FILE_NAME_LENGTH(K)
-                  TMP_NAME(J)=id%OOC_FILE_NAMES(K,J)
-               ENDDO
-               CALL MUMPS_OOC_REMOVE_FILE_C(IERR, TMP_NAME(1))
-               IF(IERR.LT.0)THEN
-                  IF (ICNTL1.GT.0)THEN
-                     WRITE(ICNTL1,*)MYID_OOC,': ',
-     &                    ERR_STR_OOC(1:DIM_ERR_STR_OOC)
-                     RETURN
-                  ENDIF
-               ENDIF
-               K=K+1
-            ENDDO
-         ENDDO
+      IF(.NOT. id%ASSOCIATED_OOC_FILES) THEN
+        IF(associated(id%OOC_FILE_NAMES).AND.
+     &       associated(id%OOC_FILE_NAME_LENGTH))THEN
+           DO I1=1,id%OOC_NB_FILE_TYPE
+              DO I=1,id%OOC_NB_FILES(I1)
+                 DO J=1,id%OOC_FILE_NAME_LENGTH(K)
+                    TMP_NAME(J)=id%OOC_FILE_NAMES(K,J)
+                 ENDDO
+                 CALL MUMPS_OOC_REMOVE_FILE_C(IERR, TMP_NAME(1))
+                 IF(IERR.LT.0)THEN
+                    IF (ICNTL1.GT.0)THEN
+                       WRITE(ICNTL1,*)MYID_OOC,': ',
+     &                      ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+                       RETURN
+                    ENDIF
+                 ENDIF
+                 K=K+1
+              ENDDO
+           ENDDO
+        ENDIF
       ENDIF
       IF(associated(id%OOC_FILE_NAMES))THEN
          DEALLOCATE(id%OOC_FILE_NAMES)
@@ -559,7 +561,7 @@ C
       TYPE(DMUMPS_STRUC), TARGET :: id
       INTEGER IERR
       IERR=0
-      IF(.NOT. id%IF_RESTARTING) CALL DMUMPS_OOC_CLEAN_FILES(id,IERR)
+      CALL DMUMPS_OOC_CLEAN_FILES(id,IERR)
       IF(associated(id%OOC_TOTAL_NB_NODES))THEN
          DEALLOCATE(id%OOC_TOTAL_NB_NODES)
          NULLIFY(id%OOC_TOTAL_NB_NODES)
@@ -672,7 +674,7 @@ C
          NULLIFY(SIZE_OF_BLOCK)
       ENDIF
       IF(associated(OOC_INODE_SEQUENCE))THEN
-         NULLIFY(OOC_VADDR)
+         NULLIFY(OOC_INODE_SEQUENCE)
       ENDIF
       OOC_NB_FILE_TYPE=id%OOC_NB_FILE_TYPE
       CALL MUMPS_OOC_INIT_FILETYPE(TYPEF_L, TYPEF_U, TYPEF_CB,
@@ -2646,12 +2648,12 @@ C
      &              THEN
                   IF (OOC_STATE_NODE(STEP_OOC(J)).EQ.NOT_IN_MEM) THEN
                      OOC_STATE_NODE(STEP_OOC(J)) = USED
-                     IF((SOLVE_STEP.NE.0).OR.(J.NE.SPECIAL_ROOT_NODE)
-     &                    .OR.(ZONE.NE.NB_Z))THEN
+                     IF((SOLVE_STEP.NE.0).AND.(J.NE.SPECIAL_ROOT_NODE)
+     &                    .AND.(ZONE.NE.NB_Z))THEN
                         CALL DMUMPS_SOLVE_UPD_NODE_INFO(J,PTRFAC,NSTEPS)
                      ENDIF
                      CYCLE
-                  ELSEIF(OOC_STATE_NODE(STEP_OOC(J)).EQ.ALREADY_USED)
+                  ELSEIF(OOC_STATE_NODE(STEP_OOC(J)).EQ.USED)
      &                    THEN
                     COMPRESS_TO_BE_DONE         = .TRUE.
                   ELSE
@@ -2753,24 +2755,30 @@ C
 #endif
      &  ) THEN
         CALL DMUMPS_SOLVE_PREPARE_PREF(PTRFAC,NSTEPS,A,LA)
-        IF (I_WORKED_ON_ROOT) THEN
-          CALL DMUMPS_FREE_FACTORS_FOR_SOLVE ( IROOT,
-     &         PTRFAC, KEEP_OOC(28), A, LA,.FALSE.,IERR)
-          IF (IERR .LT. 0) RETURN
-          CALL DMUMPS_SOLVE_FIND_ZONE(IROOT,
-     &         ZONE,PTRFAC,NSTEPS)
-          IF(IROOT.EQ.NB_Z)THEN
-             DUMMY_SIZE=1_8
-             CALL DMUMPS_FREE_SPACE_FOR_SOLVE(A,LA,
-     &            DUMMY_SIZE,PTRFAC,
-     &            NSTEPS,NB_Z,IERR)
-             IF (IERR .LT. 0) THEN
-                WRITE(*,*)MYID_OOC,': Internal error in
-     &               DMUMPS_FREE_SPACE_FOR_SOLVE', 
-     &               IERR
-                CALL MUMPS_ABORT()
-             ENDIF
-          ENDIF
+        IF (I_WORKED_ON_ROOT.AND.
+     $       ((IROOT.GT.0)))THEN
+           IF(SIZE_OF_BLOCK(STEP_OOC(IROOT),OOC_FCT_TYPE).NE.0) THEN
+              IF (.NOT.(KEEP_OOC(237).NE.0 .OR. KEEP_OOC(235).NE.0)) 
+     &             THEN
+                 CALL DMUMPS_FREE_FACTORS_FOR_SOLVE ( IROOT,
+     &                PTRFAC, KEEP_OOC(28), A, LA,.FALSE.,IERR)
+                 IF (IERR .LT. 0) RETURN
+              ENDIF
+              CALL DMUMPS_SOLVE_FIND_ZONE(IROOT,
+     &             ZONE,PTRFAC,NSTEPS)
+              IF(ZONE.EQ.NB_Z)THEN
+                 DUMMY_SIZE=1_8
+                 CALL DMUMPS_FREE_SPACE_FOR_SOLVE(A,LA,
+     &                DUMMY_SIZE,PTRFAC,
+     &                NSTEPS,NB_Z,IERR)
+                 IF (IERR .LT. 0) THEN
+                    WRITE(*,*)MYID_OOC,': Internal error in
+     &                   DMUMPS_FREE_SPACE_FOR_SOLVE', 
+     &                   IERR
+                    CALL MUMPS_ABORT()
+                 ENDIF
+              ENDIF
+           ENDIF
         ENDIF
         IF (NB_Z.GT.1) THEN
           CALL DMUMPS_SUBMIT_READ_FOR_Z(A,LA,PTRFAC,
@@ -3363,7 +3371,7 @@ C
       INTEGER, INTENT(IN) :: NNMAX
       INTEGER DMUMPS_OOC_GET_PANEL_SIZE
       DMUMPS_OOC_PANEL_SIZE=DMUMPS_OOC_GET_PANEL_SIZE(
-     &     HBUF_SIZE, NNMAX, KEEP_OOC(227),KEEP_OOC(50))
+     &     int(KEEP_OOC(223),8), NNMAX, KEEP_OOC(227),KEEP_OOC(50))
       RETURN
       END FUNCTION DMUMPS_OOC_PANEL_SIZE
       SUBROUTINE DMUMPS_OOC_SKIP_NULL_SIZE_NODE()

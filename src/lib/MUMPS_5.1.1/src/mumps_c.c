@@ -1,10 +1,10 @@
 /*
  *
- *  This file is part of MUMPS 5.0.1, released
- *  on Thu Jul 23 17:08:29 UTC 2015
+ *  This file is part of MUMPS 5.1.1, released
+ *  on Mon Mar 20 14:34:33 UTC 2017
  *
  *
- *  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+ *  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
  *  University of Bordeaux.
  *
  *  This version of MUMPS is provided to you free of charge. It is
@@ -96,6 +96,7 @@ MUMPS_F77( MUMPS_INT      *job,
            MUMPS_REAL     *dkeep,
            MUMPS_INT8     *keep8,
            MUMPS_INT      *nz,
+           MUMPS_INT8     *nnz,
            MUMPS_INT      *irn,
            MUMPS_INT      *irn_avail,
            MUMPS_INT      *jcn,
@@ -103,6 +104,7 @@ MUMPS_F77( MUMPS_INT      *job,
            MUMPS_COMPLEX  *a,
            MUMPS_INT      *a_avail,
            MUMPS_INT      *nz_loc,
+           MUMPS_INT8     *nnz_loc,
            MUMPS_INT      *irn_loc,
            MUMPS_INT      *irn_loc_avail,
            MUMPS_INT      *jcn_loc,
@@ -302,7 +304,7 @@ mumps_c(MUMPS_STRUC_C * mumps_par)
         /* Next line initializes scalars to arbitrary values.
          * Some of those will anyway be overwritten during the
          * call to Fortran routine [SDCZ]MUMPS_INIT_PHASE */
-        mumps_par->n=0; mumps_par->nz=0; mumps_par->nz_loc=0; mumps_par->nelt=0;mumps_par->instance_number=0;mumps_par->deficiency=0;mumps_par->lwk_user=0;mumps_par->size_schur=0;mumps_par->lrhs=0; mumps_par->lredrhs=0; mumps_par->nrhs=0; mumps_par->nz_rhs=0; mumps_par->lsol_loc=0;
+        mumps_par->n=0; mumps_par->nz=0; mumps_par->nnz=0; mumps_par->nz_loc=0; mumps_par->nnz_loc=0; mumps_par->nelt=0;mumps_par->instance_number=0;mumps_par->deficiency=0;mumps_par->lwk_user=0;mumps_par->size_schur=0;mumps_par->lrhs=0; mumps_par->lredrhs=0; mumps_par->nrhs=0; mumps_par->nz_rhs=0; mumps_par->lsol_loc=0;
  mumps_par->schur_mloc=0; mumps_par->schur_nloc=0; mumps_par->schur_lld=0; mumps_par->mblock=0; mumps_par->nblock=0; mumps_par->nprow=0; mumps_par->npcol=0;
       }
      ooc_tmpdirlen=(int)strlen(mumps_par->ooc_tmpdir);
@@ -414,8 +416,8 @@ mumps_c(MUMPS_STRUC_C * mumps_par)
     /* Call F77 interface */
     MUMPS_F77(&(mumps_par->job), &(mumps_par->sym), &(mumps_par->par), &(mumps_par->comm_fortran),
           &(mumps_par->n), icntl, cntl, keep, dkeep, keep8,
-          &(mumps_par->nz), irn, &irn_avail, jcn, &jcn_avail, a, &a_avail,
-          &(mumps_par->nz_loc), irn_loc, &irn_loc_avail, jcn_loc, &jcn_loc_avail,
+          &(mumps_par->nz), &(mumps_par->nnz), irn, &irn_avail, jcn, &jcn_avail, a, &a_avail,
+          &(mumps_par->nz_loc), &(mumps_par->nnz_loc), irn_loc, &irn_loc_avail, jcn_loc, &jcn_loc_avail,
           a_loc, &a_loc_avail,
           &(mumps_par->nelt), eltptr, &eltptr_avail, eltvar, &eltvar_avail, a_elt, &a_elt_avail,
           perm_in, &perm_in_avail,
@@ -441,6 +443,13 @@ mumps_c(MUMPS_STRUC_C * mumps_par)
           , &ooc_prefixlen
           , &write_problemlen
     );
+    /*
+     * Set interface to C (KEEP(500)=1) after job=-1
+     */
+    if ( mumps_par->job == -1 )
+      {
+	mumps_par->keep[499]=1;
+      }
     /*
      * mapping and pivnul_list are usually 0 except if
      * MUMPS_ASSIGN_MAPPING/MUMPS_ASSIGN_PIVNUL_LIST was called.
@@ -474,4 +483,15 @@ mumps_c(MUMPS_STRUC_C * mumps_par)
          mumps_par->colsca_from_mumps=1;
       }
     }
+    /*
+     * Decode OOC_TMPDIR and OOC_PREFIX
+     */
+    for(i=0;i<ooc_tmpdirlen;i++){
+      mumps_par->ooc_tmpdir[i]=(char)ooc_tmpdir[i];
+    }
+    mumps_par->ooc_tmpdir[ooc_tmpdirlen]='\0';
+    for(i=0;i<ooc_prefixlen;i++){
+      mumps_par->ooc_prefix[i]=(char)ooc_prefix[i];
+    }
+    mumps_par->ooc_prefix[ooc_prefixlen]='\0';
 }

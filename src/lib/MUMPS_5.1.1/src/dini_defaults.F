@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -13,7 +13,7 @@ C
 C
 C**********************************************************************
 C
-      SUBROUTINE DMUMPS_SET_TYPE_SIZES( K34, K35, K16, K10 )
+      SUBROUTINE DMUMPS_SET_TYPE_SIZES( K34, K35, K16, K10 ) 
       IMPLICIT NONE
 C
 C     Purpose:
@@ -40,7 +40,7 @@ C     K16 = K35 for S and D arithmetics
 C     K16 = K35 / 2 for C and Z arithmetics
 C
 C     K34= 4 and K10 = 2, except on CRAY machines or when compilation
-C     flag -i8 is used, in which case, K34 = 8 and K10 = 2
+C     flag -i8 is used, in which case, K34 = 8 and K10 = 1
 C
 C
       INTEGER, INTENT(OUT) :: K34, K35, K10, K16
@@ -61,7 +61,8 @@ C
       SUBROUTINE DMUMPSID( NSLAVES, LWK_USER, CNTL, ICNTL,
      &                    KEEP,KEEP8,
      &                    INFO, INFOG, RINFO, RINFOG, SYM, PAR,
-     &                    DKEEP)
+     &                    DKEEP, MYID )
+!$    USE OMP_LIB
       IMPLICIT NONE
 C
 C  Purpose
@@ -71,9 +72,9 @@ C  The elements of the arrays CNTL and ICNTL control the action of
 C  DMUMPS, DMUMPS_ANA_DRIVER, DMUMPS_FAC_DRIVER, DMUMPS_SOLVE_DRIVER 
 C  Default values for the elements are set in this routine.
 C
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       DOUBLE PRECISION    CNTL(15), RINFO(40), RINFOG(40)
-      INTEGER ICNTL(40), KEEP(500), SYM, PAR, NSLAVES
+      INTEGER ICNTL(40), KEEP(500), SYM, PAR, NSLAVES, MYID
       INTEGER INFO(40), INFOG(40)
       INTEGER(8) KEEP8(150)
       INTEGER LWK_USER
@@ -116,7 +117,7 @@ C     If the matrix A is diagonally dominant, then
 C     setting CNTL(1) to zero will decrease the factorization 
 C     time while still providing a stable decomposition.
 C
-C  CNTL(2) must be set to the tolerance for convegence of iterative
+C  CNTL(2) must be set to the tolerance for convergence of iterative
 C     refinement. 
 C     Default value is sqrt(macheps).
 C     Values less than zero are treated as sqrt(macheps).
@@ -209,6 +210,22 @@ C              pospone pivot
 C          else
 C              partial threshold pivoting
 C          endif
+C
+C CNTL(7) tolerance for Low Rank approximation of the Blocks (BLR). 
+C         Dropping parameter expressed with a double precision, 
+C         real value, controlling
+C         compression and used to truncate the RRQR algorithm
+C         default value is 0.0.  (i.e. no approximation).
+C         The truncated RRQR operation is implemented as
+C         as variant of the LAPACK GEQP3 and LAQPS routines.
+C           0.0 : full precision approximation.
+C         > 0.0 : the dropping parameter is DKEEP(8).
+C
+C        Warning: using negative values is an experimental and 
+C        non recommended setting.
+C        < 0.0 : the dropping parameter is |DKEEP(8)|*|Apre|, Apre 
+C                as defined in user's guide
+C        
 C
 C  -----------------------------------------
 C
@@ -490,8 +507,7 @@ C    INFO(23), where INFO(23) has been returned by DMUMPS at the end of the
 C    factorization phase.
 C    Values of ICNTL(21) different from 0 and 1 are currently treated as 0.
 C
-C   ICNTL(22) (saved in KEEP(201) controls the OOC setting (0=incore, >0 =OOC,
-C    and later -1=discard factors completely)
+C   ICNTL(22) (saved in KEEP(201) controls the OOC setting (0=incore, 1 =OOC)
 C    It has default value 0 (incore). 
 C    If set before analysis then special setting and massage of the tree 
 C    might be done (so far only extra splitting  CUTNODES) is performed.
@@ -629,10 +645,11 @@ C              all factor matrices need not be stored.
 C              This can also be useful for testing : 
 C              to experiment facto OOC without
 C              effective storage of factors on disk.
-C            2 L factors not stored: meaningful when 
+C            2 L factors not stored: meaningful when both
 C              - matrix is unsymmetric and fwd performed during facto
 C              - the user is only interested in the null-space basis
 C              and thus only need the U factors to be stored.
+C              Currently, L factors are always stored in IC.
 C              
 C   -----------
 C   Fwd in facto
@@ -654,9 +671,17 @@ C            For all other values, the determinant is computed. Note that
 C            null pivots and static pivots are excluded from the
 C            computation of the determinant.
 C
-C   ICNTL(34-38) are not used in this version
 C
+C    ICNTL(35) : Block low rank (BLR) factorization 
+C             Default value is 0
+C             0 = BLR is not activated
+C             1 = BLR activated with grouping based
+C                  on inherited clustering done during analysis
+C             Other values are treated as zero
+C      Note that this functionality is currently incompatible with elemental matrices 
+C      (ICNTL(5) = 1) and with forward elimination during factorization (ICNTL(32) = 1).
 C
+C   ICNTL(38) not used in this version
 C
 C=========================
 C  ARRAYS FOR INFORMATION
@@ -826,9 +851,10 @@ C     residual (w2) is returned in `RINFOG(8)>. If all equations are
 C     non exceptional then zero is returned in `RINFOG(8).
 C     The upper bound error is returned in `RINFOG(9).
 C
-C  RINFOG(14) Infinite norm of the residual
-C
-C  RINFOG(15) 2-norm of the residual
+C  RINFOG(14) Number of floating-point operations
+C     for the elimination process (on all fronts, BLR or not) 
+C     performed when BLR option is activated on all processors.
+C     (equal to zero if BLR option not used, ICNTL(35).EQ.1)
 C
 C===========================
 C DESCRIPTION OF KEEP8 ARRAY
@@ -864,7 +890,7 @@ C     uninitialized values should be 0
       RINFO(1:40) = 0.0D0
       RINFOG(1:40)= 0.0D0
       CNTL(1:15)  = 0.0D0
-      DKEEP(1:130) = 0.0D0
+      DKEEP(1:230) = 0.0D0
 C     ----------------
 C     Symmetric code ?
 C     ----------------
@@ -927,8 +953,8 @@ C     automatic choice
          ICNTL(12)  = 1
       ENDIF
 C     Control of the use of ScaLAPACK for root node
-C     If null space options asked, ScaLAPACK always
-C     used and ICNTL(13) is not significant
+C     If null space options asked, ScaLAPACK is always ignored
+C        and ICNTL(13) is not significant
 C     ICNTL(13) = 0 : Root parallelism on (if size large enough)
 C     ICNTL(13) = 1 : Root parallelism off
       ICNTL(13) = 0
@@ -961,7 +987,7 @@ C     MEM_ALLOWED (0: not provided)
 C     null pivots
       ICNTL(24) = 0
 C     blocking factor for multiple RHS during solution phase
-      ICNTL(27) = -24
+      ICNTL(27) = -32
 C     analysis strategy: 0=auto, 1=sequential, 2=parallel
       ICNTL(28) = 1
 C     tool used for parallel ordering computation :
@@ -976,7 +1002,8 @@ C Default values for some components
 C of KEEP array
 C===================================
       KEEP(12) = 0
-      KEEP(11) = 2147483646
+C      KEEP(11) = 2147483646
+      KEEP(11) = huge(KEEP(11))
       KEEP(24) = 18
       KEEP(68) = 0
       KEEP(36) = 1
@@ -1007,11 +1034,7 @@ C===================================
       KEEP(17) = 0
       CALL DMUMPS_SET_TYPE_SIZES( KEEP(34), KEEP(35),
      &                            KEEP(16), KEEP(10) )
-#if defined(SP_)
-      KEEP( 51 )  = 70
-#else
-      KEEP( 51 )  = 48
-#endif
+      KEEP(51) = 70
       KEEP(37) = max(800, int(sqrt(dble(NSLAVES+1))*dble(KEEP(51))))
       IF ( NSLAVES > 256 ) THEN
         KEEP(39) = 10000
@@ -1029,6 +1052,8 @@ C===================================
       KEEP(47) = 2
       KEEP(64) = 20
       KEEP(69) = 4
+C     To disable SMP management when using new mapping strategy
+C      KEEP(69) = 1
 C     Forcing proportional is ok with strategy 5
       KEEP(75) = 1
       KEEP(76) = 2
@@ -1044,7 +1069,7 @@ C     Forcing proportional is ok with strategy 5
       KEEP8(79) = -10_8
       KEEP(80) = 1
       KEEP(81) = 0
-      KEEP(82) = 10
+      KEEP(82) = 30
       KEEP(83) = min(8,NSLAVES/4)
       KEEP(83) = max(min(4,NSLAVES),max(KEEP(83),1))
       KEEP(86)=1
@@ -1078,6 +1103,8 @@ C     Forcing proportional is ok with strategy 5
 #if ! defined(NO_XXNBPR)
       KEEP(121)=-999999
 #endif
+      KEEP(122)=150
+      KEEP(206)=1 
       KEEP(211)=2
       IF (NSLAVES .EQ. 2) THEN
         KEEP(213) = 101
@@ -1110,13 +1137,54 @@ C     Forcing proportional is ok with strategy 5
       KEEP(234)= 1
       KEEP(235)=-1
       DKEEP(3)=-5.0D0
-      KEEP(242) = 1
+      KEEP(242) = -9
       KEEP(243) = -1
+      KEEP(249)=1
+!$    KEEP(249) = OMP_GET_MAX_THREADS()
       KEEP(250) = 1
       KEEP(261) = 1
       KEEP(262) = 0
       KEEP(263) = 0
-      KEEP(488) =  4*KEEP(6)   ! if KEEP(6)=32 then 128
+      KEEP(266) = 0
+      KEEP(267) = 0
+      KEEP(350) = 1
+      KEEP(351) = 0
+      KEEP(360) = 256
+      KEEP(361) = 2048
+      KEEP(362) = 4
+      KEEP(363) = 512
+      KEEP(364) = 32768
+      KEEP(420) =  4*KEEP(6)   ! if KEEP(6)=32 then 128
+      KEEP(468) = 3
+      KEEP(469) = 1
+      KEEP(470) = 1
+      KEEP(471) = -1
+      KEEP(480) = 0
+      KEEP(479) = 1
+      KEEP(478) = 0
+      KEEP(474) = 0
+      KEEP(481) = 0
+      KEEP(482) = 0  
+      KEEP(472) = 1
+      KEEP(473) = 0
+      KEEP(475) = 0
+      KEEP(476) = 50  
+      KEEP(477) = 100  
+      KEEP(483) = 50  
+      KEEP(484) = 50  
+      KEEP(485) = 1 ! (1 promote factors)
+      KEEP(487) = 1
+      IF (KEEP(472).EQ.1) THEN
+        KEEP(488) = 512
+      ELSE
+        KEEP(488) =  8*KEEP(6)   ! if KEEP(6)=32 then 256
+      ENDIF
+      KEEP(489) = 0
+      KEEP(490) = 128
+      KEEP(491) = 1000
+      KEEP(492) = 1
+      KEEP(82) = 30
+      KEEP(493) = 0
       KEEP(496) = 1
       KEEP(495) = -1
       KEEP(497) = -1
@@ -1142,9 +1210,17 @@ C     Forcing proportional is ok with strategy 5
          id%KEEP(62) = 2  
          id%KEEP(1)  = 1   
          id%KEEP(51) = 2
+!$       id%KEEP(360) = 2
+!$       id%KEEP(361) = 2
+!$       id%KEEP(362) = 1
+!$       id%KEEP(363) = 2
+         id%KEEP(364) = 10
+         id%KEEP(420) = 4
          id%KEEP(488) = 4
          id%KEEP(490) = 5
          id%KEEP(491) = 5
+         id%ICNTL(27)=-3
+         id%KEEP(227)=3
       ELSE IF (id%KEEP(72)==2) THEN
          id%KEEP(85)=2            ! default is 
          id%KEEP(85)=-10000         ! default is 160 

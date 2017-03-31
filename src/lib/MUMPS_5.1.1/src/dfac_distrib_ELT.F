@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -11,25 +11,29 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       SUBROUTINE DMUMPS_ELT_DISTRIB(
-     &            N, NELT, NA_ELT,
+     &            N, NELT, NA_ELT8,
      &            COMM, MYID, SLAVEF,
-     &            IELPTR_LOC, RELPTR_LOC,
+     &            IELPTR_LOC8, RELPTR_LOC8,
      &            ELTVAR_LOC, ELTVAL_LOC,
+     &            LINTARR, LDBLARR,
      &            KEEP,KEEP8, MAXELT_SIZE,
      &            FRTPTR, FRTELT, A, LA, FILS,
      &            id, root )
       USE DMUMPS_STRUC_DEF
       IMPLICIT NONE
-      INTEGER N, NELT, NA_ELT
+      INTEGER N, NELT
+      INTEGER(8) :: NA_ELT8
       INTEGER COMM, MYID, SLAVEF, MAXELT_SIZE, MSGLEN
       INTEGER(8), intent(IN) :: LA
       INTEGER FRTPTR( N+1 )
       INTEGER FRTELT( NELT ), FILS ( N )
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      INTEGER IELPTR_LOC( NELT + 1 ), RELPTR_LOC( NELT + 1 )
-      INTEGER ELTVAR_LOC( max(1,KEEP(14)) )
-      DOUBLE PRECISION ELTVAL_LOC( max(1,KEEP(13)) )
+      INTEGER(8), INTENT(IN)    :: IELPTR_LOC8( NELT + 1 )
+      INTEGER(8), INTENT(INOUT) :: RELPTR_LOC8( NELT + 1 )
+      INTEGER(8), INTENT(IN) :: LINTARR, LDBLARR
+      INTEGER ELTVAR_LOC( LINTARR )
+      DOUBLE PRECISION ELTVAL_LOC( LDBLARR )
       DOUBLE PRECISION A( LA )
       TYPE(DMUMPS_STRUC)     :: id
       TYPE(DMUMPS_ROOT_STRUC) :: root
@@ -43,16 +47,18 @@ C
       INTEGER allocok
       INTEGER I, DEST, MAXELT_REAL_SIZE, MPG, IEL, SIZEI, SIZER
       INTEGER NBRECORDS, NBUF
-      INTEGER RECV_IELTPTR, RECV_RELTPTR
-      INTEGER IELTPTR, RELTPTR, INODE
+      INTEGER(8) :: RECV_IELTPTR8
+      INTEGER(8) :: RECV_RELTPTR8
+      INTEGER INODE
+      INTEGER(8) :: IELTPTR8, RELTPTR8
       LOGICAL FINI, PROKG, I_AM_SLAVE
       INTEGER(8) :: PTR_ROOT
       INTEGER LOCAL_M, LOCAL_N, LP, IBEG, IGLOB, JGLOB
       INTEGER ARROW_ROOT
-      INTEGER IELT, J, K, NB_REC, IREC
+      INTEGER IELT, J, NB_REC, IREC
+      INTEGER(8) :: K8, IVALPTR8
       INTEGER ILOCROOT, JLOCROOT, IPOSROOT, JPOSROOT, IPTR
       INTEGER JCOL_GRID, IROW_GRID
-      INTEGER IVALPTR
       INTEGER NBELROOT
       INTEGER MASTER
       PARAMETER( MASTER = 0 )
@@ -63,7 +69,7 @@ C
       DOUBLE PRECISION, DIMENSION( :, : ), ALLOCATABLE :: BUFR
       DOUBLE PRECISION, DIMENSION( : ), ALLOCATABLE :: TEMP_ELT_R
       INTEGER, DIMENSION( : ), ALLOCATABLE :: TEMP_ELT_I
-      INTEGER, DIMENSION( : ), ALLOCATABLE :: ELROOTPOS
+      INTEGER(8), DIMENSION( : ), ALLOCATABLE :: ELROOTPOS8
       INTEGER, DIMENSION( : ), ALLOCATABLE, TARGET :: RG2LALLOC
       INTEGER, DIMENSION( : ), POINTER     :: RG2L
       MPG = id%ICNTL(3)
@@ -79,7 +85,10 @@ C
         ELSE
           NBUF = SLAVEF - 1
         END IF
-        NBRECORDS = min(KEEP(39),NA_ELT)
+        NBRECORDS = KEEP(39)
+        IF (NA_ELT8 < int(NBRECORDS,8)) THEN
+          NBRECORDS = int(NA_ELT8)
+        ENDIF
         IF ( KEEP(50) .eq. 0 ) THEN
           MAXELT_REAL_SIZE = MAXELT_SIZE * MAXELT_SIZE
         ELSE
@@ -121,7 +130,7 @@ C
         END IF
         IF ( KEEP(38) .ne. 0 ) THEN
           NBELROOT = FRTPTR(KEEP(38)+1)-FRTPTR(KEEP(38))
-          ALLOCATE( ELROOTPOS( max(NBELROOT,1) ),
+          ALLOCATE( ELROOTPOS8( max(NBELROOT,1) ),
      &              stat = allocok )
           IF ( allocok .gt. 0 ) THEN
               id%INFO(1) = -13
@@ -157,15 +166,15 @@ C
       IF ( id%INFO(1) .LT. 0 ) RETURN
       CALL MPI_BCAST( NBRECORDS, 1, MPI_INTEGER, MASTER,
      &                COMM, IERR_MPI )
-      RECV_IELTPTR = 1
-      RECV_RELTPTR = 1
+      RECV_IELTPTR8 = 1_8
+      RECV_RELTPTR8 = 1_8
       IF ( MYID .eq. MASTER ) THEN
         NBELROOT = 0
-        RELTPTR = 1
-        RELPTR_LOC(1) = 1
+        RELTPTR8 = 1_8
+        RELPTR_LOC8(1) = 1
         DO IEL = 1, NELT
-          IELTPTR = id%ELTPTR( IEL )
-          SIZEI   = id%ELTPTR( IEL + 1 ) - IELTPTR
+          IELTPTR8 = int(id%ELTPTR( IEL ),8)
+          SIZEI   = int(int(id%ELTPTR( IEL + 1 ),8) - IELTPTR8)
           IF ( KEEP( 50 ) .eq. 0 ) THEN
             SIZER = SIZEI * SIZEI
           ELSE
@@ -175,39 +184,39 @@ C
           IF ( DEST .eq. -2 ) THEN
             NBELROOT = NBELROOT + 1
             FRTELT( FRTPTR(KEEP(38)) + NBELROOT - 1 ) = IEL
-            ELROOTPOS( NBELROOT ) = RELTPTR
+            ELROOTPOS8( NBELROOT ) = RELTPTR8
             GOTO 200
           END IF
           IF ( DEST .ge. 0 .and. KEEP(46) .eq. 0 ) DEST = DEST + 1
           IF ( KEEP(52) .ne. 0 ) THEN
             CALL DMUMPS_SCALE_ELEMENT( N, SIZEI, SIZER,
-     &               id%ELTVAR( IELTPTR: ), id%A_ELT( RELTPTR: ),
+     &               id%ELTVAR( IELTPTR8 ), id%A_ELT( RELTPTR8 ),
      &               TEMP_ELT_R(1), MAXELT_REAL_SIZE,
-     &               id%ROWSCA(1:), id%COLSCA(1:), KEEP(50) )
+     &               id%ROWSCA(1), id%COLSCA(1), KEEP(50) )
           END IF
           IF ( DEST .eq. 0 .or. ( DEST .eq. -1 .and. KEEP(46) .ne. 0 ) )
      &      THEN
-            ELTVAR_LOC( RECV_IELTPTR: RECV_IELTPTR + SIZEI - 1 )
-     &      = id%ELTVAR( IELTPTR: IELTPTR + SIZEI - 1 )
-            RECV_IELTPTR = RECV_IELTPTR + SIZEI
+            ELTVAR_LOC( RECV_IELTPTR8: RECV_IELTPTR8 + SIZEI - 1 )
+     &      = id%ELTVAR( IELTPTR8: IELTPTR8 + SIZEI - 1 )
+            RECV_IELTPTR8 = RECV_IELTPTR8 + SIZEI
             IF ( KEEP(52) .ne. 0 ) THEN
-              ELTVAL_LOC( RECV_RELTPTR: RECV_RELTPTR + SIZER - 1)
+              ELTVAL_LOC( RECV_RELTPTR8: RECV_RELTPTR8 + SIZER - 1)
      &        = TEMP_ELT_R( 1: SIZER )
-              RECV_RELTPTR = RECV_RELTPTR + SIZER
+              RECV_RELTPTR8 = RECV_RELTPTR8 + SIZER
             END IF
           END IF
           IF ( DEST .NE. 0 .AND. DEST. NE. -3 ) THEN
             IF ( KEEP(52) .eq. 0 ) THEN
               CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR:),
-     &           id%A_ELT (RELTPTR:),
+     &           id%ELTVAR(IELTPTR8),
+     &           id%A_ELT (RELTPTR8),
      &           SIZEI, SIZER,
      &
      &           DEST, NBUF, NBRECORDS,
      &           BUFI, BUFR, COMM )
             ELSE
               CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR:),
+     &           id%ELTVAR(IELTPTR8),
      &           TEMP_ELT_R( 1 ),
      &           SIZEI, SIZER,
      &
@@ -216,39 +225,39 @@ C
             END IF
           END IF
  200      CONTINUE
-          RELTPTR = RELTPTR + SIZER
+          RELTPTR8 = RELTPTR8 + SIZER
           IF ( KEEP(46) .eq. 0 .OR. KEEP(52) .eq. 0 ) THEN
-            RELPTR_LOC( IEL + 1 ) = RELTPTR
+            RELPTR_LOC8( IEL + 1 ) = RELTPTR8
           ELSE
-            RELPTR_LOC( IEL + 1 ) = RECV_RELTPTR
+            RELPTR_LOC8( IEL + 1 ) = RECV_RELTPTR8
           ENDIF
         END DO
         IF ( KEEP(46) .eq. 0 .OR. KEEP(52) .eq. 0 ) THEN
-          KEEP(13) = RELTPTR - 1
+          KEEP8(26) = RELTPTR8 - 1_8
         ELSE
-          KEEP(13) = RECV_RELTPTR - 1
+          KEEP8(26) = RECV_RELTPTR8 - 1_8
         ENDIF
-        IF ( RELTPTR - 1 .ne. id%NA_ELT ) THEN
-          WRITE(*,*) ' ** ERROR ELT DIST: RELPTR - 1 / id%NA_ELT=',
-     &               RELTPTR - 1,id%NA_ELT
+        IF ( RELTPTR8 - 1_8 .NE. NA_ELT8 ) THEN
+          WRITE(*,*) " ** Internal error in DMUMPS_ELT_DISTRIB",
+     &               RELTPTR8 - 1_8, NA_ELT8
           CALL MUMPS_ABORT()
         END IF
         DEST = -2
-        IELTPTR = 1
-        RELTPTR = 1
+        IELTPTR8 = 1_8
+        RELTPTR8 = 1_8
         SIZEI   = 1
         SIZER   = 1
         CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR:),
-     &           id%A_ELT (RELTPTR:),
+     &           id%ELTVAR(IELTPTR8),
+     &           id%A_ELT (RELTPTR8),
      &           SIZEI, SIZER,
      &
      &           DEST, NBUF, NBRECORDS,
      &           BUFI, BUFR, COMM )
         IF ( KEEP(52) .NE. 0 ) DEALLOCATE( TEMP_ELT_R )
       ELSE
-        FINI = ( RECV_IELTPTR .eq. IELPTR_LOC( NELT+1 )
-     &     .and. RECV_RELTPTR .eq. RELPTR_LOC( NELT+1 ) )
+        FINI = ( RECV_IELTPTR8 .eq. IELPTR_LOC8( NELT+1 )
+     &     .and. RECV_RELTPTR8 .eq. RELPTR_LOC8( NELT+1 ) )
         DO WHILE ( .not. FINI )
           CALL MPI_PROBE( MASTER, MPI_ANY_TAG,
      &                    COMM, STATUS, IERR_MPI )
@@ -257,20 +266,20 @@ C
              CASE( ELT_INT )
                CALL MPI_GET_COUNT( STATUS, MPI_INTEGER,
      &                             MSGLEN, IERR_MPI )
-               CALL MPI_RECV( ELTVAR_LOC( RECV_IELTPTR ), MSGLEN,
+               CALL MPI_RECV( ELTVAR_LOC( RECV_IELTPTR8 ), MSGLEN,
      &            MPI_INTEGER, MASTER, ELT_INT,
      &            COMM, STATUS, IERR_MPI )
-               RECV_IELTPTR = RECV_IELTPTR + MSGLEN
+               RECV_IELTPTR8 = RECV_IELTPTR8 + MSGLEN
              CASE( ELT_REAL )
                 CALL MPI_GET_COUNT( STATUS, MPI_DOUBLE_PRECISION,
      &                              MSGLEN, IERR_MPI )
-                CALL MPI_RECV( ELTVAL_LOC( RECV_RELTPTR ), MSGLEN,
+                CALL MPI_RECV( ELTVAL_LOC( RECV_RELTPTR8 ), MSGLEN,
      &            MPI_DOUBLE_PRECISION, MASTER, ELT_REAL,
      &            COMM, STATUS, IERR_MPI )
-                RECV_RELTPTR = RECV_RELTPTR + MSGLEN
+                RECV_RELTPTR8 = RECV_RELTPTR8 + MSGLEN
           END SELECT
-          FINI = ( RECV_IELTPTR .eq. IELPTR_LOC( NELT+1 )
-     &       .and. RECV_RELTPTR .eq. RELPTR_LOC( NELT+1 ) )
+          FINI = ( RECV_IELTPTR8 .eq. IELPTR_LOC8( NELT+1 )
+     &       .and. RECV_RELTPTR8 .eq. RELPTR_LOC8( NELT+1 ) )
         END DO
       END IF
       IF ( KEEP(38) .NE. 0 ) THEN
@@ -316,8 +325,8 @@ C
             TEMP_ELT_I( I ) = RG2L
      &              ( id%ELTVAR( id%ELTPTR(IELT) + I - 1 ) )
           END DO
-          IVALPTR = ELROOTPOS( IPTR - FRTPTR(KEEP(38)) + 1 ) - 1
-          K = 1
+          IVALPTR8 = ELROOTPOS8( IPTR - FRTPTR(KEEP(38)) + 1 ) - 1
+          K8 = 1_8
           DO J = 1, SIZEI
             JGLOB = id%ELTVAR( id%ELTPTR( IELT ) + J - 1 )
             IF ( KEEP(50).eq. 0 ) THEN
@@ -328,9 +337,9 @@ C
             DO I = IBEG, SIZEI
               IGLOB = id%ELTVAR( id%ELTPTR( IELT ) + I - 1 )
               IF ( KEEP(52) .eq. 0 ) THEN
-                VAL = id%A_ELT( IVALPTR + K )
+                VAL = id%A_ELT( IVALPTR8 + K8 )
               ELSE
-                VAL = id%A_ELT( IVALPTR + K ) *
+                VAL = id%A_ELT( IVALPTR8 + K8 ) *
      &                id%ROWSCA( IGLOB ) * id%COLSCA( JGLOB )
               END IF
               IF ( KEEP(50).eq.0 ) THEN
@@ -384,7 +393,7 @@ C
      &          IPOSROOT, JPOSROOT, VAL, DEST, BUFI, BUFR, NBRECORDS,
      &          NBUF, LP, COMM, KEEP(46) )
               END IF
-              K = K + 1
+              K8 = K8 + 1_8
             END DO
           END DO
         END DO
@@ -443,7 +452,7 @@ C
         DEALLOCATE( BUFI )
         DEALLOCATE( BUFR )
         IF (KEEP(38).ne.0) THEN 
-          DEALLOCATE(ELROOTPOS)
+          DEALLOCATE(ELROOTPOS8)
           IF (KEEP(46) .eq. 0 ) THEN
              DEALLOCATE(RG2LALLOC)
           ENDIF

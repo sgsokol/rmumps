@@ -68,7 +68,7 @@ IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
 LMETISDIR = $(topdir)/../metis-5.1.0/build/`gcc -dumpmachine`/libmetis/
-IMETIS    = $(topdir)/../metis-5.1.0/include # should be set to include directory for (par)metis.h
+IMETIS    = -I$(topdir)/../metis-5.1.0/include # should be set to include directory for (par)metis.h
 
 
 # You have to choose one among the following two lines depending on
@@ -147,6 +147,8 @@ CDEFS = -DAdd_
 #COMPILER OPTIONS
 
 #OPTC    = -O -I. -fPIC
+OPTC    = $(PKG_CFLAGS)
+OPTF    = $(PKG_FCFLAGS)
 
 #Sequential:
 

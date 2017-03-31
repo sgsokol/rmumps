@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -59,12 +59,16 @@ C
       SUBROUTINE DMUMPS_MTRANSB
      &           (M,N,NE,IP,IRN,A,IPERM,NUM,JPERM,PR,Q,L,D,RINF) 
       IMPLICIT NONE
-      INTEGER M,N,NE,NUM
-      INTEGER IP(N+1),IRN(NE),IPERM(M),JPERM(N),PR(N),Q(M),L(M)
-      DOUBLE PRECISION A(NE)
-      DOUBLE PRECISION D(M), RINF
-      INTEGER I,II,J,JJ,JORD,Q0,QLEN,IDUM,JDUM,ISP,JSP,
-     &        K,KK,KK1,KK2,I0,UP,LOW
+      INTEGER ::  M,N,NUM
+      INTEGER(8), INTENT(IN)  :: NE
+      INTEGER :: IRN(NE),IPERM(M),JPERM(N),Q(M),L(M)
+      INTEGER(8), INTENT(IN)  :: IP(N+1)
+      INTEGER(8), INTENT(OUT) :: PR(N)
+      DOUBLE PRECISION  :: A(NE)
+      DOUBLE PRECISION  :: D(M), RINF
+      INTEGER    :: I,II,J,JJ,JORD,Q0,QLEN,IDUM,JDUM,ISP,JSP,
+     &              I0,UP,LOW, IK
+      INTEGER(8) :: K,KK,KK1,KK2
       DOUBLE PRECISION    CSP,DI,DNEW,DQ0,AI,A0,BV,TBV,RLX
       DOUBLE PRECISION    ZERO,MINONE,ONE
       PARAMETER (ZERO=0.0D0,MINONE=-1.0D0,ONE=1.0D0)
@@ -74,17 +78,17 @@ C
       RLX = D(1)
       NUM = 0
       BV = RINF
-      DO 10 K = 1,N
-        JPERM(K) = 0
-        PR(K) = IP(K)
+      DO 10 I = 1,N
+        JPERM(I) = 0
+        PR(I) = IP(I)
    10 CONTINUE
-      DO 12 K = 1,M
-        IPERM(K) = 0
-        D(K) = ZERO
+      DO 12 I = 1,M
+        IPERM(I) = 0
+        D(I) = ZERO
    12 CONTINUE
       DO 30 J = 1,N
         A0 = MINONE
-        DO 20 K = IP(J),IP(J+1)-1
+        DO 20 K = IP(J),IP(J+1)-1_8
           I = IRN(K)
           AI = abs(A(K))
           IF (AI.GT.D(I)) D(I) = AI
@@ -117,30 +121,30 @@ C
       IF (NUM.EQ.N) GO TO 1000
       DO 95 J = 1,N
         IF (JPERM(J).NE.0) GO TO 95
-        DO 50 K = IP(J),IP(J+1)-1
+        DO 50 K = IP(J),IP(J+1)-1_8
           I = IRN(K)
           AI = abs(A(K))
           IF (AI.LT.BV) GO TO 50
           IF (IPERM(I).EQ.0) GO TO 90
           JJ = IPERM(I)
           KK1 = PR(JJ)
-          KK2 = IP(JJ+1) - 1
+          KK2 = IP(JJ+1) - 1_8
           IF (KK1.GT.KK2) GO TO 50
           DO 70 KK = KK1,KK2
             II = IRN(KK)
             IF (IPERM(II).NE.0) GO TO 70
             IF (abs(A(KK)).GE.BV) GO TO 80
    70     CONTINUE
-          PR(JJ) = KK2 + 1
+          PR(JJ) = KK2 + 1_8
    50   CONTINUE
         GO TO 95
    80   JPERM(JJ) = II
         IPERM(II) = JJ
-        PR(JJ) = KK + 1
+        PR(JJ) = KK + 1_8
    90   NUM = NUM + 1
         JPERM(J) = I
         IPERM(I) = J
-        PR(J) = K + 1
+        PR(J) = K + 1_8
    95 CONTINUE
       IF (NUM.EQ.N) GO TO 1000
       DO 99 I = 1,M
@@ -155,8 +159,8 @@ C
         UP = M + 1
         CSP = MINONE
         J = JORD
-        PR(J) = -1
-        DO 115 K = IP(J),IP(J+1)-1
+        PR(J) = -1_8
+        DO 115 K = IP(J),IP(J+1)-1_8
           I = IRN(K)
           DNEW = abs(A(K))
           IF (CSP.GE.DNEW) GO TO 115
@@ -176,7 +180,7 @@ C
               CALL DMUMPS_MTRANSD(I,M,Q,D,L,1)
             ENDIF
             JJ = IPERM(I)
-            PR(JJ) = J
+            PR(JJ) = int(J,8)
           ENDIF
   115   CONTINUE
         DO 150 JDUM = 1,NUM
@@ -201,7 +205,7 @@ C
           DQ0 = D(Q0)
           L(Q0) = UP
           J = IPERM(Q0)
-          DO 155 K = IP(J),IP(J+1)-1
+          DO 155 K = IP(J),IP(J+1)-1_8
             I = IRN(K)
             IF (L(I).GE.UP) GO TO 155
             DNEW = min(DQ0,abs(A(K)))
@@ -230,7 +234,7 @@ C
                 CALL DMUMPS_MTRANSD(I,M,Q,D,L,1)
               ENDIF
               JJ = IPERM(I)
-              PR(JJ) = J
+              PR(JJ) = int(J,8)
             ENDIF
   155     CONTINUE
   150   CONTINUE
@@ -244,21 +248,21 @@ C
           I0 = JPERM(J)
           JPERM(J) = I
           IPERM(I) = J
-          J = PR(J)
+          J = int(PR(J))
           IF (J.EQ.-1) GO TO 190
           I = I0
   170   CONTINUE
-  190   DO 191 KK = UP,M
-          I = Q(KK)
+  190   DO 191 IK = UP,M
+          I = Q(IK)
           D(I) = MINONE
           L(I) = 0
   191   CONTINUE 
-        DO 192 KK = LOW,UP-1
-          I = Q(KK)
+        DO 192 IK = LOW,UP-1
+          I = Q(IK)
           D(I) = MINONE
   192   CONTINUE
-        DO 193 KK = 1,QLEN
-          I = Q(KK)
+        DO 193 IK = 1,QLEN
+          I = Q(IK)
           D(I) = MINONE
           L(I) = 0
   193   CONTINUE
@@ -439,16 +443,18 @@ C
       END SUBROUTINE DMUMPS_MTRANSF
       SUBROUTINE DMUMPS_MTRANSQ(IP,LENL,LENH,W,WLEN,A,NVAL,VAL)
       IMPLICIT NONE
-      INTEGER WLEN,NVAL
-      INTEGER IP(*),LENL(*),LENH(*),W(*)
-      DOUBLE PRECISION A(*),VAL
-      INTEGER XX,J,K,II,S,POS
+      INTEGER ::WLEN,NVAL
+      INTEGER :: LENL(*),LENH(*),W(*)
+      INTEGER(8) :: IP(*)
+      DOUBLE PRECISION :: A(*),VAL
+      INTEGER XX,J,K,S,POS
+      INTEGER(8) :: II
       PARAMETER (XX=10)
       DOUBLE PRECISION SPLIT(XX),HA
       NVAL = 0 
       DO 10 K = 1,WLEN
         J = W(K)
-        DO 15 II = IP(J)+LENL(J),IP(J)+LENH(J)-1
+        DO 15 II = IP(J)+int(LENL(J),8),IP(J)+int(LENH(J)-1,8)
           HA = A(II)
           IF (NVAL.EQ.0) THEN
             SPLIT(1) = HA
@@ -476,22 +482,25 @@ C
       END SUBROUTINE DMUMPS_MTRANSQ
       SUBROUTINE DMUMPS_MTRANSR(N,NE,IP,IRN,A)
       IMPLICIT NONE
-      INTEGER N,NE
-      INTEGER IP(N+1),IRN(NE)
-      DOUBLE PRECISION A(NE)
-      INTEGER THRESH,TDLEN
+      INTEGER, INTENT(IN)    :: N
+      INTEGER(8), INTENT(IN) :: NE
+      INTEGER(8), INTENT(IN) :: IP(N+1)
+      INTEGER, INTENT(INOUT) :: IRN(NE)
+      DOUBLE PRECISION, INTENT(INOUT)    :: A(NE)
+      INTEGER  :: THRESH,TDLEN
       PARAMETER (THRESH=15,TDLEN=50)
-      INTEGER J,IPJ,K,LEN,R,S,HI,FIRST,MID,LAST,TD
-      DOUBLE PRECISION HA,KEY
-      INTEGER TODO(TDLEN)
+      INTEGER    :: J, LEN, HI
+      INTEGER(8) :: K, IPJ, TD, FIRST, LAST, MID, R, S
+      DOUBLE PRECISION       :: HA, KEY
+      INTEGER(8) :: TODO(TDLEN)
       DO 100 J = 1,N
-        LEN = IP(J+1) - IP(J)
+        LEN = int(IP(J+1) - IP(J))
         IF (LEN.LE.1) GO TO 100
         IPJ = IP(J)
         IF (LEN.LT.THRESH) GO TO 400
         TODO(1) = IPJ
-        TODO(2) = IPJ + LEN
-        TD = 2
+        TODO(2) = IPJ +int(LEN,8)
+        TD = 2_8
   500   CONTINUE
         FIRST = TODO(TD-1)
         LAST = TODO(TD)
@@ -503,7 +512,7 @@ C
           KEY = HA
           GO TO 470
   475   CONTINUE
-        TD = TD - 2
+        TD = TD - 2_8
         GO TO 425
   470   MID = FIRST
         DO 450 K = FIRST,LAST-1
@@ -526,19 +535,19 @@ C
           TODO(TD) = LAST
           TODO(TD-1) = MID
         ENDIF
-        TD = TD + 2
+        TD = TD + 2_8
   425   CONTINUE
-        IF (TD.EQ.0) GO TO 400 
-        IF (TODO(TD)-TODO(TD-1).GE.THRESH) GO TO 500
-        TD = TD - 2
+        IF (TD.EQ.0_8) GO TO 400 
+        IF (TODO(TD)-TODO(TD-1).GE.int(THRESH,8)) GO TO 500
+        TD = TD - 2_8
         GO TO 425
-  400   DO 200 R = IPJ+1,IPJ+LEN-1
+  400   DO 200 R = IPJ+1_8,IPJ+int(LEN-1,8)
           IF (A(R-1) .LT. A(R)) THEN
             HA = A(R)
             HI = IRN(R)
-            A(R) = A(R-1)
-            IRN(R) = IRN(R-1)
-            DO 300 S = R-1,IPJ+1,-1
+            A(R) = A(R-1_8)
+            IRN(R) = IRN(R-1_8)
+            DO 300 S = R-1,IPJ+1_8,-1_8
               IF (A(S-1) .LT. HA) THEN
                 A(S) = A(S-1)
                 IRN(S) = IRN(S-1)
@@ -558,16 +567,20 @@ C
       SUBROUTINE DMUMPS_MTRANSS(M,N,NE,IP,IRN,A,IPERM,NUMX,
      &           W,LEN,LENL,LENH,FC,IW,IW4,RLX,RINF)
       IMPLICIT NONE
-      INTEGER M,N,NE,NUMX
-      INTEGER IP(N+1),IRN(NE),IPERM(N), 
+      INTEGER, INTENT(IN) :: M,N
+      INTEGER(8), INTENT(IN) :: NE
+      INTEGER, INTENT(OUT) :: NUMX
+      INTEGER(8), INTENT(IN) :: IP(N+1)
+      INTEGER  :: IRN(NE),IPERM(N), 
      &        W(N),LEN(N),LENL(N),LENH(N),FC(N),IW(M),IW4(3*N+M)
       DOUBLE PRECISION A(NE),RLX,RINF
-      INTEGER NUM,NVAL,WLEN,II,I,J,K,L,CNT,MOD,IDUM1,IDUM2,IDUM3
-      DOUBLE PRECISION    BVAL,BMIN,BMAX
+      INTEGER :: NUM,NVAL,WLEN,I,J,L,CNT,MOD, IDUM
+      INTEGER(8) :: K, II, KDUM1, KDUM2
+      DOUBLE PRECISION ::    BVAL,BMIN,BMAX
       EXTERNAL DMUMPS_MTRANSQ,DMUMPS_MTRANSU,DMUMPS_MTRANSX
       DO 20 J = 1,N
         FC(J) = J
-        LEN(J) = IP(J+1) - IP(J)
+        LEN(J) = int(IP(J+1) - IP(J))
    20 CONTINUE
       DO 21 I = 1,M
         IW(I) = 0
@@ -575,7 +588,8 @@ C
       CNT = 1
       MOD = 1
       NUMX = 0
-      CALL DMUMPS_MTRANSU(CNT,MOD,M,N,IRN,NE,IP,LEN,FC,IW,NUMX,N,
+      CALL DMUMPS_MTRANSU(CNT,MOD,M,N,IRN,NE,IP,LEN,FC,IW,
+     &            NUMX,N,
      &            IW4(1),IW4(N+1),IW4(2*N+1),IW4(2*N+M+1))
       NUM = NUMX
       IF (NUM.NE.N) THEN
@@ -584,7 +598,7 @@ C
         BMAX = RINF
         DO 30 J = 1,N
           BVAL = 0.0D0
-          DO 25 K = IP(J),IP(J+1)-1
+          DO 25 K = IP(J),IP(J+1)-1_8
             IF (A(K).GT.BVAL) BVAL = A(K)
    25     CONTINUE
           IF (BVAL.LT.BMAX) BMAX = BVAL
@@ -595,33 +609,34 @@ C
       BMIN = 0.0D0
       WLEN = 0
       DO 48 J = 1,N
-        L = IP(J+1) - IP(J)
+        L = int(IP(J+1) - IP(J))
         LENH(J) = L
         LEN(J) = L
-        DO 45 K = IP(J),IP(J+1)-1
+        DO 45 K = IP(J),IP(J+1)-1_8
           IF (A(K).LT.BMAX) GO TO 46
    45   CONTINUE
         K = IP(J+1)
-   46   LENL(J) = K - IP(J)
+   46   LENL(J) = int(K - IP(J))
         IF (LENL(J).EQ.L) GO TO 48
         WLEN = WLEN + 1
         W(WLEN) = J
    48 CONTINUE
-      DO 90 IDUM1 = 1,NE
+      DO 90 KDUM1 = 1_8,NE
         IF (NUM.EQ.NUMX) THEN
           DO 50 I = 1,M
             IPERM(I) = IW(I)
    50     CONTINUE
-          DO 80 IDUM2 = 1,NE
+          DO 80 KDUM2 = 1_8,NE
             BMIN = BVAL
             IF (BMAX-BMIN .LE. RLX) GO TO 1000
             CALL DMUMPS_MTRANSQ(IP,LENL,LEN,W,WLEN,A,NVAL,BVAL)
             IF (NVAL.LE.1) GO TO 1000
             K = 1
-            DO 70 IDUM3 = 1,N
+            DO 70 IDUM = 1,N
               IF (K.GT.WLEN) GO TO 71
               J = W(K)
-              DO 55 II = IP(J)+LEN(J)-1,IP(J)+LENL(J),-1
+              DO 55 II = IP(J)+int(LEN(J)-1,8),
+     &                   IP(J)+int(LENL(J),8),-1_8
                 IF (A(II).GE.BVAL) GO TO 60 
                 I = IRN(II)
                 IF (IW(I).NE.J) GO TO 55
@@ -630,7 +645,7 @@ C
                 FC(N-NUM) = J
    55         CONTINUE
    60         LENH(J) = LEN(J)
-              LEN(J) = II - IP(J) + 1
+              LEN(J) = int(II - IP(J) + 1)
               IF (LENL(J).EQ.LENH(J)) THEN
                 W(K) = W(WLEN)
                 WLEN = WLEN - 1
@@ -647,14 +662,14 @@ C
           CALL DMUMPS_MTRANSQ(IP,LEN,LENH,W,WLEN,A,NVAL,BVAL)
           IF (NVAL.EQ.0. OR. BVAL.EQ.BMIN) GO TO 1000
           K = 1
-          DO 87 IDUM3 = 1,N
+          DO 87 IDUM = 1,N
             IF (K.GT.WLEN) GO TO 88
             J = W(K)
-            DO 85 II = IP(J)+LEN(J),IP(J)+LENH(J)-1
+            DO 85 II = IP(J)+int(LEN(J),8),IP(J)+int(LENH(J)-1,8)
               IF (A(II).LT.BVAL) GO TO 86
    85       CONTINUE
    86       LENL(J) = LEN(J)
-            LEN(J) = II - IP(J)
+            LEN(J) = int(II - IP(J))
             IF (LENL(J).EQ.LENH(J)) THEN
               W(K) = W(WLEN)
               WLEN = WLEN - 1
@@ -665,22 +680,27 @@ C
    88     MOD = 0
         ENDIF
         CNT = CNT + 1
-        CALL DMUMPS_MTRANSU(CNT,MOD,M,N,IRN,NE,IP,LEN,FC,IW,NUM,NUMX,
+        CALL DMUMPS_MTRANSU(CNT,MOD,M,N,IRN,NE,IP,LEN,FC,IW,
+     &              NUM,NUMX,
      &              IW4(1),IW4(N+1),IW4(2*N+1),IW4(2*N+M+1))
    90 CONTINUE 
  1000 IF (M.EQ.N .and. NUMX.EQ.N) GO TO 2000
       CALL DMUMPS_MTRANSX(M,N,IPERM,IW,W)
  2000 RETURN
       END SUBROUTINE DMUMPS_MTRANSS
+C
       SUBROUTINE DMUMPS_MTRANSU
      &           (ID,MOD,M,N,IRN,LIRN,IP,LENC,FC,IPERM,NUM,NUMX,
      &           PR,ARP,CV,OUT)
       IMPLICIT NONE
-      INTEGER ID,MOD,M,N,LIRN,NUM,NUMX
-      INTEGER ARP(N),CV(M),IRN(LIRN),IP(N),
+      INTEGER  :: ID,MOD,M,N,NUM,NUMX
+      INTEGER(8), INTENT(IN) :: LIRN
+      INTEGER  :: ARP(N),CV(M),IRN(LIRN),
      &        FC(N),IPERM(M),LENC(N),OUT(N),PR(N)
-      INTEGER I,II,IN1,IN2,J,J1,JORD,K,KK,LAST,NFC,
-     &        NUM0,NUM1,NUM2,ID0,ID1
+      INTEGER(8), INTENT(IN) :: IP(N)
+      INTEGER I,J,J1,JORD,NFC,K,KK, 
+     &        NUM0,NUM1,NUM2,ID0,ID1,LAST
+      INTEGER(8) :: IN1, IN2, II
       IF (ID.EQ.1) THEN
         DO 5 I = 1,M
           CV(I) = 0
@@ -708,8 +728,8 @@ C
         PR(J) = -1
         DO 70 K = 1,JORD
           IF (ARP(J).GE.LENC(J)) GO TO 30
-          IN1 = IP(J) + ARP(J)
-          IN2 = IP(J) + LENC(J) - 1
+          IN1 = IP(J) + int(ARP(J),8)
+          IN2 = IP(J) + int(LENC(J) - 1,8)
           DO 20 II = IN1,IN2
             I = IRN(II)
             IF (IPERM(I).EQ.0) GO TO 80
@@ -717,9 +737,9 @@ C
           ARP(J) = LENC(J)
    30     OUT(J) = LENC(J) - 1
           DO 60 KK = 1,JORD
-            IN1 = OUT(J)
+            IN1 = int(OUT(J),8)
             IF (IN1.LT.0) GO TO 50
-            IN2 = IP(J) + LENC(J) - 1
+            IN2 = IP(J) + int(LENC(J) - 1,8)
             IN1 = IN2 - IN1
             DO 40 II = IN1,IN2
               I = IRN(II)
@@ -728,7 +748,7 @@ C
               J = IPERM(I)
               CV(I) = ID1
               PR(J) = J1
-              OUT(J1) = IN2 - II - 1
+              OUT(J1) = int(IN2 - II) - 1 
               GO TO 70
    40       CONTINUE
    50       J1 = PR(J)
@@ -745,12 +765,12 @@ C
    60     CONTINUE
    70   CONTINUE
    80   IPERM(I) = J
-        ARP(J) = II - IP(J) + 1
+        ARP(J) = int(II - IP(J)) + 1
         NUM = NUM + 1
         DO 90 K = 1,JORD
           J = PR(J)
           IF (J.EQ.-1) GO TO 95
-          II = IP(J) + LENC(J) - OUT(J) - 2
+          II = IP(J) + int(LENC(J) - OUT(J) - 2,8)
           I = IRN(II)
           IPERM(I) = J
    90   CONTINUE
@@ -766,17 +786,21 @@ C
   110 CONTINUE
       RETURN
       END SUBROUTINE DMUMPS_MTRANSU
+C
       SUBROUTINE DMUMPS_MTRANSW(M,N,NE,IP,IRN,A,IPERM,NUM,
-     &           JPERM,OUT,PR,Q,L,U,D,RINF) 
+     &           JPERM,L32,OUT,PR,Q,L,U,D,RINF) 
       IMPLICIT NONE
-      INTEGER M,N,NE,NUM
-      INTEGER IP(N+1),IRN(NE),IPERM(M),JPERM(N),OUT(N),PR(N),Q(M),L(M)
+      INTEGER :: M,N,NUM
+      INTEGER(8), INTENT(IN) :: NE
+      INTEGER  :: IRN(NE),IPERM(M),Q(M),L32(max(M,N))
+      INTEGER(8)  :: IP(N+1), PR(N), L(M), JPERM(N), OUT(N)
       DOUBLE PRECISION A(NE),U(M),D(M),RINF,RINF3
-      INTEGER I,I0,II,J,JJ,JORD,Q0,QLEN,JDUM,ISP,JSP,
-     &        K,K0,K1,K2,KK,KK1,KK2,UP,LOW
-      DOUBLE PRECISION    CSP,DI,DMIN,DNEW,DQ0,VJ,RLX
-      LOGICAL LORD
-      DOUBLE PRECISION    ZERO, ONE
+      INTEGER  :: I,I0,II,J,JJ,JORD,Q0,QLEN,JDUM,JSP,
+     &            UP,LOW,IK
+      INTEGER(8) :: K, KK, KK1, KK2, K0, K1, K2, ISP
+      DOUBLE PRECISION     :: CSP,DI,DMIN,DNEW,DQ0,VJ,RLX
+      LOGICAL  :: LORD
+      DOUBLE PRECISION    :: ZERO, ONE
       PARAMETER (ZERO=0.0D0,ONE=1.0D0)
       EXTERNAL DMUMPS_MTRANSD, DMUMPS_MTRANSE,
      &         DMUMPS_MTRANSF, DMUMPS_MTRANSX
@@ -784,18 +808,18 @@ C
       RINF3 = U(2)
       LORD = (JPERM(1).EQ.6)
       NUM = 0
-      DO 10 K = 1,N
-        JPERM(K) = 0
-        PR(K) = IP(K)
-        D(K) = RINF
+      DO 10 I = 1,N
+        JPERM(I) = 0_8
+        PR(I) = IP(I)
+        D(I) = RINF
    10 CONTINUE
-      DO 15 K = 1,M
-        U(K) = RINF3
-        IPERM(K) = 0
-        L(K) = 0
+      DO 15 I = 1,M
+        U(I) = RINF3
+        IPERM(I) = 0
+        L(I) = 0_8
    15 CONTINUE
       DO 30 J = 1,N
-         IF (IP(J+1)-IP(J) .GT. N/10 .AND. N.GT.50) GO TO 30
+         IF (int(IP(J+1)-IP(J)) .GT. N/10 .AND. N.GT.50) GO TO 30
         DO 20 K = IP(J),IP(J+1)-1
           I = IRN(K)
           IF (A(K).GT.U(I)) GO TO 20
@@ -807,7 +831,7 @@ C
       DO 40 I = 1,M
         J = IPERM(I)
         IF (J.EQ.0) GO TO 40
-        IF (JPERM(J).EQ.0) THEN
+        IF (JPERM(J).EQ.0_8) THEN
           JPERM(J) = L(I)
           D(J) = U(I)
           NUM = NUM + 1
@@ -822,13 +846,13 @@ C
         ENDIF
    40 CONTINUE
       IF (NUM.EQ.N) GO TO 1000
-      DO 45 K = 1,M
-        D(K) = ZERO
+      DO 45 I = 1,M
+        D(I) = ZERO
    45 CONTINUE
       DO 95 J = 1,N
         IF (JPERM(J).NE.0) GO TO 95
         K1 = IP(J)
-        K2 = IP(J+1) - 1
+        K2 = IP(J+1) - 1_8
         IF (K1.GT.K2) GO TO 95
         VJ = RINF
         DO 50 K = K1,K2
@@ -850,28 +874,28 @@ C
           IF (A(K)-U(I).GT.VJ) GO TO 60 
           JJ = IPERM(I)
           KK1 = PR(JJ)
-          KK2 = IP(JJ+1) - 1
+          KK2 = IP(JJ+1) - 1_8
           IF (KK1.GT.KK2) GO TO 60
           DO 70 KK = KK1,KK2
             II = IRN(KK)
             IF (IPERM(II).GT.0) GO TO 70
             IF (A(KK)-U(II).LE.D(JJ)) GO TO 80
    70     CONTINUE
-          PR(JJ) = KK2 + 1
+          PR(JJ) = KK2 + 1_8
    60   CONTINUE
         GO TO 95
    80   JPERM(JJ) = KK
         IPERM(II) = JJ
-        PR(JJ) = KK + 1
+        PR(JJ) = KK + 1_8
    90   NUM = NUM + 1
         JPERM(J) = K
         IPERM(I) = J
-        PR(J) = K + 1
+        PR(J) = K + 1_8
    95 CONTINUE
       IF (NUM.EQ.N) GO TO 1000
       DO 99 I = 1,M
         D(I) = RINF
-        L(I) = 0
+        Q(I) = 0
    99 CONTINUE
       DO 100 JORD = 1,N
         IF (JPERM(JORD).NE.0) GO TO 100
@@ -881,8 +905,8 @@ C
         UP = M + 1
         CSP = RINF
         J = JORD
-        PR(J) = -1
-        DO 115 K = IP(J),IP(J+1)-1
+        PR(J) = -1_8
+        DO 115 K = IP(J),IP(J+1)-1_8
           I = IRN(K)
           DNEW = A(K) - U(I)
           IF (DNEW.GE.CSP) GO TO 115
@@ -894,13 +918,13 @@ C
             IF (DNEW.LT.DMIN) DMIN = DNEW
             D(I) = DNEW
             QLEN = QLEN + 1
-            Q(QLEN) = K
+            L(QLEN) = K
           ENDIF
   115   CONTINUE
         Q0 = QLEN
         QLEN = 0
-        DO 120 KK = 1,Q0
-          K = Q(KK)
+        DO 120 IK = 1,Q0
+          K = L(IK)
           I = IRN(K)
           IF (CSP.LE.D(I)) THEN
             D(I) = RINF
@@ -908,40 +932,40 @@ C
           ENDIF
           IF (D(I).LE.DMIN) THEN
             LOW = LOW - 1
-            Q(LOW) = I
-            L(I) = LOW
+            L32(LOW) = I
+            Q(I) = LOW
           ELSE
             QLEN = QLEN + 1
-            L(I) = QLEN
-            CALL DMUMPS_MTRANSD(I,M,Q,D,L,2)
+            Q(I) = QLEN
+            CALL DMUMPS_MTRANSD(I,M,L32,D,Q,2)
           ENDIF
           JJ = IPERM(I)
           OUT(JJ) = K
-          PR(JJ) = J
+          PR(JJ) = int(J,8)
   120   CONTINUE
         DO 150 JDUM = 1,NUM
           IF (LOW.EQ.UP) THEN
             IF (QLEN.EQ.0) GO TO 160
-            I = Q(1)
+            I = L32(1)
             IF (D(I).LT.RINF) DMIN = D(I)*(ONE+RLX)
             IF (DMIN.GE.CSP) GO TO 160
-  152       CALL DMUMPS_MTRANSE(QLEN,M,Q,D,L,2)
+  152       CALL DMUMPS_MTRANSE(QLEN,M,L32,D,Q,2)
             LOW = LOW - 1
-            Q(LOW) = I
-            L(I) = LOW
+            L32(LOW) = I
+            Q(I) = LOW
             IF (QLEN.EQ.0) GO TO 153
-            I = Q(1)
+            I = L32(1)
             IF (D(I).GT.DMIN) GO TO 153
             GO TO 152
           ENDIF
-  153     Q0 = Q(UP-1)
+  153     Q0 = L32(UP-1)
           DQ0 = D(Q0)
           IF (DQ0.GE.CSP) GO TO 160
           IF (DMIN.GE.CSP) GO TO 160
           UP = UP - 1
           J = IPERM(Q0)
           VJ = DQ0 - A(JPERM(J)) + U(Q0)
-          K1 = IP(J+1)-1
+          K1 = IP(J+1)-1_8
           IF (LORD) THEN
             IF (CSP.NE.RINF) THEN
               DI = CSP - VJ
@@ -970,7 +994,7 @@ C
           DI = CSP - VJ
           DO 155 K = K0,K1
             I = IRN(K)
-            IF (L(I).GE.LOW) GO TO 155
+            IF (Q(I).GE.LOW) GO TO 155
             DNEW = A(K) - U(I)
             IF (DNEW.GE.DI) GO TO 155
             DNEW = DNEW + VJ
@@ -984,22 +1008,22 @@ C
               IF (DNEW.GE.D(I)) GO TO 155
               D(I) = DNEW
               IF (DNEW.LE.DMIN) THEN
-                IF (L(I).NE.0) THEN
-                  CALL DMUMPS_MTRANSF(L(I),QLEN,M,Q,D,L,2)
+                IF (Q(I).NE.0) THEN
+                  CALL DMUMPS_MTRANSF(Q(I),QLEN,M,L32,D,Q,2)
                 ENDIF
                 LOW = LOW - 1
-                Q(LOW) = I
-                L(I) = LOW
+                L32(LOW) = I
+                Q(I) = LOW
               ELSE   
-                IF (L(I).EQ.0) THEN
+                IF (Q(I).EQ.0) THEN
                   QLEN = QLEN + 1
-                  L(I) = QLEN
+                  Q(I) = QLEN
                 ENDIF
-                CALL DMUMPS_MTRANSD(I,M,Q,D,L,2)
+                CALL DMUMPS_MTRANSD(I,M,L32,D,Q,2)
               ENDIF
               JJ = IPERM(I)
               OUT(JJ) = K
-              PR(JJ) = J
+              PR(JJ) = int(J,8)
             ENDIF
   155     CONTINUE
   150   CONTINUE
@@ -1010,7 +1034,7 @@ C
         IPERM(I) = J
         JPERM(J) = ISP
         DO 170 JDUM = 1,NUM
-          JJ = PR(J) 
+          JJ = int(PR(J))
           IF (JJ.EQ.-1) GO TO 180
           K = OUT(J)
           I = IRN(K)
@@ -1018,24 +1042,24 @@ C
           JPERM(JJ) = K
           J = JJ
   170   CONTINUE
-  180   DO 182 KK = UP,M
-          I = Q(KK)
+  180   DO 182 JJ = UP,M
+          I = L32(JJ)
           U(I) = U(I) + D(I) - CSP
   182   CONTINUE 
-  190   DO 191 KK = UP,M
-          I = Q(KK)
+  190   DO 191 JJ = UP,M
+          I = L32(JJ)
           D(I) = RINF
-          L(I) = 0
+          Q(I) = 0
   191   CONTINUE
-        DO 192 KK = LOW,UP-1
-          I = Q(KK)
+        DO 192 JJ = LOW,UP-1
+          I = L32(JJ)
           D(I) = RINF
-          L(I) = 0
+          Q(I) = 0
   192   CONTINUE 
-        DO 193 KK = 1,QLEN
-          I = Q(KK)
+        DO 193 JJ = 1,QLEN
+          I = L32(JJ)
           D(I) = RINF
-          L(I) = 0
+          Q(I) = 0
   193   CONTINUE
   100 CONTINUE
  1000 CONTINUE
@@ -1051,15 +1075,19 @@ C
         IF (IPERM(I).EQ.0) U(I) = ZERO
  1201 CONTINUE
       IF (M.EQ.N .and. NUM.EQ.N) GO TO 2000
-      CALL DMUMPS_MTRANSX(M,N,IPERM,L,JPERM)
+      CALL DMUMPS_MTRANSX(M,N,IPERM,Q,L32)
  2000 RETURN
       END SUBROUTINE DMUMPS_MTRANSW
       SUBROUTINE DMUMPS_MTRANSZ
      &           (M,N,IRN,LIRN,IP,LENC,IPERM,NUM,PR,ARP,CV,OUT)
       IMPLICIT NONE
-      INTEGER LIRN,M,N,NUM
-      INTEGER ARP(N),CV(M),IRN(LIRN),IP(N),IPERM(M),LENC(N),OUT(N),PR(N)
-      INTEGER I,II,IN1,IN2,J,J1,JORD,K,KK
+      INTEGER :: M,N,NUM
+      INTEGER(8), INTENT(IN) :: LIRN
+      INTEGER :: ARP(N),CV(M),IRN(LIRN),IPERM(M),LENC(N),OUT(N),PR(N)
+      INTEGER(8), INTENT(IN) :: IP(N)
+C Local variables 
+      INTEGER    :: I,J,J1,JORD,K,KK
+      INTEGER(8) :: II, IN1, IN2
       EXTERNAL DMUMPS_MTRANSX
       DO 10 I = 1,M
         CV(I) = 0
@@ -1073,9 +1101,9 @@ C
         J = JORD
         PR(J) = -1
         DO 70 K = 1,JORD
-          IN1 = ARP(J)
-          IF (IN1.LT.0) GO TO 30
-          IN2 = IP(J) + LENC(J) - 1
+          IN1 = int(ARP(J),8)
+          IF (IN1.LT.0_8) GO TO 30
+          IN2 = IP(J) + int(LENC(J) - 1,8)
           IN1 = IN2 - IN1
           DO 20 II = IN1,IN2
             I = IRN(II)
@@ -1085,9 +1113,9 @@ C
    30     CONTINUE
           OUT(J) = LENC(J) - 1
           DO 60 KK = 1,JORD
-            IN1 = OUT(J)
-            IF (IN1.LT.0) GO TO 50
-            IN2 = IP(J) + LENC(J) - 1
+            IN1 = int(OUT(J),8)
+            IF (IN1.LT.0_8) GO TO 50
+            IN2 = IP(J) + int(LENC(J) - 1,8)
             IN1 = IN2 - IN1
             DO 40 II = IN1,IN2
               I = IRN(II)
@@ -1096,7 +1124,7 @@ C
               J = IPERM(I)
               CV(I) = JORD
               PR(J) = J1
-              OUT(J1) = IN2 - II - 1
+              OUT(J1) = int(IN2 - II - 1_8)
               GO TO 70
    40       CONTINUE
    50       CONTINUE
@@ -1106,12 +1134,12 @@ C
    70   CONTINUE
    80   CONTINUE
         IPERM(I) = J
-        ARP(J) = IN2 - II - 1
+        ARP(J) = int(IN2 - II - 1_8)
         NUM = NUM + 1
         DO 90 K = 1,JORD
           J = PR(J)
           IF (J.EQ.-1) GO TO 1000
-          II = IP(J) + LENC(J) - OUT(J) - 2
+          II = IP(J) + int(LENC(J) - OUT(J) - 2,8)
           I = IRN(II)
           IPERM(I) = J
    90   CONTINUE

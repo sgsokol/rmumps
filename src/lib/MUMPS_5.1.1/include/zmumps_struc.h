@@ -1,9 +1,9 @@
 !
-!  This file is part of MUMPS 5.0.1, released
-!  on Thu Jul 23 17:08:29 UTC 2015
+!  This file is part of MUMPS 5.1.1, released
+!  on Mon Mar 20 14:34:33 UTC 2017
 !
 !
-!  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+!  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 !  University of Bordeaux.
 !
 !  This version of MUMPS is provided to you free of charge. It is
@@ -41,7 +41,8 @@
 !    ----------------------------------------
 !    Assembled input matrix : User interface
 !    ----------------------------------------
-        INTEGER :: NZ
+        INTEGER    :: NZ  ! Standard integer input + bwd. compat.
+        INTEGER(8) :: NNZ ! 64-bit integer input
         COMPLEX(kind=8), DIMENSION(:), POINTER :: A
         INTEGER, DIMENSION(:), POINTER :: IRN, JCN
         DOUBLE PRECISION, DIMENSION(:), POINTER :: COLSCA, ROWSCA, pad0
@@ -50,7 +51,9 @@
 !       Case of distributed assembled matrix
 !       matrix on entry:
 !       ------------------------------------
-        INTEGER :: NZ_loc, pad1
+        INTEGER    :: NZ_loc  ! Standard integer input + bwd. compat.
+        INTEGER    :: pad1
+        INTEGER(8) :: NNZ_loc ! 64-bit integer input
         INTEGER, DIMENSION(:), POINTER :: IRN_loc, JCN_loc
         COMPLEX(kind=8), DIMENSION(:), POINTER :: A_loc, pad2
 !
@@ -120,7 +123,7 @@
 !    --------------
 !    Version number
 !    --------------
-        CHARACTER(LEN=25) ::  VERSION_NUMBER
+        CHARACTER(LEN=30) ::  VERSION_NUMBER
 !    -----------
 !    Out-of-core
 !    -----------
@@ -130,7 +133,12 @@
 !    To save the matrix in matrix market format
 !    ------------------------------------------
         CHARACTER(LEN=255) ::  WRITE_PROBLEM
-        CHARACTER(LEN=5) :: pad8
+!    -----------
+!    Save/Restore
+!    -----------
+        CHARACTER(LEN=255) :: SAVE_DIR
+        CHARACTER(LEN=255)  :: SAVE_PREFIX
+        CHARACTER(LEN=7)   ::  pad8  
 !
 !
 ! **********************
@@ -144,7 +152,6 @@
         INTEGER ::  ASS_IRECV
         INTEGER ::  LBUFR
         INTEGER ::  LBUFR_BYTES
-        INTEGER, DIMENSION(:), POINTER :: POIDS
         INTEGER, DIMENSION(:), POINTER ::  BUFR
 !       IS is used for the factors + workspace for contrib. blocks
         INTEGER, DIMENSION(:), POINTER :: IS
@@ -163,7 +170,8 @@
         INTEGER,POINTER,DIMENSION(:) :: Step2node
 !  ---------------------
         INTEGER,POINTER,DIMENSION(:) :: FRERE_STEPS, DAD_STEPS
-        INTEGER,POINTER,DIMENSION(:) :: FILS, PTRAR, FRTPTR, FRTELT
+        INTEGER,POINTER,DIMENSION(:) :: FILS, FRTPTR, FRTELT
+        INTEGER(8),POINTER,DIMENSION(:) :: PTRAR
         INTEGER,POINTER,DIMENSION(:) :: NA, PROCNODE_STEPS
 !       The two pointer arrays computed in facto and used by the solve
 !          (except the factors) are PTLUST_S and PTRFAC. 
@@ -179,7 +187,7 @@
         INTEGER, DIMENSION(:), POINTER :: INTARR
         COMPLEX(kind=8), DIMENSION(:), POINTER :: DBLARR
 !       Element entry: internal data
-        INTEGER :: NELT_loc, LELTVAR, NA_ELT, pad11
+        INTEGER :: NELT_loc, LELTVAR
         INTEGER, DIMENSION(:), POINTER :: ELTPROC
 !       Candidates and node partitionning
         INTEGER, DIMENSION(:,:), POINTER :: CANDIDATES
@@ -191,8 +199,8 @@
         INTEGER, DIMENSION(:), POINTER :: MEM_DIST
 !       Compressed RHS
         INTEGER, DIMENSION(:),   POINTER :: POSINRHSCOMP_ROW
+        LOGICAL  :: POSINRHSCOMP_COL_ALLOC, pad11
         INTEGER, DIMENSION(:),   POINTER :: POSINRHSCOMP_COL
-        LOGICAL  :: POSINRHSCOMP_COL_ALLOC, pad111
         COMPLEX(kind=8), DIMENSION(:),   POINTER :: RHSCOMP
 !       Info on the subtrees to be used during factorization
         DOUBLE PRECISION, DIMENSION(:), POINTER :: MEM_SUBTREE
@@ -211,21 +219,21 @@
         INTEGER :: NBSA_LOCAL
         INTEGER :: LWK_USER
 !    Internal control array
-        DOUBLE PRECISION ::  DKEEP(130)
+        DOUBLE PRECISION ::  DKEEP(230)
 !    For simulating parallel out-of-core stack.
-        DOUBLE PRECISION, DIMENSION(:),POINTER :: CB_SON_SIZE, pad12
+        DOUBLE PRECISION, DIMENSION(:),POINTER :: CB_SON_SIZE
 !    Instance number used/managed by the C/F77 interface
         INTEGER ::  INSTANCE_NUMBER
 !    OOC management data that must persist from factorization to solve.
         INTEGER ::  OOC_MAX_NB_NODES_FOR_ZONE
-        INTEGER, DIMENSION(:,:),   POINTER :: OOC_INODE_SEQUENCE, pad13
+        INTEGER, DIMENSION(:,:),   POINTER :: OOC_INODE_SEQUENCE
         INTEGER(8),DIMENSION(:,:), POINTER :: OOC_SIZE_OF_BLOCK
         INTEGER(8), DIMENSION(:,:),   POINTER :: OOC_VADDR
         INTEGER,DIMENSION(:), POINTER :: OOC_TOTAL_NB_NODES
         INTEGER,DIMENSION(:), POINTER :: OOC_NB_FILES
-        INTEGER :: OOC_NB_FILE_TYPE
-        CHARACTER,DIMENSION(:,:), POINTER :: OOC_FILE_NAMES  
+        INTEGER :: OOC_NB_FILE_TYPE,pad12
         INTEGER,DIMENSION(:), POINTER :: OOC_FILE_NAME_LENGTH
+        CHARACTER,DIMENSION(:,:), POINTER :: OOC_FILE_NAMES  
 !    Indices of nul pivots
         INTEGER,DIMENSION(:), POINTER :: PIVNUL_LIST
 !    Array needed to manage additionnal candidate processor 
@@ -236,12 +244,16 @@
         TYPE (ZMUMPS_ROOT_STRUC) :: root
 !    Low-rank
         INTEGER, POINTER, DIMENSION(:) :: LRGROUPS
-        INTEGER :: NBGRP
+        INTEGER :: NBGRP,pad13
+!    Pointer encoding for FDM_F data
+        CHARACTER(LEN=1), DIMENSION(:), POINTER :: FDM_F_ENCODING
+!    Pointer array encoding BLR factors pointers
+        CHARACTER(LEN=1), DIMENSION(:), POINTER :: BLRARRAY_ENCODING
 !    Multicore
         INTEGER :: LPOOL_AFTER_L0_OMP, LPOOL_BEFORE_L0_OMP
         INTEGER :: L_PHYS_L0_OMP
         INTEGER :: L_VIRT_L0_OMP                                    
-        INTEGER :: LL0_OMP_MAPPING
+        INTEGER :: LL0_OMP_MAPPING,pad15
         INTEGER(8) :: THREAD_LA
 ! Pool before L0_OMP
         INTEGER, DIMENSION(:), POINTER :: IPOOL_BEFORE_L0_OMP
@@ -257,9 +269,9 @@
         INTEGER, DIMENSION(:), POINTER :: PTR_LEAFS_L0_OMP
 ! Mapping of the subtrees
         INTEGER, DIMENSION(:), POINTER :: L0_OMP_MAPPING
-! To avoid JOB -2 to suppress OOC files
-        LOGICAL :: IF_RESTARTING
-! for RR on root (#define try_null_space)
+! for RR on root
         DOUBLE PRECISION, DIMENSION(:), POINTER :: SINGULAR_VALUES
         INTEGER ::  NB_SINGULAR_VALUES
+! To know if OOC files are associated to a saved and so if they should be removed.
+        LOGICAL :: ASSOCIATED_OOC_FILES
       END TYPE ZMUMPS_STRUC

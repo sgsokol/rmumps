@@ -1,6 +1,6 @@
 #
-#  This file is part of MUMPS 5.0.1, released
-#  on Thu Jul 23 17:08:29 UTC 2015
+#  This file is part of MUMPS 5.1.1, released
+#  on Mon Mar 20 14:34:33 UTC 2017
 #
 ################################################################################
 #
@@ -25,9 +25,9 @@
 ########################################################################
 #Begin orderings
 #
-# NOTE that PORD is distributed within MUMPS by default. If you would like to
-# use other orderings, you need to obtain the corresponding package and modify
-# the variables below accordingly.
+# NOTE that PORD is distributed within MUMPS by default. It is recommended to
+# install other orderings. For that, you need to obtain the corresponding package
+# and modify the variables below accordingly.
 # For example, to have Metis available within MUMPS:
 #          1/ download Metis and compile it
 #          2/ uncomment (suppress # in first column) lines
@@ -37,11 +37,12 @@
 #          4/ Compile and install MUMPS
 #             make clean; make   (to clean up previous installation)
 #
-#          Metis/ParMetis and SCOTCH/PT-SCOTCH (ver 6.0 and later) orderings are now available for MUMPS.
+#          Metis/ParMetis and SCOTCH/PT-SCOTCH (ver 6.0 and later) orderings are recommended.
 #
 
 #SCOTCHDIR  = ${HOME}/scotch_6.0
-#ISCOTCH    = -I$(SCOTCHDIR)/include 
+#ISCOTCH    = -I$(SCOTCHDIR)/include
+#
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF
@@ -49,15 +50,15 @@
 # line (remember to add -Dptscotch in the ORDERINGSF variable below)
 
 #LSCOTCH    = -L$(SCOTCHDIR)/lib -lesmumps -lscotch -lscotcherr
-#LSCOTCH    = -L$(SCOTCHDIR)/lib -lptesmumps -lptscotch -lptscotcherr -lscotch
+#LSCOTCH    = -L$(SCOTCHDIR)/lib -lptesmumps -lptscotch -lptscotcherr
 
 
 LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-#LMETISDIR = /local/metis/
-#IMETIS    = # should be set to include directory for (par)metis.h
+#LMETISDIR = /opt/metis-5.1.0/build/Linux-x86_64/libmetis
+#IMETIS    = /opt/metis-5.1.0/include
 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
@@ -70,7 +71,7 @@ LPORD    = -L$(LPORDDIR) -lpord
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
-# If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis 
+# If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis
 # or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
 ORDERINGSF  = -Dpord
@@ -109,6 +110,10 @@ AR      = ar vr
 RANLIB  = ranlib
 #RANLIB  = echo
 
+# DEFINE HERE YOUR LAPACK LIBRARY
+
+LAPACK = -llapack
+
 # SCALAP should define the SCALAPACK and  BLACS libraries.
 SCALAP  = -lscalapack -lblacs
 
@@ -116,19 +121,19 @@ SCALAP  = -lscalapack -lblacs
 INCPAR  = -I/usr/include
 
 # LIBRARIES USED BY THE PARALLEL VERSION OF MUMPS: $(SCALAP) and MPI
-LIBPAR  = $(SCALAP) -L/usr/lib -lmpi
+LIBPAR  = $(SCALAP) $(LAPACK) -L/usr/lib -lmpi
 
 # The parallel version is not concerned by the next two lines.
 # They are related to the sequential library provided by MUMPS,
 # to use instead of ScaLAPACK and MPI.
 INCSEQ  = -I$(topdir)/libseq
-LIBSEQ  = -L$(topdir)/libseq -lmpiseq
+LIBSEQ  = $(LAPACK) -L$(topdir)/libseq -lmpiseq
 
 # DEFINE HERE YOUR BLAS LIBRARY
 
 LIBBLAS = -lblas
 
-# DEFINE YOUR PTHREAD LIBRARY
+# DEFINE HERE YOUR PTHREAD LIBRARY
 LIBOTHERS = -lpthread
 
 # FORTRAN/C COMPATIBILITY:

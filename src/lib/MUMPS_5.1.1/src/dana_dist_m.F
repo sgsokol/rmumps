@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -55,7 +55,7 @@ C
       DOUBLE PRECISION OPS_SBTR_LOC 
       INTEGER, ALLOCATABLE, DIMENSION(:) :: TNSTK, IPOOL, LSTKI 
       INTEGER(8), ALLOCATABLE, DIMENSION(:) :: LSTKR
-      LOGICAL  OUTER_SENDS  
+      LOGICAL  OUTER_SENDS_FR  
       INTEGER(8) SBUFS_CB, SBUFR_CB
       INTEGER SBUFR, SBUFS
       INTEGER BLOCKING_RHS
@@ -115,8 +115,13 @@ C
         RETURN
       endif
       LKJIB = max(KEEP(5),KEEP(6))
-      OUTER_SENDS = (KEEP(263).NE.0)
-      IF (OUTER_SENDS) LKJIB = max(LKJIB,KEEP(488))
+      OUTER_SENDS_FR = (KEEP(263).NE.0)
+      IF ( OUTER_SENDS_FR ) THEN
+         LKJIB = max(LKJIB, KEEP(420))
+      ENDIF
+      IF ( KEEP(486).NE.0 ) THEN
+         LKJIB = max(LKJIB,KEEP(488))
+      ENDIF
       TNSTK = NE
       LEAF = NA(1)+1
       IPOOL(1:LEAF-1) = NA(3:3+LEAF-2)
@@ -819,7 +824,7 @@ C
  115  CONTINUE
       BLOCKING_RHS = KEEP(84)
       IF (KEEP(84).EQ.0) BLOCKING_RHS=1
-      NRLNEC = max(NRLNEC, 
+      NRLNEC = max(NRLNEC,
      &         NRLADU+int(4*KEEP(127)*abs(BLOCKING_RHS),8))
       IF (BLOCKING_RHS .LT. 0) THEN
         BLOCKING_RHS = - 2 * BLOCKING_RHS

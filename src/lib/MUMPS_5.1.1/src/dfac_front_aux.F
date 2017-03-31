@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -17,24 +17,31 @@ C
      &     PP_FIRST2SWAP_L, PP_LastPanelonDisk_L,
      &     PP_LastPIVRPTRFilled_L,
      &     PP_FIRST2SWAP_U, PP_LastPanelonDisk_U,
-     &     PP_LastPIVRPTRFilled_U)
+     &     PP_LastPIVRPTRFilled_U,MAXFROMN,IS_MAXFROMN_AVAIL, 
+     &     Inextpiv
+     &)
+!$    USE OMP_LIB
       USE MUMPS_OOC_COMMON 
       IMPLICIT NONE
       INTEGER NFRONT,NASS,LIW,INOPV
       INTEGER(8) :: LA
       INTEGER KEEP(500)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       DOUBLE PRECISION UU, SEUIL
       DOUBLE PRECISION A(LA)
       INTEGER IW(LIW)
+      DOUBLE PRECISION, intent(in) :: MAXFROMN
+      LOGICAL, intent(inout) :: IS_MAXFROMN_AVAIL
+      INTEGER, intent(inout) :: Inextpiv
       DOUBLE PRECISION AMROW
       DOUBLE PRECISION RMAX
       DOUBLE PRECISION  SWOP
       INTEGER(8) :: APOS, POSELT
       INTEGER(8) :: J1, J2, J3_8, JJ, IDIAG
+      INTEGER(8) :: J1_ini
       INTEGER(8) :: NFRONT8
       INTEGER IOLDPS
-      INTEGER NOFFW,NPIV,IPIV
+      INTEGER NOFFW,NPIV,IPIV,IPIV_SHIFT
       INTEGER J, J3
       INTEGER NPIVP1,JMAX,ISW,ISWPS1
       INTEGER ISWPS2,KSW,XSIZE
@@ -44,15 +51,22 @@ C
      &        PP_LastPIVRPTRFilled_L,
      &        PP_FIRST2SWAP_U, PP_LastPanelonDisk_U,
      &        PP_LastPIVRPTRFilled_U
+      INTEGER ISHIFT, K206
       INTEGER DMUMPS_IXAMAX
       INCLUDE 'mumps_headers.h'
       INTRINSIC max
       DOUBLE PRECISION, PARAMETER :: RZERO = 0.0D0
+!$    INTEGER :: JJMAX
+!$    DOUBLE PRECISION    :: RRMAX, VALABS
+!$    INTEGER :: NOMP, CHUNK, K360
+!$    K360 = KEEP(360)
+!$    NOMP    = OMP_GET_MAX_THREADS()
         NFRONT8 = int(NFRONT,8)
         INOPV   = 0
         XSIZE   = KEEP(IXSZ)
         NPIV    = IW(IOLDPS+1+XSIZE)
         NPIVP1  = NPIV + 1
+        K206    = KEEP(206)
         IF (KEEP(201).EQ.1 .AND. KEEP(50).NE.1) THEN
           CALL DMUMPS_GET_OOC_PERM_PTR(TYPEF_L, NBPANELS_L, 
      &       I_PIVRPTR_L, I_PIVR_L, 
@@ -64,32 +78,108 @@ C
      &       IOLDPS+2*NFRONT+6+IW(IOLDPS+5+XSIZE)+XSIZE,
      &       IW, LIW)
         ENDIF
-          DO 460 IPIV=NPIVP1,NASS
+        ISHIFT = 0   
+        IF (K206.GE.1) THEN
+          IF (Inextpiv.GT.NPIVP1.AND.Inextpiv.LE.NASS) THEN
+            ISHIFT = Inextpiv - NPIVP1
+          ENDIF
+          IF (ISHIFT.GT.0.AND.IS_MAXFROMN_AVAIL) THEN
+            IPIV = NPIVP1
+            APOS = POSELT + NFRONT8*int(NPIV,8) + int(IPIV-1,8)
+            IDIAG = APOS + int(IPIV - NPIVP1,8)*NFRONT8
+            IF (abs(A(IDIAG)).GT.max(UU*MAXFROMN,SEUIL,
+     &                               tiny(MAXFROMN))) THEN
+              ISHIFT = 0
+            ENDIF
+          ENDIF
+          IF ( ISHIFT .GT. 0) THEN
+            IS_MAXFROMN_AVAIL = .FALSE.
+          ENDIF
+        ENDIF  
+          DO 460 IPIV_SHIFT=NPIVP1+ISHIFT,NASS+ISHIFT
+            IF (IPIV_SHIFT .LE. NASS) THEN
+              IPIV=IPIV_SHIFT
+            ELSE
+              IPIV=IPIV_SHIFT-NASS-1+NPIVP1
+            ENDIF
             APOS = POSELT + NFRONT8*int(NPIV,8) + int(IPIV-1,8)
             JMAX = 1
             AMROW = RZERO
             J1    = APOS
             J3    = NASS -NPIV
-            JMAX  = DMUMPS_IXAMAX(J3,A(J1),NFRONT)
+            IF (KEEP(351).EQ.1) THEN
+!$            IF (NOMP.GT.1 .AND. J3.GE.K360) THEN
+!$              JMAX = 1
+!$              RMAX = RZERO
+!$              CHUNK = max(K360/2,J3/NOMP)
+!$OMP PARALLEL PRIVATE(JJ,VALABS,JJMAX,RRMAX)
+!$OMP& FIRSTPRIVATE(J1,NFRONT8,J3)
+!$              RRMAX = RZERO
+!$OMP DO schedule(static, CHUNK)
+!$              DO J = 1, J3
+!$                JJ = J1 + int(J-1,8)*NFRONT8
+!$                VALABS = abs(A(JJ))
+!$                IF (VALABS.GT.RRMAX) THEN
+!$                  RRMAX = VALABS
+!$                  JJMAX = J
+!$                ENDIF
+!$              ENDDO
+!$OMP END DO
+!$              IF (RRMAX.GT.0.0) THEN
+!$OMP CRITICAL
+!$                IF (RRMAX.GT.RMAX) THEN
+!$                  RMAX = RRMAX
+!$                  JMAX = JJMAX
+!$                ENDIF
+!$OMP END CRITICAL
+!$              ENDIF
+!$OMP END PARALLEL
+!$            ELSE
+              JMAX  = DMUMPS_IXAMAX(J3,A(J1),NFRONT)
+!$            ENDIF
+            ELSE
+              JMAX  = DMUMPS_IXAMAX(J3,A(J1),NFRONT)
+            ENDIF
             JJ    = J1 + int(JMAX-1,8)*NFRONT8
             AMROW = abs(A(JJ))
             RMAX  = AMROW
             J1    = APOS +  int(NASS-NPIV,8) * NFRONT8
             J3 = NFRONT - NASS - KEEP(253)
-            IF (J3.EQ.0) GOTO 370
-            DO 360 J=1,J3
-              RMAX = max(abs(A(J1)),RMAX)
-              J1 = J1 + NFRONT8
-  360       CONTINUE
-  370       IF (RMAX.EQ.RZERO) GO TO 460
+            IF (IS_MAXFROMN_AVAIL) THEN
+              RMAX = max(MAXFROMN,RMAX)
+              IS_MAXFROMN_AVAIL = .FALSE.
+            ELSE
+              IF (J3.EQ.0) GOTO 370
+              IF (KEEP(351).EQ.1) THEN
+                J1_ini = J1
+!$              CHUNK = max(K360/2,J3/NOMP)
+!$OMP  PARALLEL DO schedule(static, CHUNK) PRIVATE(J1)
+!$OMP& FIRSTPRIVATE(J1_ini,NFRONT8,J3)
+!$OMP& REDUCTION(max:RMAX) IF (J3.GE.K360)
+                DO J=1,J3
+                  J1 = J1_ini + int(J-1,8) * NFRONT8
+                  RMAX = max(abs(A(J1)),RMAX)
+                END DO
+!$OMP  END PARALLEL DO
+              ELSE
+                DO J=1,J3
+                  RMAX = max(abs(A(J1)), RMAX)
+                  J1 = J1 + NFRONT8
+                END DO
+              ENDIF
+            END IF
+  370       IF (RMAX.LE.tiny(RMAX)) GO TO 460
             IDIAG = APOS + int(IPIV - NPIVP1,8)*NFRONT8
-            IF (abs(A(IDIAG)).GE.max(UU*RMAX,SEUIL)) THEN
+            IF (abs(A(IDIAG)).GT.max(UU*RMAX,SEUIL,tiny(RMAX))) THEN
               JMAX = IPIV - NPIV
               GO TO 380
             ENDIF
-            IF (AMROW.LT.max(UU*RMAX,SEUIL)) GO TO 460
+            IF (AMROW.LE.max(UU*RMAX,SEUIL,tiny(RMAX))) GO TO 460
             NOFFW = NOFFW + 1
   380       CONTINUE
+            IF (K206.GE.1) THEN
+              Inextpiv = IPIV + 1 
+            ENDIF
             IF (KEEP(258) .NE. 0) THEN
               CALL DMUMPS_UPDATEDETER(
      &             A(APOS + int(JMAX - 1,8) * NFRONT8 ),
@@ -100,13 +190,13 @@ C
             KEEP(260)=-KEEP(260)
             J1   = POSELT + int(NPIV,8)
             J3_8 = POSELT + int(IPIV-1,8)
-            DO 390 J= 1,NFRONT
+            DO J= 1,NFRONT
               SWOP  = A(J1)
               A(J1) = A(J3_8)
               A(J3_8) = SWOP
               J1 = J1 + NFRONT8
               J3_8 = J3_8 + NFRONT8
-  390       CONTINUE
+            END DO
             ISWPS1 = IOLDPS + 5 + NPIVP1 + NFRONT + XSIZE
             ISWPS2 = IOLDPS + 5 + IPIV + NFRONT + XSIZE
             ISW = IW(ISWPS1)
@@ -116,20 +206,20 @@ C
             KEEP(260)=-KEEP(260)
             J1 = POSELT + int(NPIV,8) * NFRONT8
             J2 = POSELT + int(NPIV + JMAX - 1,8) * NFRONT8
-            DO 410 KSW=1,NFRONT
+            DO KSW=1,NFRONT
               SWOP = A(J1)
               A(J1) = A(J2)
               A(J2) = SWOP
               J1 = J1 + 1_8
               J2 = J2 + 1_8
-  410       CONTINUE
+            END DO
             ISWPS1 = IOLDPS + 5 + NPIV + 1 + XSIZE
             ISWPS2 = IOLDPS + 5 + NPIV + JMAX + XSIZE
             ISW = IW(ISWPS1)
             IW(ISWPS1) = IW(ISWPS2)
             IW(ISWPS2) = ISW
             GO TO 420
-  460     CONTINUE
+  460    CONTINUE
        INOPV = 1
        GOTO 430
   420 CONTINUE
@@ -148,6 +238,7 @@ C
      &               PP_LastPIVRPTRFilled_U)
               ENDIF
  430  CONTINUE
+      IS_MAXFROMN_AVAIL = .FALSE.
       RETURN
       END SUBROUTINE DMUMPS_FAC_H
       SUBROUTINE DMUMPS_FAC_M(IBEG_BLOCK,
@@ -206,7 +297,9 @@ C
         RETURN
         END SUBROUTINE DMUMPS_FAC_M
       SUBROUTINE DMUMPS_FAC_N(NFRONT,NASS,IW,LIW,A,LA,
-     &       IOLDPS,POSELT,IFINB,XSIZE)
+     &       IOLDPS,POSELT,IFINB,XSIZE,
+     &       KEEP,MAXFROMN,IS_MAXFROMN_AVAIL)
+!$    USE OMP_LIB
       IMPLICIT NONE
       INCLUDE 'mumps_headers.h'
       INTEGER NFRONT,NASS,LIW,IFINB
@@ -216,41 +309,97 @@ C
       DOUBLE PRECISION    ALPHA,VALPIV
       INTEGER(8) :: APOS, POSELT, UUPOS, LPOS, IRWPOS
       INTEGER(8) :: NFRONT8
-      INTEGER IOLDPS,NPIV,KROW, XSIZE
-      INTEGER NEL,ICOL,NEL2
+      INTEGER IOLDPS,NPIV,XSIZE
+      INTEGER, intent(in) :: KEEP(500)
+      DOUBLE PRECISION, intent(inout) :: MAXFROMN
+      LOGICAL, intent(inout) :: IS_MAXFROMN_AVAIL
+      INTEGER NEL,IROW,NEL2,JCOL, NCB
       INTEGER NPIVP1
       DOUBLE PRECISION, PARAMETER :: ONE = 1.0D0
+!$    LOGICAL:: OMP_FLAG
+!$    INTEGER:: NOMP, K360, CHUNK
+!$    NOMP = OMP_GET_MAX_THREADS()
+!$    K360 = KEEP(360)
         NFRONT8=int(NFRONT,8)
         NPIV   = IW(IOLDPS+1+XSIZE)
         NPIVP1 = NPIV + 1
-        NEL    = NFRONT - NPIVP1
+        NEL    = NFRONT - NPIVP1 
         NEL2   = NASS - NPIVP1
+        NCB    = NFRONT - NASS - KEEP(253)
         IFINB  = 0
         IF (NPIVP1.EQ.NASS) IFINB = 1
         APOS   = POSELT + int(NPIV,8)*(NFRONT8 + 1_8)
         VALPIV = ONE/A(APOS)
-        LPOS   = APOS + NFRONT8
-        DO 541 KROW = 1,NEL
-             A(LPOS) = A(LPOS)*VALPIV
-             LPOS    = LPOS + NFRONT8
- 541    CONTINUE
-        LPOS   = APOS + NFRONT8
-        UUPOS  = APOS + 1_8
-        DO 440 ICOL = 1,NEL
-             IRWPOS  = LPOS + 1_8
-             ALPHA   = -A(LPOS)
-             CALL daxpy(NEL2,ALPHA,A(UUPOS),1,A(IRWPOS),1)
-             LPOS    = LPOS + NFRONT8
-  440   CONTINUE
+!$      OMP_FLAG = .FALSE.
+!$      CHUNK = NEL
+!$      IF (NOMP.GT.1) THEN
+!$        IF (NEL.LT.K360) THEN
+!$            IF (NEL*NEL2.GE.KEEP(361)) THEN
+!$              OMP_FLAG = .TRUE.
+!$              CHUNK = max(20, NEL/NOMP)
+!$            ENDIF
+!$        ELSE
+!$          OMP_FLAG = .TRUE.
+!$          CHUNK = max(K360/2,NEL/NOMP)
+!$        ENDIF
+!$      ENDIF
+        IF (KEEP(351).EQ.2) THEN
+          MAXFROMN = 0.0D0
+          IF (NEL2 > 0) THEN
+            IS_MAXFROMN_AVAIL = .TRUE.
+          ENDIF
+!$OMP PARALLEL DO schedule(static, CHUNK)
+!$OMP& PRIVATE(LPOS, UUPOS, IRWPOS, ALPHA, JCOL)
+!$OMP& FIRSTPRIVATE(APOS,NFRONT8,VALPIV,NEL,NEL2)
+!$OMP& REDUCTION(max:MAXFROMN) IF(OMP_FLAG)
+          DO IROW = 1, NEL
+            LPOS = APOS + NFRONT8*int(IROW,8)
+            A(LPOS) = A(LPOS)*VALPIV
+            ALPHA   = -A(LPOS)
+            IRWPOS  = LPOS + 1_8
+            UUPOS  = APOS + 1_8
+            IF (NEL2 > 0) THEN
+              A(IRWPOS) = A(IRWPOS) + ALPHA*A(UUPOS)
+              MAXFROMN=max(MAXFROMN, abs(A(IRWPOS)))
+              IRWPOS = IRWPOS+1_8
+              UUPOS  = UUPOS+1_8
+              DO JCOL = 2, NEL2
+                A(IRWPOS) = A(IRWPOS) + ALPHA*A(UUPOS)
+                IRWPOS = IRWPOS+1_8
+                UUPOS  = UUPOS+1_8
+              ENDDO
+            ENDIF
+          END DO
+!$OMP END PARALLEL DO
+        ELSE
+!$OMP PARALLEL DO schedule(static, CHUNK)
+!$OMP& FIRSTPRIVATE(APOS,NFRONT8,VALPIV,NEL,NEL2)
+!$OMP& PRIVATE(LPOS, UUPOS, IRWPOS, ALPHA, JCOL) IF(OMP_FLAG)
+          DO IROW = 1, NEL
+            LPOS = APOS + NFRONT8*int(IROW,8)
+            A(LPOS) = A(LPOS)*VALPIV
+            ALPHA   = -A(LPOS)
+            IRWPOS  = LPOS + 1_8
+            UUPOS  = APOS + 1_8
+            DO JCOL = 1, NEL2
+              A(IRWPOS) = A(IRWPOS) + ALPHA*A(UUPOS)
+              IRWPOS = IRWPOS+1_8
+              UUPOS  = UUPOS+1_8
+            ENDDO
+          ENDDO
+!$OMP END PARALLEL DO
+        ENDIF
         RETURN
         END SUBROUTINE DMUMPS_FAC_N
       SUBROUTINE DMUMPS_FAC_P(A,LA,NFRONT,
-     &       NPIV,NASS,POSELT)
+     &       NPIV,NASS,POSELT,CALL_UTRSM
+     &      )
       IMPLICIT NONE
       INTEGER(8) :: LA,POSELT
       DOUBLE PRECISION    A(LA)
       INTEGER NFRONT, NPIV, NASS
-      INTEGER(8) :: LPOS, LPOS1, LPOS2
+      LOGICAL CALL_UTRSM
+      INTEGER(8) :: LPOS, LPOS1, LPOS2, UPOS
       INTEGER NEL1,NEL11
       DOUBLE PRECISION ALPHA, ONE
       PARAMETER (ONE = 1.0D0, ALPHA=-1.0D0)
@@ -259,6 +408,11 @@ C
         LPOS2  = POSELT + int(NASS,8)*int(NFRONT,8)
         CALL dtrsm('L','L','N','N',NPIV,NEL1,ONE,A(POSELT),NFRONT,
      &              A(LPOS2),NFRONT)
+        IF (CALL_UTRSM) THEN
+          UPOS  = POSELT + int(NASS,8)
+          CALL dtrsm('R', 'U', 'N', 'U', NEL1, NPIV, ONE,
+     &                 A(POSELT), NFRONT, A(UPOS), NFRONT)
+        ENDIF
         LPOS   = LPOS2 + int(NPIV,8)
         LPOS1  = POSELT + int(NPIV,8)
         CALL dgemm('N','N',NEL11,NEL1,NPIV,ALPHA,A(LPOS1),
@@ -331,18 +485,19 @@ C
         RETURN
         END SUBROUTINE DMUMPS_FAC_T
       SUBROUTINE DMUMPS_FAC_SQ(IBEG_BLOCK, IEND_BLOCK, NPIV,
-     &    NFRONT, LAST_ROW, A, LA, POSELT, CALL_GEMM
-     &    )
+     &    NFRONT, LAST_ROW, LAST_COL, A, LA, POSELT, 
+     &    CALL_UTRSM, CALL_GEMM, WITH_COMM_THREAD )
       IMPLICIT NONE
       INTEGER, intent(in)     :: IBEG_BLOCK, IEND_BLOCK
-      INTEGER, intent(in)     :: NPIV, NFRONT, LAST_ROW
+      INTEGER, intent(in)     :: NPIV, NFRONT, LAST_ROW, LAST_COL
       INTEGER(8), intent(in)  :: LA
       DOUBLE PRECISION, intent(inout)  :: A(LA)
       INTEGER(8), intent(in)  :: POSELT 
-      LOGICAL, intent(in)     :: CALL_GEMM
+      LOGICAL, intent(in)     :: CALL_UTRSM, CALL_GEMM
+      LOGICAL, intent(in) :: WITH_COMM_THREAD
       INTEGER(8) :: NFRONT8
-      INTEGER(8) :: LPOS, LPOS1, LPOS2, POSELT_LOCAL
-      INTEGER NELIM, LKJIW, NEL1, NEL11 
+      INTEGER(8) :: LPOS, LPOS1, LPOS2, UPOS, POSELT_LOCAL
+      INTEGER NELIM, LKJIW, NEL1, NEL11
       DOUBLE PRECISION ALPHA, ONE
       PARAMETER (ONE = 1.0D0, ALPHA=-1.0D0)
       NFRONT8= int(NFRONT,8)
@@ -355,29 +510,36 @@ C
         CALL MUMPS_ABORT()
       ENDIF
       LKJIW  = NPIV - IBEG_BLOCK + 1
-      NEL11  = NFRONT - NPIV
+      NEL11  = LAST_COL - NPIV
       IF ((NEL1.NE.0).AND.(LKJIW.NE.0)) THEN
-          LPOS2  = POSELT + int(IEND_BLOCK,8)*NFRONT8 +
-     &             int(IBEG_BLOCK - 1,8)
-          POSELT_LOCAL = POSELT + 
-     &           int(IBEG_BLOCK-1,8)*NFRONT8 + int(IBEG_BLOCK - 1,8)
-          CALL dtrsm('L','L','N','N',LKJIW,NEL1,ONE,
-     &               A(POSELT_LOCAL),NFRONT,
-     &               A(LPOS2),NFRONT)
-          IF (CALL_GEMM) THEN
-           LPOS   = LPOS2 + int(LKJIW,8)
-           LPOS1  = POSELT_LOCAL + int(LKJIW,8)
-           CALL dgemm('N','N',NEL11,NEL1,LKJIW,ALPHA,A(LPOS1),
-     &          NFRONT,A(LPOS2),NFRONT,ONE,A(LPOS),NFRONT)
-          END IF
+           LPOS2  = POSELT + int(IEND_BLOCK,8)*NFRONT8 +
+     &              int(IBEG_BLOCK - 1,8)
+           UPOS   = POSELT + int(IBEG_BLOCK-1,8)*NFRONT8 +
+     &              int(IEND_BLOCK,8)
+           POSELT_LOCAL = POSELT + 
+     &            int(IBEG_BLOCK-1,8)*NFRONT8 + int(IBEG_BLOCK - 1,8)
+           CALL dtrsm('L','L','N','N',LKJIW,NEL1,ONE,
+     &                A(POSELT_LOCAL),NFRONT,
+     &                A(LPOS2),NFRONT)
+           IF (CALL_UTRSM) THEN
+             CALL dtrsm('R','U','N','U',NEL1,LKJIW,ONE,
+     &                A(POSELT_LOCAL),NFRONT,
+     &                A(UPOS),NFRONT)
+           ENDIF
+           IF (CALL_GEMM) THEN
+            LPOS   = LPOS2 + int(LKJIW,8)
+            LPOS1  = POSELT_LOCAL + int(LKJIW,8)
+            CALL dgemm('N','N',NEL11,NEL1,LKJIW,ALPHA,A(LPOS1),
+     &           NFRONT,A(LPOS2),NFRONT,ONE,A(LPOS),NFRONT)
+           END IF
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_FAC_SQ
       SUBROUTINE DMUMPS_FAC_MQ(IBEG_BLOCK,IEND_BLOCK,
-     &     NFRONT, NASS, NPIV, A, LA, POSELT, IFINB)
+     &     NFRONT, NASS, NPIV, LAST_COL, A, LA, POSELT, IFINB)
       IMPLICIT NONE
       INTEGER, intent(in)    :: IBEG_BLOCK, IEND_BLOCK, NFRONT, 
-     &                          NASS, NPIV
+     &                          NASS, NPIV, LAST_COL
       INTEGER, intent(out)   ::  IFINB
       INTEGER(8), intent(in) :: LA, POSELT
       DOUBLE PRECISION, intent(inout) :: A(LA)
@@ -389,7 +551,7 @@ C
       PARAMETER (ONE = 1.0D0, ALPHA=-1.0D0)
         NFRONT8= int(NFRONT,8)
         NPIVP1 = NPIV + 1
-        NEL    = NFRONT - NPIVP1
+        NEL  = LAST_COL - NPIVP1
         IFINB  = 0
         NEL2   = IEND_BLOCK - NPIVP1
         IF (NEL2.EQ.0) THEN
@@ -418,8 +580,8 @@ C
         ENDIF
         RETURN
         END SUBROUTINE DMUMPS_FAC_MQ
-      SUBROUTINE DMUMPS_FAC_FR_UPDATE_CBROWS( INODE,
-     &     NFRONT, NASS, A, LA, LAFAC, POSELT, IW, LIW, IOLDPS,
+      SUBROUTINE DMUMPS_FAC_FR_UPDATE_CBROWS( INODE, NFRONT, NASS, 
+     &     CALL_UTRSM, A, LA, LAFAC, POSELT, IW, LIW, IOLDPS,
      &     MonBloc, MYID, NOFFW, LIWFAC,
      &     PP_FIRST2SWAP_L, PP_FIRST2SWAP_U,
      &     LNextPiv2beWritten, UNextPiv2beWritten, 
@@ -436,17 +598,26 @@ C
      &                   LNextPiv2beWritten, UNextPiv2beWritten,
      &                   PP_LastPIVRPTRFilled_L, PP_LastPIVRPTRFilled_U,
      &                   IFLAG
+      LOGICAL, intent(in)    :: CALL_UTRSM
       INTEGER, intent(inout) :: IW(LIW)
       DOUBLE PRECISION, intent(inout) :: A(LA)
-      DOUBLE PRECISION, intent(in)       :: SEUIL, UU, DKEEP(130)
+      DOUBLE PRECISION, intent(in)       :: SEUIL, UU, DKEEP(230)
       INTEGER, intent(in)    :: KEEP( 500 ) 
       INTEGER(8), intent(inout) :: LAFAC
       INTEGER(8)             :: KEEP8(150)
       TYPE(IO_BLOCK), intent(inout)  :: MonBloc
       INTEGER  :: NPIV, NEL1, STRAT, TYPEFile, IFLAG_OOC, 
      &            IBEG_BLOCK, IFINB, INOPV
+      INTEGER Inextpiv
+      DOUBLE PRECISION :: MAXFROMN
+      LOGICAL :: IS_MAXFROMN_AVAIL
       NPIV   = IW(IOLDPS+1+XSIZE)
       NEL1   = NFRONT - NASS
+      IF (KEEP(206).GE.1) THEN
+        Inextpiv = 1   
+      ELSE 
+        Inextpiv = 0   
+      ENDIF
       IF ((NPIV.GT.0).AND.(NEL1.GT.0)) THEN
         IF (KEEP(201).EQ.1) THEN 
          STRAT          = STRAT_TRY_WRITE
@@ -459,22 +630,28 @@ C
      &      LNextPiv2beWritten, UNextPiv2beWritten)
           IF (IFLAG_OOC < 0 ) IFLAG=IFLAG_OOC
         ELSE
-          CALL DMUMPS_FAC_P(A,LA,NFRONT, NPIV,NASS,POSELT)
+          CALL DMUMPS_FAC_P(A,LA,NFRONT, NPIV, NASS, POSELT, 
+     &                      CALL_UTRSM
+     &                     )
         ENDIF
        ENDIF
         NPIV   = IW(IOLDPS+1+XSIZE)
         IBEG_BLOCK = NPIV
         IF (NASS.EQ.NPIV) GOTO 500
+        IS_MAXFROMN_AVAIL = .FALSE.
  120    CALL DMUMPS_FAC_H(NFRONT,NASS,IW,LIW,A,LA,
      &     INOPV,NOFFW,IOLDPS,POSELT,UU,SEUIL,
      &     KEEP, DKEEP,
      &     PP_FIRST2SWAP_L,  MonBloc%LastPanelWritten_L,
      &     PP_LastPIVRPTRFilled_L,
      &     PP_FIRST2SWAP_U,  MonBloc%LastPanelWritten_U,
-     &     PP_LastPIVRPTRFilled_U)
+     &     PP_LastPIVRPTRFilled_U, MAXFROMN, IS_MAXFROMN_AVAIL,
+     &     Inextpiv
+     &     )
         IF (INOPV.NE.1) THEN
          CALL DMUMPS_FAC_N(NFRONT,NASS,IW,LIW,A,LA,
-     &                 IOLDPS,POSELT,IFINB,XSIZE)
+     &                 IOLDPS,POSELT,IFINB,XSIZE,
+     &                 KEEP, MAXFROMN, IS_MAXFROMN_AVAIL)
          IW(IOLDPS+1+XSIZE) = IW(IOLDPS+1+XSIZE) + 1
          IF (IFINB.EQ.0) GOTO 120
         ENDIF
@@ -487,7 +664,7 @@ C
       RETURN
       END SUBROUTINE DMUMPS_FAC_FR_UPDATE_CBROWS
       SUBROUTINE DMUMPS_FAC_I(NFRONT,NASS,LAST_ROW,
-     &    IBEG_BLOCK_FOR_TIPIV, IEND_BLOCK,
+     &    IBEG_BLOCK, IEND_BLOCK,
      &    N,INODE,IW,LIW,A,LA,
      &    INOPV,NOFFW,IFLAG,IOLDPS,POSELT,UU,SEUIL,KEEP,KEEP8,
      &     DKEEP,PIVNUL_LIST,LPN_LIST,
@@ -496,10 +673,13 @@ C
      &     PP_LastPIVRPTRFilled_L,
      &     PP_FIRST2SWAP_U, PP_LastPanelonDisk_U,
      &     PP_LastPIVRPTRFilled_U,
-     &     TIPIV)    
+     &     PIVOT_OPTION, IEND_BLR, Inextpiv,
+     &     TIPIV    
+     &     )
+!$    USE OMP_LIB
       USE MUMPS_OOC_COMMON 
       IMPLICIT NONE
-      INTEGER, intent(in)    :: IBEG_BLOCK_FOR_TIPIV, IEND_BLOCK
+      INTEGER, intent(in)    :: IBEG_BLOCK, IEND_BLOCK
       INTEGER, intent(inout), OPTIONAL :: TIPIV(:)
       INTEGER(8), intent(in) :: LA
       DOUBLE PRECISION, intent(inout) :: A(LA)
@@ -513,11 +693,13 @@ C
       INTEGER(8) KEEP8(150)
       INTEGER, intent(in)    :: LPN_LIST
       INTEGER, intent(inout) :: PIVNUL_LIST(LPN_LIST)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER PP_FIRST2SWAP_L, PP_LastPanelonDisk_L,
      &        PP_LastPIVRPTRFilled_L,
      &        PP_FIRST2SWAP_U, PP_LastPanelonDisk_U,
      &        PP_LastPIVRPTRFilled_U
+      INTEGER, intent(in)    :: PIVOT_OPTION, IEND_BLR
+      INTEGER, intent(inout) :: Inextpiv
       INCLUDE 'mumps_headers.h'
       DOUBLE PRECISION SWOP
       INTEGER XSIZE
@@ -527,22 +709,28 @@ C
       INTEGER ILOC
       DOUBLE PRECISION ZERO
       PARAMETER( ZERO = 0.0D0 )
-      DOUBLE PRECISION RZERO, RMAX, AMROW, ONE
+      DOUBLE PRECISION RZERO, RMAX, AMROW
       DOUBLE PRECISION PIVNUL
       DOUBLE PRECISION FIXA, CSEUIL
       INTEGER NPIV,IPIV
       INTEGER NPIVP1,JMAX,J,ISW,ISWPS1
       INTEGER ISWPS2,KSW, HF
       INTEGER DMUMPS_IXAMAX
+      INTEGER :: ISHIFT, K206
+      INTEGER :: IPIV_SHIFT,IPIV_END
       INTRINSIC max
       DATA RZERO /0.0D0/
-      DATA ONE /1.0D0/
+!$    INTEGER :: J4,JJMAX,NOMP,CHUNK,K361
+!$    DOUBLE PRECISION    :: RRMAX,VALABS
       INTEGER I_PIVRPTR_L, I_PIVR_L, NBPANELS_L
       INTEGER I_PIVRPTR_U, I_PIVR_U, NBPANELS_U
+!$      NOMP    = OMP_GET_MAX_THREADS()
+!$      K361    = KEEP(361)
         PIVNUL  = DKEEP(1)
         FIXA    = DKEEP(2)
         CSEUIL  = SEUIL
-        NFRONT8=int(NFRONT,8)
+        NFRONT8 = int(NFRONT,8)
+        K206    = KEEP(206)
         XSIZE   = KEEP(IXSZ)
         NPIV    = IW(IOLDPS+1+XSIZE)
         HF = 6 + IW(IOLDPS+5+XSIZE)+XSIZE
@@ -558,7 +746,7 @@ C
      &       IW, LIW)
         ENDIF
         IF ( present(TIPIV) ) THEN
-          ILOC    = NPIVP1 - IBEG_BLOCK_FOR_TIPIV + 1
+          ILOC    = NPIVP1 - IBEG_BLOCK + 1
           TIPIV(ILOC) = ILOC
         ENDIF
         IF (INOPV .EQ. -1) THEN
@@ -591,35 +779,103 @@ C
            GO TO 420
         ENDIF
         INOPV   = 0
-          DO 460 IPIV=NPIVP1,IEND_BLOCK
+      ISHIFT   = 0            
+      IPIV_END = IEND_BLOCK   
+      IF (K206.GE.1) THEN
+        IF (Inextpiv.GT.NPIVP1.AND.Inextpiv.LE.IEND_BLOCK) THEN
+          ISHIFT = Inextpiv - NPIVP1
+        ENDIF
+        IF ( K206.EQ.1
+     &      .OR.  (K206 .GT.1 .AND. IEND_BLOCK.EQ.IEND_BLR) ) THEN
+          IPIV_END = IEND_BLOCK + ISHIFT
+        ENDIF
+      ENDIF
+          DO 460 IPIV_SHIFT = NPIVP1+ISHIFT, IPIV_END
+            IF (IPIV_SHIFT .LE. IEND_BLOCK) THEN
+              IPIV=IPIV_SHIFT
+            ELSE
+              IPIV = IPIV_SHIFT-IEND_BLOCK-1+NPIVP1
+              IF (IBEG_BLOCK.EQ.NPIVP1) THEN
+                EXIT
+              ENDIF
+            ENDIF
             APOS = POSELT + NFRONT8*int(IPIV-1,8) + int(NPIV,8)
             JMAX = 1
-            IF (UU.GT.RZERO) GO TO 340
+            IF (PIVOT_OPTION.GT.0.AND.UU.GT.RZERO) GO TO 340
             IF (A(APOS).EQ.ZERO) GO TO 630 
             GO TO 380 
-  340       AMROW = RZERO
+  340       CONTINUE
+            AMROW = RZERO
             J1 = APOS
-            J2 = APOS +int(- NPIV + NASS - 1,8)
-             J     = NASS -NPIV
-             JMAX  = DMUMPS_IXAMAX(J,A(J1),1)
-             JJ    = J1 + int(JMAX - 1,8)
-             AMROW = abs(A(JJ))
+            IF (PIVOT_OPTION.EQ.1 .OR. KEEP(480).GE.2) THEN
+              J = IEND_BLR - NPIV
+            ELSE
+              J = NASS - NPIV
+            ENDIF
+            J2 = J1 + J - 1_8
+            IF (KEEP(351).EQ.1) THEN
+!$            IF (NOMP.GT.1 .AND. J.GE.K361) THEN
+!$              JMAX = 1
+!$              RMAX = RZERO
+!$              CHUNK = max(K361/2,J/NOMP)
+!$OMP PARALLEL PRIVATE(J3,VALABS,JJMAX,RRMAX)
+!$OMP& FIRSTPRIVATE(J1,J)
+!$              RRMAX = RZERO
+!$OMP DO schedule(static, CHUNK)
+!$              DO J4 = 1, J
+!$                J3 = J1 + int(J4-1,8)
+!$                VALABS = abs(A(J3))
+!$                IF(VALABS.GT.RRMAX) THEN
+!$                  RRMAX = VALABS
+!$                  JJMAX = J4
+!$                ENDIF
+!$              ENDDO
+!$OMP END DO
+!$              IF (RRMAX.GT.0.0) THEN
+!$OMP CRITICAL
+!$               IF (RRMAX.GT.RMAX) THEN
+!$                 RMAX = RRMAX
+!$                 JMAX = JJMAX
+!$               ENDIF
+!$OMP END CRITICAL
+!$              ENDIF
+!$OMP END PARALLEL
+!$            ELSE
+               JMAX  = DMUMPS_IXAMAX(J,A(J1),1)
+!$            ENDIF
+            ELSE
+              JMAX  = DMUMPS_IXAMAX(J,A(J1),1)
+            ENDIF
+            JJ    = J1 + int(JMAX - 1,8)
+            AMROW = abs(A(JJ))
             RMAX = AMROW
-            J1 = J2 + 1_8
-            J2 = APOS +int(- NPIV + NFRONT - 1 - KEEP(253),8)
-            IF (J2.LT.J1) GO TO 370
-            DO 360 JJ=J1,J2
-              RMAX = max(abs(A(JJ)),RMAX)
-  360       CONTINUE
+            IF (PIVOT_OPTION.GE.3) THEN
+              J1 = J2 + 1_8
+              J2 = APOS +int(- NPIV + NFRONT - 1 - KEEP(253),8)
+              IF (J2.LT.J1) GO TO 370
+              IF (KEEP(351).EQ.1) THEN
+!$              CHUNK = max(K361/2,int(J2-J1)/NOMP)
+!$OMP  PARALLEL DO schedule(static, CHUNK) PRIVATE(JJ)
+!$OMP& FIRSTPRIVATE(J1,J2)
+!$OMP& REDUCTION(max:RMAX) IF ((J2-J1).GE.K361)
+                DO JJ=J1,J2
+                  RMAX = max(abs(A(JJ)),RMAX)
+                ENDDO
+!$OMP  END PARALLEL DO
+              ELSE
+                DO 360 JJ=J1,J2
+                  RMAX = max(abs(A(JJ)),RMAX)
+  360           CONTINUE
+              ENDIF
+            ENDIF
   370       IDIAG = APOS + int(IPIV - NPIVP1,8)
             IF ( RMAX .LE. PIVNUL ) THEN
                IF (NFRONT - KEEP(253) .EQ. NASS) THEN 
                  IF (IEND_BLOCK.NE.NASS ) THEN 
                    GOTO 460
                  ENDIF
-                 J1 = IDIAG
-                 J1=POSELT+int(IPIV-1,8)+NPIV*NFRONT
-                 J2=POSELT+int(IPIV-1,8)+(LAST_ROW-1)*NFRONT8
+                 J1=POSELT+int(IPIV-1,8)+int(NPIV,8)*NFRONT8
+                 J2=POSELT+int(IPIV-1,8)+int(LAST_ROW-1,8)*NFRONT8
                ELSE
                  J1=POSELT+int(IPIV-1,8)
                  J2=POSELT+int(IPIV-1,8)+int(LAST_ROW-1,8)*NFRONT8
@@ -650,13 +906,18 @@ C
                JMAX = IPIV - NPIV
                GOTO 385   
             ENDIF
-            IF (abs(A(IDIAG)).GT.max(UU*RMAX,SEUIL)) THEN
+            IF (abs(A(IDIAG)) .GE. UU*RMAX .AND.
+     &          abs(A(IDIAG)) .GT. max(SEUIL,tiny(RMAX))) THEN
                JMAX = IPIV - NPIV
                GO TO 380
             ENDIF
-            IF (AMROW .LE. max(UU*RMAX,SEUIL)) GO TO 460
+            IF ( .NOT. (AMROW .GE. UU*RMAX .AND.
+     &                  AMROW .GT. max(SEUIL,tiny(RMAX))) ) GO TO 460
             NOFFW = NOFFW + 1
   380       CONTINUE
+          IF (K206.GE.1) THEN
+             Inextpiv = IPIV + 1
+          ENDIF
             IF (KEEP(258) .NE. 0) THEN
               CALL DMUMPS_UPDATEDETER( A(APOS+int(JMAX-1,8)),
      &                                 DKEEP(6),
@@ -700,6 +961,9 @@ C
             IW(ISWPS2) = ISW
             GO TO 420  
   460     CONTINUE
+          IF (K206 .GE. 1) THEN
+            Inextpiv=IEND_BLOCK+1
+          ENDIF
       IF (IEND_BLOCK.EQ.NASS) THEN
        INOPV = 1
       ELSE
@@ -728,19 +992,22 @@ C
       RETURN
       END SUBROUTINE DMUMPS_FAC_I
       SUBROUTINE DMUMPS_FAC_I_LDLT 
-     &   (NFRONT,NASS,INODE,IEND_BLOCK,
+     &   (NFRONT,NASS,INODE,IBEG_BLOCK,IEND_BLOCK,
      &    IW,LIW, A,LA, INOPV,
      &    NNEG,
      &    IFLAG,IOLDPS,POSELT,UU, SEUIL,KEEP,KEEP8,PIVSIZ,
      &     DKEEP,PIVNUL_LIST,LPN_LIST, XSIZE,
      &     PP_FIRST2SWAP_L, PP_LastPanelonDisk,
-     &     PP_LastPIVRPTRIndexFilled,MAXFROMM,IS_MAXFROMM_AVAIL)
+     &     PP_LastPIVRPTRIndexFilled,MAXFROMM,IS_MAXFROMM_AVAIL, 
+     &      PIVOT_OPTION, IEND_BLR, Inextpiv)
       USE MUMPS_OOC_COMMON 
       IMPLICIT NONE
       INTEGER(8) :: POSELT, LA
       INTEGER NFRONT,NASS,LIW,INODE,IFLAG,INOPV,
      &        IOLDPS, NNEG
-      INTEGER, intent(in) :: IEND_BLOCK
+      INTEGER, intent(in) :: IBEG_BLOCK, IEND_BLOCK
+      INTEGER, intent(in)    :: PIVOT_OPTION,IEND_BLR
+      INTEGER, intent(inout) :: Inextpiv
       INTEGER PIVSIZ,LPIV, XSIZE
       DOUBLE PRECISION A(LA) 
       DOUBLE PRECISION UU, UULOC, SEUIL
@@ -749,27 +1016,27 @@ C
       INTEGER(8) KEEP8(150)
       INTEGER LPN_LIST
       INTEGER PIVNUL_LIST(LPN_LIST)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
       INTEGER PP_FIRST2SWAP_L, PP_LastPanelonDisk
       INTEGER PP_LastPIVRPTRIndexFilled
       DOUBLE PRECISION, intent(in) :: MAXFROMM
       LOGICAL, intent(inout) :: IS_MAXFROMM_AVAIL
       include 'mpif.h'
       INTEGER (8) :: POSPV1,POSPV2,OFFDAG,APOSJ
-      INTEGER JMAX
-      DOUBLE PRECISION RMAX,AMAX,TMAX,TOL
+      INTEGER JMAX, LIM
+      DOUBLE PRECISION RMAX,AMAX,TMAX
       DOUBLE PRECISION MAXPIV
       DOUBLE PRECISION PIVNUL
       DOUBLE PRECISION FIXA, CSEUIL
       DOUBLE PRECISION PIVOT,DETPIV
-      PARAMETER(TOL = 1.0D-20)
       INCLUDE 'mumps_headers.h'
       INTEGER :: J
       INTEGER(8) :: APOS, J1, J2, JJ, NFRONT8, KK, J1_ini, JJ_ini
       INTEGER    :: LDA
       INTEGER(8) :: LDA8
       INTEGER NPIV,IPIV
-      INTEGER NPIVP1,K
+      INTEGER NPIVP1,K 
+      INTEGER :: ISHIFT, K206, IPIV_SHIFT, IPIV_END
       INTRINSIC max
       DOUBLE PRECISION ZERO, ONE
       PARAMETER( ZERO = 0.0D0 )
@@ -784,6 +1051,7 @@ C
       LDA     = NFRONT
       LDA8    = int(LDA,8)
       NFRONT8 = int(NFRONT,8)
+      K206    = KEEP(206)
       IF (KEEP(201).EQ.1 .AND. KEEP(50).NE.1) THEN
              CALL DMUMPS_GET_OOC_PERM_PTR(TYPEF_L, NBPANELS_L, 
      &       I_PIVRPTR, I_PIVR, IOLDPS+2*NFRONT+6+KEEP(IXSZ),
@@ -816,11 +1084,45 @@ C
          GO TO 420
       ENDIF
       INOPV   = 0
-      DO 460 IPIV=NPIVP1,IEND_BLOCK
+      ISHIFT = 0              
+      IPIV_END = IEND_BLOCK   
+      IF (K206.GE.1) THEN
+        IF (Inextpiv.GT.NPIVP1.AND.Inextpiv.LE.IEND_BLOCK) THEN
+          ISHIFT = Inextpiv - NPIVP1
+        ENDIF
+        IF ( K206.EQ.1
+     &      .OR.  (K206 .GT.1 .AND. IEND_BLOCK.EQ.IEND_BLR) ) THEN
+          IPIV_END = IEND_BLOCK + ISHIFT
+        ENDIF
+        IF (ISHIFT.GT.0.AND.IS_MAXFROMM_AVAIL) THEN
+           IPIV = NPIVP1
+           APOS = POSELT + LDA8*int(IPIV-1,8) + int(NPIV,8)
+           POSPV1 = APOS + int(IPIV - NPIVP1,8)
+           PIVOT = A(POSPV1)
+           IF ( MAXFROMM .GT. PIVNUL ) THEN
+               IF ( abs(PIVOT) .GE. UULOC*MAXFROMM
+     &         .AND. abs(PIVOT) .GT. max(SEUIL,tiny(MAXFROMM)) ) THEN
+                 ISHIFT = 0
+               ENDIF
+           ENDIF
+        ENDIF  
+        IF ( ISHIFT .GT. 0) THEN
+          IS_MAXFROMM_AVAIL = .FALSE.
+        ENDIF
+      ENDIF  
+       DO 460 IPIV_SHIFT = NPIVP1+ISHIFT, IPIV_END
+            IF (IPIV_SHIFT .LE. IEND_BLOCK) THEN
+              IPIV=IPIV_SHIFT
+            ELSE
+              IPIV = IPIV_SHIFT-IEND_BLOCK-1+NPIVP1
+              IF (IBEG_BLOCK.EQ.NPIVP1) THEN
+                EXIT
+              ENDIF
+            ENDIF
          APOS = POSELT + LDA8*int(IPIV-1,8) + int(NPIV,8)
          POSPV1 = APOS + int(IPIV - NPIVP1,8)
          PIVOT = A(POSPV1)
-         IF (UULOC.EQ.RZERO) THEN 
+         IF (UULOC.EQ.RZERO.OR.PIVOT_OPTION.EQ.0) THEN 
             IF (abs(A(APOS)).EQ.RZERO) GO TO 630
             IF (A(APOS).LT.RZERO) NNEG = NNEG+1
             IF (KEEP(258) .NE. 0) THEN
@@ -828,11 +1130,10 @@ C
             ENDIF
             GO TO 420
          ENDIF
-         AMAX = RZERO
-         JMAX = 0
          IF ( IS_MAXFROMM_AVAIL ) THEN
-            IF ( MAXFROMM > PIVNUL .AND. abs(PIVOT) > TOL) THEN
-               IF ( abs(PIVOT) .GT. max(UULOC*MAXFROMM,SEUIL) ) THEN
+            IF ( MAXFROMM .GT. PIVNUL ) THEN
+               IF ( abs(PIVOT) .GE. UULOC*MAXFROMM
+     &         .AND. abs(PIVOT) .GT. max(SEUIL,tiny(MAXFROMM)) ) THEN
                  IF (PIVOT .LT. RZERO) NNEG = NNEG+1
                  IF (KEEP(258) .NE. 0) THEN
                    CALL DMUMPS_UPDATEDETER(PIVOT, DKEEP(6), KEEP(259))
@@ -842,6 +1143,8 @@ C
             ENDIF
             IS_MAXFROMM_AVAIL = .FALSE.
          ENDIF
+         AMAX = -RONE
+         JMAX = 0
          J1 = APOS
          J2 = POSPV1 - 1_8
          DO JJ=J1,J2
@@ -859,14 +1162,24 @@ C
             J1 = J1 + LDA8
          ENDDO
            RMAX = RZERO
+           IF (PIVOT_OPTION.EQ.3) THEN
+             LIM = NFRONT
+           ELSEIF (PIVOT_OPTION.EQ.2) THEN
+             LIM = NASS
+           ELSEIF (PIVOT_OPTION.EQ.1) THEN
+             LIM = IEND_BLR
+           ELSE
+             write(*,*) 'Internal error in FAC_I_LDLT: PIVOT_OPTION=',
+     &                  PIVOT_OPTION
+           ENDIF
            J1_ini = J1
-           IF ( (NFRONT - KEEP(253) - IEND_BLOCK).GE.300 ) THEN
+           IF ( (LIM - KEEP(253) - IEND_BLOCK).GE.300 ) THEN
              OMP_FLAG = .TRUE.
            ELSE
              OMP_FLAG = .FALSE.
            ENDIF
 !$OMP PARALLEL DO PRIVATE(J1) REDUCTION(max:RMAX) IF(OMP_FLAG)
-           DO J=1, NFRONT - KEEP(253) - IEND_BLOCK
+           DO J=1, LIM - KEEP(253) - IEND_BLOCK
               J1 = J1_ini + int(J-1,8) * LDA8
               RMAX = max(abs(A(J1)),RMAX)
            ENDDO
@@ -900,35 +1213,22 @@ C
             PIVOT = A(POSPV1)
             GO TO 415
          ENDIF
-         IF ((KEEP(19).EQ.0).AND.(KEEP(110).EQ.0)) THEN
-           IF (max(AMAX,RMAX,abs(PIVOT)).LE.TOL) THEN
-            IF(SEUIL .GT. epsilon(SEUIL)) THEN
-               IF(dble(PIVOT) .GE. RZERO) THEN
-                  A(POSPV1) = CSEUIL
-               ELSE
-                  A(POSPV1) = -CSEUIL
-                  NNEG = NNEG+1
-               ENDIF
-               PIVOT = A(POSPV1)
-               KEEP(98) = KEEP(98)+1
-               GO TO 415
-            ENDIF
-           ENDIF
-         ENDIF
-         IF (max(AMAX,abs(PIVOT)).LE.TOL) then
-           GO TO 460
-         ENDIF
-         IF (abs(PIVOT).GT.max(UULOC*max(RMAX,AMAX),SEUIL)) THEN
+         IF ( abs(PIVOT).GE.UULOC*max(RMAX,AMAX)
+     &        .AND. abs(PIVOT) .GT. max(SEUIL,tiny(RMAX)) ) THEN
                IF (PIVOT .LT. ZERO) NNEG = NNEG+1
                IF (KEEP(258) .NE.0 ) THEN
                  CALL DMUMPS_UPDATEDETER(PIVOT, DKEEP(6), KEEP(259))
                ENDIF
                GO TO 415
          END IF
-         IF (  (AMAX.LE.TOL).OR.
-     &   (
+         IF (NPIVP1.EQ.IEND_BLOCK) THEN
+           GOTO 460
+         ENDIF
+         IF (max(abs(PIVOT),RMAX,AMAX).LE.tiny(RMAX)) THEN
+           GOTO 460
+         ENDIF
+         IF (
      &   (KEEP(19).NE.0).AND.(max(AMAX,RMAX,abs(PIVOT)).LE.SEUIL)
-     &   ) 
      &      )
      &       THEN
            GO TO 460
@@ -949,6 +1249,16 @@ C
                   J1 = J1 + LDA8
                ENDDO
            ENDIF
+           IF (PIVOT_OPTION.EQ.3) THEN
+             LIM = NFRONT
+           ELSEIF (PIVOT_OPTION.EQ.2) THEN
+             LIM = NASS
+           ELSEIF (PIVOT_OPTION.EQ.1) THEN
+             LIM = IEND_BLR
+           ELSE
+             write(*,*) 'Internal error in FAC_I_LDLT: PIVOT_OPTION=',
+     &                  PIVOT_OPTION
+           ENDIF
            APOSJ = POSELT + int(JMAX-1,8)*LDA8 + int(NPIV,8)
            POSPV2 = APOSJ + int(JMAX - NPIVP1,8)
            IF (IPIV.LT.JMAX) THEN
@@ -957,12 +1267,12 @@ C
               OFFDAG = APOS + int(JMAX - NPIVP1,8)
            END IF
            TMAX = RZERO
-           IF(JMAX .LT. IPIV) THEN
+           IF (JMAX .LT. IPIV) THEN
               JJ_ini = POSPV2
-              OMP_FLAG = (NFRONT-JMAX-KEEP(253). GE. 300)
+              OMP_FLAG = (LIM-JMAX-KEEP(253). GE. 300)
 !$OMP PARALLEL DO IF (OMP_FLAG)
 !$OMP& PRIVATE(JJ) REDUCTION(max:TMAX)
-              DO K = 1, NFRONT - JMAX - KEEP(253)
+              DO K = 1, LIM - JMAX - KEEP(253)
                  JJ = JJ_ini+ int(K,8)*NFRONT8
                  IF (JMAX+K.NE.IPIV) THEN
                     TMAX=max(TMAX,abs(A(JJ)))
@@ -974,9 +1284,9 @@ C
               ENDDO
            ELSE
               JJ_ini = POSPV2
-              OMP_FLAG = (NFRONT-JMAX-KEEP(253). GE. 300)
+              OMP_FLAG = (LIM-JMAX-KEEP(253). GE. 300)
 !$OMP PARALLEL DO PRIVATE(JJ) REDUCTION(max:TMAX) IF(OMP_FLAG)
-              DO K = 1, NFRONT-JMAX-KEEP(253)
+              DO K = 1, LIM-JMAX-KEEP(253)
                  JJ = JJ_ini + int(K,8)*NFRONT8
                  TMAX=max(TMAX,abs(A(JJ)))
               ENDDO
@@ -995,15 +1305,12 @@ C
            ENDIF
            MAXPIV = max(abs(A(POSPV1)),abs(A(POSPV2)))
            IF (MAXPIV.EQ.RZERO) MAXPIV = RONE
-           IF (abs(DETPIV)/MAXPIV.LE.TOL) THEN
-             GO TO 460
-           ENDIF
            IF ((abs(A(POSPV2))*RMAX+AMAX*TMAX)*UULOC.GT.
-     &          abs(DETPIV)) THEN
+     &          abs(DETPIV) .OR. abs(DETPIV) .EQ. RZERO) THEN
              GO TO 460
            ENDIF
            IF ((abs(A(POSPV1))*TMAX+AMAX*RMAX)*UULOC.GT.
-     &          abs(DETPIV)) THEN
+     &          abs(DETPIV) .OR. abs(DETPIV) .EQ. RZERO) THEN
              GO TO 460
            ENDIF
            IF (KEEP(258) .NE.0 ) THEN
@@ -1017,6 +1324,9 @@ C
              NNEG = NNEG+2
            ENDIF
  415       CONTINUE
+          IF (K206.GE.1) THEN
+             Inextpiv = max(NPIVP1+PIVSIZ, IPIV+1)
+          ENDIF
            DO K=1,PIVSIZ
               IF (PIVSIZ .EQ. 2) THEN
                 IF (K==1) THEN
@@ -1027,13 +1337,11 @@ C
               ELSE
                 LPIV = IPIV
               ENDIF
-              IF (LPIV.EQ.NPIVP1) THEN
-                 GOTO 416
-              ENDIF
-              CALL DMUMPS_SWAP( A, LA, IW, LIW,
+              IF (LPIV.EQ.NPIVP1) GOTO 416 
+              CALL DMUMPS_SWAP_LDLT( A, LA, IW, LIW,
      &             IOLDPS, NPIVP1, LPIV, POSELT, NASS,
      &             LDA, NFRONT, 1, KEEP(219), KEEP(50),
-     &             KEEP(IXSZ)) 
+     &             KEEP(IXSZ), -9999)
  416          CONTINUE
               IF (KEEP(201).EQ.1.AND.KEEP(50).NE.1) THEN
                 CALL DMUMPS_STORE_PERMINFO( IW(I_PIVRPTR), NBPANELS_L,
@@ -1047,6 +1355,9 @@ C
            ENDIF
            GOTO 420
   460   CONTINUE
+          IF (K206 .GE. 1) THEN
+            Inextpiv=IEND_BLOCK+1
+          ENDIF
       IF (IEND_BLOCK.EQ.NASS) THEN
        INOPV = 1
       ELSE
@@ -1062,10 +1373,11 @@ C
       END SUBROUTINE DMUMPS_FAC_I_LDLT
       SUBROUTINE DMUMPS_FAC_MQ_LDLT(IEND_BLOCK,
      &     NFRONT,NASS,NPIV,INODE,
-     &     A,LA,LDA, POSTPONE_COL_UPDATE,
+     &     A,LA,LDA, 
      &     POSELT,IFINB,PIVSIZ,
      &     MAXFROMM, IS_MAXFROMM_AVAIL, IS_MAX_USEFUL,
-     &     KEEP253)
+     &     KEEP253, PIVOT_OPTION, IEND_BLR
+     &     )
       IMPLICIT NONE
       INTEGER, intent(out):: IFINB
       INTEGER, intent(in) :: INODE, NFRONT, NASS, NPIV
@@ -1073,7 +1385,7 @@ C
       INTEGER, intent(in) :: LDA
       INTEGER(8), intent(in) :: LA
       DOUBLE PRECISION, intent(inout) :: A(LA)
-      LOGICAL, intent(in)    :: POSTPONE_COL_UPDATE
+      INTEGER, intent(in)    :: PIVOT_OPTION, IEND_BLR
       INTEGER(8) :: POSELT
       DOUBLE PRECISION, intent(out) :: MAXFROMM
       LOGICAL, intent(out) :: IS_MAXFROMM_AVAIL
@@ -1085,7 +1397,7 @@ C
       INTEGER(8) :: NFRONT8
       INTEGER(8) :: LDA8
       INTEGER(8) :: K1POS
-      INTEGER NEL2,NEL
+      INTEGER NEL2, NEL, LIM
       DOUBLE PRECISION ONE, ZERO
       DOUBLE PRECISION A11,A22,A12
       INTEGER(8) :: APOS, LPOS, LPOS1, LPOS2
@@ -1140,11 +1452,14 @@ C
              ENDDO
            ENDIF
          ENDIF
-         IF (POSTPONE_COL_UPDATE) THEN
-           NCB1 = NASS   - IEND_BLOCK
+         IF (PIVOT_OPTION.EQ.3) THEN
+           LIM = NFRONT
+         ELSEIF (PIVOT_OPTION.EQ.2) THEN
+           LIM = NASS
          ELSE
-           NCB1 = NFRONT - IEND_BLOCK
+           LIM = IEND_BLR
          ENDIF
+         NCB1 = LIM - IEND_BLOCK
          IF (.NOT. IS_MAX_USEFUL) THEN
 !$OMP      PARALLEL DO PRIVATE(JJ,K1POS) IF (NCB1 > 300)
            DO I=NEL2+1, NEL2 + NCB1
@@ -1184,6 +1499,13 @@ C
            MAXFROMM=max(MAXFROMM, MAXFROMMTMP)
          ENDIF
       ELSE
+         IF (PIVOT_OPTION.EQ.3) THEN
+           LIM = NFRONT
+         ELSEIF (PIVOT_OPTION.EQ.2) THEN
+           LIM = NASS
+         ELSE
+           LIM = IEND_BLR
+         ENDIF
          POSPV1 = POSELT + int(NPIV,8)*(NFRONT8 + 1_8)
          POSPV2 = POSPV1 + NFRONT8 + 1_8
          OFFDAG_OLD = POSPV2 - 1_8
@@ -1197,8 +1519,8 @@ C
           A(OFFDAG_OLD) = ZERO
          LPOS1   = POSPV2 + LDA8 - 1_8
          LPOS2   = LPOS1 + 1_8
-         CALL dcopy(NFRONT-NPIV_NEW, A(LPOS1), LDA, A(POSPV1+2_8), 1)
-         CALL dcopy(NFRONT-NPIV_NEW, A(LPOS2), LDA, A(POSPV2+1_8), 1)
+         CALL dcopy(LIM-NPIV_NEW, A(LPOS1), LDA, A(POSPV1+2_8), 1)
+         CALL dcopy(LIM-NPIV_NEW, A(LPOS2), LDA, A(POSPV2+1_8), 1)
          JJ = POSPV2 + NFRONT8-1_8  
          IBEG = JJ + 2_8
          IEND = IBEG
@@ -1221,7 +1543,7 @@ C
            JJ = JJ+NFRONT8
          ENDDO
          IEND = IEND-1_8
-         DO J2 = IEND_BLOCK+1,NFRONT
+         DO J2 = IEND_BLOCK+1,LIM
            K1 = JJ
            K2 = JJ+1_8
            MULT1 = - (A11*A(K1)+A12*A(K2))
@@ -1246,8 +1568,8 @@ C
      &    NFRONT,NASS,LAST_VAR,INODE,A,LA,
      &    LDA,
      &    POSELT,
-     &    POSTPONE_COL_UPDATE,
-     &    KEEP,KEEP8 )
+     &    KEEP,KEEP8,
+     &    PIVOT_OPTION, CALL_TRSM)
       IMPLICIT NONE
       INTEGER, intent(in) :: NPIV
       INTEGER, intent(in) :: NFRONT, NASS, IBEG_BLOCK, IEND_BLOCK
@@ -1259,21 +1581,43 @@ C
       INTEGER(8) KEEP8(150)
       INTEGER(8), intent(in) :: POSELT
       INTEGER, intent(in) :: LDA
-      LOGICAL, intent(in) :: POSTPONE_COL_UPDATE
+      INTEGER, intent(in) :: PIVOT_OPTION
+      LOGICAL, intent(in) :: CALL_TRSM
       INTEGER(8) :: LDA8
-      INTEGER NPIV_BLOCK, NEL1
+      INTEGER NPIV_BLOCK, NEL1, I, II
       INTEGER(8) :: LPOS,UPOS,APOS
       INTEGER IROW
       INTEGER Block
-      INTEGER BLSIZE
-      DOUBLE PRECISION ONE, ALPHA
+      INTEGER BLSIZE, ELSIZE
+      DOUBLE PRECISION ONE, ALPHA, VALPIV
       INCLUDE 'mumps_headers.h'
       PARAMETER (ONE=1.0D0, ALPHA=-1.0D0)
       LDA8 = int(LDA,8)
-      NEL1   = LAST_VAR - IEND_BLOCK
+      ELSIZE = IEND_BLOCK - IBEG_BLOCK +1
+      NEL1 = LAST_VAR - IEND_BLOCK
       NPIV_BLOCK  = NPIV - IBEG_BLOCK + 1
       IF (NPIV_BLOCK.EQ.0) GO TO 500
       IF (NEL1.NE.0) THEN
+        IF (PIVOT_OPTION.LE.1.AND.CALL_TRSM) THEN
+          APOS = POSELT + LDA8*int(IBEG_BLOCK-1,8) + int(IBEG_BLOCK-1,8)
+          LPOS = POSELT + LDA8*int(IEND_BLOCK,8) + int(IBEG_BLOCK-1,8)
+          UPOS = POSELT + LDA8*int(IBEG_BLOCK-1,8) + int(IEND_BLOCK,8)
+          CALL dtrsm('L', 'U', 'T', 'U', ELSIZE, NEL1, ONE, 
+     &              A(APOS), LDA, A(LPOS), LDA)
+!$OMP PARALLEL PRIVATE(VALPIV,I,II)          
+         DO I = 1, ELSIZE
+          VALPIV = ONE/A(POSELT+(LDA8+1_8)*int(IBEG_BLOCK+I-2,8))
+!$OMP DO 
+          DO II = 1,NEL1
+            A(UPOS+int(I-1,8)*LDA8 + int(II-1,8)) = 
+     &          A(LPOS+int(I-1,8) + int(II-1,8)*LDA8)
+            A(LPOS+int(I-1,8) + int(II-1,8)*LDA8) = 
+     &          A(LPOS+int(I-1,8) + int(II-1,8)*LDA8)*VALPIV
+          ENDDO
+!$OMP END DO NOWAIT
+         ENDDO
+!$OMP END PARALLEL
+        ENDIF
         IF ( LAST_VAR - IEND_BLOCK > KEEP(7) ) THEN
           BLSIZE = KEEP(8)
         ELSE
@@ -1312,31 +1656,32 @@ C
        UPOS = POSELT + int(IBEG_BLOCK-1,8) * LDA8 +
      &                 int(IEND_BLOCK,8)
        APOS = POSELT + int(LAST_VAR,8)*LDA8 + int(IEND_BLOCK,8)
-       IF ( POSTPONE_COL_UPDATE ) THEN
-         IF (NASS.GT. LAST_VAR) THEN
-           CALL dgemm('N', 'N', NEL1, NASS-LAST_VAR, NPIV_BLOCK, ALPHA, 
-     &              A(UPOS), LDA, A(LPOS), LDA, ONE, 
-     &              A(APOS), LDA)
-         ENDIF
-       ELSE
+       IF (PIVOT_OPTION.EQ.3) THEN
          CALL dgemm('N', 'N', NEL1, NFRONT-LAST_VAR, NPIV_BLOCK, ALPHA, 
      &              A(UPOS), LDA, A(LPOS), LDA, ONE, 
      &              A(APOS), LDA)
-       END IF
+       ELSEIF (PIVOT_OPTION.EQ.2.AND.(NASS.GT. LAST_VAR)) THEN
+         CALL dgemm('N', 'N', NEL1, NASS-LAST_VAR, NPIV_BLOCK, ALPHA, 
+     &              A(UPOS), LDA, A(LPOS), LDA, ONE, 
+     &              A(APOS), LDA)
+       ENDIF
       ENDIF
   500 CONTINUE
       RETURN
       END SUBROUTINE DMUMPS_FAC_SQ_LDLT
-        SUBROUTINE DMUMPS_SWAP( A, LA, IW, LIW,
+        SUBROUTINE DMUMPS_SWAP_LDLT( A, LA, IW, LIW,
      &                       IOLDPS, NPIVP1, IPIV, POSELT, NASS,
-     &                       LDA, NFRONT, LEVEL, K219, K50, XSIZE )
+     &                       LDA, NFRONT, LEVEL, K219, K50, XSIZE,
+     &                       IBEG_BLOCK_TO_SEND )
         IMPLICIT NONE
       INTEGER(8) :: POSELT, LA
       INTEGER LIW, IOLDPS, NPIVP1, IPIV
       INTEGER LDA, NFRONT, NASS, LEVEL, K219, K50, XSIZE
       DOUBLE PRECISION A( LA )
       INTEGER IW( LIW )
+      INTEGER, INTENT(IN) :: IBEG_BLOCK_TO_SEND
       INCLUDE 'mumps_headers.h'
+      INTEGER :: LASTROW2SWAP, IBEG
       INTEGER ISW, ISWPS1, ISWPS2, HF
       INTEGER(8) :: IDIAG, APOS
       INTEGER(8) :: LDA8
@@ -1354,9 +1699,12 @@ C
             IW(ISWPS1+NFRONT) = IW(ISWPS2+NFRONT)
             IW(ISWPS2+NFRONT) = ISW
             IF ( LEVEL .eq. 2 ) THEN
-              CALL dswap( NPIVP1 - 1,
-     &            A( POSELT + int(NPIVP1-1,8) ), LDA,
-     &            A( POSELT + int(IPIV-1,8)   ), LDA )
+              IBEG = IBEG_BLOCK_TO_SEND
+              CALL dswap( NPIVP1 - 1 - IBEG + 1,
+     &            A( POSELT + int(NPIVP1-1,8) +
+     &                     int(IBEG-1,8) * LDA8), LDA,
+     &            A( POSELT + int(IPIV-1,8)   +
+     &                     int(IBEG-1,8) * LDA8), LDA )
             END IF
             CALL dswap( NPIVP1-1,
      &           A( POSELT+int(NPIVP1-1,8) * LDA8 ), 1,
@@ -1367,13 +1715,14 @@ C
             SWOP = A(IDIAG)
             A(IDIAG) = A( POSELT+int(NPIVP1-1,8)*LDA8+int(NPIVP1-1,8) )
             A( POSELT + int(NPIVP1-1,8)*LDA8 + int(NPIVP1-1,8) ) = SWOP
-            CALL dswap( NASS - IPIV, A( APOS + LDA8 ), LDA,
-     &                  A( IDIAG + LDA8 ), LDA )
-            IF ( LEVEL .eq. 1 ) THEN
-              CALL dswap( NFRONT - NASS,
-     &        A( APOS  + int(NASS-IPIV+1,8) * LDA8 ), LDA,
-     &        A( IDIAG + int(NASS-IPIV+1,8) * LDA8 ), LDA )
-            END IF
+            IF (LEVEL .EQ. 1) THEN
+              LASTROW2SWAP = NFRONT
+            ELSE
+              LASTROW2SWAP = NASS
+            ENDIF
+            CALL dswap( LASTROW2SWAP - IPIV,
+     &      A( APOS  + LDA8 ), LDA,
+     &      A( IDIAG + LDA8 ), LDA )
             IF (K219.NE.0 .AND.K50.EQ.2) THEN
              IF ( LEVEL .eq. 2) THEN
               APOS                 = POSELT+LDA8*LDA8-1_8
@@ -1383,15 +1732,14 @@ C
              ENDIF
             ENDIF
         RETURN
-        END SUBROUTINE DMUMPS_SWAP
+        END SUBROUTINE DMUMPS_SWAP_LDLT
       SUBROUTINE DMUMPS_FAC_T_LDLT(NFRONT,NASS,
      &    IW,LIW,A,LA,
      &    LDA,
      &    IOLDPS,POSELT,KEEP,KEEP8,
      &    POSTPONE_COL_UPDATE, ETATASS,
      &    TYPEFile, LAFAC, MonBloc, NextPiv2beWritten,
-     &    LIWFAC, MYID, IFLAG
-     &    )
+     &    LIWFAC, MYID, IFLAG, OFFSET_IW)
       USE DMUMPS_OOC
       IMPLICIT NONE
       INTEGER NFRONT, NASS,LIW
@@ -1410,12 +1758,15 @@ C
       TYPE(IO_BLOCK):: MonBloc
       INTEGER IDUMMY
       LOGICAL LAST_CALL
+      INTEGER :: OFFSET_IW
       INCLUDE 'mumps_headers.h'
       INTEGER(8) :: UPOS, APOS, LPOS
+      INTEGER(8) :: DPOS, POSPV1, POSPV2, OFFDAG
       INTEGER(8) :: LDA8
-      INTEGER BLSIZE, BLSIZE2, Block, IROW, NPIV, I, IROWEND
+      INTEGER BLSIZE, BLSIZE2, Block, IROW, NPIV, I, J, IROWEND
       INTEGER I2, I2END, Block2
-      DOUBLE PRECISION  ONE, ALPHA, BETA, ZERO, VALPIV
+      DOUBLE PRECISION  ONE, ALPHA, BETA, ZERO
+      DOUBLE PRECISION :: MULT1, MULT2, A11, DETPIV, A22, A12
       PARAMETER (ONE = 1.0D0, ALPHA=-1.0D0)
       PARAMETER (ZERO=0.0D0)
       LDA8 = int(LDA,8)
@@ -1449,13 +1800,44 @@ C
           UPOS = POSELT + int(NASS + IROW - 1,8)
         ENDIF
         IF (POSTPONE_COL_UPDATE) THEN
-         DO I = 1, NPIV
-          VALPIV = ONE/A(POSELT+(LDA8+1_8)*int(I-1,8))
-          CALL dcopy( Block, A( LPOS+int(I-1,8) ), LDA,
-     &                       A( UPOS+int(I-1,8)*LDA8 ), 1 )
-          CALL dscal( Block, VALPIV,
-     &                A( LPOS + int(I - 1,8) ), LDA )
-         ENDDO
+          DPOS = POSELT
+          I = 1
+          DO
+            IF(I .GT. NPIV) EXIT
+            IF(IW(OFFSET_IW+I-1) .GT. 0) THEN
+              A11 = ONE/A(DPOS)
+              CALL dcopy(Block, A(LPOS+int(I-1,8)), LDA,
+     &                          A(UPOS+int(I-1,8)*LDA8), 1)
+              CALL dscal(Block, A11, A(LPOS+int(I-1,8)), LDA)
+              DPOS = DPOS + int(LDA+1,8)
+              I = I+1
+            ELSE
+              CALL dcopy(Block, A(LPOS+int(I-1,8)), LDA,
+     &                          A(UPOS+int(I-1,8)*LDA8), 1)
+              CALL dcopy(Block, A(LPOS+int(I,8)), LDA,
+     &                          A(UPOS+int(I,8)*LDA8), 1)
+              POSPV1 = DPOS
+              POSPV2 = DPOS + int(LDA+1,8)
+              OFFDAG = POSPV1+1_8
+              A11 = A(POSPV1)
+              A22 = A(POSPV2)
+              A12 = A(OFFDAG)
+              DETPIV = A11*A22 - A12**2
+              A22 = A11/DETPIV
+              A11 = A(POSPV2)/DETPIV
+              A12 = -A12/DETPIV
+              DO J = 1,Block
+                MULT1 = A11*A(LPOS+int(J-1,8)*LDA8+int(I-1,8)) 
+     &                + A12*A(LPOS+int(J-1,8)*LDA8+int(I,8))
+                MULT2 = A12*A(LPOS+int(J-1,8)*LDA8+int(I-1,8)) 
+     &                + A22*A(LPOS+int(J-1,8)*LDA8+int(I,8))
+                A(LPOS+int(J-1,8)*LDA8+int(I-1,8)) = MULT1
+                A(LPOS+int(J-1,8)*LDA8+int(I,8))   = MULT2
+              ENDDO
+              DPOS = POSPV2 + int(LDA+1,8)
+              I = I+2
+            ENDIF
+          ENDDO
         ENDIF
         DO I2END = Block, 1, -BLSIZE2
           Block2 = min(BLSIZE2, I2END)

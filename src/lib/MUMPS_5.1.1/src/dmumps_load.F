@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -146,12 +146,13 @@ C
       RETURN
       END SUBROUTINE MUMPS_LOAD_DISABLE
       SUBROUTINE DMUMPS_LOAD_SET_INICOST( COST_SUBTREE_ARG, K64, K66,
-     &     MAXS )
+     &     K375, MAXS )
       IMPLICIT NONE
       DOUBLE PRECISION COST_SUBTREE_ARG
-      INTEGER K64, K66
+      INTEGER, INTENT(IN) :: K64, K66, K375
       INTEGER(8)::MAXS
-      DOUBLE PRECISION T64, T66
+      DOUBLE PRECISION :: T64, T66
+      LOGICAL :: AVOID_LOAD_MESSAGES
       T64 = max ( dble(K64), dble(1) )
       T64 = min ( T64, dble(1000)  )
       T66 = max (dble(K66), dble(100))
@@ -159,10 +160,12 @@ C
      &                  T66 * dble(1000000)
       DM_THRES_MEM = dble(MAXS/300_8)
       COST_SUBTREE = COST_SUBTREE_ARG
-#if defined(FORCE_REGULAR_NIV2) 
-      MIN_DIFF = MIN_DIFF * 1000.D0
-      DM_THRES_MEM = DM_THRES_MEM * 1000_8
-#endif
+      AVOID_LOAD_MESSAGES = .FALSE.
+      IF (AVOID_LOAD_MESSAGES) THEN
+        MIN_DIFF = MIN_DIFF * 1000.D0
+        DM_THRES_MEM = DM_THRES_MEM * 1000_8
+      ENDIF
+      RETURN
       END SUBROUTINE DMUMPS_LOAD_SET_INICOST
       SUBROUTINE DMUMPS_SPLIT_PREP_PARTITION ( 
      &      INODE, STEP, N, SLAVEF,
@@ -367,10 +370,12 @@ C
                CALL MUMPS_ABORT()
             ENDIF
          ENDDO
+         GOTO 457
       ELSE
         WRITE(*,*) "Strategy 6 not implemented"
         CALL MUMPS_ABORT()
       ENDIF
+ 457  CONTINUE
       RETURN
       END SUBROUTINE DMUMPS_LOAD_SET_PARTITION
       SUBROUTINE DMUMPS_LOAD_PARTI_REGULAR(
@@ -421,7 +426,8 @@ C
       NSLAVES_LESS = max(ITEMP,1)
       NSLAVES_NODE = MUMPS_REG_GET_NSLAVES(KEEP8(21), KEEP(48),
      &          KEEP(50),SLAVEF,
-     &          NCB, NFRONT, NSLAVES_LESS, NMB_OF_CAND)
+     &          NCB, NFRONT, NSLAVES_LESS, NMB_OF_CAND,
+     &          KEEP(375))
       CALL MUMPS_BLOC2_SETPARTITION(
      &            KEEP,KEEP8, SLAVEF,
      &            TAB_POS,
@@ -438,7 +444,7 @@ C
       RETURN
       END SUBROUTINE DMUMPS_LOAD_PARTI_REGULAR
       SUBROUTINE DMUMPS_LOAD_INIT( id, MEMORY_MD_ARG, MAXS )
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       USE DMUMPS_STRUC_DEF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
@@ -452,7 +458,6 @@ C
       DOUBLE PRECISION :: MAX_SBTR
       DOUBLE PRECISION ZERO
       DOUBLE PRECISION MEMORY_SENT
-      INTEGER,DIMENSION(:),POINTER:: KEEP
       PARAMETER( ZERO=0.0d0 )
       DOUBLE PRECISION SIZE_REAL(2) 
       INTEGER WHAT
@@ -462,7 +467,6 @@ C
       CAND_LOAD=>id%CANDIDATES
       ND_LOAD=>id%ND_STEPS
       KEEP_LOAD=>id%KEEP
-      KEEP     =>id%KEEP
       KEEP8_LOAD=>id%KEEP8
       FILS_LOAD=>id%FILS
       FRERE_LOAD=>id%FRERE_STEPS
@@ -478,64 +482,64 @@ C
      & (int(id%KEEP(12),8)*int(id%MAX_SURF_MASTER,8)/int(100,8))
       COMM_LD = id%COMM_LOAD
       MAX_PEAK_STK = 0.0D0
-      K69  = KEEP(69)
-      IF ( KEEP(47) .le. 0 .OR. KEEP(47) .gt. 4 ) THEN
+      K69  = id%KEEP(69)
+      IF ( id%KEEP(47) .le. 0 .OR. id%KEEP(47) .gt. 4 ) THEN
         write(*,*) "Internal error 1 in DMUMPS_LOAD_INIT"
         CALL MUMPS_ABORT()
       END IF
       CHK_LD=dble(0)
-      BDC_MEM      = ( KEEP(47) >= 2 )
-      BDC_POOL     = ( KEEP(47) >= 3 )
-      BDC_SBTR     = ( KEEP(47) >= 4 )
-      BDC_M2_MEM   = ( ( KEEP(80) == 2 .OR. KEEP(80) == 3 )
-     &             .AND. KEEP(47) == 4 )
-      BDC_M2_FLOPS   = ( KEEP(80) == 1 
-     &             .AND. KEEP(47) .GE. 1 )
-      BDC_MD       = (KEEP(86)==1)
-      SBTR_WHICH_M       = KEEP(90)
+      BDC_MEM      = ( id%KEEP(47) >= 2 )
+      BDC_POOL     = ( id%KEEP(47) >= 3 )
+      BDC_SBTR     = ( id%KEEP(47) >= 4 )
+      BDC_M2_MEM   = ( ( id%KEEP(80) == 2 .OR. id%KEEP(80) == 3 )
+     &             .AND. id%KEEP(47) == 4 )
+      BDC_M2_FLOPS   = ( id%KEEP(80) == 1 
+     &             .AND. id%KEEP(47) .GE. 1 )
+      BDC_MD       = (id%KEEP(86)==1)
+      SBTR_WHICH_M       = id%KEEP(90)
       REMOVE_NODE_FLAG=.FALSE.
       REMOVE_NODE_FLAG_MEM=.FALSE.
       REMOVE_NODE_COST_MEM=dble(0)
       REMOVE_NODE_COST=dble(0)
-      IF (KEEP(80) .LT. 0 .OR. KEEP(80)>3) THEN
+      IF (id%KEEP(80) .LT. 0 .OR. id%KEEP(80)>3) THEN
         WRITE(*,*) "Unimplemented KEEP(80) Strategy"
         CALL MUMPS_ABORT()
       ENDIF
-      IF ((KEEP(80) == 2 .OR. KEEP(80)==3 ).AND. KEEP(47).NE.4)
+      IF ((id%KEEP(80) == 2 .OR. id%KEEP(80)==3).AND. id%KEEP(47).NE.4)
      &  THEN
         WRITE(*,*) "Internal error 3 in DMUMPS_LOAD_INIT"
          CALL MUMPS_ABORT()
       END IF
-      IF (KEEP(81) == 1 .AND. KEEP(47) < 2) THEN
+      IF (id%KEEP(81) == 1 .AND. id%KEEP(47) < 2) THEN
         WRITE(*,*) "Internal error 2 in DMUMPS_LOAD_INIT"
         CALL MUMPS_ABORT()
       ENDIF
-      BDC_POOL_MNG = ((KEEP(81) == 1).AND.(KEEP(47) >= 2))
-      IF(KEEP(76).EQ.4)THEN
+      BDC_POOL_MNG = ((id%KEEP(81) == 1).AND.(id%KEEP(47) >= 2))
+      IF(id%KEEP(76).EQ.4)THEN
          DEPTH_FIRST_LOAD=>id%DEPTH_FIRST
       ENDIF
-      IF(KEEP(76).EQ.5)THEN
+      IF(id%KEEP(76).EQ.5)THEN
          COST_TRAV=>id%COST_TRAV
       ENDIF
-      IF(KEEP(76).EQ.6)THEN
+      IF(id%KEEP(76).EQ.6)THEN
          DEPTH_FIRST_LOAD=>id%DEPTH_FIRST
          DEPTH_FIRST_SEQ_LOAD=>id%DEPTH_FIRST_SEQ
          SBTR_ID_LOAD=>id%SBTR_ID
       ENDIF
       IF (BDC_M2_MEM.OR.BDC_M2_FLOPS) THEN
          POOL_NIV2_SIZE=max(1,min(id%NBSA+id%KEEP(262),id%NA(1)))
-         ALLOCATE(NIV2(id%NSLAVES), NB_SON(KEEP(28)),
+         ALLOCATE(NIV2(id%NSLAVES), NB_SON(id%KEEP(28)),
      &            POOL_NIV2(POOL_NIV2_SIZE),
      &        POOL_NIV2_COST(POOL_NIV2_SIZE),
      &            stat=allocok)
-         DO i = 1, KEEP(28)
+         DO i = 1, id%KEEP(28)
            NB_SON(i)=id%NE_STEPS(i)
          ENDDO
          NIV2=dble(0)
          IF (allocok > 0) THEN
            WRITE(*,*) 'PB allocation in DMUMPS_LOAD_INIT'
            id%INFO(1) = -13
-           id%INFO(2) = id%NSLAVES + KEEP(28) + 200
+           id%INFO(2) = id%NSLAVES + id%KEEP(28) + 200
            RETURN
          ENDIF
       ENDIF
@@ -573,7 +577,7 @@ C
          LU_USAGE=dble(0)
          MD_MEM=int(0,8)
       ENDIF
-      IF((KEEP(81).EQ.2).OR.(KEEP(81).EQ.3))THEN
+      IF((id%KEEP(81).EQ.2).OR.(id%KEEP(81).EQ.3))THEN
          ALLOCATE(CB_COST_MEM(2*2000*id%NSLAVES), 
      &            stat=allocok)
          IF (allocok > 0) THEN
@@ -714,7 +718,7 @@ C
         SBTR_CUR = dble(0) 
         SBTR_MEM = dble(0) 
       END IF
-      K34_LOC=KEEP(34)
+      K34_LOC=id%KEEP(34)
       CALL MUMPS_SIZE_C(SIZE_REAL(1),SIZE_REAL(2),K35_LOC)
       K35  = K35_LOC
       BUF_LOAD_SIZE = K34_LOC * 2 * ( NPROCS - 1 ) +
@@ -757,7 +761,7 @@ C
         DM_LAST_MEM_SENT=ZERO
 #endif
       ENDIF
-      CALL DMUMPS_INIT_ALPHA_BETA(KEEP(69))
+      CALL DMUMPS_INIT_ALPHA_BETA(id%KEEP(69))
       IF(BDC_MD)THEN
          MAX_SBTR=0.0D0
          IF(BDC_SBTR)THEN
@@ -772,14 +776,15 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &        FUTURE_NIV2,
 #endif
-     &        dble(MEMORY_MD),dble(0) ,MYID, IERR  )
+     &        dble(MEMORY_MD),dble(0) ,MYID, id%KEEP, IERR  )
          WHAT=9
          MEMORY_SENT = dble(LA-MAX_SURF_MASTER)-MAX_SBTR
      &      - max( dble(LA) * dble(3) / dble(100),
-     &      dble(2) * dble(max(KEEP(5),KEEP(6))) * dble(KEEP(127)))
-         IF (KEEP(12) > 25) THEN
+     &      dble(2) *
+     &      dble(max(id%KEEP(5),id%KEEP(6))) * dble(id%KEEP(127)))
+         IF (id%KEEP(12) > 25) THEN
            MEMORY_SENT = MEMORY_SENT -
-     &                   dble(KEEP(12))*0.2d0*dble(LA)/100.0d0
+     &                   dble(id%KEEP(12))*0.2d0*dble(LA)/100.0d0
          ENDIF
          TAB_MAXS(MYID)=int(MEMORY_SENT,8)
          CALL DMUMPS_BUF_BROADCAST( WHAT,
@@ -788,13 +793,13 @@ C
      &        FUTURE_NIV2,
 #endif
      &        MEMORY_SENT,
-     &        dble(0),MYID, IERR  )
+     &        dble(0),MYID, id%KEEP, IERR  )
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_LOAD_INIT
       SUBROUTINE DMUMPS_LOAD_UPDATE( CHECK_FLOPS,PROCESS_BANDE,
      &     INC_LOAD, KEEP,KEEP8 )
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -891,9 +896,9 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &        FUTURE_NIV2,
 #endif
-     &        MYID, IERR )
+     &        MYID, KEEP, IERR )
            IF ( IERR == -1 )THEN
-             CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+             CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
              GOTO 111
            ELSE IF ( IERR .NE.0 ) THEN
              WRITE(*,*) "Internal Error in DMUMPS_LOAD_UPDATE",IERR
@@ -918,7 +923,7 @@ C
       SUBROUTINE DMUMPS_LOAD_MEM_UPDATE( SSARBR,
      &           PROCESS_BANDE_ARG, MEM_VALUE, NEW_LU, INC_MEM_ARG,
      &           KEEP,KEEP8,LRLUS)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -1073,9 +1078,9 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &           FUTURE_NIV2,
 #endif
-     &           MYID,IERR )
+     &           MYID, KEEP, IERR )
             IF ( IERR == -1 )THEN
-               CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+               CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
                GOTO 111
            ELSE IF ( IERR .NE. 0 ) THEN
              WRITE(*,*) "Internal Error in DMUMPS_LOAD_MEM_UPDATE",IERR
@@ -1166,15 +1171,25 @@ C
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_LOAD_SET_SLAVES
-      SUBROUTINE DMUMPS_LOAD_END( INFO1, IERR )
-      USE DMUMPS_COMM_BUFFER
+      SUBROUTINE DMUMPS_LOAD_END( INFO1, NSLAVES, IERR )
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
       IMPLICIT NONE
-      INTEGER, intent(in) :: INFO1
-      INTEGER, intent(out) :: IERR
+      INTEGER, INTENT(IN)  :: INFO1
+      INTEGER, INTENT(IN)  :: NSLAVES
+      INTEGER, INTENT(OUT) :: IERR
+      INTEGER :: DUMMY_COMMUNICATOR
       IERR=0
+      DUMMY_COMMUNICATOR = -999 
+      CALL DMUMPS_CLEAN_PENDING( INFO1, KEEP_LOAD(1), BUF_LOAD_RECV(1),
+     &     LBUF_LOAD_RECV,
+     &     LBUF_LOAD_RECV_BYTES, DUMMY_COMMUNICATOR, COMM_LD,
+     &     NSLAVES,
+     &     .FALSE.,  
+     &     .TRUE.    
+     &     )
       DEALLOCATE( LOAD_FLOPS )
       DEALLOCATE( WLOAD )
       DEALLOCATE( IDWLOAD )
@@ -1231,24 +1246,22 @@ C
          DEALLOCATE(SBTR_CUR_ARRAY)
       ENDIF
       CALL DMUMPS_BUF_DEALL_LOAD_BUFFER( IERR )
-      CALL DMUMPS_FINISH_RECV( MYID, COMM_LD,
-     &     BUF_LOAD_RECV, LBUF_LOAD_RECV,
-     &     LBUF_LOAD_RECV_BYTES )
       DEALLOCATE(BUF_LOAD_RECV)
+      RETURN
       END SUBROUTINE DMUMPS_LOAD_END
-      RECURSIVE SUBROUTINE DMUMPS_LOAD_RECV_MSGS(COMM, KEEP)
+      RECURSIVE SUBROUTINE DMUMPS_LOAD_RECV_MSGS(COMM)
       IMPLICIT NONE
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
       INTEGER IERR, MSGTAG, MSGLEN, MSGSOU,COMM
-      INTEGER KEEP(500)
       INTEGER :: STATUS(MPI_STATUS_SIZE)
       LOGICAL FLAG
  10   CONTINUE
       CALL MPI_IPROBE( MPI_ANY_SOURCE, MPI_ANY_TAG, COMM,
      &     FLAG, STATUS, IERR )
       IF (FLAG) THEN
-        KEEP(65)=KEEP(65)+1
+        KEEP_LOAD(65)=KEEP_LOAD(65)+1
+        KEEP_LOAD(267)=KEEP_LOAD(267)-1
         MSGTAG = STATUS( MPI_TAG )
         MSGSOU = STATUS( MPI_SOURCE )
         IF ( MSGTAG .NE. UPDATE_LOAD) THEN
@@ -1799,7 +1812,7 @@ C
       END SUBROUTINE DMUMPS_ARCHGENWLOAD
       SUBROUTINE DMUMPS_LOAD_MASTER_2_ALL(MYID, SLAVEF, COMM,
      &     TAB_POS, NASS, KEEP,KEEP8, LIST_SLAVES, NSLAVES,INODE)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -1847,9 +1860,9 @@ C
       IF ( FUTURE_NIV2(MYID + 1) == 0 ) THEN
  112    CONTINUE
         CALL DMUMPS_BUF_SEND_NOT_MSTR(COMM,MYID,SLAVEF,
-     &       dble(MAX_SURF_MASTER),IERR)
+     &       dble(MAX_SURF_MASTER),KEEP,IERR)
         IF (IERR == -1 ) THEN
-          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
           GOTO 112
         ELSE IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) "Internal Error in DMUMPS_LOAD_MASTER_2_ALL",
@@ -1918,9 +1931,9 @@ C
 #endif
      &     NSLAVES, LIST_SLAVES,INODE,
      &     MEM_INCREMENT,
-     &     FLOPS_INCREMENT,CB_BAND, WHAT,IERR)
+     &     FLOPS_INCREMENT,CB_BAND, WHAT, KEEP, IERR)
         IF ( IERR == -1 ) THEN
-          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
           GOTO 111
         ELSE IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) "Internal Error in DMUMPS_LOAD_MASTER_2_ALL",
@@ -1948,7 +1961,7 @@ C
      &     POOL, LPOOL,
      &     PROCNODE, KEEP,KEEP8, SLAVEF, COMM, MYID, STEP, N,
      &     ND, FILS )
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -2045,11 +2058,11 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &               FUTURE_NIV2,
 #endif
-     &         COST, dble(0),MYID, IERR  )
+     &         COST, dble(0), MYID, KEEP, IERR  )
         POOL_LAST_COST_SENT = COST
         POOL_MEM(MYID)=COST
         IF ( IERR == -1 )THEN
-          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
           GOTO 111
         ELSE IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) "Internal Error in DMUMPS_LOAD_POOL_UPD_NEW_POOL",
@@ -2061,7 +2074,7 @@ C
       END SUBROUTINE DMUMPS_LOAD_POOL_UPD_NEW_POOL
       SUBROUTINE DMUMPS_LOAD_SBTR_UPD_NEW_POOL(
      &     OK,INODE,POOL,LPOOL,MYID,SLAVEF,COMM,KEEP,KEEP8)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -2106,9 +2119,10 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &           FUTURE_NIV2,
 #endif
-     &           dble(MEM_SUBTREE(INDICE_SBTR)), dble(0),MYID, IERR  )
+     &           dble(MEM_SUBTREE(INDICE_SBTR)), dble(0),
+     &           MYID, KEEP, IERR  )
             IF ( IERR == -1 )THEN
-               CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+               CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
                GOTO 111
             ELSE IF ( IERR .NE. 0 ) THEN
                WRITE(*,*)
@@ -2134,9 +2148,9 @@ C
 #if ! defined(OLD_LOAD_MECHANISM)
      &              FUTURE_NIV2,
 #endif
-     &              COST, dble(0) ,MYID,IERR  )
+     &              COST, dble(0), MYID, KEEP, IERR  )
                IF ( IERR == -1 )THEN
-                  CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+                  CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
                   GOTO 112
                ELSE IF ( IERR .NE. 0 ) THEN
                   WRITE(*,*)
@@ -4888,7 +4902,7 @@ C
       RETURN
       END FUNCTION DMUMPS_LOAD_GET_MEM
       RECURSIVE SUBROUTINE DMUMPS_NEXT_NODE(FLAG,COST,COMM)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -4937,9 +4951,9 @@ C
 #endif
      &         COST, 
      &         TO_BE_SENT, 
-     &         MYID, IERR  )
+     &         MYID, KEEP_LOAD, IERR  )
       IF ( IERR == -1 )THEN
-         CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP_LOAD)
+         CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
          GOTO 111
       ELSE IF ( IERR .NE. 0 ) THEN
          WRITE(*,*) "Internal Error in DMUMPS_LOAD_POOL_UPD_NEW_POOL",
@@ -4950,7 +4964,7 @@ C
       END SUBROUTINE DMUMPS_NEXT_NODE
       SUBROUTINE DMUMPS_UPPER_PREDICT(INODE,STEP,NSTEPS,PROCNODE,FRERE,
      &     NE,COMM,SLAVEF,MYID,KEEP,KEEP8,N)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       IMPLICIT NONE
       INTEGER INODE,NSTEPS,MYID,SLAVEF,COMM,N
       INTEGER KEEP(500)
@@ -5017,10 +5031,10 @@ C
       ENDIF
  111  CONTINUE      
       CALL DMUMPS_BUF_SEND_FILS(WHAT, COMM, NPROCS,
-     &     FATHER_NODE,INODE,NCB, KEEP(81),MYID,
+     &     FATHER_NODE,INODE,NCB, KEEP,MYID,
      &     FATHER, IERR)
       IF (IERR == -1 ) THEN
-        CALL DMUMPS_LOAD_RECV_MSGS(COMM, KEEP)
+        CALL DMUMPS_LOAD_RECV_MSGS(COMM)
         GOTO 111
       ELSE IF ( IERR .NE. 0 ) THEN
         WRITE(*,*) "Internal Error in DMUMPS_UPPER_PREDICT",
@@ -5220,7 +5234,7 @@ C
      &     LIST_OF_CAND,
      &     TAB_POS, NASS, KEEP,KEEP8, LIST_SLAVES,
      &     NSLAVES,INODE)
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
 #if ! defined(OLD_LOAD_MECHANISM)
       USE MUMPS_FUTURE_NIV2
 #endif
@@ -5289,9 +5303,9 @@ C
      &     DELTA_MD, 
      &     DELTA_MD, 
      &     DELTA_MD, 
-     &     WHAT, IERR)
+     &     WHAT, KEEP, IERR)
       IF ( IERR == -1 ) THEN
-          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD, KEEP)
+          CALL DMUMPS_LOAD_RECV_MSGS(COMM_LD)
           GOTO 111
       ELSE IF ( IERR .NE. 0 ) THEN
          WRITE(*,*) "Internal Error 2 in DMUMPS_LOAD_SEND_MD_INFO",

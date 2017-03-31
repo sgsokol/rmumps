@@ -1,9 +1,9 @@
 !
-!  This file is part of MUMPS 5.0.1, released
-!  on Thu Jul 23 17:08:29 UTC 2015
+!  This file is part of MUMPS 5.1.1, released
+!  on Mon Mar 20 14:34:33 UTC 2017
 !
 !
-!  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+!  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 !  University of Bordeaux.
 !
 !  This version of MUMPS is provided to you free of charge. It is
@@ -40,6 +40,6 @@
         COMPLEX(kind=8), DIMENSION(:,:), POINTER :: SVD_U, SVD_VT
 !       for RR on root (#define try_null_space)
         DOUBLE PRECISION, DIMENSION(:), POINTER :: SINGULAR_VALUES
-        INTEGER :: NB_SINGULAR_VALUES
+        INTEGER :: NB_SINGULAR_VALUES,rootpad4
 !
       END TYPE ZMUMPS_ROOT_STRUC

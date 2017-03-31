@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -26,6 +26,7 @@ C
      & ASS_IRECV, SEUIL, SEUIL_LDLT_NIV2,
      & MEM_DISTRIB,
      & DKEEP,PIVNUL_LIST,LPN_LIST
+     &       ,LRGROUPS
      &     )
       USE DMUMPS_LOAD 
       USE DMUMPS_FAC_PAR_M
@@ -43,6 +44,7 @@ C
       INTEGER BUFR( LBUFR )
       INTEGER NELT, LDPTRAR
       INTEGER FRTPTR(*), FRTELT(*)
+      INTEGER LRGROUPS(N)
       DOUBLE PRECISION CNTL1
       INTEGER   ICNTL(40)
       INTEGER   INFO(40), KEEP(500)
@@ -53,7 +55,7 @@ C
      &          DAD(KEEP(28))
       INTEGER   CAND(SLAVEF+1, max(1,KEEP(56)))
       INTEGER   STEP(N)
-      INTEGER   PTRAR(LDPTRAR,2)
+      INTEGER(8), INTENT(IN) :: PTRAR(LDPTRAR,2)
       INTEGER(8) :: PTRFAC(KEEP(28))
       INTEGER   PTRIST(KEEP(28)), PTLUST_S(KEEP(28))
       INTEGER   IW1(3*KEEP(28)), ITLOC(N+KEEP(253)), POOL(LPOOL)
@@ -63,12 +65,12 @@ C
       INTEGER   COMM_LOAD, ASS_IRECV
       INTEGER   ISTEP_TO_INIV2(KEEP(71)), 
      &          TAB_POS_IN_PERE(SLAVEF+2,max(1,KEEP(56)))
-      INTEGER   INTARR(max(1,KEEP(14)))
-      DOUBLE PRECISION DBLARR(max(1,KEEP(13)))
+      DOUBLE PRECISION   DBLARR(KEEP8(26))
+      INTEGER   INTARR(KEEP8(27))
       DOUBLE PRECISION SEUIL, SEUIL_LDLT_NIV2
       INTEGER LPN_LIST
       INTEGER PIVNUL_LIST(LPN_LIST)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
        INTEGER MUMPS_PROCNODE
        EXTERNAL MUMPS_PROCNODE
       DOUBLE PRECISION UULOC
@@ -112,6 +114,10 @@ C
       LRLU = LA
       LRLUS = LRLU
       KEEP8(67) = LRLUS
+      KEEP8(68) = LRLUS
+      KEEP8(69) = LRLUS
+      KEEP8(70) = LRLUS
+      KEEP8(71) = LRLUS
       IPTRLU = LRLU
       NTOTPV   = 0
       NMAXNPIV = 0
@@ -157,6 +163,7 @@ C
      &         COMM_LOAD, ASS_IRECV, SEUIL, SEUIL_LDLT_NIV2,
      &         MEM_DISTRIB,NE_STEPS,
      &         DKEEP(1),PIVNUL_LIST(1),LPN_LIST
+     &         ,LRGROUPS(1)
      &         )
       POSFAC = POSFAC -1_8
       IWPOS = IWPOS -1
@@ -170,6 +177,8 @@ C
       CALL MUMPS_SETI8TOI4(KEEP8(31), INFO(9))
       INFO(10) = KEEP(32)
       KEEP8(67) = LA - KEEP8(67)
+      KEEP8(68) = LA - KEEP8(68)
+      KEEP8(69) = LA - KEEP8(69)
       KEEP(89)  = NTOTPV
       KEEP(246) = NMAXNPIV
       INFO(23) = KEEP(89)

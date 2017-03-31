@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -27,8 +27,9 @@ C
      &    INTARR, DBLARR,ICNTL,KEEP,KEEP8,DKEEP,ND,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE  
+     &               , LRGROUPS
      &     )
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       INCLUDE 'mpif.h'
@@ -36,7 +37,7 @@ C
       INTEGER IROOT
       INTEGER ICNTL( 40 ), KEEP( 500 )
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER COMM_LOAD, ASS_IRECV
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER BUFR( LBUFR )
@@ -46,6 +47,7 @@ C
       INTEGER N, LIW
       INTEGER IW( LIW )
       DOUBLE PRECISION A( LA )
+      INTEGER, intent(in) :: LRGROUPS(N)
       INTEGER(8) :: PTRAST(KEEP(28))
       INTEGER(8) :: PTRFAC(KEEP(28))
       INTEGER(8) :: PAMASTER(KEEP(28))
@@ -65,10 +67,10 @@ C
       DOUBLE PRECISION OPASSW, OPELIW
       INTEGER ITLOC( N+KEEP(253) ), FILS( N )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
-      INTEGER PTRARW( LPTRAR ), PTRAIW( LPTRAR )
+      INTEGER(8), INTENT(IN) :: PTRARW( LPTRAR ), PTRAIW( LPTRAR )
       INTEGER ND(KEEP(28)), FRERE(KEEP(28))
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max(1,KEEP(13)) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
+      INTEGER INTARR( KEEP8(27) )
       INTEGER I, NELIM, NB_CONTRI_GLOBAL, NUMORG, 
      &        NFRONT, IROW, JCOL, PDEST, HF, IOLDPS,
      &        IN, DEB_ROW, ILOC_ROW, IFSON, ILOC_COL,
@@ -88,7 +90,7 @@ C
             PDEST = IROW * root%NPCOL + JCOL
           IF ( PDEST .NE. MYID ) THEN
            CALL DMUMPS_BUF_SEND_ROOT2SLAVE(NFRONT, 
-     &     NB_CONTRI_GLOBAL, PDEST, COMM, IERR)
+     &     NB_CONTRI_GLOBAL, PDEST, COMM, KEEP, IERR)
               if (IERR.lt.0) then
                 write(6,*) ' error detected by ',
      &          'DMUMPS_BUF_SEND_ROOT2SLAVE'
@@ -156,7 +158,7 @@ C
             ENDIF
             IF (PDEST.NE.MYID) THEN
              CALL DMUMPS_BUF_SEND_ROOT2SON(IN, NELIM_SENT,
-     &        PDEST, COMM, IERR )
+     &        PDEST, COMM, KEEP, IERR )
                if (IERR.lt.0) then
                 write(6,*) ' error detected by ',
      &          'DMUMPS_BUF_SEND_ROOT2SLAVE'
@@ -181,6 +183,7 @@ C
      &       INTARR, DBLARR, ICNTL, KEEP, KEEP8, DKEEP, ND, FRERE,
      &       LPTRAR, NELT, FRTPTR, FRTELT, 
      &       ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &       )
              IF ( ISLAVE .NE. 0 ) THEN
                IF (KEEP(50) .EQ. 0) THEN
@@ -198,7 +201,7 @@ C
                 ENDIF
                 CALL DMUMPS_FREE_BAND( N, IN, PTRIST, PTRAST,
      &          IW, LIW, A, LA, LRLU, LRLUS, IWPOSCB,
-     &          IPTRLU, STEP, MYID, KEEP, TYPE_SON
+     &          IPTRLU, STEP, MYID, KEEP, KEEP8, TYPE_SON
      &        )
                ENDIF
              ENDIF

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -62,15 +62,16 @@ C
      &    ND, FRERE,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE  
+     &               , LRGROUPS
      &     )
       USE DMUMPS_OOC        
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       USE DMUMPS_LOAD
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       INTEGER KEEP(500), ICNTL(40)
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION  DKEEP(130)
+      DOUBLE PRECISION  DKEEP(230)
       TYPE (DMUMPS_ROOT_STRUC) :: root
       INTEGER COMM_LOAD, ASS_IRECV
       INTEGER N, ISON, IROOT, TAG
@@ -90,6 +91,7 @@ C
       INTEGER LIW
       INTEGER IW( LIW )
       DOUBLE PRECISION A( LA )
+      INTEGER, intent(in) :: LRGROUPS(N)
       INTEGER LPTRAR, NELT
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
       INTEGER(8) :: PTRAST(KEEP(28))
@@ -107,9 +109,9 @@ C
       INTEGER ITLOC( N + KEEP(253) ), FILS( N )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
       INTEGER ND( KEEP(28) ), FRERE( KEEP(28) )
-      INTEGER PTRARW( LPTRAR ), PTRAIW( LPTRAR )
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max(1,KEEP(13)) )
+      INTEGER(8), INTENT(IN) :: PTRARW( LPTRAR ), PTRAIW( LPTRAR )
+      INTEGER INTARR( KEEP8(27) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
       INTEGER ISTEP_TO_INIV2(KEEP(71)), 
      &        TAB_POS_IN_PERE(SLAVEF+2,max(1,KEEP(56)))
       INTEGER allocok
@@ -168,7 +170,7 @@ C
       IF (IFLAG.LT.0) THEN
          IF (LP > 0) write(6,*) MYID, ' : MEMORY ALLOCATION ',
      &     'FAILURE in DMUMPS_BUILD_AND_SEND_CB_ROOT'
-         CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+         CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
          RETURN
       ENDIF
       SKIPLAST_RHS_ROWS = ((KEEP(253).GT.0).AND.(KEEP(50).EQ.0))
@@ -364,7 +366,7 @@ C
            KEEP(121) = -1 
 #endif
            IF (IFLAG.LT.0) THEN
-                CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+                CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
                 RETURN
            ENDIF
         ELSE
@@ -400,7 +402,7 @@ C
             NRLOCAL = PTRROW( IROW + 2 ) - PTRROW( IROW + 1 )
             NCLOCAL = PTRCOL( JCOL + 2 ) - PTRCOL( JCOL + 1 )
             CALL DMUMPS_ROOT_LOCAL_ASSEMBLY( N,
-     &        root%SCHUR_POINTER(1:),
+     &        root%SCHUR_POINTER(1),
      &        LOCAL_M, LOCAL_N,
      &        root%NPCOL, root%NPROW, root%MBLOCK, root%NBLOCK,
      &        NBCOL, NBROW,
@@ -412,9 +414,9 @@ C
      &        NRLOCAL,
      &        NCLOCAL,
      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
-     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
      &        KEEP,
-     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
        ELSE
         IF ( PTRIST(STEP( IROOT )) .GE. 0 ) THEN
           IF ( PTRIST(STEP( IROOT )) .EQ. 0 ) THEN
@@ -440,9 +442,9 @@ C
      &        NRLOCAL,
      &        NCLOCAL,
      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
-     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
      &        KEEP,
-     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
         END IF
        ENDIF
       END IF
@@ -510,6 +512,7 @@ C
      &            PTRARW,PTRAIW,INTARR,DBLARR,ICNTL,KEEP,KEEP8,DKEEP,
      &            ND, FRERE, LPTRAR, NELT, FRTPTR, FRTELT, 
      &            ISTEP_TO_INIV2, TAB_POS_IN_PERE, .TRUE.
+     &               , LRGROUPS
      &             )
                   IF ( IFLAG .LT. 0 ) GOTO 500
                   IF (LDA_ARG < 0) THEN 
@@ -524,7 +527,7 @@ C
               IERROR = SIZE_MSG
               IF (LP > 0) WRITE(LP, *) "FAILURE, SEND BUFFER TOO
      & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT"
-              CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+              CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
               GOTO 500
             ENDIF
             IF ( IERR == -3 ) THEN
@@ -532,7 +535,7 @@ C
      & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT"
               IFLAG  = -20
               IERROR = SIZE_MSG
-              CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+              CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
               GOTO 500
             ENDIF
           END IF
@@ -1055,7 +1058,7 @@ C
       INTEGER MYID
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
       TYPE (DMUMPS_ROOT_STRUC ) :: root
       INTEGER(8) :: LA, LRLU, IPTRLU, LRLUS
       INTEGER IROOT, LIW, N, IWPOS, IWPOSCB
@@ -1068,9 +1071,10 @@ C
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
       INTEGER COMP, IFLAG, IERROR
       INCLUDE 'mumps_headers.h'
-      INTEGER FILS( N ), PTRAIW(N), PTRARW( N )
-      INTEGER INTARR(max(1,KEEP(14)))
-      DOUBLE PRECISION DBLARR(max(1,KEEP(13)))
+      INTEGER FILS( N )
+      INTEGER(8), INTENT(IN) :: PTRAIW(N), PTRARW( N )
+      INTEGER INTARR(KEEP8(27))
+      DOUBLE PRECISION DBLARR(KEEP8(26))
       INTEGER numroc
       EXTERNAL numroc
       DOUBLE PRECISION ZERO

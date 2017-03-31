@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -49,6 +49,8 @@ C
          LRLU    = LRLU  + SIZFR_BLOCK
          IF (.NOT. IN_PLACE_STATS) THEN
            LRLUS   = LRLUS + SIZFR_BLOCK_EFF
+           KEEP8(70) = KEEP8(70) + SIZFR_BLOCK_EFF
+           KEEP8(71) = KEEP8(71) + SIZFR_BLOCK_EFF
          ENDIF
       MEM_INC = -SIZFR_BLOCK_EFF
       IF (IN_PLACE_STATS) THEN
@@ -70,7 +72,11 @@ C
          IW( IWPOSCB+1+XXP)=TOP_OF_STACK
       ELSE
          IW( IPOSBLOCK +XXS)=S_FREE
-         IF (.NOT. IN_PLACE_STATS) LRLUS = LRLUS + SIZFR_BLOCK_EFF
+         IF (.NOT. IN_PLACE_STATS) THEN
+           LRLUS = LRLUS + SIZFR_BLOCK_EFF
+           KEEP8(70) = KEEP8(70) + SIZFR_BLOCK_EFF
+           KEEP8(71) = KEEP8(71) + SIZFR_BLOCK_EFF
+         ENDIF
       CALL DMUMPS_LOAD_MEM_UPDATE(SSARBR,.FALSE.,
      &            LA-LRLUS,0_8,-SIZFR_BLOCK_EFF,KEEP,KEEP8,LRLUS)
       END IF

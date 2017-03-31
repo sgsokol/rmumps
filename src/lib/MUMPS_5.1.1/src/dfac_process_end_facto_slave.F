@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -26,11 +26,13 @@ C
      &    INTARR, DBLARR, ICNTL, KEEP,KEEP8,DKEEP, ND, FRERE,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE 
+     &               , LRGROUPS
      &    )
       USE DMUMPS_LOAD
 #if ! defined(NO_FDM_MAPROW)
       USE MUMPS_FAC_MAPROW_DATA_M
 #endif
+      USE DMUMPS_LR_DATA_M  
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       INCLUDE 'mumps_headers.h'
@@ -41,7 +43,7 @@ C
       INTEGER COMM, MYID
       INTEGER ICNTL( 40 ), KEEP( 500 )
       INTEGER(8) KEEP8(150)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER COMM_LOAD, ASS_IRECV
       INTEGER N
       INTEGER LBUFR, LBUFR_BYTES
@@ -53,6 +55,7 @@ C
       INTEGER LIW
       INTEGER IW( LIW )
       DOUBLE PRECISION A( LA )
+      INTEGER, intent(in) :: LRGROUPS(N)
       INTEGER LPTRAR, NELT
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
       INTEGER(8) :: PTRAST(KEEP(28))
@@ -68,10 +71,10 @@ C
       INTEGER ITLOC( N + KEEP(253) ), FILS( N )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
       INTEGER ND( KEEP(28) )
-      INTEGER PTRARW( LPTRAR ), PTRAIW( LPTRAR )
+      INTEGER(8), INTENT(IN) :: PTRARW( LPTRAR ), PTRAIW( LPTRAR )
       INTEGER FRERE(KEEP(28))
-      INTEGER INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max(1,KEEP(13)) )
+      INTEGER INTARR( KEEP8(27) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
       INTEGER ISTEP_TO_INIV2(KEEP(71)), 
      &        TAB_POS_IN_PERE(SLAVEF+2,max(1,KEEP(56)))
       INTEGER MRS_INODE
@@ -101,6 +104,7 @@ C
         ENDIF
         IOLDPS = PTRIST(STEP(INODE))
         IWHANDLER_SAVE = IW(IOLDPS+XXA)
+        CALL DMUMPS_BLR_END_FRONT( IW(IOLDPS+XXF), IFLAG, KEEP8, .TRUE.)
         IW(IOLDPS+XXS)=S_ALL
          IF (KEEP(214).EQ.1) THEN
           CALL DMUMPS_STACK_BAND( N, INODE,
@@ -117,6 +121,8 @@ C
              MEM_GAIN=int(IW( IOLDPS + 2 + KEEP(IXSZ) ),8)*
      &                int(IW( IOLDPS + 3 + KEEP(IXSZ) ),8)
              LRLUS = LRLUS+MEM_GAIN
+             KEEP8(70) = KEEP8(70) + MEM_GAIN
+             KEEP8(71) = KEEP8(71) + MEM_GAIN
              CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &              LA-LRLUS,0_8,-MEM_GAIN,KEEP,KEEP8,LRLUS)
             ENDIF
@@ -166,6 +172,7 @@ C
      &    INTARR,DBLARR,ICNTL,KEEP,KEEP8,DKEEP,.FALSE.,ND,FRERE,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE 
+     &               , LRGROUPS
      &    )
        IF ( IFLAG < 0 ) GOTO 600
        IF (NELIM.EQ.0) THEN
@@ -179,14 +186,14 @@ C
          ENDIF
          CALL DMUMPS_FREE_BAND( N, INODE, PTRIST, PTRAST, IW, LIW,
      &        A, LA, LRLU, LRLUS, IWPOSCB, IPTRLU, STEP,
-     &        MYID, KEEP, ITYPE2
+     &        MYID, KEEP, KEEP8, ITYPE2
      &         )
        ELSE
          IOLDPS = PTRIST(STEP(INODE))
          IF (IW(IOLDPS+IHDR_REC+KEEP(IXSZ)).EQ.S_ROOT2SON_CALLED) THEN
            CALL DMUMPS_FREE_BAND( N, INODE, PTRIST, PTRAST, IW, LIW,
      &        A, LA, LRLU, LRLUS, IWPOSCB, IPTRLU, STEP,
-     &        MYID, KEEP, ITYPE2
+     &        MYID, KEEP, KEEP8, ITYPE2
      &         )
          ELSE
           IW(IOLDPS+IHDR_REC+KEEP(IXSZ)) = S_ROOTBAND_INIT
@@ -196,6 +203,8 @@ C
      &                     LIW-IOLDPS+1,
      &                     MEM_GAIN, KEEP(IXSZ) )
            LRLUS = LRLUS + MEM_GAIN
+           KEEP8(70) = KEEP8(70) + MEM_GAIN
+           KEEP8(71) = KEEP8(71) + MEM_GAIN
               CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &                LA-LRLUS,0_8,-MEM_GAIN,KEEP,KEEP8,LRLUS)
             IF (KEEP(216).EQ.2) THEN
@@ -240,9 +249,7 @@ C
      &  MRS_NFRONT_PERE, MRS_NASS_PERE, MRS_NFS4FATHER,
      &  MRS_LMAP, MRS_TROW(1),
      &  PROCNODE_STEPS, SLAVEF, POSFAC, IWPOS, IWPOSCB, IPTRLU, LRLU,
-     &  LRLUS, N, IW,
-     &  LIW, A, LA,
-     &  PTRIST, PTLUST_S, PTRFAC,
+     &  LRLUS, N, IW, LIW, A, LA, PTRIST, PTLUST_S, PTRFAC,
      &  PTRAST, STEP, PIMASTER, PAMASTER, NSTK, COMP,
      &  IFLAG, IERROR, MYID, COMM, NBPROCFILS, IPOOL, LPOOL, LEAF,
      &  NBFIN, ICNTL, KEEP,KEEP8,DKEEP,
@@ -252,6 +259,7 @@ C
      &  LPTRAR, NELT, FRTPTR, FRTELT, 
      &
      &  ISTEP_TO_INIV2, TAB_POS_IN_PERE 
+     &               , LRGROUPS
      &  )
        CALL MUMPS_FMRD_FREE_MAPROW_STRUC( IWHANDLER_SAVE )
        ENDIF

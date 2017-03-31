@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -28,17 +28,18 @@ C
      &             BUFR,LBUFR,LBUFR_BYTES,INTARR,DBLARR,root,
      &             PERM, NELT, FRTPTR, FRTELT, LPTRAR,
      &             COMM_LOAD, ASS_IRECV, SEUIL, SEUIL_LDLT_NIV2,
-     &             MEM_DISTRIB, NE,
-     &             DKEEP,PIVNUL_LIST,LPN_LIST
+     &             MEM_DISTRIB, NE, DKEEP,PIVNUL_LIST,LPN_LIST
+     &             ,LRGROUPS
      &             )
       USE DMUMPS_LOAD
       USE DMUMPS_OOC
+      USE DMUMPS_FAC_LR
       USE DMUMPS_FAC_ASM_MASTER_M
       USE DMUMPS_FAC_ASM_MASTER_ELT_M
       USE DMUMPS_FAC1_LDLT_M
       USE DMUMPS_FAC2_LDLT_M
-      USE DMUMPS_FACTO_NIV1_M
-      USE DMUMPS_FACTO_NIV2_M
+      USE DMUMPS_FAC1_LU_M
+      USE DMUMPS_FAC2_LU_M
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       TYPE (DMUMPS_ROOT_STRUC) :: root
@@ -55,7 +56,8 @@ C
       INTEGER ITLOC(N+KEEP(253))
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
       INTEGER IW(LIW), NSTK_STEPS(KEEP(28)), NBPROCFILS(KEEP(28))
-      INTEGER PTRARW(LPTRAR), PTRAIW(LPTRAR), ND(KEEP(28))
+      INTEGER(8), INTENT(IN) :: PTRARW(LPTRAR), PTRAIW(LPTRAR)
+      INTEGER ND(KEEP(28))
       INTEGER FILS(N),PTRIST(KEEP(28))
       INTEGER STEP(N), FRERE(KEEP(28)), DAD(KEEP(28))
       INTEGER PIMASTER(KEEP(28))
@@ -76,12 +78,13 @@ C
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER BUFR( LBUFR )
-      INTEGER        INTARR( max(1,KEEP(14)) )
-      DOUBLE PRECISION DBLARR( max(1,KEEP(13)) )
+      DOUBLE PRECISION DBLARR( KEEP8(26) )
+      INTEGER INTARR( KEEP8(27) )
       LOGICAL IS_ISOLATED_NODE
       INTEGER LPN_LIST
       INTEGER PIVNUL_LIST(LPN_LIST)
-      DOUBLE PRECISION DKEEP(130)
+      DOUBLE PRECISION DKEEP(230)
+      INTEGER LRGROUPS(N)
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
       INTEGER :: STATUS(MPI_STATUS_SIZE)
@@ -128,12 +131,14 @@ C
       TYPE(IO_BLOCK) :: MonBloc
       INCLUDE 'mumps_headers.h'
       DOUBLE PRECISION    OPASSW, OPELIW
-      ASS_IRECV = MPI_REQUEST_NULL
       ITLOC(1:N+KEEP(253)) =0
+      ASS_IRECV = MPI_REQUEST_NULL
       PTRIST(1:KEEP(28))=0
       PTLUST(1:KEEP(28))=0
       PTRAST(1:KEEP(28))=0_8
       PTRFAC(1:KEEP(28))=-99999_8
+      PIMASTER(1:KEEP(28))=-99999_8
+      PAMASTER(1:KEEP(28))=-99999_8
       MP = ICNTL(2)
       LP = ICNTL(1)
       MAXFRW = 0
@@ -198,8 +203,9 @@ C
      &      LPTRAR, NELT, FRTPTR, FRTELT,
      &      ISTEP_TO_INIV2, TAB_POS_IN_PERE,
      &      STACK_RIGHT_AUTHORIZED
+     &               , LRGROUPS
      &       )
-      CALL DMUMPS_LOAD_RECV_MSGS(COMM_LOAD, KEEP)
+      CALL DMUMPS_LOAD_RECV_MSGS(COMM_LOAD)
       IF (MESSAGE_RECEIVED) THEN
           IF ( INFO(1) .LT. 0 ) GO TO 640
           IF ( NBFIN .eq. 0 ) GOTO 640
@@ -254,7 +260,7 @@ C
             IF (SLAVEF.GT.1) THEN
                 DUMMY(1) = NBROOT
                 CALL DMUMPS_MCAST2(DUMMY, 1, MPI_INTEGER, MYID_NODES,
-     &          COMM_NODES, RACINE, SLAVEF)
+     &          COMM_NODES, RACINE, SLAVEF, KEEP )
             END IF
          ENDIF
          IF (NBFIN.EQ.0) GOTO 640
@@ -266,7 +272,7 @@ C
        AVOID_DELAYED = ( (FPERE .eq. KEEP(20) .OR. FPERE .eq. KEEP(38))
      &                   .AND. KEEP(60).ne.0 )
        IF ( KEEP(50) .eq. 0 ) THEN
-         CALL  DMUMPS_FACTO_NIV2( COMM_LOAD, ASS_IRECV,
+         CALL  DMUMPS_FAC2_LU( COMM_LOAD, ASS_IRECV,
      &        N, INODE, FPERE, IW, LIW, A, LA, UU, NOFFW, NPVW,
      &        COMM_NODES, MYID_NODES, BUFR, LBUFR,LBUFR_BYTES,
      &        NBFIN,LEAF, INFO(1), INFO(2), IPOOL,LPOOL,
@@ -280,6 +286,7 @@ C
      &        LPTRAR, NELT, FRTPTR, FRTELT, SEUIL,
      &        ISTEP_TO_INIV2, TAB_POS_IN_PERE, AVOID_DELAYED,
      &        DKEEP(1),PIVNUL_LIST(1),LPN_LIST
+     &        , LRGROUPS
      &             )
           IF ( INFO(1) .LT. 0 ) GOTO 640
        ELSE
@@ -297,6 +304,7 @@ C
      &             LPTRAR, NELT, FRTPTR, FRTELT, SEUIL_LDLT_NIV2,
      &             ISTEP_TO_INIV2, TAB_POS_IN_PERE, AVOID_DELAYED,
      &              DKEEP(1),PIVNUL_LIST(1),LPN_LIST
+     &           , LRGROUPS
      &             )
         IF ( INFO(1) .LT. 0 ) GOTO 640
         IF ( IW( PTLUST(STEP(INODE)) + KEEP(IXSZ) + 5 ) .GT. 1 ) THEN
@@ -324,6 +332,7 @@ C
      &    INTARR, DBLARR,ICNTL,KEEP,KEEP8,DKEEP, ND,
      &    LPTRAR, NELT, FRTPTR, FRTELT,
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &      )
          IF ( INFO(1) .LT. 0 ) GOTO 640
         GOTO 20
@@ -341,11 +350,13 @@ C
      &        ITLOC, RHS_MUMPS, NSTEPS, SON_LEVEL2,
      &        COMP, LRLU, IPTRLU,
      &        IWPOS,IWPOSCB, POSFAC, LRLUS,
-     &        ICNTL, KEEP,KEEP8,DKEEP, INTARR, DBLARR,
+     &        ICNTL, KEEP,KEEP8,DKEEP,
+     &        INTARR,KEEP8(27),DBLARR,KEEP8(26),
      &    NSTK_STEPS,NBPROCFILS, PROCNODE_STEPS, SLAVEF,
      &    COMM_NODES, MYID_NODES,
      &    BUFR, LBUFR, LBUFR_BYTES, NBFIN, IPOOL, LPOOL, LEAF,
      &    PERM, ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &    )
         ELSE
          JOBASS = 0
@@ -358,12 +369,14 @@ C
      &        ITLOC, RHS_MUMPS, NSTEPS, SON_LEVEL2,
      &        COMP, LRLU, IPTRLU,
      &        IWPOS,IWPOSCB, POSFAC, LRLUS,
-     &        ICNTL, KEEP,KEEP8,DKEEP, INTARR, DBLARR,
+     &        ICNTL, KEEP,KEEP8,DKEEP, INTARR,KEEP8(27),
+     &        DBLARR,KEEP8(26),
      &    NSTK_STEPS,NBPROCFILS, PROCNODE_STEPS, SLAVEF,
      &    COMM_NODES, MYID_NODES,
      &    BUFR, LBUFR, LBUFR_BYTES, NBFIN, IPOOL, LPOOL, LEAF,
      &    PERM,
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE, JOBASS,ETATASS
+     &               , LRGROUPS
      &    )
         ENDIF
        IF ( INFO(1) .LT. 0 ) GOTO 640
@@ -388,12 +401,13 @@ C
      &    PTRAST, STEP, PIMASTER, PAMASTER, PTRARW, NSTK_STEPS,
      &    PTRAIW, ITLOC, RHS_MUMPS, NSTEPS,
      &    COMP, LRLU, IPTRLU, IWPOS, IWPOSCB, POSFAC, LRLUS,
-     &    ICNTL, KEEP,KEEP8,DKEEP,INTARR,DBLARR,
+     &    ICNTL, KEEP,KEEP8,DKEEP,INTARR,KEEP8(27),DBLARR,KEEP8(26),
      &    NBPROCFILS, PROCNODE_STEPS, SLAVEF, COMM_NODES,
      &    MYID_NODES,
      &    BUFR, LBUFR, LBUFR_BYTES,
      &    NBFIN, LEAF, IPOOL, LPOOL, PERM,
      &    MEM_DISTRIB(0)
+     &               , LRGROUPS
      &    )
         ELSE
           CALL DMUMPS_FAC_ASM_NIV2_ELT( COMM_LOAD, ASS_IRECV,
@@ -406,12 +420,13 @@ C
      &    PTRAST, STEP, PIMASTER, PAMASTER, PTRARW, NSTK_STEPS,
      &    PTRAIW, ITLOC, RHS_MUMPS, NSTEPS,
      &    COMP, LRLU, IPTRLU, IWPOS, IWPOSCB, POSFAC, LRLUS,
-     &    ICNTL, KEEP,KEEP8,DKEEP,INTARR,DBLARR,
+     &    ICNTL, KEEP,KEEP8,DKEEP,INTARR,KEEP8(27),DBLARR,KEEP8(26),
      &    NBPROCFILS, PROCNODE_STEPS, SLAVEF, COMM_NODES,
      &    MYID_NODES,
      &    BUFR, LBUFR, LBUFR_BYTES,
      &    NBFIN, LEAF, IPOOL, LPOOL, PERM,
      &    MEM_DISTRIB(0)
+     &               , LRGROUPS
      &     )
         END IF
         IF (INFO(1).LT.0) GOTO 640
@@ -438,24 +453,26 @@ C
       AVOID_DELAYED = ( (FPERE .eq. KEEP(20) .OR. FPERE .eq. KEEP(38))
      &                   .AND. KEEP(60).ne.0 )
         IF (KEEP(50).EQ.0) THEN
-           CALL DMUMPS_FACTO_NIV1 ( 
+           CALL DMUMPS_FAC1_LU ( 
      &               N, INODE, IW, LIW, A, LA,
      &               IOLDPS, POSELT,
-     &               INFO(1), UU, NOFFW, NPVW,
+     &               INFO(1), INFO(2), UU, NOFFW, NPVW,
      &               KEEP,KEEP8,
      &               STEP, PROCNODE_STEPS, MYID_NODES, SLAVEF,
      &               SEUIL, AVOID_DELAYED, ETATASS,
      &              DKEEP(1),PIVNUL_LIST(1),LPN_LIST, IWPOS 
+     &           , LRGROUPS
      &           )
       ELSE  
             IW( IOLDPS+4+KEEP(IXSZ) ) = 1
               CALL DMUMPS_FAC1_LDLT( N, INODE,
      &           IW, LIW, A, LA,
      &           IOLDPS, POSELT,
-     &           INFO(1), UU, NOFFW, NPVW,
+     &           INFO(1), INFO(2), UU, NOFFW, NPVW,
      &           KEEP,KEEP8, MYID_NODES, SEUIL, AVOID_DELAYED,
      &           ETATASS,
      &           DKEEP(1),PIVNUL_LIST(1),LPN_LIST, IWPOS
+     &           , LRGROUPS
      &           )
             IW( IOLDPS+4+KEEP(IXSZ) ) = STEP(INODE)
           ENDIF 
@@ -470,13 +487,14 @@ C
      &        ITLOC, RHS_MUMPS, NSTEPS, SON_LEVEL2,
      &        COMP, LRLU, IPTRLU,
      &        IWPOS,IWPOSCB, POSFAC, LRLUS,
-     &        ICNTL, KEEP,KEEP8,DKEEP, INTARR, DBLARR,
+     &        ICNTL, KEEP,KEEP8,DKEEP,INTARR,KEEP8(27),DBLARR,KEEP8(26),
      &        NSTK_STEPS,NBPROCFILS, PROCNODE_STEPS, SLAVEF,
      &        COMM_NODES, MYID_NODES,
      &        BUFR, LBUFR, LBUFR_BYTES, NBFIN, IPOOL, LPOOL, LEAF,
      &        PERM,
      &        ISTEP_TO_INIV2, TAB_POS_IN_PERE,
      &        JOBASS,ETATASS
+     &               , LRGROUPS
      &         )
           ENDIF
       IF (INFO(1).LT.0) GOTO 635
@@ -501,6 +519,7 @@ C
      &       INTARR, DBLARR,
      &       ND, FRERE, LPTRAR, NELT, FRTPTR, FRTELT,
      &       ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &       )
       IF (INFO(1).LT.0) GOTO 640
  200  CONTINUE
@@ -531,7 +550,7 @@ C
             IF (SLAVEF.GT.1) THEN
                 DUMMY(1) = NBROOT
                 CALL DMUMPS_MCAST2( DUMMY(1), 1, MPI_INTEGER,
-     &          MYID_NODES, COMM_NODES, RACINE, SLAVEF)
+     &          MYID_NODES, COMM_NODES, RACINE, SLAVEF, KEEP )
             END IF
         ENDIF
         IF (NBFIN.EQ.0)THEN
@@ -566,17 +585,20 @@ C
       ENDIF
       GO TO 20
  635  CONTINUE
-      CALL DMUMPS_BDC_ERROR( MYID_NODES, SLAVEF, COMM_NODES )
+      CALL DMUMPS_BDC_ERROR( MYID_NODES, SLAVEF, COMM_NODES, KEEP )
  640  CONTINUE
-        CALL DMUMPS_MPI_CANCEL( INFO(1),
+        CALL DMUMPS_CANCEL_IRECV( INFO(1),
+     &       KEEP,
      &       ASS_IRECV, BUFR, LBUFR,
      &       LBUFR_BYTES,
      &       COMM_NODES,
      &       MYID_NODES, SLAVEF)
-       CALL DMUMPS_CLEAN_PENDING( INFO(1),
+       CALL DMUMPS_CLEAN_PENDING( INFO(1), KEEP,
      &      BUFR, LBUFR,
      &      LBUFR_BYTES,
-     &      COMM_NODES, COMM_LOAD, SLAVEF, MP)
+     &      COMM_NODES, COMM_LOAD, SLAVEF,
+     &      .TRUE.,
+     &      .TRUE.)
       CALL MPI_BARRIER( COMM_NODES, IERR )
        IF ( INFO(1) .GE. 0 ) THEN
           IF( KEEP(38) .NE. 0 .OR. KEEP(20).NE.0) THEN
@@ -674,6 +696,8 @@ C
                   ENDIF 
                   IF (KEEP(201).NE.0 .OR. KEEP(252).NE.0) THEN
                      LRLUS = LRLUS + ITMP8 
+                     KEEP8(70) = KEEP8(70) + ITMP8 
+                     KEEP8(71) = KEEP8(71) + ITMP8 
                      IF (KEEP(252).NE.0) THEN
                        CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &                 LA-LRLUS
@@ -749,6 +773,8 @@ C
                     POSFAC = POSFAC - NFRONT8*NFRONT8
                     LRLUS  = LRLUS  + NFRONT8*NFRONT8
                     LRLU   = LRLUS  + NFRONT8*NFRONT8
+                    KEEP8(70) = KEEP8(70) + NFRONT8*NFRONT8
+                    KEEP8(71) = KEEP8(71) + NFRONT8*NFRONT8
                     CALL DMUMPS_LOAD_MEM_UPDATE(.FALSE.,.FALSE.,
      &              LA-LRLUS,0_8,-NFRONT8*NFRONT8,KEEP,KEEP8,LRLUS)
                   ENDIF

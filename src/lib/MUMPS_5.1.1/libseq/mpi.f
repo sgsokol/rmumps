@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -610,6 +610,16 @@ C        CALL MUMPS_COPY_2INTEGER( SENDBUF, RECVBUF, COUNT )
       END DO
       RETURN
       END SUBROUTINE MUMPS_COPY_INTEGER
+      SUBROUTINE MUMPS_COPY_INTEGER8( S, R, N )
+      IMPLICIT NONE
+      INTEGER N
+      INTEGER(8) S(N),R(N)
+      INTEGER I
+      DO I = 1, N
+        R(I) = S(I)
+      END DO
+      RETURN
+      END SUBROUTINE MUMPS_COPY_INTEGER8
       SUBROUTINE MUMPS_COPY_LOGICAL( S, R, N )
       IMPLICIT NONE
       INTEGER N

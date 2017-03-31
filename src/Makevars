@@ -1,14 +1,14 @@
-DMUMPS=lib/MUMPS_5.0.1
+DMUMPS=lib/MUMPS_5.1.1
 RANLIB?=ranlib
 
 sysname=$(shell "$(R_HOME)/bin/Rscript" -e 'cat(Sys.info()[["sysname"]])')
-INC_OS = $(if $(subst Darwin,,$(sysname)),,".macos")
+INC_OS := $(if $(subst Darwin,,$(sysname)),,".macos")
 
-PKG_CXXFLAGS=-I$(DMUMPS)/include
-PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -lpthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_CXXFLAGS=-I$(DMUMPS)/include $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS= -L./lib -lallmumps -lesmumps -lscotch -lscotcherr -pthread $(SHLIB_OPENMP_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 $(SHLIB): lib/liballmumps.a
 
 lib/liballmumps.a:
 	$(MAKE) -C lib \
-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"
+	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS) $(SHLIB_OPENMP_CFLAGS)"  PKG_FCFLAGS="$(FCFLAGS) $(FCPICFLAGS) $(SHLIB_OPENMP_FCFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"

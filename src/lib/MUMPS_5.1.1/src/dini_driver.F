@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -18,7 +18,7 @@ C  =======
 C
 C  Initialize an instance of the DMUMPS package.
 C
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       IMPLICIT NONE
       INCLUDE 'mpif.h'
       TYPE (DMUMPS_STRUC) id
@@ -75,7 +75,7 @@ C     ----------------------------------------------
      &    id%CNTL(1), id%ICNTL(1),
      &    id%KEEP(1), id%KEEP8(1), id%INFO(1), id%INFOG(1),
      &    id%RINFO(1), id%RINFOG(1),
-     &    SYM_loc, PAR_loc, id%DKEEP(1) )
+     &    SYM_loc, PAR_loc, id%DKEEP(1), id%MYID )
       id%WRITE_PROBLEM="NAME_NOT_INITIALIZED"
       CALL MUMPS_SET_VERSION( id%VERSION_NUMBER )
       id%OOC_TMPDIR="NAME_NOT_INITIALIZED"
@@ -104,11 +104,11 @@ C
 C
 C  Nullify a few pointers and integers
 C
-      id%N = 0; id%NZ = 0
+      id%N = 0; id%NZ = 0; id%NNZ = 0_8
       NULLIFY(id%IRN)
       NULLIFY(id%JCN)
       NULLIFY(id%A)
-      id%NZ_loc = 0 ! will be tested at the beginning of the facto
+      id%NZ_loc = 0; id%NNZ_loc = 0_8
       NULLIFY(id%IRN_loc)
       NULLIFY(id%JCN_loc)
       NULLIFY(id%A_loc)
@@ -146,7 +146,6 @@ C     Info for pruning tree
       NULLIFY(id%PROCNODE_STEPS)
       NULLIFY(id%S)
       NULLIFY(id%PROCNODE)
-      NULLIFY(id%POIDS)
       NULLIFY(id%PTLUST_S)
       NULLIFY(id%PTRFAC)
       NULLIFY(id%INTARR) 
@@ -179,6 +178,9 @@ C
       NULLIFY(id%OOC_FILE_NAMES)
       NULLIFY(id%OOC_VADDR)
       NULLIFY(id%OOC_NB_FILES)
+      NULLIFY(id%LRGROUPS)
+      NULLIFY(id%FDM_F_ENCODING)
+      NULLIFY(id%BLRARRAY_ENCODING)
 C     Must be nullified because of routine
 C     DMUMPS_SIZE_IN_STRUCT
       NULLIFY(id%CB_SON_SIZE)
@@ -224,6 +226,16 @@ C
       NULLIFY(id%CANDIDATES)
       id%OOC_NB_FILE_TYPE=-123456
 C
+C     Initializations for L0_OMP mechanisms
+C
+      NULLIFY(id%IPOOL_BEFORE_L0_OMP)
+      NULLIFY(id%IPOOL_AFTER_L0_OMP)
+      NULLIFY(id%PHYS_L0_OMP)
+      NULLIFY(id%VIRT_L0_OMP)
+      NULLIFY(id%PERM_L0_OMP)
+      NULLIFY(id%PTR_LEAFS_L0_OMP)
+      NULLIFY(id%L0_OMP_MAPPING)
+C
 C     Mapping information used during solve.
 C
       NULLIFY(id%IPTR_WORKING)
@@ -231,6 +243,7 @@ C
 C
 C     Initializations for Rank detection/null space
 C
+      NULLIFY(id%SINGULAR_VALUES)
       CALL DMUMPS_RR_INIT_POINTERS(id)
 C     Architecture data
       NULLIFY(id%MEM_DIST)
@@ -241,8 +254,8 @@ C     DMUMPS_SIZE_IN_STRUCT
       id%root%LPIV = -1
       id%root%yes  = .FALSE.
       id%root%gridinit_done  = .FALSE.
-C     NOT IN RESTATING
-      id%IF_RESTARTING=.FALSE.
+C     NOT IN SAVE/RESTORE
+      id%ASSOCIATED_OOC_FILES=.FALSE.
 C
 C     ----------------------------------------
 C     Find MYID_NODES relatively to COMM_NODES
@@ -250,12 +263,12 @@ C     If  the calling processor is not inside
 C     COMM_NODES, MYID_NODES will not be
 C     significant / used anyway
 C     ----------------------------------------
-        IF ( id%KEEP( 46 ) .ne. 0  .OR.
+      IF ( id%KEEP( 46 ) .ne. 0  .OR.
      &     id%MYID .ne. MASTER ) THEN
           CALL MPI_COMM_RANK
      &         (id%COMM_NODES, id%MYID_NODES, IERR )
-        ELSE
+      ELSE
           id%MYID_NODES = -464646
-        ENDIF
+      ENDIF
       RETURN
       END SUBROUTINE DMUMPS_INI_DRIVER

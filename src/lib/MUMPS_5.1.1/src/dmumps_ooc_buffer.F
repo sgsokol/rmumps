@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -17,7 +17,6 @@ C
       INTEGER FIRST_HBUF,SECOND_HBUF
       PARAMETER (FIRST_HBUF=0, SECOND_HBUF=1)
       INTEGER,SAVE :: OOC_FCT_TYPE_LOC
-      INTEGER IO_STRAT
       DOUBLE PRECISION, DIMENSION(:),ALLOCATABLE :: BUF_IO
       LOGICAL,SAVE :: PANEL_FLAG
       INTEGER,SAVE :: EARLIEST_WRITE_MIN_SIZE
@@ -283,6 +282,7 @@ C
       ELSE
          CALL DMUMPS_OOC_INIT_DB_BUFFER()
       ENDIF
+      KEEP_OOC(223)=int(HBUF_SIZE)
       RETURN
       END SUBROUTINE DMUMPS_INIT_OOC_BUF
       SUBROUTINE DMUMPS_END_OOC_BUF()

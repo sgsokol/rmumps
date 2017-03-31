@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -12,8 +12,9 @@ C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       SUBROUTINE DMUMPS_F77( JOB, SYM, PAR, COMM_F77, N, ICNTL, CNTL,
      &                      KEEP, DKEEP, KEEP8,
-     &                      NZ, IRN, IRNhere, JCN, JCNhere, A, Ahere,
-     &                      NZ_loc, IRN_loc, IRN_lochere,
+     &                      NZ, NNZ, IRN, IRNhere, JCN, JCNhere,
+     &                      A, Ahere,
+     &                      NZ_loc, NNZ_loc, IRN_loc, IRN_lochere,
      &                      JCN_loc, JCN_lochere,
      &                      A_loc, A_lochere,
      &                      NELT, ELTPTR, ELTPTRhere,  ELTVAR,
@@ -61,11 +62,12 @@ C
      &        DEFICIENCY, LWK_USER, SIZE_SCHUR, INSTANCE_NUMBER,
      &        NRHS, LRHS,
      &        NZ_RHS, LSOL_loc, LREDRHS
+      INTEGER(8) :: NNZ, NNZ_loc
       INTEGER ICNTL(40), INFO(40), INFOG(40), KEEP(500)
       INTEGER SCHUR_MLOC, SCHUR_NLOC, SCHUR_LLD
       INTEGER MBLOCK, NBLOCK, NPROW, NPCOL
       INTEGER TMPDIRLEN, PREFIXLEN, WRITE_PROBLEMLEN
-      DOUBLE PRECISION CNTL(15), RINFO(40), RINFOG(40), DKEEP(130)
+      DOUBLE PRECISION CNTL(15), RINFO(40), RINFOG(40), DKEEP(230)
       INTEGER(8) KEEP8(150)
       INTEGER, TARGET :: IRN(*), JCN(*), ELTPTR(*), ELTVAR(*)
       INTEGER, TARGET :: PERM_IN(*), IRN_loc(*), JCN_loc(*)
@@ -77,8 +79,8 @@ C
       DOUBLE PRECISION, TARGET :: ROWSCA(*), COLSCA(*)
       DOUBLE PRECISION, TARGET :: SCHUR(*)
       DOUBLE PRECISION, TARGET :: RHS_SPARSE(*), SOL_loc(*)
-      INTEGER, INTENT(in) :: OOC_TMPDIR(OOC_TMPDIR_MAX_LENGTH)
-      INTEGER, INTENT(in) :: OOC_PREFIX(OOC_PREFIX_MAX_LENGTH)
+      INTEGER, INTENT(inout) :: OOC_TMPDIR(OOC_TMPDIR_MAX_LENGTH)
+      INTEGER, INTENT(inout) :: OOC_PREFIX(OOC_PREFIX_MAX_LENGTH)
       INTEGER, INTENT(in) :: WRITE_PROBLEM(PB_MAX_LENGTH)
       INTEGER IRNhere, JCNhere, Ahere, ELTPTRhere, ELTVARhere,
      &        A_ELThere, PERM_INhere, WK_USERhere,
@@ -98,6 +100,7 @@ C
       INTEGER, SAVE :: DMUMPS_STRUC_ARRAY_SIZE = 0
       INTEGER, SAVE :: N_INSTANCES = 0
       INTEGER A_ELT_SIZE, I, Np, IERR
+      INTEGER(8) :: NNZ_i
       INTEGER DMUMPS_STRUC_ARRAY_SIZE_INIT
       PARAMETER (DMUMPS_STRUC_ARRAY_SIZE_INIT=10)
       EXTERNAL MUMPS_ASSIGN_MAPPING,
@@ -159,14 +162,16 @@ C
       mumps_par%JOB = JOB
       mumps_par%N   = N
       mumps_par%NZ  = NZ
+      mumps_par%NNZ  = NNZ
       mumps_par%NZ_loc  = NZ_loc
+      mumps_par%NNZ_loc  = NNZ_loc
       mumps_par%LWK_USER = LWK_USER
       mumps_par%SIZE_SCHUR  = SIZE_SCHUR
       mumps_par%NELT= NELT
       mumps_par%ICNTL(1:40)=ICNTL(1:40)
       mumps_par%CNTL(1:15)=CNTL(1:15)
       mumps_par%KEEP(1:500)=KEEP(1:500)
-      mumps_par%DKEEP(1:130)=DKEEP(1:130)
+      mumps_par%DKEEP(1:230)=DKEEP(1:230)
       mumps_par%KEEP8(1:150)=KEEP8(1:150)
       mumps_par%NRHS  = NRHS
       mumps_par%LRHS  = LRHS
@@ -186,12 +191,14 @@ C
         mumps_par%COMM = MPI_COMM_WORLD
       ENDIF
       CALL MPI_BCAST(NRHS,1,MPI_INTEGER,0,mumps_par%COMM,IERR)
-      IF ( IRNhere /= 0 ) mumps_par%IRN => IRN(1:NZ)
-      IF ( JCNhere /= 0 ) mumps_par%JCN => JCN(1:NZ)
-      IF ( Ahere /= 0 )   mumps_par%A   => A(1:NZ)
-      IF ( IRN_lochere /= 0 ) mumps_par%IRN_loc => IRN_loc(1:NZ_loc)
-      IF ( JCN_lochere /= 0 ) mumps_par%JCN_loc => JCN_loc(1:NZ_loc)
-      IF ( A_lochere /= 0 )   mumps_par%A_loc   => A_loc(1:NZ_loc)
+      CALL MUMPS_GET_NNZ_INTERNAL(NNZ,NZ,NNZ_i)
+      IF ( IRNhere /= 0 ) mumps_par%IRN => IRN(1:NNZ_i)
+      IF ( JCNhere /= 0 ) mumps_par%JCN => JCN(1:NNZ_i)
+      IF ( Ahere /= 0 )   mumps_par%A   => A(1:NNZ_i)
+      CALL MUMPS_GET_NNZ_INTERNAL(NNZ_loc,NZ_loc,NNZ_i)
+      IF ( IRN_lochere /= 0 ) mumps_par%IRN_loc => IRN_loc(1:NNZ_i)
+      IF ( JCN_lochere /= 0 ) mumps_par%JCN_loc => JCN_loc(1:NNZ_i)
+      IF ( A_lochere /= 0 )   mumps_par%A_loc   => A_loc(1:NNZ_i)
       IF ( ELTPTRhere /= 0 ) mumps_par%ELTPTR => ELTPTR(1:NELT+1)
       IF ( ELTVARhere /= 0 ) mumps_par%ELTVAR =>
      &   ELTVAR(1:ELTPTR(NELT+1)-1)
@@ -265,17 +272,19 @@ C
       ICNTL(1:40) = mumps_par%ICNTL(1:40)
       CNTL(1:15) = mumps_par%CNTL(1:15)
       KEEP(1:500) = mumps_par%KEEP(1:500)
-      DKEEP(1:130) = mumps_par%DKEEP(1:130)
+      DKEEP(1:230) = mumps_par%DKEEP(1:230)
       KEEP8(1:150) = mumps_par%KEEP8(1:150)
       SYM = mumps_par%SYM
       PAR = mumps_par%PAR
       JOB = mumps_par%JOB
       N   = mumps_par%N
       NZ  = mumps_par%NZ
+      NNZ = mumps_par%NNZ
       NRHS = mumps_par%NRHS
       LRHS = mumps_par%LRHS
       LREDRHS = mumps_par%LREDRHS
       NZ_loc  = mumps_par%NZ_loc
+      NNZ_loc  = mumps_par%NNZ_loc
       NZ_RHS  = mumps_par%NZ_RHS
       LSOL_loc= mumps_par%LSOL_loc
       SIZE_SCHUR  = mumps_par%SIZE_SCHUR
@@ -319,6 +328,14 @@ C
       ELSE
           CALL DMUMPS_NULLIFY_C_ROWSCA()
       ENDIF
+      TMPDIRLEN=len_trim(mumps_par%OOC_TMPDIR)
+      DO I=1,OOC_TMPDIR_MAX_LENGTH
+         OOC_TMPDIR(I)=ichar(mumps_par%OOC_TMPDIR(I:I))
+      ENDDO
+      PREFIXLEN=len_trim(mumps_par%OOC_PREFIX)
+      DO I=1,OOC_PREFIX_MAX_LENGTH
+         OOC_PREFIX(I)=ichar(mumps_par%OOC_PREFIX(I:I))
+      ENDDO
       IF ( JOB == -2 ) THEN
          IF (associated(mumps_par_array(INSTANCE_NUMBER)%PTR))THEN
            DEALLOCATE(mumps_par_array(INSTANCE_NUMBER)%PTR)

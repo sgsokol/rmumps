@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -16,7 +16,8 @@ C
      &           A, LA, PTRAST, PTLUST_S, PTRFAC,
      &           STEP, INFO, LDLT, QR,
      &           WK, LWK, KEEP,KEEP8,DKEEP,OPELIW)
-      IMPLICIT NONE
+        USE DMUMPS_LR_STATS, ONLY: UPDATE_FLOPS_STATS_ROOT
+        IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
       INCLUDE 'mpif.h'
       TYPE ( DMUMPS_ROOT_STRUC ) :: root
@@ -25,7 +26,7 @@ C
       INTEGER(8) :: LWK
       DOUBLE PRECISION WK( LWK )
       INTEGER KEEP(500)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER(8) KEEP8(150)
       INTEGER(8) :: PTRAST(KEEP(28))
       INTEGER(8) :: PTRFAC(KEEP(28))
@@ -112,11 +113,17 @@ C
         IF (IERR .GT. 0) THEN
           CALL MUMPS_UPDATE_FLOPS_ROOT( OPELIW, LDLT,
      &                          root%TOT_ROOT_SIZE, INFO(2),
-     &                          root%NPROW, root%NPCOL )
+     &                          root%NPROW, root%NPCOL, MYID )
+          CALL UPDATE_FLOPS_STATS_ROOT( LDLT,
+     &                          root%TOT_ROOT_SIZE, INFO(2),
+     &                          root%NPROW, root%NPCOL, MYID )
         ELSE
           CALL MUMPS_UPDATE_FLOPS_ROOT( OPELIW, LDLT,
      &                          root%TOT_ROOT_SIZE, root%TOT_ROOT_SIZE,
-     &                          root%NPROW, root%NPCOL )
+     &                          root%NPROW, root%NPCOL, MYID )
+          CALL UPDATE_FLOPS_STATS_ROOT( LDLT,
+     &                          root%TOT_ROOT_SIZE, root%TOT_ROOT_SIZE,
+     &                          root%NPROW, root%NPCOL, MYID )
         ENDIF
         IF ( LDLT .EQ. 0 ) THEN
           ENTRIES_ROOT = int(root%TOT_ROOT_SIZE,8)

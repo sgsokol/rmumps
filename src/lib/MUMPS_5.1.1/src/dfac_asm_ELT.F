@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -28,13 +28,13 @@ C
       INTEGER(8) :: PTRAST(KEEP(28))
       INTEGER IW(LIW), ITLOC(N + KEEP(253)), STEP(N),
      &        PTRIST(KEEP(28)),
-     &        FILS(N), PTRARW(NELT+1), 
-     &        PTRAIW(NELT+1)
+     &        FILS(N)
+      INTEGER(8), INTENT(IN) :: PTRARW(NELT+1), PTRAIW(NELT+1)
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
-      INTEGER INTARR(max(1,KEEP(14)))
+      INTEGER INTARR(KEEP8(27))
       INTEGER FRT_PTR(N+1), FRT_ELT(NELT)
-      DOUBLE PRECISION A(LA),
-     &        DBLARR(max(1,KEEP(13)))
+      DOUBLE PRECISION :: A(LA)
+      DOUBLE PRECISION :: DBLARR(KEEP8(26))
       DOUBLE PRECISION OPASSW, OPELIW
       INTEGER(8) :: POSELT
       INTEGER IOLDPS, NBCOLF, NBROWF, NSLAVES, HF,
@@ -53,8 +53,10 @@ C
           NASS         = -NASS
           IW(IOLDPS+1+KEEP(IXSZ)) = NASS
           CALL DMUMPS_ASM_SLAVE_ELEMENTS( INODE, N, NELT, IW, LIW,
-     &    IOLDPS, A, LA, POSELT, KEEP, ITLOC, FILS, PTRAIW, PTRARW,
-     &    INTARR, DBLARR, FRT_PTR, FRT_ELT, RHS_MUMPS)
+     &    IOLDPS, A, LA, POSELT, KEEP, KEEP8, ITLOC, FILS,
+     &    PTRAIW, PTRARW,
+     &    INTARR, DBLARR, KEEP8(27), KEEP8(26), FRT_PTR, FRT_ELT,
+     &    RHS_MUMPS)
       END IF
       IF (NBROWS.GT.0) THEN
           K1 = IOLDPS + HF + NBROWF
@@ -69,27 +71,32 @@ C
       RETURN
       END SUBROUTINE DMUMPS_ELT_ASM_S_2_S_INIT
       SUBROUTINE DMUMPS_ASM_SLAVE_ELEMENTS( INODE, N, NELT, IW, LIW,
-     &IOLDPS, A, LA, POSELT, KEEP, ITLOC, FILS, PTRAIW, PTRARW,
-     &INTARR, DBLARR, FRT_PTR, FRT_ELT, RHS_MUMPS)
+     &IOLDPS, A, LA, POSELT, KEEP, KEEP8, ITLOC, FILS, PTRAIW, PTRARW,
+     &INTARR, DBLARR, LINTARR, LDBLARR, FRT_PTR, FRT_ELT, RHS_MUMPS)
       IMPLICIT NONE
       INTEGER, intent(in)    :: N, NELT, LIW, IOLDPS, INODE
-      INTEGER(8), intent(in) :: LA, POSELT
+      INTEGER(8), intent(in) :: LA, POSELT, LINTARR, LDBLARR
       INTEGER, intent(in)    :: IW(LIW)
       INTEGER, intent(in)    :: KEEP(500)
+      INTEGER(8), intent(in) :: KEEP8(150)
       INTEGER, intent(inout) :: ITLOC(N+KEEP(253))
       DOUBLE PRECISION, intent(inout) :: A(LA)
       DOUBLE PRECISION, intent(in)    :: RHS_MUMPS(KEEP(255))
-      INTEGER, intent(in)    :: INTARR(max(1,KEEP(14)))
-      DOUBLE PRECISION, intent(in)    :: DBLARR(max(1,KEEP(13)))
+      INTEGER, intent(in)    :: INTARR(LINTARR)
+      DOUBLE PRECISION, intent(in)    :: DBLARR(LDBLARR)
       INTEGER, intent(in)    :: FRT_PTR(N+1), FRT_ELT(NELT)
-      INTEGER, intent(in)    :: FILS(N), PTRAIW(NELT+1), PTRARW(NELT+1)
+      INTEGER, intent(in)    :: FILS(N)
+      INTEGER(8), intent(in) :: PTRAIW(NELT+1), PTRARW(NELT+1)
       INCLUDE 'mumps_headers.h'
       INTEGER    :: HF, NBROWF, NBCOLF, NASS, NSLAVES
-      INTEGER    :: ILOC, IELL, ELTI, ELBEG, NUMELT, SIZE_ELTI
-      INTEGER    :: I, II, J, JJ, J1, J2, K, K1, K2
+      INTEGER    :: ILOC, IELL, ELTI, ELBEG, NUMELT
+      INTEGER(8) :: SIZE_ELTI8 
+      INTEGER    :: I, J, K, K1, K2
       INTEGER    :: IPOS, IPOS1, IPOS2, JPOS, IJROW
       INTEGER    :: IN
-      INTEGER    :: AINPUT, AII
+      INTEGER(8) :: II8, JJ8, J18, J28 
+      INTEGER(8) :: AINPUT8
+      INTEGER(8) :: AII8
       INTEGER(8) :: APOS, APOS2, ICT12
       INTEGER    :: K1RHS, K2RHS, JFirstRHS
       DOUBLE PRECISION ZERO
@@ -151,31 +158,31 @@ C
           NUMELT = FRT_PTR(INODE+1) - ELBEG
           DO IELL=ELBEG,ELBEG+NUMELT-1
            ELTI = FRT_ELT(IELL)
-           J1= PTRAIW(ELTI)
-           J2= PTRAIW(ELTI+1)-1
-           AII = PTRARW(ELTI)
-           SIZE_ELTI = J2 - J1 + 1
-           DO II=J1,J2
-            I = ITLOC(INTARR(II))
+           J18= PTRAIW(ELTI)
+           J28= PTRAIW(ELTI+1)-1_8
+           AII8 = PTRARW(ELTI)
+           SIZE_ELTI8 = J28 - J18 + 1_8
+           DO II8=J18,J28
+            I = ITLOC(INTARR(II8))
             IF (KEEP(50).EQ.0) THEN
              IF (I.LE.0) CYCLE
-             AINPUT    = AII + II - J1
+             AINPUT8    = AII8 + II8 - J18
              IPOS = mod(I,NBCOLF)
              ICT12 = POSELT + int(IPOS-1,8) * int(NBCOLF,8)
-             DO JJ = J1, J2
-              JPOS = ITLOC(INTARR(JJ))
+             DO JJ8 = J18, J28
+              JPOS = ITLOC(INTARR(JJ8))
               IF (JPOS.LE.0) THEN 
                    JPOS = -JPOS
               ELSE
                    JPOS = JPOS/NBCOLF
               END IF
               APOS2    = ICT12 + int(JPOS - 1,8)
-              A(APOS2) = A(APOS2) +  DBLARR(AINPUT)
-              AINPUT   = AINPUT + SIZE_ELTI
+              A(APOS2) = A(APOS2) +  DBLARR(AINPUT8)
+              AINPUT8   = AINPUT8 + SIZE_ELTI8
              END DO
             ELSE
               IF ( I .EQ. 0 ) THEN 
-               AII = AII + J2 - II + 1
+               AII8 = AII8 + J28 - II8 + 1_8
                CYCLE
               ENDIF
               IF ( I .LE. 0 ) THEN 
@@ -186,9 +193,9 @@ C
                IPOS2 = mod(I,NBCOLF)
               END IF
               ICT12 =  POSELT + int(IPOS2-1,8)*int(NBCOLF,8)
-              DO JJ=II,J2
-               AII = AII + 1
-               J = ITLOC(INTARR(JJ))
+              DO JJ8=II8,J28
+               AII8 = AII8 + 1_8
+               J = ITLOC(INTARR(JJ8))
                IF ( J .EQ. 0 ) CYCLE
                IF ( IPOS2.EQ.0 .AND. J.LE.0) CYCLE
                IF ( J .LE. 0 ) THEN
@@ -198,14 +205,14 @@ C
                END IF
                IF ( (IPOS1.GE.JPOS) .AND. (IPOS2.GT.0) ) THEN
                  APOS2 = ICT12  + int(JPOS - 1,8)
-                 A(APOS2) = A(APOS2) +  DBLARR(AII-1)
+                 A(APOS2) = A(APOS2) +  DBLARR(AII8-1_8)
                END IF
                IF ( (IPOS1.LT.JPOS) .AND. (J.GT.0) ) THEN
                  IPOS = mod(J,NBCOLF)
                  JPOS = IPOS1
                  APOS2 = POSELT + int(IPOS-1,8)*int(NBCOLF,8)
      &                          + int(JPOS - 1,8)
-                 A(APOS2) = A(APOS2) +  DBLARR(AII-1)
+                 A(APOS2) = A(APOS2) +  DBLARR(AII8-1_8)
                END IF
               END DO
             END IF

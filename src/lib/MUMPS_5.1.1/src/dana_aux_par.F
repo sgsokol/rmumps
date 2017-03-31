@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -12,7 +12,8 @@ C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       MODULE DMUMPS_PARALLEL_ANALYSIS
       USE DMUMPS_STRUC_DEF
-      USE TOOLS_COMMON
+      USE MUMPS_MEMORY_MOD
+      USE MUMPS_ANA_ORD_WRAPPERS
       INCLUDE 'mpif.h'
       PUBLIC DMUMPS_ANA_F_PAR
       INTERFACE DMUMPS_ANA_F_PAR
@@ -36,15 +37,17 @@ C
       LOGICAL           :: IDO
       END TYPE ORD_TYPE
       TYPE GRAPH_TYPE
-      INTEGER           :: NZ_LOC, N, COMM
+      INTEGER(8)        :: NZ_LOC
+      INTEGER           :: N, COMM
       INTEGER, POINTER  :: IRN_LOC(:) => null()
       INTEGER, POINTER  :: JCN_LOC(:) => null()
       END TYPE GRAPH_TYPE
       TYPE ARRPNT
       INTEGER, POINTER :: BUF(:) => null()
       END TYPE ARRPNT
-      INTEGER :: MEMCNT, MAXMEM, MP, MPG, LP, NRL, TOPROWS
-      LOGICAL :: PROK, PROKG, LPOK
+      INTEGER    :: MP, MPG, LP, NRL, TOPROWS
+      INTEGER(8) :: MEMCNT, MAXMEM
+      LOGICAL    :: PROK, PROKG, LPOK
       CONTAINS
       SUBROUTINE DMUMPS_ANA_F_PAR(id, WORK1, WORK2, NFSIZ, FILS,
      &     FRERE)
@@ -62,7 +65,6 @@ C
       INTEGER              :: MYID, NPROCS, IERR, NEMIN, LDIAG
       LOGICAL              :: SPLITROOT
       INTEGER(8), PARAMETER :: K79REF=12000000_8
-      DOUBLE PRECISION      :: TIMEB
       nullify(IPE, NV, NE, NA, NODE, ND, SUBORD, NAMALG, IPS,
      &     CUMUL, SAVEIRN, SAVEJCN)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
@@ -83,9 +85,9 @@ C
             SAVEJCN    => id%JCN_loc
             id%IRN_loc => id%IRN
             id%JCN_loc => id%JCN
-            id%NZ_loc  =  id%NZ
+            id%KEEP8(29) = id%KEEP8(28)
          ELSE
-            id%NZ_loc = 0
+            id%KEEP8(29)=0_8
          END IF
       END IF
       MAXMEM=0
@@ -131,9 +133,9 @@ C
          ND     => WORK2(id%N+1   : 2*id%N)
          SUBORD => WORK2(2*id%N+1 : 3*id%N)
          NAMALG => WORK2(3*id%N+1 : 4*id%N)
-      CALL MUMPS_REALLOC(CUMUL, id%N, id%INFO, LP,
-     &     STRING='CUMUL', MEMCNT=MEMCNT, ERRCODE=-7)
-      IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
+         CALL MUMPS_REALLOC(CUMUL, id%N, id%INFO, LP,
+     &        STRING='CUMUL', MEMCNT=MEMCNT, ERRCODE=-7)
+         IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
          NEMIN  = id%KEEP(1)
          CALL DMUMPS_ANA_LNEW(id%N, IPE(1), NV(1), IPS(1), NE(1),
      &        NA(1), NFSIZ(1), NODE(1), id%INFOG(6), FILS(1), FRERE(1),
@@ -141,7 +143,7 @@ C
      &        id%KEEP(38), NAMALG(1), id%KEEP(104), CUMUL(1),
      &        id%KEEP(50), id%ICNTL(13), id%KEEP(37), id%NSLAVES,
      &        id%KEEP(250).EQ.1)
-         CALL MUMPS_IDEALLOC(CUMUL, NV, IPE, MEMCNT=MEMCNT)
+         CALL MUMPS_DEALLOC(CUMUL, NV, IPE, MEMCNT=MEMCNT)
          CALL DMUMPS_ANA_M(NE(1), ND(1), id%INFOG(6), id%INFOG(5),
      &        id%KEEP(2), id%KEEP(50), id%KEEP(101), id%KEEP(108),
      &        id%KEEP(5), id%KEEP(6), id%KEEP(226), id%KEEP(253))
@@ -362,17 +364,18 @@ C
 #if defined(parmetis) || defined(parmetis3)
       SUBROUTINE DMUMPS_PARMETIS_ORD(id, ord, WORK)
       IMPLICIT NONE
-      TYPE(DMUMPS_STRUC) :: id
-      TYPE(ORD_TYPE)     :: ord
-      INTEGER, POINTER   :: WORK(:)
-      INTEGER            :: I, MYID, NPROCS, IERR, BASE
-      INTEGER, POINTER   :: FIRST(:),
+      TYPE(DMUMPS_STRUC)  :: id
+      TYPE(ORD_TYPE)      :: ord
+      INTEGER, POINTER    :: WORK(:)
+      INTEGER             :: I, MYID, NPROCS, IERR, BASE, METIS_IDX_SIZE
+      INTEGER, POINTER    :: FIRST(:),
      &     LAST(:), SWORK(:)
-      INTEGER            :: BASEVAL, VERTLOCNBR,
-     &     EDGELOCNBR, OPTIONS(10), NROWS_LOC
-      INTEGER, POINTER   :: VERTLOCTAB(:),
-     &     EDGELOCTAB(:), RCVCNTS(:)
-      INTEGER, POINTER   :: SIZES(:), ORDER(:)
+      INTEGER             :: BASEVAL, VERTLOCNBR,
+     &     OPTIONS(10)
+      INTEGER(8), POINTER :: VERTLOCTAB(:)
+      INTEGER, POINTER    :: EDGELOCTAB(:), RCVCNTS(:)
+      INTEGER(8)          :: EDGELOCNBR
+      INTEGER, POINTER    :: SIZES(:), ORDER(:)
       nullify(FIRST, LAST, SWORK, VERTLOCTAB, EDGELOCTAB, RCVCNTS,
      &      SIZES, ORDER)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
@@ -386,35 +389,53 @@ C
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       BASEVAL = 1
       BASE    = id%NPROCS-id%NSLAVES
-      VERTLOCTAB => ord%PERMTAB
       CALL MUMPS_REALLOC(FIRST, NPROCS+1, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       CALL MUMPS_REALLOC(LAST, NPROCS+1, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       CALL DMUMPS_GRAPH_DIST(id, ord, FIRST,
-     &     LAST, BASE, NPROCS, WORK(id%N+1: 3*id%N), TYPE=2)
+     &     LAST, BASE, NPROCS, WORK(1: 2*id%N), TYPE=2)
       VERTLOCNBR = LAST(MYID+1)-FIRST(MYID+1) + 1
+      CALL MUMPS_I8REALLOC(VERTLOCTAB, VERTLOCNBR+1, id%INFO,
+     &        LP, STRING='VERTLOCTAB', MEMCNT=MEMCNT, ERRCODE=-7)
+      IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       SWORK => WORK(id%N+1:3*id%N)
-      CALL DMUMPS_BUILD_SCOTCH_GRAPH(id, FIRST, LAST, VERTLOCTAB,
+      CALL DMUMPS_BUILD_DIST_GRAPH(id, FIRST, LAST, VERTLOCTAB,
      &     EDGELOCTAB, SWORK)
       IF(id%INFO(1).LT.0) RETURN
-      EDGELOCNBR = VERTLOCTAB(VERTLOCNBR+1)-1
+      EDGELOCNBR = VERTLOCTAB(VERTLOCNBR+1)-1_8
       OPTIONS(:) = 0
-      NROWS_LOC = LAST(MYID+1)-FIRST(MYID+1)+1
       ORDER => WORK(1:id%N)
       CALL MUMPS_REALLOC(SIZES, 2*ord%NSLAVES, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       IF(ord%IDO) THEN
-         CALL MUMPS_PARMETIS(FIRST(1+BASE), VERTLOCTAB(1),
-     &        EDGELOCTAB(1), BASEVAL, OPTIONS, ORDER(1),
-     &        SIZES(1), ord%COMM_NODES, IERR)
+         CALL MUMPS_METIS_IDXSIZE(METIS_IDX_SIZE) 
+         IF (METIS_IDX_SIZE.EQ.32) THEN
+           IF (id%KEEP(10).EQ.1) THEN
+            id%INFO(1) = -52
+            id%INFO(2) = 1
+           ELSE
+            CALL MUMPS_PARMETIS_MIXEDto32(id, BASE, VERTLOCNBR, FIRST,
+     &           VERTLOCTAB, EDGELOCTAB, BASEVAL, OPTIONS, ORDER,
+     &           SIZES, ord%COMM_NODES, IERR)
+           ENDIF
+         ELSE IF (METIS_IDX_SIZE.EQ.64) THEN
+            CALL MUMPS_PARMETIS_MIXEDto64
+     &           (id, BASE, VERTLOCNBR, FIRST,
+     &           VERTLOCTAB, EDGELOCTAB, BASEVAL, OPTIONS, ORDER,
+     &           SIZES, ord%COMM_NODES, IERR)
+         ELSE
+              WRITE(*,*)
+     &        "Internal error in PARMETIS wrappers, METIS_IDX_SIZE=",
+     &        METIS_IDX_SIZE
+              CALL MUMPS_ABORT()
+         END IF
       END IF
       CALL MUMPS_IDEALLOC(EDGELOCTAB, MEMCNT=MEMCNT)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      NULLIFY(VERTLOCTAB)
-      NULLIFY(EDGELOCTAB)
+      CALL MUMPS_I8DEALLOC(VERTLOCTAB)
       IF(IERR.GT.0) THEN
          id%INFO(1:2) = -50
       END IF
@@ -434,7 +455,7 @@ C
       IF(FIRST(1) .LT. 0) THEN
          FIRST(1)   = 0
       END IF
-      CALL MPI_ALLGATHERV ( ORDER(1), NROWS_LOC, MPI_INTEGER,
+      CALL MPI_ALLGATHERV ( ORDER(1), VERTLOCNBR, MPI_INTEGER,
      &     ord%PERMTAB(1),
      &     RCVCNTS(1), FIRST(1), MPI_INTEGER, id%COMM, IERR )
       DO I=1, id%N
@@ -445,7 +466,7 @@ C
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       CALL DMUMPS_BUILD_TREETAB(ord%TREETAB, ord%RANGTAB,
      &     SIZES, ord%CBLKNBR)
-      CALL MUMPS_IDEALLOC(SIZES, FIRST, LAST,
+      CALL MUMPS_DEALLOC(SIZES, FIRST, LAST,
      &     RCVCNTS, MEMCNT=MEMCNT)
       CALL MUMPS_REALLOC(ord%SON, ord%CBLKNBR, id%INFO,
      &     LP, STRING='SON', MEMCNT=MEMCNT, ERRCODE=-7)
@@ -459,10 +480,10 @@ C
       ord%COMM = id%COMM
       RETURN
  20   CONTINUE
-      CALL MUMPS_IDEALLOC(FIRST      , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(LAST       , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(SIZES      , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(ord%RANGTAB, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(FIRST      , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(LAST       , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(SIZES      , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(ord%RANGTAB, MEMCNT=MEMCNT)
       RETURN
       END SUBROUTINE DMUMPS_PARMETIS_ORD
 #endif
@@ -474,29 +495,18 @@ C
       TYPE(ORD_TYPE)                :: ord
       INTEGER, POINTER              :: WORK(:)
       INTEGER                       :: I, J, MYID, NPROCS, IERR
-      INTEGER, POINTER          :: FIRST(:),
+      INTEGER, POINTER              :: FIRST(:),
      &     LAST(:), SWORK(:)
       INTEGER                       :: BASEVAL, VERTLOCNBR,
-     &     EDGELOCNBR, MYWORKID,
-     &     BASE
-      INTEGER, POINTER          :: VERTLOCTAB(:),
-     &     EDGELOCTAB(:)
-      DOUBLE PRECISION              :: GRAPHDAT(SCOTCH_DGRAPHDIM),
-     &     ORDEDAT(SCOTCH_DORDERDIM), STRADAT(SCOTCH_STRATDIM),
-     &     CORDEDAT(SCOTCH_ORDERDIM)
-      CHARACTER  STRSTRING*1024
+     &     MYWORKID, BASE, SCOTCH_INT_SIZE
+      INTEGER(8)                    :: EDGELOCNBR
+      INTEGER(8), POINTER           :: VERTLOCTAB(:)
+      INTEGER, POINTER              :: EDGELOCTAB(:)
       nullify(FIRST, LAST, SWORK, VERTLOCTAB, EDGELOCTAB)
       IF(MUMPS_GETSIZE(WORK) .LT. ID%N*3) THEN
          WRITE(LP,
-     &        '("Insufficient workspace inside DMUMPS_PTSCOTCH_ORD")')
+     &      '("Insufficient workspace inside DMUMPS_PTSCOTCH_ORD")')
          CALL MUMPS_ABORT()
-      END IF
-      IF(ord%SUBSTRAT .NE. 0) THEN
-         STRSTRING='n{sep=m{asc=b{width=3,strat=q{strat=f}},'//
-     &        'low=q{strat=h},vert=1000,dvert=100,dlevl=0,'//
-     &        'proc=1,seq=q{strat=m{type=h,vert=100,'//
-     &        'low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},'//
-     &        'org=h{pass=10}f{bal=0.2}}}}},ole=s,ose=s,osq=s}'
       END IF
       CALL MPI_BARRIER(id%COMM, IERR)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
@@ -509,14 +519,16 @@ C
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       CALL DMUMPS_GRAPH_DIST(id, ord, FIRST,
-     &     LAST, BASE, NPROCS, WORK(id%N+1: 3*id%N), TYPE=2)
+     &     LAST, BASE, NPROCS, WORK(1: 2*id%N), TYPE=2)
       VERTLOCNBR = LAST(MYID+1)-FIRST(MYID+1) + 1
-      VERTLOCTAB => WORK(1:id%N)
+      CALL MUMPS_I8REALLOC(VERTLOCTAB, VERTLOCNBR+1, id%INFO,
+     &        LP, STRING='VERTLOCTAB', MEMCNT=MEMCNT, ERRCODE=-7)
+      IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       SWORK => WORK(id%N+1:3*id%N)
-      CALL DMUMPS_BUILD_SCOTCH_GRAPH(id, FIRST, LAST, VERTLOCTAB,
+      CALL DMUMPS_BUILD_DIST_GRAPH(id, FIRST, LAST, VERTLOCTAB,
      &     EDGELOCTAB, SWORK)
       IF(id%INFO(1).LT.0) RETURN
-      EDGELOCNBR = VERTLOCTAB(VERTLOCNBR+1)-1
+      EDGELOCNBR = VERTLOCTAB(VERTLOCNBR+1)-1_8
       CALL MUMPS_REALLOC(ord%PERMTAB, id%N, id%INFO,
      &     LP, STRING='PERMTAB', MEMCNT=MEMCNT, ERRCODE=-7)
       CALL MUMPS_REALLOC(ord%PERITAB, id%N, id%INFO,
@@ -527,98 +539,32 @@ C
      &     LP, STRING='TREETAB', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       IF(ord%IDO) THEN
-         CALL MPI_COMM_RANK (ord%COMM_NODES, MYWORKID, IERR)
-      ELSE
-         MYWORKID = -1
-      END IF
-      IF(ord%IDO) THEN
-         CALL MUMPS_DGRAPHINIT(GRAPHDAT, ord%COMM_NODES, IERR)
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         CALL SCOTCHFDGRAPHBUILD(GRAPHDAT, BASEVAL, VERTLOCNBR,
-     &        VERTLOCNBR, VERTLOCTAB(1), VERTLOCTAB(2), VERTLOCTAB(1),
-     &        VERTLOCTAB(1), EDGELOCNBR, EDGELOCNBR, EDGELOCTAB(1),
-     &        EDGELOCTAB(1), EDGELOCTAB(1), IERR)
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         CALL SCOTCHFSTRATINIT(STRADAT, IERR)
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         IF(ord%SUBSTRAT .NE. 0) THEN
-            CALL SCOTCHFSTRATDGRAPHORDER(STRADAT, STRSTRING, IERR)
-         END IF
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         CALL SCOTCHFDGRAPHORDERINIT(GRAPHDAT, ORDEDAT, IERR)
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         CALL SCOTCHFDGRAPHORDERCOMPUTE(GRAPHDAT, ORDEDAT, STRADAT,
-     &        IERR)
-         IF(IERR.NE.0) THEN
-            id%INFO(1:2) = -50
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         IF(MYWORKID .EQ. 0) THEN
-            CALL SCOTCHFDGRAPHCORDERINIT(GRAPHDAT, CORDEDAT,
-     &           ord%PERMTAB, ord%PERITAB, ord%CBLKNBR, ord%RANGTAB,
-     &           ord%TREETAB, IERR)
-            IF(IERR.NE.0) THEN
-               id%INFO(1:2) = -50
-            END IF
-         END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
-         IF(MYWORKID .EQ. 0) THEN
-            CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
-     &           CORDEDAT, IERR)
-            IF(IERR.NE.0) THEN
-               id%INFO(1:2) = -50
-            END IF
+         CALL MUMPS_SCOTCH_INTSIZE(SCOTCH_INT_SIZE)
+         IF(SCOTCH_INT_SIZE.EQ.32) THEN
+           IF (id%KEEP(10).EQ.1) THEN
+            id%INFO(1) = -52
+            id%INFO(2) = 2
+           ELSE
+            CALL MUMPS_PTSCOTCH_MIXEDto32(id, ord,
+     &           BASEVAL, 
+     &           VERTLOCNBR, VERTLOCTAB,
+     &           EDGELOCNBR, EDGELOCTAB,
+     &           IERR)
+          ENDIF
          ELSE
-            CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
-     &           ORDEDAT, IERR)
-            IF(IERR.NE.0) THEN
-               id%INFO(1:2) = -50
-            END IF
+            CALL MUMPS_PTSCOTCH_MIXEDto64(id, ord,
+     &           BASEVAL, 
+     &           VERTLOCNBR, VERTLOCTAB,
+     &           EDGELOCNBR, EDGELOCTAB,
+     &           IERR)
          END IF
-         CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
-     &        ord%COMM_NODES, id%MYID )
-         IF ( id%INFO(1) .LT. 0 ) GOTO 10
       END IF
- 10   CONTINUE
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
       CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
      &     id%COMM, id%MYID )
       IF ( id%INFO(1) .LT. 0 ) GOTO 11
-      IF(MYWORKID .EQ. 0) 
-     &     CALL SCOTCHFDGRAPHCORDEREXIT(GRAPHDAT, CORDEDAT)
-      IF(ord%IDO) THEN
-         CALL SCOTCHFDGRAPHORDEREXIT(GRAPHDAT, ORDEDAT)
-         CALL SCOTCHFSTRATEXIT(STRADAT) 
-         CALL SCOTCHFDGRAPHEXIT(GRAPHDAT)
-      END IF
       CALL  MPI_BCAST (ord%CBLKNBR, 1,      MPI_INTEGER,
      &     BASE, id%COMM, IERR)
       CALL  MPI_BCAST (ord%PERMTAB, id%N,   MPI_INTEGER,
@@ -639,15 +585,16 @@ C
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       ord%N = id%N
       ord%COMM = id%COMM
-      CALL MUMPS_IDEALLOC(EDGELOCTAB, MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(FIRST     , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(LAST      , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(EDGELOCTAB, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(FIRST     , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(LAST      , MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(VERTLOCTAB, MEMCNT=MEMCNT)
       RETURN
  11   CONTINUE
-      CALL MUMPS_IDEALLOC(FIRST      , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(LAST       , MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(ord%RANGTAB, MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(EDGELOCTAB, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(FIRST      , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(LAST       , MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(ord%RANGTAB, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(EDGELOCTAB, MEMCNT=MEMCNT)
       RETURN
       END SUBROUTINE DMUMPS_PTSCOTCH_ORD
 #endif
@@ -664,6 +611,7 @@ C
       INTEGER              :: TOPROWS, NRL, HOSTMEM, SUBMEM
       INTEGER              :: I, NZ_ROW, WEIGHT
       LOGICAL              :: ICHECKMEM
+      INTEGER              :: NZ4
       IF(present(CHECKMEM)) THEN
          ICHECKMEM = CHECKMEM
       ELSE
@@ -703,7 +651,8 @@ C
       TOPROWS = ord%TOPNODES(2)+ord%RANGTAB(BIG+1)-ord%RANGTAB(BIG)
       SUBMEM  = 7 *id%N 
       HOSTMEM = 12*id%N 
-      NZ_ROW = 2*(id%NZ/id%N) 
+      NZ4=int(id%KEEP8(28))
+      NZ_ROW = 2*(NZ4/id%N) 
       IF(id%KEEP(46) .EQ. 0) THEN
          NRL = 0
       ELSE
@@ -753,7 +702,6 @@ C
       RETURN
       END FUNCTION DMUMPS_CNT_KIDS
       SUBROUTINE DMUMPS_GET_SUBTREES(ord, id)
-      USE TOOLS_COMMON
       IMPLICIT NONE
       TYPE(ORD_TYPE)     :: ord
       TYPE(DMUMPS_STRUC) :: id
@@ -890,33 +838,40 @@ C
       INTEGER, POINTER     :: GPE(:), GNV(:)
       INTEGER, POINTER     :: WORK(:)
       TYPE(GRAPH_TYPE)     :: top_graph
-      INTEGER, POINTER     :: PE(:), IPE(:),
+      INTEGER(8), POINTER  :: IPE(:), IPET(:),
+     &     BUF_PE1(:), BUF_PE2(:), TMP1(:)
+      INTEGER, POINTER     :: PE(:),
      &     LENG(:), I_HALO_MAP(:)
       INTEGER, POINTER     :: NDENSE(:), LAST(:),
      &     DEGREE(:), W(:), PERM(:),
      &     LISTVAR_SCHUR(:), NEXT(:),
      &     HEAD(:), NV(:), ELEN(:),
      &     RCVCNT(:), LSTVAR(:)
-      INTEGER, POINTER     :: NROOTS(:), MYLIST(:),
-     &     MYNVAR(:), LVARPT(:),
-     &     DISPLS(:),  LPERM(:),
+      INTEGER, POINTER     :: MYLIST(:),
+     &     LPERM(:),
      &     LIPERM(:),
-     &     IPET(:), NVT(:), BUF_PE1(:),
-     &     BUF_PE2(:), BUF_NV1(:),
+     &     NVT(:), BUF_NV1(:),
      &     BUF_NV2(:), ROOTPERM(:),
-     &     TMP1(:), TMP2(:), BWORK(:)
+     &     TMP2(:), BWORK(:), NCLIQUES(:)
+      INTEGER              :: MYNCLIQUES, MYMAXVARS, ICLIQUES,
+     &     TOTNCLIQUES
+      INTEGER(8)           :: MYNVARS, TOTNVARS
+      INTEGER(8), POINTER  :: LVARPT(:)
       INTEGER              :: HIDX, NCMPA, I, J, SIZE_SCHUR, MYID,
-     &     NPROCS, IERR, NROWS_LOC, GLOB_IDX, MYNROOTS, PNT, TMP,
-     &     NCLIQUES, NTVAR, PFREES, PFREET, TGSIZE, MAXS, RHANDPE,
-     &     RHANDNV, RIDX, PROC, PFS_SAVE, PFT_SAVE, JOB
+     &     NPROCS, IERR, NROWS_LOC, GLOB_IDX, TMP,
+     &     NTVAR, TGSIZE, MAXS, RHANDPE,
+     &     RHANDNV, RIDX, PROC, JOB, K
+      INTEGER(8)           :: PFREES, PFS_SAVE, PELEN, PFREET, PFT_SAVE
       INTEGER              :: STATUSPE(MPI_STATUS_SIZE)
       INTEGER              :: STATUSNV(MPI_STATUS_SIZE)
+      INTEGER              :: STATUSCLIQUES(MPI_STATUS_SIZE)
+      INTEGER, PARAMETER   :: ITAG=30
       LOGICAL              :: AGG6
       INTEGER              :: THRESH
-      nullify(PE, IPE, LENG, I_HALO_MAP)
+      nullify(PE, IPE, LENG, I_HALO_MAP, NCLIQUES)
       nullify(NDENSE, LAST, DEGREE, W, PERM, LISTVAR_SCHUR,
      &     NEXT, HEAD, NV, ELEN, RCVCNT, LSTVAR)
-      nullify(NROOTS, MYLIST, MYNVAR, LVARPT, DISPLS,
+      nullify(MYLIST, LVARPT,
      &     LPERM, LIPERM, IPET, NVT, BUF_PE1, BUF_PE2,
      &     BUF_NV1, BUF_NV2, ROOTPERM, TMP1, TMP2, BWORK)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
@@ -939,6 +894,8 @@ C
       BWORK => WORK(1 : 2*id%N)
       CALL DMUMPS_BUILD_LOC_GRAPH(id, ord, HIDX, IPE, PE, LENG,
      &     I_HALO_MAP, top_graph, BWORK)
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     id%COMM, id%MYID )
       IF(id%INFO(1).lt.0) RETURN
       TMP = id%N
       DO I=1, NPROCS
@@ -973,6 +930,7 @@ C
       AGG6   = .TRUE.
       PFREES = IPE(NROWS_LOC+1)
       PFS_SAVE = PFREES
+      PELEN = PFREES-1 + 2_8*int(NROWS_LOC,8)
          DO I=1, HIDX
             PERM(I) = I
          END DO
@@ -982,103 +940,85 @@ C
             JOB = 1
          END IF
          CALL MUMPS_SYMQAMD_NEW(JOB, THRESH, NDENSE(1), HIDX,
-     &        MUMPS_GETSIZE(PE), IPE(1), PFREES, LENG(1), PE(1), NV(1), 
+     &        PELEN, IPE(1), PFREES, LENG(1), PE(1), NV(1), 
      &        ELEN(1), LAST(1), NCMPA, DEGREE(1), HEAD(1), NEXT(1), 
      &        W(1), PERM(1), LISTVAR_SCHUR(1), SIZE_SCHUR, AGG6)
-      CALL MUMPS_REALLOC(W, 2*NPROCS, id%INFO,
-     &     LP, STRING='W', MEMCNT=MEMCNT, ERRCODE=-7)
-      if(MEMCNT .gt. MAXMEM) MAXMEM=MEMCNT
-      NROOTS => W
-      DISPLS => W(NPROCS+1:2*NPROCS) 
-      MYNVAR => DEGREE 
-      MYLIST => NDENSE   
-      LVARPT => NEXT     
-      RCVCNT => HEAD         
-      LSTVAR => LAST
-      NULLIFY(W, DEGREE, NDENSE, NEXT, HEAD, LAST)
-      MYNROOTS = 0
-      PNT = 0
+      MYNCLIQUES = 0
+      MYNVARS    = 0
+      MYMAXVARS  = 0
       DO I=1, HIDX
          IF(IPE(I) .GT. 0) THEN
-            PNT = PNT+LENG(I)
-            MYNROOTS = MYNROOTS+1
+            MYMAXVARS  = MAX(MYMAXVARS,LENG(I))
+            MYNVARS    = MYNVARS+LENG(I)
+            MYNCLIQUES = MYNCLIQUES+1
          END IF
       END DO
-      CALL MUMPS_REALLOC(MYLIST, PNT, id%INFO,
-     &     LP, STRING='MYLIST', MEMCNT=MEMCNT, ERRCODE=-7)
-      IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      MYNROOTS = 0
-      PNT = 0
-      DO I=1, HIDX
-         IF(IPE(I) .GT. 0) THEN
-            MYNROOTS = MYNROOTS+1
-            MYNVAR(MYNROOTS) =  LENG(I)
-            DO J=1, LENG(I)
-               MYLIST(PNT+J) = I_HALO_MAP(PE(IPE(I)+J-1)-NROWS_LOC)
-            END DO
-            PNT = PNT+LENG(I)
-         END IF
-      END DO
-      CALL MPI_BARRIER(id%COMM, IERR)
-      CALL MPI_GATHER(MYNROOTS, 1, MPI_INTEGER, NROOTS(1), 1, 
+      CALL MPI_REDUCE(MYNVARS, TOTNVARS, 1, MPI_INTEGER8,
+     &     MPI_SUM, 0, id%COMM, IERR)
+      CALL MUMPS_REALLOC(NCLIQUES, NPROCS, id%INFO,
+     &     LP, STRING='NCLIQUES', MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MPI_GATHER(MYNCLIQUES, 1, MPI_INTEGER, NCLIQUES(1), 1, 
      &     MPI_INTEGER, 0, id%COMM, IERR)
-      IF(MYID .EQ.0) THEN 
-         DISPLS(1) = 0
-         DO I=2, NPROCS
-            DISPLS(I) = DISPLS(I-1)+NROOTS(I-1)
-         END DO
-         NCLIQUES = sum(NROOTS(1:NPROCS))
-         CALL MUMPS_REALLOC(LVARPT, NCLIQUES+1, id%INFO,
+      IF(id%MYID.EQ.0) THEN
+         TOTNCLIQUES = sum(NCLIQUES)
+         CALL MUMPS_I8REALLOC(LVARPT, TOTNCLIQUES+1, id%INFO,
      &        LP, STRING='LVARPT', MEMCNT=MEMCNT, ERRCODE=-7)
-         IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      ELSE
-         CALL MUMPS_REALLOC(LVARPT, 2, id%INFO,
-     &        LP, STRING='LVARPT', MEMCNT=MEMCNT, ERRCODE=-7)
-         IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      END IF
-      CALL MPI_GATHERV(MYNVAR(1), MYNROOTS, MPI_INTEGER, LVARPT(2), 
-     &     NROOTS(1), DISPLS(1), MPI_INTEGER, 0, id%COMM, IERR)
-      IF(MYID .EQ. 0) THEN
-         DO I=1, NPROCS
-            RCVCNT(I) = sum(LVARPT(2+DISPLS(I):2+DISPLS(I)+NROOTS(I)-1))
-            IF(I .EQ. 1) THEN
-               DISPLS(I) = 0
-            ELSE
-               DISPLS(I) = DISPLS(I-1)+RCVCNT(I-1)
+         CALL MUMPS_IREALLOC8(LSTVAR, TOTNVARS, id%INFO,
+     &        LP, STRING='LSTVAR', MEMCNT=MEMCNT, ERRCODE=-7)
+         LVARPT(1) = 1_8
+         ICLIQUES  = 0
+         DO I=1, HIDX
+            IF(IPE(I) .GT. 0) THEN
+               ICLIQUES = ICLIQUES+1
+               LVARPT(ICLIQUES+1) = LVARPT(ICLIQUES)+LENG(I)
+               DO J=0, LENG(I)-1
+                  LSTVAR(LVARPT(ICLIQUES)+J) =
+     &                 I_HALO_MAP(PE(IPE(I)+J)-NROWS_LOC)
+               END DO
             END IF
          END DO
-         CALL MUMPS_REALLOC(LSTVAR, sum(RCVCNT(1:NPROCS)), id%INFO,
-     &     LP, STRING='LSTVAR', MEMCNT=MEMCNT, ERRCODE=-7)
-         IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      END IF
-      CALL MPI_GATHERV(MYLIST(1), PNT, MPI_INTEGER, LSTVAR(1), 
-     &     RCVCNT(1), DISPLS(1), MPI_INTEGER, 0, id%COMM, IERR)
-      NULLIFY(DISPLS)
-      IF(MYID .EQ. 0) THEN
-         LVARPT(1) = 1
-         DO I=2, NCLIQUES+1
-            LVARPT(I) = LVARPT(I-1) + LVARPT(I)
+         DO PROC=1, NPROCS-1
+            DO I=1, NCLIQUES(PROC+1)
+               ICLIQUES = ICLIQUES+1
+               CALL MPI_RECV(K, 1, MPI_INTEGER, PROC, ITAG, id%COMM,
+     &              STATUSCLIQUES, IERR)
+               LVARPT(ICLIQUES+1) = LVARPT(ICLIQUES)+K
+               CALL MPI_RECV(LSTVAR(LVARPT(ICLIQUES)), K, MPI_INTEGER,
+     &              PROC, ITAG, id%COMM, STATUSCLIQUES, IERR)
+            END DO
          END DO
          LPERM => WORK(3*id%N+1 : 4*id%N)
          NTVAR   = ord%TOPNODES(2)
          CALL DMUMPS_MAKE_LOC_IDX(id, ord%TOPNODES, LPERM, LIPERM, ord)
          CALL DMUMPS_ASSEMBLE_TOP_GRAPH(id, ord%TOPNODES(2), LPERM,
-     &        top_graph, NCLIQUES, LSTVAR, LVARPT, IPET, PE, LENG, ELEN)
-         TGSIZE = ord%TOPNODES(2)+NCLIQUES
+     &        top_graph, TOTNCLIQUES, LSTVAR, LVARPT, IPET, PE,
+     &        LENG, ELEN)
+         TGSIZE = ord%TOPNODES(2)+TOTNCLIQUES
          PFREET = IPET(TGSIZE+1)
          PFT_SAVE = PFREET
          nullify(LPERM)
-         CALL MUMPS_IDEALLOC(top_graph%IRN_LOC,
-     &        top_graph%JCN_LOC, ord%TOPNODES, MEMCNT=MEMCNT)
-         W       => NROOTS
-         DEGREE  => MYNVAR
-         NDENSE  => MYLIST
-         NEXT    => LVARPT
-         HEAD    => RCVCNT
-         LAST    => LSTVAR
-         NULLIFY(NROOTS, MYNVAR, MYLIST, LVARPT, RCVCNT, LSTVAR)
-         CALL MUMPS_REALLOC(PE, max(PFREET+TGSIZE,1), id%INFO, LP,
-     &        COPY=.TRUE., STRING='J2:PE', MEMCNT=MEMCNT, ERRCODE=-7)
+      ELSE
+         CALL MUMPS_REALLOC(MYLIST, MYMAXVARS, id%INFO,
+     &        LP, STRING='MYLIST', MEMCNT=MEMCNT, ERRCODE=-7)
+         IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
+         DO I=1, HIDX
+            IF(IPE(I) .GT. 0) THEN
+               DO J=1, LENG(I)
+                  MYLIST(J) = I_HALO_MAP(PE(IPE(I)+J-1)-NROWS_LOC)
+               END DO
+               CALL MPI_SEND(LENG(I), 1, MPI_INTEGER, 0, ITAG,
+     &              id%COMM, IERR)
+               CALL MPI_SEND(MYLIST(1), LENG(I), MPI_INTEGER, 0, ITAG,
+     &              id%COMM, IERR)
+            END IF
+         END DO
+      END IF
+      CALL MUMPS_IDEALLOC(top_graph%IRN_LOC,
+     &     top_graph%JCN_LOC, ord%TOPNODES, MEMCNT=MEMCNT)
+      IF(MYID .EQ. 0) THEN
+         CALL MUMPS_IREALLOC8(PE, max(PFREET+int(TGSIZE,8),1_8),id%INFO,
+     &        LP, COPY=.TRUE., STRING='J2:PE', MEMCNT=MEMCNT,
+     &        ERRCODE=-7)
          CALL MUMPS_REALLOC(NDENSE, max(TGSIZE,1), id%INFO, LP,
      &        STRING='J2:NDENSE', MEMCNT=MEMCNT, ERRCODE=-7)
          CALL MUMPS_REALLOC(NVT, max(TGSIZE,1), id%INFO, LP,
@@ -1091,10 +1031,10 @@ C
      &        STRING='J2:NEXT', MEMCNT=MEMCNT, ERRCODE=-7)
          CALL MUMPS_REALLOC(W, max(TGSIZE,1), id%INFO, LP,
      &        STRING='J2:W', MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(LISTVAR_SCHUR, max(NCLIQUES,1), id%INFO, LP,
-     &        STRING='J2:LVSCH', MEMCNT=MEMCNT, ERRCODE=-7)
+         CALL MUMPS_REALLOC(LISTVAR_SCHUR, max(TOTNCLIQUES,1), id%INFO,
+     &        LP, STRING='J2:LVSCH', MEMCNT=MEMCNT, ERRCODE=-7)
          IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-         DO I=1, NCLIQUES
+         DO I=1, TOTNCLIQUES
             LISTVAR_SCHUR(I) = NTVAR+I
          END DO
          THRESH = -1
@@ -1107,37 +1047,44 @@ C
             DO I=1, TGSIZE
                PERM(I) = I
             END DO
+            PELEN = max(PFREET+int(TGSIZE,8),1_8)
             CALL MUMPS_SYMQAMD_NEW(2, -1, NDENSE(1), TGSIZE,
-     &           MUMPS_GETSIZE(PE), IPET(1), PFREET, LENG(1), PE(1), 
+     &           PELEN, IPET(1), PFREET, LENG(1), PE(1), 
      &           NVT(1), ELEN(1), LAST(1), NCMPA, DEGREE(1), HEAD(1), 
-     &           NEXT(1), W(1), PERM(1), LISTVAR_SCHUR(1), NCLIQUES, 
+     &           NEXT(1), W(1), PERM(1), LISTVAR_SCHUR(1), TOTNCLIQUES, 
      &           AGG6)
       END IF
       CALL MPI_BARRIER(id%COMM, IERR)
-      CALL MUMPS_IDEALLOC(LISTVAR_SCHUR, PE, MEMCNT=MEMCNT) 
+      CALL MPI_BARRIER(id%COMM, IERR)
+      CALL MUMPS_DEALLOC(LISTVAR_SCHUR, MEMCNT=MEMCNT) 
+      IF(ID%MYID.EQ.0) THEN
+         CALL MUMPS_DEALLOC(PE, MEMCNT=MEMCNT) 
+      else IF(ID%MYID.EQ.1) THEN
+         CALL MUMPS_DEALLOC(PE, MEMCNT=MEMCNT) 
+      else IF(ID%MYID.EQ.2) THEN
+         CALL MUMPS_DEALLOC(PE, MEMCNT=MEMCNT) 
+      else IF(ID%MYID.EQ.3) THEN
+         CALL MUMPS_DEALLOC(PE, MEMCNT=MEMCNT) 
+      END IF
       IF(MYID .EQ. 0) THEN
-         BUF_PE1 => WORK(       1 :   id%N)
-         BUF_PE2 => WORK(  id%N+1 : 2*id%N)
-         BUF_NV1 => WORK(2*id%N+1 : 3*id%N)
-         BUF_NV2 => WORK(3*id%N+1 : 4*id%N)
          MAXS = NROWS_LOC
          DO I=2, NPROCS
             IF((ord%LAST(I)-ord%FIRST(I)+1) .GT. MAXS)
      &           MAXS = (ord%LAST(I)-ord%FIRST(I)+1)
          END DO
-         CALL MUMPS_REALLOC(BUF_PE1, MAXS, id%INFO,
+         CALL MUMPS_I8REALLOC(BUF_PE1, max(MAXS,1), id%INFO,
      &        LP, STRING='BUF_PE1', MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(BUF_PE2, MAXS, id%INFO,
+         CALL MUMPS_I8REALLOC(BUF_PE2, max(MAXS,1), id%INFO,
      &        LP, STRING='BUF_PE2', MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(BUF_NV1, MAXS, id%INFO,
+         CALL MUMPS_REALLOC(BUF_NV1, max(MAXS,1), id%INFO,
      &        LP, STRING='BUF_NV1', MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(BUF_NV2, MAXS, id%INFO,
+         CALL MUMPS_REALLOC(BUF_NV2, max(MAXS,1), id%INFO,
      &        LP, STRING='BUF_NV2', MEMCNT=MEMCNT, ERRCODE=-7)
          CALL MUMPS_REALLOC(GPE, id%N, id%INFO,
      &        LP, STRING='GPE', MEMCNT=MEMCNT, ERRCODE=-7)
          CALL MUMPS_REALLOC(GNV, id%N, id%INFO,
      &        LP, STRING='GNV', MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(ROOTPERM, NCLIQUES, id%INFO,
+         CALL MUMPS_REALLOC(ROOTPERM, TOTNCLIQUES, id%INFO,
      &        LP, STRING='ROOTPERM', MEMCNT=MEMCNT, ERRCODE=-7)
          IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
          RIDX = 0
@@ -1148,7 +1095,7 @@ C
          BUF_NV1 => NV
          DO PROC=0, NPROCS-2
             CALL MPI_IRECV(BUF_PE2(1), ord%LAST(PROC+2)-
-     &           ord%FIRST(PROC+2)+1, MPI_INTEGER, PROC+1, PROC+1,
+     &           ord%FIRST(PROC+2)+1, MPI_INTEGER8, PROC+1, PROC+1,
      &           id%COMM, RHANDPE, IERR)
             CALL MPI_IRECV(BUF_NV2(1), ord%LAST(PROC+2)-
      &           ord%FIRST(PROC+2)+1, MPI_INTEGER, PROC+1, PROC+1,
@@ -1206,25 +1153,27 @@ C
                GNV(GLOB_IDX) = NVT(I)
             END IF
          END DO
-         DO I=1, NCLIQUES
+         DO I=1, TOTNCLIQUES
             GLOB_IDX      = ROOTPERM(I)
             GPE(GLOB_IDX) = -LIPERM(-IPET(NTVAR+I))
          END DO
       ELSE
          CALL MPI_SEND(IPE(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
-     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
+     &        MPI_INTEGER8, 0, MYID, id%COMM, IERR)
          CALL MPI_SEND(NV(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
      &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
       END IF
-      CALL MUMPS_IDEALLOC(PE, IPE, I_HALO_MAP, NDENSE,
+      CALL MUMPS_DEALLOC(BUF_NV1, BUF_NV2, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(BUF_PE1, BUF_PE2, IPE, IPET,
+     &     TMP1, LVARPT, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(PE, I_HALO_MAP, NDENSE,
      &     LAST, DEGREE, MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(W, LISTVAR_SCHUR, NEXT,
+      CALL MUMPS_DEALLOC(W, LISTVAR_SCHUR, NEXT,
      &     NV, MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(LSTVAR, NROOTS, MYLIST, MYNVAR,
-     &     LVARPT, MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(LPERM, LIPERM, IPET, NVT, 
+      CALL MUMPS_DEALLOC(LSTVAR, NCLIQUES, MYLIST, 
      &     MEMCNT=MEMCNT)
-      CALL MUMPS_IDEALLOC(ROOTPERM, TMP1, TMP2, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(LPERM, LIPERM, NVT, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(ROOTPERM, TMP2, MEMCNT=MEMCNT)
       NULLIFY(HEAD, ELEN, LENG, PERM, RCVCNT)
       RETURN
       END SUBROUTINE DMUMPS_PARSYMFACT
@@ -1254,61 +1203,67 @@ C
       SUBROUTINE DMUMPS_ASSEMBLE_TOP_GRAPH(id, NLOCVARS, LPERM,
      &     top_graph, NCLIQUES, LSTVAR, LVARPT, IPE, PE, LENG, ELEN)
       IMPLICIT NONE
-      TYPE(DMUMPS_STRUC) :: id
-      TYPE(GRAPH_TYPE)   :: top_graph
-      INTEGER, POINTER   :: LPERM(:), LSTVAR(:), LVARPT(:),
-     &     IPE(:), PE(:), LENG(:), ELEN(:)
-      INTEGER            :: NCLIQUES
-      INTEGER            :: I, J, IDX, NLOCVARS, PNT, SAVEPNT
+      TYPE(DMUMPS_STRUC)  :: id
+      TYPE(GRAPH_TYPE)    :: top_graph
+      INTEGER, POINTER    :: LPERM(:), LSTVAR(:), 
+     &     PE(:), LENG(:), ELEN(:)
+      INTEGER(8)          :: LVARPT(:)
+      INTEGER             :: NCLIQUES
+      INTEGER(8), POINTER :: IPE(:)
+      INTEGER             :: I, IDX, NLOCVARS
+      INTEGER(8)          :: INNZ, PNT, SAVEPNT
       CALL MUMPS_REALLOC(LENG, max(NLOCVARS+NCLIQUES,1)  , id%INFO,
      &        LP, STRING='ATG:LENG', MEMCNT=MEMCNT, ERRCODE=-7)
       CALL MUMPS_REALLOC(ELEN, max(NLOCVARS+NCLIQUES,1)  , id%INFO,
      &        LP, STRING='ATG:ELEN', MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(IPE , NLOCVARS+NCLIQUES+1, id%INFO,
+      CALL MUMPS_I8REALLOC(IPE , NLOCVARS+NCLIQUES+1, id%INFO,
      &        LP, STRING='ATG:IPE', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       LENG = 0
       ELEN = 0
-      DO I=1, top_graph%NZ_LOC
-         IF((LPERM(top_graph%JCN_LOC(I)) .NE. 0) .AND.
-     &        (top_graph%JCN_LOC(I) .NE. top_graph%IRN_LOC(I))) THEN
-            LENG(LPERM(top_graph%IRN_LOC(I))) =
-     &           LENG(LPERM(top_graph%IRN_LOC(I))) + 1
+      DO INNZ=1, top_graph%NZ_LOC
+         IF((LPERM(top_graph%JCN_LOC(INNZ)) .NE. 0) .AND.
+     &        (top_graph%JCN_LOC(INNZ) .NE. top_graph%IRN_LOC(INNZ)))
+     &        THEN
+            LENG(LPERM(top_graph%IRN_LOC(INNZ))) =
+     &           LENG(LPERM(top_graph%IRN_LOC(INNZ))) + 1
          END IF
       END DO
       DO I=1, NCLIQUES
-         DO J=LVARPT(I), LVARPT(I+1)-1
-            ELEN(LPERM(LSTVAR(J))) = ELEN(LPERM(LSTVAR(J)))+1
+         DO INNZ=LVARPT(I), LVARPT(I+1)-1
+            ELEN(LPERM(LSTVAR(INNZ))) = ELEN(LPERM(LSTVAR(INNZ)))+1
             LENG(NLOCVARS+I) = LENG(NLOCVARS+I)+1
          END DO
       END DO
       IPE(1) = 1
       DO I=1, NLOCVARS+NCLIQUES
-         IPE(I+1) = IPE(I)+LENG(I)+ELEN(I)
+         IPE(I+1) = IPE(I)+int(LENG(I),8)+int(ELEN(I),8)
       END DO
-      CALL MUMPS_REALLOC(PE, IPE(NLOCVARS+NCLIQUES+1)+NLOCVARS+NCLIQUES,
+      CALL MUMPS_IREALLOC8(PE, IPE(NLOCVARS+NCLIQUES+1)+
+     &     int(NLOCVARS,8)+int(NCLIQUES,8),
      &     id%INFO, LP, STRING='ATG:PE', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       LENG = 0
       ELEN = 0
       DO I=1, NCLIQUES
-         DO J=LVARPT(I), LVARPT(I+1)-1
-            IDX = LPERM(LSTVAR(J))
-            PE(IPE(IDX)+ELEN(IDX)) = NLOCVARS+I
-            PE(IPE(NLOCVARS+I)+LENG(NLOCVARS+I)) = IDX
-            ELEN(LPERM(LSTVAR(J))) = ELEN(LPERM(LSTVAR(J)))+1
+         DO INNZ=LVARPT(I), LVARPT(I+1)-1
+            IDX = LPERM(LSTVAR(INNZ))
+            PE(IPE(IDX)+int(ELEN(IDX),8)) = NLOCVARS+I
+            PE(IPE(NLOCVARS+I)+int(LENG(NLOCVARS+I),8)) = IDX
+            ELEN(LPERM(LSTVAR(INNZ))) = ELEN(LPERM(LSTVAR(INNZ)))+1
             LENG(NLOCVARS+I) = LENG(NLOCVARS+I)+1
          end do
       end do
-      DO I=1, top_graph%NZ_LOC
-         IF((LPERM(top_graph%JCN_LOC(I)) .NE. 0) .AND.
-     &        (top_graph%JCN_LOC(I) .NE. top_graph%IRN_LOC(I))) THEN
-            PE(IPE(LPERM(top_graph%IRN_LOC(I)))+
-     &           ELEN(LPERM(top_graph%IRN_LOC(I))) +
-     &           LENG(LPERM(top_graph%IRN_LOC(I)))) =
-     &           LPERM(top_graph%JCN_LOC(I))
-            LENG(LPERM(top_graph%IRN_LOC(I))) =
-     &           LENG(LPERM(top_graph%IRN_LOC(I))) + 1
+      DO INNZ=1, top_graph%NZ_LOC
+         IF((LPERM(top_graph%JCN_LOC(INNZ)) .NE. 0) .AND.
+     &        (top_graph%JCN_LOC(INNZ) .NE. top_graph%IRN_LOC(INNZ)))
+     &        THEN
+            PE(IPE(LPERM(top_graph%IRN_LOC(INNZ)))+
+     &           ELEN(LPERM(top_graph%IRN_LOC(INNZ))) +
+     &           LENG(LPERM(top_graph%IRN_LOC(INNZ)))) =
+     &           LPERM(top_graph%JCN_LOC(INNZ))
+            LENG(LPERM(top_graph%IRN_LOC(INNZ))) =
+     &           LENG(LPERM(top_graph%IRN_LOC(INNZ))) + 1
          END IF
       END DO
       DO I=1, NLOCVARS+NCLIQUES
@@ -1318,13 +1273,13 @@ C
       PNT = 0
       LPERM(1:NLOCVARS+NCLIQUES) = 0
       DO I=1, NLOCVARS+NCLIQUES
-         DO J=IPE(I), IPE(I+1)-1
-            IF(LPERM(PE(J)) .EQ. I) THEN
+         DO INNZ=IPE(I), IPE(I+1)-1
+            IF(LPERM(PE(INNZ)) .EQ. I) THEN
                LENG(I) = LENG(I)-1
             ELSE
-               LPERM(PE(J)) = I 
+               LPERM(PE(INNZ)) = I 
                PNT = PNT+1
-               PE(PNT) = PE(J)
+               PE(PNT) = PE(INNZ)
             END IF
          END DO
          IPE(I) = SAVEPNT
@@ -1333,6 +1288,7 @@ C
       IPE(NLOCVARS+NCLIQUES+1) = SAVEPNT
       RETURN
       END SUBROUTINE DMUMPS_ASSEMBLE_TOP_GRAPH
+#if defined(parmetis) || defined(parmetis3)
       SUBROUTINE DMUMPS_BUILD_TREETAB(TREETAB, RANGTAB, SIZES, CBLKNBR)
       INTEGER, POINTER  :: TREETAB(:), RANGTAB(:), SIZES(:)
       INTEGER           :: CBLKNBR
@@ -1387,28 +1343,29 @@ C
       END IF
       END SUBROUTINE REC_TREETAB
       END SUBROUTINE DMUMPS_BUILD_TREETAB
-      SUBROUTINE DMUMPS_BUILD_SCOTCH_GRAPH(id, FIRST, LAST, IPE,
+#endif
+#if defined(ptscotch) || defined(parmetis) || defined(parmetis3)
+      SUBROUTINE DMUMPS_BUILD_DIST_GRAPH(id, FIRST, LAST, IPE,
      &     PE, WORK)
       IMPLICIT NONE
-      INCLUDE 'mpif.h'
       TYPE(DMUMPS_STRUC)      :: id
-      INTEGER, POINTER        :: FIRST(:), LAST(:), IPE(:), PE(:),
+      INTEGER(8), POINTER     :: IPE(:)
+      INTEGER, POINTER        :: FIRST(:), LAST(:), PE(:),
      &     WORK(:)
       INTEGER                 :: IERR, MYID, NPROCS
-      INTEGER                 :: I, PROC, LOCNNZ,
-     &     NEW_LOCNNZ, J, LOC_ROW
-      INTEGER                 :: TOP_CNT, TIDX,
-     &     NROWS_LOC, DUPS, TOTDUPS, OFFDIAG
+      INTEGER                 :: I, PROC, J, LOC_ROW
+      INTEGER(8)              :: LOCNNZ, INNZ, NEW_LOCNNZ, OFFDIAG,
+     &                           RCVPNT, PNT, SAVEPNT, DUPS, TOTDUPS
+      INTEGER                 :: NROWS_LOC
       INTEGER                 :: STATUS(MPI_STATUS_SIZE)
-      INTEGER, POINTER        :: MAPTAB(:),
-     &     SNDCNT(:), RCVCNT(:), SDISPL(:)
-      INTEGER, POINTER        :: RDISPL(:),
-     &     MSGCNT(:), SIPES(:,:), LENG(:)
+      INTEGER, POINTER        :: MAPTAB(:), SDISPL(:)
+      INTEGER(8), POINTER     :: MSGCNT(:), SNDCNT(:), RCVCNT(:)
+      INTEGER, POINTER        :: RDISPL(:), BUFLEVEL(:),
+     &     SIPES(:,:), LENG(:)
       INTEGER, POINTER        :: PCNT(:), TSENDI(:),
      &     TSENDJ(:), RCVBUF(:)
       TYPE(ARRPNT), POINTER   :: APNT(:)
-      INTEGER                 :: BUFSIZE, SOURCE, RCVPNT, MAXS, PNT,
-     &     SAVEPNT
+      INTEGER                 :: BUFSIZE, SOURCE, MAXS
       INTEGER, PARAMETER      :: ITAG=30
       LOGICAL                 :: FLAG
       DOUBLE PRECISION        :: SYMMETRY
@@ -1417,7 +1374,7 @@ C
       INTEGER                 :: L
 #endif
       nullify(MAPTAB, SNDCNT, RCVCNT, SDISPL)
-      nullify(RDISPL, MSGCNT, SIPES, LENG)
+      nullify(RDISPL, MSGCNT, SIPES, LENG, BUFLEVEL)
       nullify(PCNT, TSENDI, TSENDJ, RCVBUF, APNT)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
@@ -1426,18 +1383,20 @@ C
      &        '("Insufficient workspace inside BUILD_SCOTCH_GRAPH")')
          CALL MUMPS_ABORT()
       END IF
-      CALL MUMPS_REALLOC(SNDCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(SNDCNT, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(RCVCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(RCVCNT, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(MSGCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(MSGCNT, NPROCS, id%INFO, LP,
+     &     MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MUMPS_REALLOC(RDISPL, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       ALLOCATE(APNT(NPROCS))
       SNDCNT = 0
-      TOP_CNT = 0
       BUFSIZE = 1000
-      LOCNNZ = id%NZ_loc
+      BUFSIZE = id%KEEP(39)
+      LOCNNZ = id%KEEP8(29)
       NROWS_LOC = LAST(MYID+1)-FIRST(MYID+1)+1
       MAPTAB => WORK(     1 :   id%N)
       LENG   => WORK(id%N+1 : 2*id%N)
@@ -1453,62 +1412,53 @@ C
       ALLOCATE(SIPES(max(1,MAXS), NPROCS))
       OFFDIAG=0
       SIPES=0
-      DO I=1, id%NZ_loc
-         IF(id%IRN_loc(I) .NE. id%JCN_loc(I)) THEN
+      DO INNZ=1, LOCNNZ
+         IF(id%IRN_loc(INNZ) .NE. id%JCN_loc(INNZ)) THEN
             OFFDIAG = OFFDIAG+1
-            PROC = MAPTAB(id%IRN_loc(I))
-            LOC_ROW = id%IRN_loc(I)-FIRST(PROC)+1
+            PROC = MAPTAB(id%IRN_loc(INNZ))
+            LOC_ROW = id%IRN_loc(INNZ)-FIRST(PROC)+1
             SIPES(LOC_ROW, PROC) = SIPES(LOC_ROW, PROC)+1
             SNDCNT(PROC) = SNDCNT(PROC)+1
-            PROC = MAPTAB(id%JCN_loc(I))
-            LOC_ROW = id%JCN_loc(I)-FIRST(PROC)+1
+            PROC = MAPTAB(id%JCN_loc(INNZ))
+            LOC_ROW = id%JCN_loc(INNZ)-FIRST(PROC)+1
             SIPES(LOC_ROW, PROC) = SIPES(LOC_ROW, PROC)+1
             SNDCNT(PROC) = SNDCNT(PROC)+1
          END IF
       END DO
-      CALL MPI_ALLREDUCE (OFFDIAG, id%KEEP(114), 1, MPI_INTEGER,
+      CALL MPI_ALLREDUCE (OFFDIAG, id%KEEP8(127), 1, MPI_INTEGER8,
      &     MPI_SUM, id%COMM, IERR)
-      id%KEEP(114) = id%KEEP(114)+3*id%N
-      id%KEEP(113) = id%KEEP(114)-2*id%N
-      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER, RCVCNT(1), 1,
-     &     MPI_INTEGER, id%COMM, IERR)
-      SNDCNT(:) = MAXS
-      CALL MPI_REDUCE_SCATTER ( SIPES(1,1), LENG(1), SNDCNT(1), 
+      id%KEEP8(127) = id%KEEP8(127)+3*id%N
+      id%KEEP8(126) = id%KEEP8(127)-2*id%N
+      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
+     &     MPI_INTEGER8, id%COMM, IERR)
+      CALL MUMPS_I8DEALLOC(SNDCNT, MEMCNT=MEMCNT)
+      RDISPL(:) = MAXS
+      CALL MPI_REDUCE_SCATTER ( SIPES(1,1), LENG(1), RDISPL(1), 
      &     MPI_INTEGER, MPI_SUM, id%COMM, IERR )
       DEALLOCATE(SIPES)
-      CALL MUMPS_REALLOC(IPE, NROWS_LOC+1, id%INFO,
-     &        LP, STRING='IPE', MEMCNT=MEMCNT, ERRCODE=-7)
-      IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      TLEN = 0
-      IPE(1) = 1
+      TLEN = 0_8
+      IPE(1) = 1_8
       DO I=1, NROWS_LOC
-         IPE(I+1) = IPE(I) + LENG(I)
-         TLEN = TLEN+LENG(I)
+        IPE(I+1) = IPE(I) + int(LENG(I),8)
+         TLEN = TLEN+int(LENG(I),8)
       END DO
-      IF(TLEN.GT.HUGE(I)) THEN
-         id%INFO( 1 ) = -51
-         id%INFO( 2 ) = int(TLEN)
-         IF ( LPOK ) THEN
-            WRITE(LP, '("32 bits int overflow in parallel analysis")')
-         END IF
-      END IF
-      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1), id%COMM, id%MYID )
-      IF(id%INFO(1).LT.0) RETURN
-      CALL MUMPS_REALLOC(PE, max(IPE(NROWS_LOC+1)-1,1), id%INFO,
+      CALL MUMPS_IREALLOC8(PE, max(IPE(NROWS_LOC+1)-1_8,1_8), id%INFO,
      &        LP, STRING='PE', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       LENG(:) = 0
+      CALL MUMPS_REALLOC(BUFLEVEL, NPROCS, id%INFO, LP,
+     &     MEMCNT=MEMCNT, ERRCODE=-7)
       CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE, PE, LENG,
-     &     RCVBUF, MSGCNT, SNDCNT, id%COMM)
-      NEW_LOCNNZ = sum(RCVCNT)
+     &     RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
+      NEW_LOCNNZ = 0
       DO I=1, NPROCS
-         MSGCNT(I) = RCVCNT(I)/BUFSIZE
+         NEW_LOCNNZ = NEW_LOCNNZ+RCVCNT(I)
+         MSGCNT(I) = RCVCNT(I)/int(BUFSIZE,8)
       END DO
       RCVPNT = 1
-      SNDCNT = 0
-      TIDX   = 0
-      DO I=1, id%NZ_loc
-         IF(mod(I,BUFSIZE/10) .EQ. 0) THEN
+      BUFLEVEL = 0 
+      DO INNZ=1, LOCNNZ
+         IF(mod(INNZ,int(BUFSIZE,8)/10_8) .EQ. 0) THEN
             CALL MPI_IPROBE( MPI_ANY_SOURCE, ITAG, id%COMM,
      &           FLAG, STATUS, IERR )
             IF(FLAG) THEN
@@ -1520,101 +1470,105 @@ C
                RCVPNT = RCVPNT + BUFSIZE
             END IF
          END IF
-         IF(id%IRN_loc(I) .NE. id%JCN_loc(I)) THEN
-            PROC = MAPTAB(id%IRN_loc(I))
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+1) = id%IRN_loc(I)-
+         IF(id%IRN_loc(INNZ) .NE. id%JCN_loc(INNZ)) THEN
+            PROC = MAPTAB(id%IRN_loc(INNZ))
+            APNT(PROC)%BUF(2*BUFLEVEL(PROC)+1) = id%IRN_loc(INNZ)-
      &           FIRST(PROC)+1
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = id%JCN_loc(I)
-            SNDCNT(PROC) = SNDCNT(PROC)+1
-            IF(SNDCNT(PROC) .EQ. BUFSIZE) THEN
+            APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) = id%JCN_loc(INNZ)
+            BUFLEVEL(PROC) = BUFLEVEL(PROC)+1
+            IF(BUFLEVEL(PROC) .EQ. BUFSIZE) THEN
                CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE,
-     &              PE, LENG, RCVBUF, MSGCNT, SNDCNT, id%COMM)
+     &              PE, LENG, RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
             END IF
-            PROC = MAPTAB(id%JCN_loc(I))
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+1) = id%JCN_loc(I)-
+            PROC = MAPTAB(id%JCN_loc(INNZ))
+            APNT(PROC)%BUF(2*BUFLEVEL(PROC)+1) = id%JCN_loc(INNZ)-
      &           FIRST(PROC)+1
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = id%IRN_loc(I)
-            SNDCNT(PROC) = SNDCNT(PROC)+1
-            IF(SNDCNT(PROC) .EQ. BUFSIZE) THEN
+            APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) = id%IRN_loc(INNZ)
+            BUFLEVEL(PROC) = BUFLEVEL(PROC)+1
+            IF(BUFLEVEL(PROC) .EQ. BUFSIZE) THEN
                CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE,
-     &              PE, LENG, RCVBUF, MSGCNT, SNDCNT, id%COMM)
+     &              PE, LENG, RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
             END IF
          END IF
       END DO
       CALL DMUMPS_SEND_BUF(APNT, -1, NPROCS, BUFSIZE, IPE, PE, LENG,
-     &     RCVBUF, MSGCNT, SNDCNT, id%COMM)
+     &     RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
       DUPS = 0
       PNT = 0
       SAVEPNT = 1
       MAPTAB = 0
       DO I=1, NROWS_LOC
-         DO J=IPE(I),IPE(I+1)-1
-            IF(MAPTAB(PE(J)) .EQ. I) THEN
+         DO INNZ=IPE(I),IPE(I+1)-1
+            IF(MAPTAB(PE(INNZ)) .EQ. I) THEN
                DUPS = DUPS+1
             ELSE
-               MAPTAB(PE(J)) = I 
+               MAPTAB(PE(INNZ)) = I 
                PNT = PNT+1
-               PE(PNT) = PE(J)
+               PE(PNT) = PE(INNZ)
             END IF
          END DO
          IPE(I) = SAVEPNT
          SAVEPNT = PNT+1
       END DO
-      CALL MPI_REDUCE( DUPS, TOTDUPS, 1, MPI_INTEGER, MPI_SUM,
+      CALL MPI_REDUCE( DUPS, TOTDUPS, 1, MPI_INTEGER8, MPI_SUM,
      &     0,  id%COMM, IERR )
-      SYMMETRY = dble(TOTDUPS)/(dble(id%NZ)-dble(id%N))
       IF(MYID .EQ. 0) THEN
+         SYMMETRY = dble(TOTDUPS)/(dble(id%KEEP8(28))-dble(id%N))
+         SYMMETRY = min(SYMMETRY,1.0d0)
          IF(id%KEEP(50) .GE. 1) SYMMETRY = 1.d0
          IF(PROKG) WRITE(MPG,'("Structural symmetry is:",i3,"%")')
      &        ceiling(SYMMETRY*100.d0)
-      id%INFOG(8) = ceiling(SYMMETRY*100.0d0)
+         id%INFOG(8) = ceiling(SYMMETRY*100.0d0)
       END IF
       IPE(NROWS_LOC+1) = SAVEPNT
-      CALL MUMPS_IDEALLOC(SNDCNT, RCVCNT, MSGCNT, MEMCNT=MEMCNT)
+      CALL MUMPS_DEALLOC(BUFLEVEL, RDISPL, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(MSGCNT, SNDCNT, RCVCNT, MEMCNT=MEMCNT)
       DEALLOCATE(APNT)
 #if defined(DETERMINISTIC_PARALLEL_GRAPH)
-         DO I=1, LAST(MYID+1)-FIRST(MYID+1)+1
-            L = IPE(I+1)-IPE(I)
-            CALL DMUMPS_MERGESORT(L,
-     &           PE(IPE(I):IPE(I+1)-1),
-     &           WORK(:))
-            CALL DMUMPS_MERGESWAP1(L, WORK(:),
-     &           PE(IPE(I):IPE(I+1)-1))
-         END DO
+      DO I=1, LAST(MYID+1)-FIRST(MYID+1)+1
+         L = int(IPE(I+1)-IPE(I))
+         CALL DMUMPS_MERGESORT(L,
+     &        PE(IPE(I):IPE(I+1)-1),
+     &        WORK(:))
+         CALL DMUMPS_MERGESWAP1(L, WORK(:),
+     &        PE(IPE(I):IPE(I+1)-1))
+      END DO
 #endif
       RETURN
-      END SUBROUTINE DMUMPS_BUILD_SCOTCH_GRAPH
+      END SUBROUTINE DMUMPS_BUILD_DIST_GRAPH
+#endif      
       SUBROUTINE DMUMPS_BUILD_LOC_GRAPH(id, ord, GSIZE, IPE, PE, LENG,
      &     I_HALO_MAP, top_graph, WORK)
       IMPLICIT NONE
-      INCLUDE 'mpif.h'
       TYPE(DMUMPS_STRUC)   :: id
       TYPE(ORD_TYPE)       :: ord
       TYPE(GRAPH_TYPE)     :: top_graph
-      INTEGER, POINTER     :: IPE(:), PE(:), LENG(:),
+      INTEGER(8), POINTER  :: IPE(:)
+      INTEGER, POINTER     :: PE(:), LENG(:),
      &     I_HALO_MAP(:), WORK(:)
       INTEGER              :: GSIZE
       INTEGER                :: IERR, MYID, NPROCS
-      INTEGER                :: I, PROC, LOCNNZ,
-     &     NEW_LOCNNZ, J, LOC_ROW
-      INTEGER                :: TOP_CNT,IIDX,JJDX
-      INTEGER                :: HALO_SIZE, TIDX, NROWS_LOC, DUPS
+      INTEGER                :: I, PROC, J, LOC_ROW
+      INTEGER(8)             :: LOCNNZ, INNZ, NEW_LOCNNZ, TOP_CNT, TIDX,
+     &                          RCVPNT
+      INTEGER                :: IIDX,JJDX
+      INTEGER                :: HALO_SIZE, NROWS_LOC, DUPS
       INTEGER                :: STATUS(MPI_STATUS_SIZE)
+      INTEGER(8), POINTER    :: MSGCNT(:), SNDCNT(:), RCVCNT(:)
       INTEGER, POINTER       :: MAPTAB(:),
-     &     SNDCNT(:), RCVCNT(:),
-     &     SDISPL(:), HALO_MAP(:)
+     &     SDISPL(:), HALO_MAP(:), BUFLEVEL(:)
       INTEGER, POINTER       :: RDISPL(:),
-     &     MSGCNT(:), SIPES(:,:)
+     &     SIPES(:,:)
       INTEGER, POINTER       :: PCNT(:), TSENDI(:),
      &     TSENDJ(:), RCVBUF(:)
       TYPE(ARRPNT), POINTER  :: APNT(:)
-      INTEGER                :: BUFSIZE, SOURCE, RCVPNT, MAXS, PNT,
-     &     SAVEPNT
+      INTEGER                :: BUFSIZE, SOURCE, MAXS
+      INTEGER(8)             :: PNT, SAVEPNT
       INTEGER, PARAMETER     :: ITAG=30
       INTEGER(KIND=8)        :: TLEN
       LOGICAL                :: FLAG
       nullify(MAPTAB, SNDCNT, RCVCNT, SDISPL, HALO_MAP)
-      nullify(RDISPL, MSGCNT, SIPES)
+      nullify(RDISPL, MSGCNT, SIPES, BUFLEVEL)
       nullify(PCNT, TSENDI, TSENDJ, RCVBUF, APNT)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
@@ -1625,18 +1579,20 @@ C
       END IF
       MAPTAB   => WORK(     1 :   id%N)
       HALO_MAP => WORK(id%N+1 : 2*id%N)
-      CALL MUMPS_REALLOC(SNDCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(SNDCNT, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(RCVCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(RCVCNT, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(MSGCNT, NPROCS, id%INFO, LP,
+      CALL MUMPS_I8REALLOC(MSGCNT, NPROCS, id%INFO, LP,
+     &     MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MUMPS_REALLOC(RDISPL, NPROCS, id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       ALLOCATE(APNT(NPROCS))
       SNDCNT = 0
       TOP_CNT = 0
       BUFSIZE = 10000
-      LOCNNZ = id%NZ_loc
+      LOCNNZ = id%KEEP8(29)
       NROWS_LOC = ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1
       MAPTAB = 0
       MAXS = 0
@@ -1651,77 +1607,72 @@ C
       ALLOCATE(SIPES(max(1,MAXS), NPROCS))
       SIPES(:,:)  = 0
       TOP_CNT     = 0
-      DO I=1, id%NZ_loc
-         IF(id%IRN_loc(I) .NE. id%JCN_loc(I)) THEN
-            PROC = MAPTAB(id%IRN_loc(I))
+      DO INNZ=1, LOCNNZ
+         IF(id%IRN_loc(INNZ) .NE. id%JCN_loc(INNZ)) THEN
+            PROC = MAPTAB(id%IRN_loc(INNZ))
             IF(PROC .EQ. 0) THEN
                TOP_CNT = TOP_CNT+1
             ELSE
-               IIDX = ord%PERMTAB(id%IRN_loc(I))
+               IIDX = ord%PERMTAB(id%IRN_loc(INNZ))
                LOC_ROW = IIDX-ord%FIRST(PROC)+1
                SIPES(LOC_ROW, PROC) = SIPES(LOC_ROW, PROC)+1
                SNDCNT(PROC) = SNDCNT(PROC)+1
             END IF
-            PROC = MAPTAB(id%JCN_loc(I))
+            PROC = MAPTAB(id%JCN_loc(INNZ))
             IF(PROC .EQ. 0) THEN
                TOP_CNT = TOP_CNT+1
             ELSE
-               IIDX = ord%PERMTAB(id%JCN_loc(I))
+               IIDX = ord%PERMTAB(id%JCN_loc(INNZ))
                LOC_ROW = IIDX-ord%FIRST(PROC)+1
                SIPES(LOC_ROW, PROC) = SIPES(LOC_ROW, PROC)+1
                SNDCNT(PROC) = SNDCNT(PROC)+1
             END IF
          END IF
       END DO
-      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER, RCVCNT(1), 1,
-     &     MPI_INTEGER, id%COMM, IERR)
+      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
+     &     MPI_INTEGER8, id%COMM, IERR)
       I = ceiling(dble(MAXS)*1.20D0)
       CALL MUMPS_REALLOC(LENG, max(I,1), id%INFO,
      &        LP, STRING='B_L_G:LENG', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      SNDCNT(:) = MAXS
-      CALL MPI_REDUCE_SCATTER ( SIPES(1,1), LENG(1), SNDCNT(1), 
+      CALL MUMPS_I8DEALLOC(SNDCNT, MEMCNT=MEMCNT)
+      RDISPL(:) = MAXS
+      CALL MPI_REDUCE_SCATTER ( SIPES(1,1), LENG(1), RDISPL(1), 
      &     MPI_INTEGER, MPI_SUM, id%COMM, IERR )
       DEALLOCATE(SIPES)
       I = ceiling(dble(NROWS_LOC+1)*1.20D0)
-      CALL MUMPS_REALLOC(IPE, max(I,1), id%INFO,
+      CALL MUMPS_I8REALLOC(IPE, max(I,1), id%INFO,
      &        LP, STRING='B_L_G:IPE', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      TLEN = 0
-      IPE(1) = 1
+      TLEN = 0_8
+      IPE(1) = 1_8
       DO I=1, NROWS_LOC
-         IPE(I+1) = IPE(I) + LENG(I)
-         TLEN = TLEN+LENG(I)
+         IPE(I+1) = IPE(I) + int(LENG(I),8)
+         TLEN = TLEN+int(LENG(I),8)
       END DO
-      IF(TLEN.GT.HUGE(I)) THEN
-         id%INFO( 1 ) = -51
-         id%INFO( 2 ) = int(TLEN)
-         IF ( LPOK ) THEN
-            WRITE(LP, '("32 bits int overflow in parallel analysis")')
-         END IF
-      END IF
-      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1), id%COMM, id%MYID )
-      IF(id%INFO(1).LT.0) RETURN
-      CALL MUMPS_REALLOC(TSENDI, max(TOP_CNT,1), id%INFO, LP,
+      CALL MUMPS_IREALLOC8(TSENDI, max(TOP_CNT,1_8), id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MUMPS_REALLOC(TSENDJ, max(TOP_CNT,1), id%INFO, LP,
+      CALL MUMPS_IREALLOC8(TSENDJ, max(TOP_CNT,1_8), id%INFO, LP,
      &     MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       LENG(:) = 0
+      CALL MUMPS_REALLOC(BUFLEVEL, NPROCS, id%INFO, LP,
+     &     MEMCNT=MEMCNT, ERRCODE=-7)
       CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE, PE,
-     &     LENG, RCVBUF, MSGCNT, SNDCNT, id%COMM)
-      NEW_LOCNNZ = sum(RCVCNT)
+     &     LENG, RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
+      NEW_LOCNNZ = 0
       DO I=1, NPROCS
-         MSGCNT(I) = RCVCNT(I)/BUFSIZE
+         NEW_LOCNNZ = NEW_LOCNNZ + RCVCNT(I)
+         MSGCNT(I) = RCVCNT(I)/int(BUFSIZE,8)
       END DO
-      CALL MUMPS_REALLOC(PE, max(NEW_LOCNNZ+2*NROWS_LOC,1), id%INFO,
-     &        LP, STRING='B_L_G:PE', MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MUMPS_IREALLOC8(PE, max(NEW_LOCNNZ+2_8*int(NROWS_LOC,8),1_8),
+     &     id%INFO, LP, STRING='B_L_G:PE', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
-      RCVPNT = 1
-      SNDCNT = 0
-      TIDX   = 0
-      DO I=1, id%NZ_loc
-         IF(mod(I,BUFSIZE/10) .EQ. 0) THEN
+      RCVPNT   = 1
+      BUFLEVEL = 0 
+      TIDX     = 0
+      DO INNZ=1, LOCNNZ
+         IF(mod(INNZ,int(BUFSIZE/10,8)) .EQ. 0) THEN
             CALL MPI_IPROBE( MPI_ANY_SOURCE, ITAG, id%COMM,
      &           FLAG, STATUS, IERR )
             IF(FLAG) THEN
@@ -1733,53 +1684,62 @@ C
                RCVPNT = RCVPNT + BUFSIZE
             END IF
          END IF
-         IF(id%IRN_loc(I) .NE. id%JCN_loc(I)) THEN
-            PROC = MAPTAB(id%IRN_loc(I))
+         IF(id%IRN_loc(INNZ) .NE. id%JCN_loc(INNZ)) THEN
+            PROC = MAPTAB(id%IRN_loc(INNZ))
+            IF((MAPTAB(id%JCN_loc(INNZ)).NE.PROC) .AND.
+     &           (MAPTAB(id%JCN_loc(INNZ)).NE.0)  .AND.
+     &           (PROC.NE.0)) THEN
+               IERR = -50
+               id%INFO(1) = IERR
+            END IF
             IF(PROC .EQ. 0) THEN
                TIDX = TIDX+1
-               TSENDI(TIDX) = id%IRN_loc(I)
-               TSENDJ(TIDX) = id%JCN_loc(I)
+               TSENDI(TIDX) = id%IRN_loc(INNZ)
+               TSENDJ(TIDX) = id%JCN_loc(INNZ)
             ELSE
-               IIDX = ord%PERMTAB(id%IRN_loc(I))
-               JJDX = ord%PERMTAB(id%JCN_loc(I))
-               APNT(PROC)%BUF(2*SNDCNT(PROC)+1) =IIDX-ord%FIRST(PROC)+1
+               IIDX = ord%PERMTAB(id%IRN_loc(INNZ))
+               JJDX = ord%PERMTAB(id%JCN_loc(INNZ))
+               APNT(PROC)%BUF(2*BUFLEVEL(PROC)+1)=IIDX-ord%FIRST(PROC)+1
                IF( (JJDX .GE. ord%FIRST(PROC)) .AND.
      &              (JJDX .LE. ord%LAST(PROC)) ) THEN
-               APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = JJDX-ord%FIRST(PROC)+1
+                  APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) =
+     &            JJDX-ord%FIRST(PROC)+1
+               ELSE
+                  APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) = -id%JCN_loc(INNZ)
+               END IF
+               BUFLEVEL(PROC) = BUFLEVEL(PROC)+1
+               IF(BUFLEVEL(PROC) .EQ. BUFSIZE) THEN
+                  CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE,
+     &                 PE, LENG, RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
+               END IF
+            END IF
+            PROC = MAPTAB(id%JCN_loc(INNZ))
+            IF(PROC .EQ. 0) THEN
+               TIDX = TIDX+1
+               TSENDI(TIDX) = id%JCN_loc(INNZ)
+               TSENDJ(TIDX) = id%IRN_loc(INNZ)
             ELSE
-               APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = -id%JCN_loc(I)
+               IIDX = ord%PERMTAB(id%JCN_loc(INNZ))
+               JJDX = ord%PERMTAB(id%IRN_loc(INNZ))
+               APNT(PROC)%BUF(2*BUFLEVEL(PROC)+1) =
+     &         IIDX-ord%FIRST(PROC)+1
+               IF( (JJDX .GE. ord%FIRST(PROC)) .AND.
+     &              (JJDX .LE. ord%LAST(PROC)) ) THEN
+                  APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) =
+     &            JJDX-ord%FIRST(PROC)+1
+               ELSE
+                  APNT(PROC)%BUF(2*BUFLEVEL(PROC)+2) = -id%IRN_loc(INNZ)
+               END IF
+               BUFLEVEL(PROC) = BUFLEVEL(PROC)+1
+               IF(BUFLEVEL(PROC) .EQ. BUFSIZE) THEN
+                  CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE,
+     &                 PE, LENG, RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
+               END IF
             END IF
-            SNDCNT(PROC) = SNDCNT(PROC)+1
-            IF(SNDCNT(PROC) .EQ. BUFSIZE) THEN
-               CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE,
-     &              PE, LENG, RCVBUF, MSGCNT, SNDCNT, id%COMM)
-            END IF
          END IF
-         PROC = MAPTAB(id%JCN_loc(I))
-         IF(PROC .EQ. 0) THEN
-            TIDX = TIDX+1
-            TSENDI(TIDX) = id%JCN_loc(I)
-            TSENDJ(TIDX) = id%IRN_loc(I)
-         ELSE
-            IIDX = ord%PERMTAB(id%JCN_loc(I))
-            JJDX = ord%PERMTAB(id%IRN_loc(I))
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+1) = IIDX-ord%FIRST(PROC)+1
-            IF( (JJDX .GE. ord%FIRST(PROC)) .AND.
-     &           (JJDX .LE. ord%LAST(PROC)) ) THEN
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = JJDX-ord%FIRST(PROC)+1
-         ELSE
-            APNT(PROC)%BUF(2*SNDCNT(PROC)+2) = -id%IRN_loc(I)
-         END IF
-         SNDCNT(PROC) = SNDCNT(PROC)+1
-         IF(SNDCNT(PROC) .EQ. BUFSIZE) THEN
-            CALL DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE, PE,
-     &           LENG, RCVBUF, MSGCNT, SNDCNT, id%COMM)
-         END IF
-      END IF
-      END IF
       END DO
       CALL DMUMPS_SEND_BUF(APNT, -1, NPROCS, BUFSIZE, IPE, PE, LENG,
-     &     RCVBUF, MSGCNT, SNDCNT, id%COMM)
+     &     RCVBUF, MSGCNT, BUFLEVEL, id%COMM)
       DUPS = 0
       PNT = 0
       SAVEPNT = 1
@@ -1787,21 +1747,21 @@ C
       HALO_MAP(:) = 0
       HALO_SIZE = 0
       DO I=1, NROWS_LOC
-         DO J=IPE(I),IPE(I+1)-1
-            IF(PE(J) .LT. 0) THEN
-               IF(HALO_MAP(-PE(J)) .EQ. 0) THEN
+         DO INNZ=IPE(I),IPE(I+1)-1
+            IF(PE(INNZ) .LT. 0) THEN
+               IF(HALO_MAP(-PE(INNZ)) .EQ. 0) THEN
                   HALO_SIZE = HALO_SIZE+1
-                  HALO_MAP(-PE(J)) = NROWS_LOC+HALO_SIZE
+                  HALO_MAP(-PE(INNZ)) = NROWS_LOC+HALO_SIZE
                END IF
-               PE(J) = HALO_MAP(-PE(J))
+               PE(INNZ) = HALO_MAP(-PE(INNZ))
             END IF
-            IF(MAPTAB(PE(J)) .EQ. I) THEN
+            IF(MAPTAB(PE(INNZ)) .EQ. I) THEN
                DUPS = DUPS+1
                LENG(I) = LENG(I)-1
             ELSE
-               MAPTAB(PE(J)) = I 
+               MAPTAB(PE(INNZ)) = I 
                PNT = PNT+1
-               PE(PNT) = PE(J)
+               PE(PNT) = PE(INNZ)
             END IF
          END DO
          IPE(I) = SAVEPNT
@@ -1823,57 +1783,71 @@ C
      &     LP, COPY=.TRUE.,
      &     STRING='lcgrph:leng', MEMCNT=MEMCNT, ERRCODE=-7)
       LENG(NROWS_LOC+1:NROWS_LOC+HALO_SIZE) = 0
-      CALL MUMPS_REALLOC(IPE, NROWS_LOC+HALO_SIZE+1, id%INFO,
+      CALL MUMPS_I8REALLOC(IPE, NROWS_LOC+HALO_SIZE+1, id%INFO,
      &     LP, COPY=.TRUE.,
      &     STRING='lcgrph:ipe', MEMCNT=MEMCNT, ERRCODE=-7)
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       IPE(NROWS_LOC+2:NROWS_LOC+HALO_SIZE+1) = IPE(NROWS_LOC+1)
       GSIZE = NROWS_LOC + HALO_SIZE
-      CALL MPI_GATHER(TOP_CNT, 1, MPI_INTEGER, RCVCNT(1), 1, 
-     & MPI_INTEGER, 0, id%COMM, IERR)
-      RDISPL => MSGCNT
-      NULLIFY(MSGCNT)
+      CALL MPI_GATHER(TOP_CNT, 1, MPI_INTEGER8, RCVCNT(1), 1, 
+     & MPI_INTEGER8, 0, id%COMM, IERR)
       IF(MYID.EQ.0) THEN
          NEW_LOCNNZ = sum(RCVCNT)
-         RDISPL(1) = 0
-         DO I=2, NPROCS
-            RDISPL(I) = RDISPL(I-1)+RCVCNT(I-1)
-         END DO
          top_graph%NZ_LOC = NEW_LOCNNZ
          top_graph%COMM = id%COMM
-         CALL MUMPS_REALLOC(top_graph%IRN_LOC, max(1,NEW_LOCNNZ), 
+         CALL MUMPS_IREALLOC8(top_graph%IRN_LOC, max(1_8,NEW_LOCNNZ), 
      &        id%INFO, LP, MEMCNT=MEMCNT, ERRCODE=-7)
-         CALL MUMPS_REALLOC(top_graph%JCN_LOC, max(1,NEW_LOCNNZ), 
+         CALL MUMPS_IREALLOC8(top_graph%JCN_LOC, max(1_8,NEW_LOCNNZ), 
      &        id%INFO, LP, MEMCNT=MEMCNT, ERRCODE=-7)
          IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       ELSE
          ALLOCATE(top_graph%IRN_LOC(1), top_graph%JCN_LOC(1))
       END IF
-      CALL MPI_GATHERV(TSENDI(1), TOP_CNT, MPI_INTEGER,
-     &     top_graph%IRN_LOC(1), RCVCNT(1), RDISPL(1), MPI_INTEGER, 
-     &     0, id%COMM, IERR)
-      CALL MPI_GATHERV(TSENDJ(1), TOP_CNT, MPI_INTEGER, 
-     &     top_graph%JCN_LOC(1), RCVCNT(1), RDISPL(1), MPI_INTEGER, 
-     &     0, id%COMM, IERR)
-      CALL MUMPS_IDEALLOC(SNDCNT, RCVCNT, RDISPL,
-     &        TSENDI, TSENDJ, MEMCNT=MEMCNT)
+      IF(MYID.EQ.0) THEN
+         top_graph%IRN_LOC(1:TOP_CNT) = TSENDI(1:TOP_CNT)
+         top_graph%JCN_LOC(1:TOP_CNT) = TSENDJ(1:TOP_CNT)
+         DO PROC=2, NPROCS
+            DO WHILE (RCVCNT(PROC) .GT. 0)
+               I = int(min(int(BUFSIZE,8), RCVCNT(PROC)))
+               CALL MPI_RECV(top_graph%IRN_LOC(TOP_CNT+1), I,
+     &              MPI_INTEGER, PROC-1, ITAG, id%COMM, STATUS, IERR)
+               CALL MPI_RECV(top_graph%JCN_LOC(TOP_CNT+1), I,
+     &              MPI_INTEGER, PROC-1, ITAG, id%COMM, STATUS, IERR)
+               RCVCNT(PROC) = RCVCNT(PROC)-I
+               TOP_CNT = TOP_CNT+I
+            END DO
+         END DO
+      ELSE
+         DO WHILE (TOP_CNT .GT. 0)
+            I = int(MIN(int(BUFSIZE,8), TOP_CNT))
+            CALL MPI_SEND(TSENDI(TOP_CNT-I+1), I,
+     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
+            CALL MPI_SEND(TSENDJ(TOP_CNT-I+1), I,
+     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
+            TOP_CNT = TOP_CNT-I
+         END DO
+      END IF
+      CALL MUMPS_DEALLOC(BUFLEVEL, RDISPL, TSENDI,
+     &     TSENDJ, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(MSGCNT, SNDCNT, RCVCNT, MEMCNT=MEMCNT)
       DEALLOCATE(APNT)
       RETURN
       END SUBROUTINE DMUMPS_BUILD_LOC_GRAPH
       SUBROUTINE DMUMPS_SEND_BUF(APNT, PROC, NPROCS, BUFSIZE, IPE, PE,
      &     LENG, RCVBUF, MSGCNT, SNDCNT, COMM)
       IMPLICIT NONE
-      INCLUDE 'mpif.h'
       INTEGER                 :: NPROCS, PROC, COMM
       TYPE(ARRPNT)            :: APNT(:)
       INTEGER                 :: BUFSIZE
-      INTEGER, POINTER        :: RCVBUF(:), LENG(:), PE(:), IPE(:)
-      INTEGER                 :: MSGCNT(:), SNDCNT(:)
+      INTEGER, POINTER        :: RCVBUF(:), LENG(:), PE(:)
+      INTEGER                 :: SNDCNT(:)
+      INTEGER(8)              :: MSGCNT(:), IPE(:)
       LOGICAL, SAVE           :: INIT = .TRUE.
       INTEGER, POINTER, SAVE  :: SPACE(:,:,:)
       LOGICAL, POINTER, SAVE  :: PENDING(:)
       INTEGER, POINTER, SAVE  :: REQ(:), CPNT(:)
-      INTEGER                 :: IERR, MYID, I, SOURCE, TOTMSG
+      INTEGER                 :: IERR, MYID, I, SOURCE
+      INTEGER(8)              :: TOTMSG
       LOGICAL                 :: FLAG, TFLAG
       INTEGER                 :: STATUS(MPI_STATUS_SIZE)
       INTEGER                 :: TSTATUS(MPI_STATUS_SIZE)
@@ -1972,9 +1946,10 @@ C
       END SUBROUTINE DMUMPS_SEND_BUF
       SUBROUTINE DMUMPS_ASSEMBLE_MSG(BUFSIZE, RCVBUF, IPE, PE, LENG)
       IMPLICIT NONE
-      INTEGER          :: BUFSIZE
-      INTEGER, POINTER :: RCVBUF(:), IPE(:), PE(:), LENG(:)
-      INTEGER          :: I, ROW, COL
+      INTEGER             :: BUFSIZE
+      INTEGER             :: RCVBUF(:), PE(:), LENG(:)
+      INTEGER(8)          :: IPE(:)
+      INTEGER             :: I, ROW, COL
       DO I=1, 2*BUFSIZE, 2
          ROW = RCVBUF(I)
          COL = RCVBUF(I+1)
@@ -1983,6 +1958,7 @@ C
       END DO
       RETURN
       END SUBROUTINE DMUMPS_ASSEMBLE_MSG 
+#if defined(ptscotch) || defined(parmetis) || defined(parmetis3)
       SUBROUTINE DMUMPS_BUILD_TREE(ord)
       TYPE(ORD_TYPE)  :: ord
       INTEGER :: I
@@ -2011,7 +1987,9 @@ C
       INTEGER              :: FIRST(:), LAST(:), BASE, NPROCS, TYPE
       INTEGER, TARGET      :: WORK(:)
       INTEGER, POINTER     :: TMP(:), NZ_ROW(:)
-      INTEGER              :: I, IERR, P, T, F
+      INTEGER              :: I, IERR, P, F, J
+      INTEGER(8)           :: LOCNNZ, INNZ, LOCOFFDIAG,
+     &     OFFDIAG, T
       DO I=0, BASE-1
          FIRST(I+1) = 0
          LAST(I+1)  = -1
@@ -2025,45 +2003,54 @@ C
      &     (BASE+ord%NSLAVES-1-BASE)+1
       LAST(BASE+ord%NSLAVES)  = id%N
       ELSE IF (TYPE.EQ.2) THEN
-      TMP    => WORK(1:id%N)
-      NZ_ROW => WORK(id%N+1:2*id%N)
-      TMP = 0
-      DO I=1, ID%NZ_LOC
-         IF(id%IRN_LOC(I) .NE. id%JCN_LOC(I)) THEN
-            TMP(id%IRN_LOC(I)) = TMP(id%IRN_LOC(I))+1
-            IF(id%SYM.GT.0) THEN
-               TMP(id%JCN_LOC(I)) = TMP(id%JCN_LOC(I))+1
-            end if
-         end if
-      end do
-      CALL MPI_ALLREDUCE(TMP(1), NZ_ROW(1), id%N,
-     &     MPI_INTEGER, MPI_SUM, id%COMM, IERR)
-      nullify(TMP)
-      P = 1
-      T = 0
-      F = 1
-      DO I=1, id%N
-         T = T+NZ_ROW(I)
-         IF(T .ge. id%NZ/ord%NSLAVES) THEN
-            FIRST(BASE+P) = F
-            LAST(BASE+P)  = I
-            F = I+1
-            P = P+1
-            T = 0
-            IF (P.EQ.ord%NSLAVES) THEN
-               FIRST(BASE+P) = F
-               LAST(BASE+P)  = id%N
+         TMP    => WORK(1:id%N)
+         NZ_ROW => WORK(id%N+1:2*id%N)
+         TMP = 0
+         LOCOFFDIAG = 0_8
+         LOCNNZ = id%KEEP8(29)
+         DO INNZ=1, LOCNNZ
+            IF(id%IRN_LOC(INNZ) .NE. id%JCN_LOC(INNZ)) THEN
+               TMP(id%IRN_LOC(INNZ)) = TMP(id%IRN_LOC(INNZ))+1
+               LOCOFFDIAG = LOCOFFDIAG+1
+               IF(id%SYM.GT.0) THEN
+                  TMP(id%JCN_LOC(INNZ)) = TMP(id%JCN_LOC(INNZ))+1
+                  LOCOFFDIAG = LOCOFFDIAG+1
+               END IF
+            END IF
+         END DO
+         CALL MPI_ALLREDUCE(TMP(1), NZ_ROW(1), id%N,
+     &        MPI_INTEGER, MPI_SUM, id%COMM, IERR)
+         CALL MPI_ALLREDUCE(LOCOFFDIAG, OFFDIAG, 1,
+     &        MPI_INTEGER8, MPI_SUM, id%COMM, IERR)
+         nullify(TMP)
+         P = 1+BASE
+         T = 0_8
+         F = 1
+         I = 1
+         DO
+            IF(I.GE.id%N) THEN
+               FIRST(P) = F
+               LAST(P)  = id%N
+               DO J=P+1, NPROCS+1
+                  FIRST(J) = id%N+1
+                  LAST(J)  = id%N
+               END DO
                EXIT
             END IF
-         END IF
-      END DO
+            T = T+int(NZ_ROW(I),8)
+            IF(T .GE. OFFDIAG/int(ord%NSLAVES,8)) THEN
+               FIRST(P) = F
+               LAST(P)  = I
+               F = I+1
+               P = P+1
+               T = 0_8
+            END IF
+            I = I+1
+         END DO
       END IF
-      DO I=BASE+ord%NSLAVES, NPROCS
-         FIRST(I+1) = id%N+1
-         LAST(I+1)  = id%N
-      END DO
       RETURN
       END SUBROUTINE DMUMPS_GRAPH_DIST
+#endif     
       SUBROUTINE DMUMPS_MERGESWAP(N, L, A1, A2)
       INTEGER   :: I, LP, ISWAP, N
       INTEGER   :: L(0:), A1(:), A2(:)
@@ -2088,7 +2075,7 @@ C
          I  = I + 1
       ENDDO
       END SUBROUTINE DMUMPS_MERGESWAP
-#if defined(DETERMINISTIC_PARALLEL_GRAPH) 
+#if defined(DETERMINISTIC_PARALLEL_GRAPH)  
       SUBROUTINE DMUMPS_MERGESWAP1(N, L, A)
       INTEGER   :: I, LP, ISWAP, N
       INTEGER   :: L(0:), A(:)
@@ -2110,7 +2097,7 @@ C
          I  = I + 1
       ENDDO
       END SUBROUTINE DMUMPS_MERGESWAP1
-#endif     
+#endif
       SUBROUTINE DMUMPS_MERGESORT(N, K, L)
       INTEGER    :: N
       INTEGER    :: K(:), L(0:)
@@ -2184,58 +2171,432 @@ C
       IF(associated(A)) THEN
          MUMPS_GETSIZE = size(A)
       ELSE
-         MUMPS_GETSIZE = 0
+         MUMPS_GETSIZE = 0_8
       END IF
       RETURN
       END FUNCTION MUMPS_GETSIZE
-      SUBROUTINE MUMPS_IDEALLOC(A1, A2, A3, A4, A5, A6, A7, MEMCNT)
-      INTEGER, POINTER :: A1(:)
-      INTEGER, POINTER, OPTIONAL :: A2(:), A3(:), A4(:), A5(:),
-     &     A6(:), A7(:)
-      INTEGER, OPTIONAL :: MEMCNT
-      INTEGER :: IMEMCNT
-      IMEMCNT = 0
-      IF(associated(A1)) THEN
-         IMEMCNT = IMEMCNT+size(A1)
-         DEALLOCATE(A1)
+#if defined(parmetis) || defined(parmetis3)
+      SUBROUTINE MUMPS_PARMETIS_MIXEDto32(id, BASE, VERTLOCNBR, FIRST,
+     &     VERTLOCTAB, EDGELOCTAB, BASEVAL, OPTIONS, ORDER,
+     &     SIZES, COMM, IERR)
+      IMPLICIT NONE
+      TYPE(DMUMPS_STRUC) :: id
+      INTEGER            :: FIRST(:), EDGELOCTAB(:), OPTIONS(:)
+      INTEGER            :: SIZES(:), ORDER(:)
+      INTEGER(8)         :: VERTLOCTAB(:)
+      INTEGER            :: VERTLOCNBR, BASEVAL, IERR, COMM, BASE
+      INTEGER, POINTER   :: VERTLOCTAB_I4(:)
+      IF( VERTLOCTAB(VERTLOCNBR+1).GT.huge(VERTLOCNBR)) THEN
+         id%INFO(1) = -51
+         CALL MUMPS_SET_IERROR(
+     &    VERTLOCTAB(VERTLOCNBR+1), id%INFO(2))
+         RETURN
       END IF
-      IF(present(A2)) THEN
-         IF(associated(A2)) THEN
-            IMEMCNT = IMEMCNT+size(A2)
-            DEALLOCATE(A2)
-         END IF
+      nullify(VERTLOCTAB_I4)
+      CALL MUMPS_REALLOC(VERTLOCTAB_I4, VERTLOCNBR+1, id%INFO,
+     &     id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     COMM, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) RETURN
+      CALL MUMPS_COPY_INT_64TO32(VERTLOCTAB(1),
+     &     VERTLOCNBR+1, VERTLOCTAB_I4(1))
+      CALL MUMPS_PARMETIS(FIRST(1+BASE), VERTLOCTAB_I4(1),
+     &     EDGELOCTAB(1), BASEVAL, OPTIONS(1), ORDER(1),
+     &     SIZES(1), COMM, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
       END IF
-      IF(present(A3)) THEN
-         IF(associated(A3)) THEN
-            IMEMCNT = IMEMCNT+size(A3)
-            DEALLOCATE(A3)
-         END IF
-      END IF
-      IF(present(A4)) THEN
-         IF(associated(A4)) THEN
-            IMEMCNT = IMEMCNT+size(A4)
-            DEALLOCATE(A4)
-         END IF
-      END IF
-      IF(present(A5)) THEN
-         IF(associated(A5)) THEN
-            IMEMCNT = IMEMCNT+size(A5)
-            DEALLOCATE(A5)
-         END IF
-      END IF
-      IF(present(A6)) THEN
-         IF(associated(A6)) THEN
-            IMEMCNT = IMEMCNT+size(A6)
-            DEALLOCATE(A6)
-         END IF
-      END IF
-      IF(present(A7)) THEN
-         IF(associated(A7)) THEN
-            IMEMCNT = IMEMCNT+size(A7)
-            DEALLOCATE(A7)
-         END IF
-      END IF
-      IF(present(MEMCNT)) MEMCNT = MEMCNT-IMEMCNT
+      CALL MUMPS_DEALLOC(VERTLOCTAB_I4, MEMCNT=MEMCNT)
       RETURN
-      END SUBROUTINE MUMPS_IDEALLOC
+      END SUBROUTINE MUMPS_PARMETIS_MIXEDto32
+      SUBROUTINE MUMPS_PARMETIS_MIXEDto64
+     &     (id, BASE, VERTLOCNBR, FIRST,
+     &     VERTLOCTAB, EDGELOCTAB, BASEVAL, OPTIONS, ORDER,
+     &     SIZES, COMM, IERR)
+      IMPLICIT NONE
+      TYPE(DMUMPS_STRUC) :: id
+      INTEGER            :: FIRST(:), EDGELOCTAB(:), OPTIONS(:)
+      INTEGER            :: SIZES(:), ORDER(:)
+      INTEGER(8)         :: VERTLOCTAB(:)
+      INTEGER            :: VERTLOCNBR, BASEVAL, IERR, COMM, BASE
+      INTEGER(8), POINTER :: FIRST_I8(:), EDGELOCTAB_I8(:),
+     &     SIZES_I8(:), ORDER_I8(:)
+#if defined(parmetis)
+      INTEGER(8), POINTER :: OPTIONS_I8(:)
+      INTEGER(8)          :: BASEVAL_I8
+      nullify(OPTIONS_I8)
+      IF (id%KEEP(10).NE.1) THEN
+       CALL MUMPS_I8REALLOC(OPTIONS_I8, size(OPTIONS), id%INFO,
+     &     id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) RETURN
+       CALL MUMPS_COPY_INT_32TO64(OPTIONS(1), size(OPTIONS)
+     &      , OPTIONS_I8(1))
+       BASEVAL_I8 = int(BASEVAL,8)
+      END IF
+#endif
+      nullify(FIRST_I8, EDGELOCTAB_I8, SIZES_I8, ORDER_I8)
+      IF (id%KEEP(10).EQ.1) THEN
+       CALL MUMPS_PARMETIS_64(FIRST(1+BASE), VERTLOCTAB(1),
+     &     EDGELOCTAB(1),
+     &     BASEVAL, OPTIONS(1),
+     &     ORDER(1),
+     &     SIZES(1), COMM, IERR)
+      ELSE
+       CALL MUMPS_I8REALLOC(FIRST_I8, size(FIRST), id%INFO,
+     &     id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) GOTO 5
+       CALL MUMPS_I8REALLOC8(EDGELOCTAB_I8, 
+     &     VERTLOCTAB(VERTLOCNBR+1)-1_8,
+     &     id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) GOTO 5
+       CALL MUMPS_I8REALLOC(SIZES_I8, size(SIZES), id%INFO,
+     &     id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) GOTO 5
+       CALL MUMPS_I8REALLOC(ORDER_I8, size(ORDER), id%INFO,
+     &     id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) GOTO 5
+ 5     CONTINUE
+       CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     COMM, id%MYID )
+       IF ( id%INFO(1) .LT. 0 ) RETURN
+       CALL MUMPS_COPY_INT_32TO64(FIRST(1), size(FIRST), FIRST_I8(1))
+       CALL MUMPS_COPY_INT_32TO64_64C(EDGELOCTAB(1),
+     &     VERTLOCTAB(VERTLOCNBR+1)-1_8, EDGELOCTAB_I8(1))
+       CALL MUMPS_PARMETIS_64(FIRST_I8(1+BASE), VERTLOCTAB(1),
+     &     EDGELOCTAB_I8(1),
+#if defined(parmetis3)
+     &     BASEVAL, OPTIONS(1),
+#else
+     &     BASEVAL_I8, OPTIONS_I8(1),
+#endif
+     &     ORDER_I8(1),
+     &     SIZES_I8(1), COMM, IERR)
+      END IF
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     COMM, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL MUMPS_COPY_INT_64TO32(ORDER_I8(1),
+     &     size(ORDER), ORDER(1))
+      CALL MUMPS_COPY_INT_64TO32(SIZES_I8(1),
+     &     size(SIZES), SIZES(1))
+ 10   CONTINUE 
+      CALL MUMPS_I8DEALLOC(FIRST_I8, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(SIZES_I8, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(EDGELOCTAB_I8, MEMCNT=MEMCNT)
+      CALL MUMPS_I8DEALLOC(ORDER_I8, MEMCNT=MEMCNT)
+#if defined(parmetis)
+      CALL MUMPS_I8DEALLOC(OPTIONS_I8, MEMCNT=MEMCNT)
+#endif
+      RETURN
+      END SUBROUTINE MUMPS_PARMETIS_MIXEDto64
+#endif
+#if defined(ptscotch)
+      SUBROUTINE MUMPS_PTSCOTCH_MIXEDto32(id, ord,
+     &     BASEVAL, 
+     &     VERTLOCNBR, VERTLOCTAB,
+     &     EDGELOCNBR, EDGELOCTAB,
+     &     IERR)
+      IMPLICIT NONE
+      INCLUDE 'ptscotchf.h'
+      TYPE(DMUMPS_STRUC)  :: id
+      TYPE(ORD_TYPE)      :: ord
+      INTEGER             :: BASEVAL, VERTLOCNBR
+      INTEGER(8)          :: EDGELOCNBR
+      INTEGER(8)          :: VERTLOCTAB(:)
+      INTEGER             :: EDGELOCTAB(:)
+      INTEGER             :: IERR
+      INTEGER, POINTER    :: VERTLOCTAB_I4(:)
+      INTEGER             :: EDGELOCNBR_I4, MYWORKID
+      DOUBLE PRECISION    :: GRAPHDAT(SCOTCH_DGRAPHDIM),
+     &     ORDEDAT(SCOTCH_DORDERDIM), STRADAT(SCOTCH_STRATDIM),
+     &     CORDEDAT(SCOTCH_ORDERDIM)
+      CHARACTER  STRSTRING*1024
+      nullify(VERTLOCTAB_I4)
+      CALL MUMPS_REALLOC(VERTLOCTAB_I4, VERTLOCNBR+1, id%INFO, LP,
+     &     MEMCNT=MEMCNT, ERRCODE=-7)
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) RETURN      
+      CALL MUMPS_COPY_INT_64TO32(VERTLOCTAB,
+     &     VERTLOCNBR+1, VERTLOCTAB_I4)
+      EDGELOCNBR_I4 = int(EDGELOCNBR)
+      IF(ord%SUBSTRAT .NE. 0) THEN
+         STRSTRING='n{sep=m{asc=b{width=3,strat=q{strat=f}},'//
+     &        'low=q{strat=h},vert=1000,dvert=100,dlevl=0,'//
+     &        'proc=1,seq=q{strat=m{type=h,vert=100,'//
+     &        'low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},'//
+     &        'org=h{pass=10}f{bal=0.2}}}}},ole=s,ose=s,osq=s}'
+      END IF
+      IF(ord%IDO) THEN
+         CALL MPI_COMM_RANK (ord%COMM_NODES, MYWORKID, IERR)
+      ELSE
+         MYWORKID = -1
+      END IF
+      CALL MUMPS_DGRAPHINIT(GRAPHDAT, ord%COMM_NODES, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHBUILD(GRAPHDAT, BASEVAL, VERTLOCNBR,
+     &     VERTLOCNBR, VERTLOCTAB_I4(1), VERTLOCTAB_I4(2),
+     &     VERTLOCTAB_I4(1), VERTLOCTAB_I4(1), EDGELOCNBR_I4,
+     &     EDGELOCNBR_I4, EDGELOCTAB(1), EDGELOCTAB(1),
+     &     EDGELOCTAB(1), IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFSTRATINIT(STRADAT, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(ord%SUBSTRAT .NE. 0) THEN
+         CALL SCOTCHFSTRATDGRAPHORDER(STRADAT, STRSTRING, IERR)
+      END IF
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHORDERINIT(GRAPHDAT, ORDEDAT, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHORDERCOMPUTE(GRAPHDAT, ORDEDAT, STRADAT,
+     &     IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(MYWORKID .EQ. 0) THEN
+         CALL SCOTCHFDGRAPHCORDERINIT(GRAPHDAT, CORDEDAT,
+     &        ord%PERMTAB, ord%PERITAB, ord%CBLKNBR, ord%RANGTAB,
+     &        ord%TREETAB, IERR)
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(MYWORKID .EQ. 0) THEN
+         CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
+     &        CORDEDAT, IERR)
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      ELSE
+         CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
+     &        ORDEDAT, IERR)
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(MYWORKID .EQ. 0) 
+     &     CALL SCOTCHFDGRAPHCORDEREXIT(GRAPHDAT, CORDEDAT)
+      CALL SCOTCHFDGRAPHORDEREXIT(GRAPHDAT, ORDEDAT)
+      CALL SCOTCHFSTRATEXIT(STRADAT) 
+      CALL SCOTCHFDGRAPHEXIT(GRAPHDAT)
+ 10   CONTINUE
+      CALL MUMPS_DEALLOC(VERTLOCTAB_I4, MEMCNT=MEMCNT)
+      RETURN
+      END SUBROUTINE MUMPS_PTSCOTCH_MIXEDto32
+      SUBROUTINE MUMPS_PTSCOTCH_MIXEDto64(id, ord,
+     &     BASEVAL, 
+     &     VERTLOCNBR, VERTLOCTAB,
+     &     EDGELOCNBR, EDGELOCTAB,
+     &     IERR)
+      IMPLICIT NONE
+      INCLUDE 'ptscotchf.h'
+      TYPE(DMUMPS_STRUC)  :: id
+      TYPE(ORD_TYPE)      :: ord
+      INTEGER             :: BASEVAL, VERTLOCNBR
+      INTEGER(8)          :: EDGELOCNBR
+      INTEGER(8)          :: VERTLOCTAB(:)
+      INTEGER             :: EDGELOCTAB(:)
+      INTEGER             :: IERR
+      INTEGER             :: MYWORKID
+      DOUBLE PRECISION    :: GRAPHDAT(SCOTCH_DGRAPHDIM),
+     &     ORDEDAT(SCOTCH_DORDERDIM), STRADAT(SCOTCH_STRATDIM),
+     &     CORDEDAT(SCOTCH_ORDERDIM)
+      CHARACTER  STRSTRING*1024
+      INTEGER(8), POINTER :: EDGELOCTAB_I8(:), PERMTAB_I8(:),
+     &     PERITAB_I8(:), RANGTAB_I8(:), TREETAB_I8(:)
+      INTEGER(8)          :: CBLKNBR_I8, VERTLOCNBR_I8, BASEVAL_I8
+      IF(ord%SUBSTRAT .NE. 0) THEN
+         STRSTRING='n{sep=m{asc=b{width=3,strat=q{strat=f}},'//
+     &        'low=q{strat=h},vert=1000,dvert=100,dlevl=0,'//
+     &        'proc=1,seq=q{strat=m{type=h,vert=100,'//
+     &        'low=h{pass=10},asc=b{width=3,bnd=f{bal=0.2},'//
+     &        'org=h{pass=10}f{bal=0.2}}}}},ole=s,ose=s,osq=s}'
+      END IF
+      IF(ord%IDO) THEN
+         CALL MPI_COMM_RANK (ord%COMM_NODES, MYWORKID, IERR)
+      ELSE
+         MYWORKID = -1
+      END IF
+      nullify(EDGELOCTAB_I8, PERMTAB_I8, PERITAB_I8,
+     &     RANGTAB_I8, TREETAB_I8)
+      IF (id%KEEP(10).NE.1) THEN 
+       CALL MUMPS_I8REALLOC8(EDGELOCTAB_I8, 
+     &     VERTLOCTAB(VERTLOCNBR+1)-1_8,
+     &     id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       IF ( id%INFO(1) .LT. 0 ) GOTO 5
+       IF (MYWORKID .EQ. 0) THEN
+         CALL MUMPS_I8REALLOC(PERMTAB_I8, size(ord%PERMTAB),
+     &        id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+         IF ( id%INFO(1) .LT. 0 ) GOTO 5
+         CALL MUMPS_I8REALLOC(PERITAB_I8, size(ord%PERITAB),
+     &        id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+         IF ( id%INFO(1) .LT. 0 ) GOTO 5
+         CALL MUMPS_I8REALLOC(TREETAB_I8, size(ord%TREETAB),
+     &        id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+         IF ( id%INFO(1) .LT. 0 ) GOTO 5
+         CALL MUMPS_I8REALLOC(RANGTAB_I8, size(ord%RANGTAB),
+     &        id%INFO, id%ICNTL(1), MEMCNT=MEMCNT, ERRCODE=-7)
+       END IF
+ 5     CONTINUE
+       CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+       IF ( id%INFO(1) .LT. 0 ) RETURN
+       CALL MUMPS_COPY_INT_32TO64_64C(EDGELOCTAB,
+     &     VERTLOCTAB(VERTLOCNBR+1)-1_8, EDGELOCTAB_I8)
+       BASEVAL_I8    = int(BASEVAL,8)
+       VERTLOCNBR_I8 = int(VERTLOCNBR,8)
+      ENDIF
+      CALL MUMPS_DGRAPHINIT(GRAPHDAT, ord%COMM_NODES, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF (id%KEEP(10).NE.1) THEN
+       CALL SCOTCHFDGRAPHBUILD(GRAPHDAT, BASEVAL_I8, VERTLOCNBR_I8,
+     &     VERTLOCNBR_I8, VERTLOCTAB(1), VERTLOCTAB(2),
+     &     VERTLOCTAB(1), VERTLOCTAB(1), EDGELOCNBR,
+     &     EDGELOCNBR, EDGELOCTAB_I8(1), EDGELOCTAB_I8(1),
+     &     EDGELOCTAB_I8(1), IERR)
+      ELSE
+       CALL SCOTCHFDGRAPHBUILD(GRAPHDAT, BASEVAL, VERTLOCNBR,
+     &     VERTLOCNBR, VERTLOCTAB(1), VERTLOCTAB(2),
+     &     VERTLOCTAB(1), VERTLOCTAB(1), EDGELOCNBR,
+     &     EDGELOCNBR, EDGELOCTAB(1), EDGELOCTAB(1),
+     &     EDGELOCTAB(1), IERR)
+      ENDIF
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFSTRATINIT(STRADAT, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(ord%SUBSTRAT .NE. 0) THEN
+         CALL SCOTCHFSTRATDGRAPHORDER(STRADAT, STRSTRING, IERR)
+      END IF
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHORDERINIT(GRAPHDAT, ORDEDAT, IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHORDERCOMPUTE(GRAPHDAT, ORDEDAT, STRADAT,
+     &     IERR)
+      IF(IERR.NE.0) THEN
+         id%INFO(1:2) = -50
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(MYWORKID .EQ. 0) THEN
+        IF (id%KEEP(10).NE.1) THEN 
+         CALL SCOTCHFDGRAPHCORDERINIT(GRAPHDAT, CORDEDAT,
+     &        PERMTAB_I8, PERITAB_I8, CBLKNBR_I8, RANGTAB_I8,
+     &        TREETAB_I8, IERR)
+        ELSE
+         CALL SCOTCHFDGRAPHCORDERINIT(GRAPHDAT, CORDEDAT,
+     &        ord%PERMTAB, ord%PERITAB, ord%CBLKNBR, ord%RANGTAB,
+     &        ord%TREETAB, IERR)
+        ENDIF
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      IF(MYWORKID .EQ. 0) THEN
+         CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
+     &        CORDEDAT, IERR)
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      ELSE
+         CALL SCOTCHFDGRAPHORDERGATHER(GRAPHDAT, ORDEDAT,
+     &        ORDEDAT, IERR)
+         IF(IERR.NE.0) THEN
+            id%INFO(1:2) = -50
+         END IF
+      END IF
+      CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
+     &     ord%COMM_NODES, id%MYID )
+      IF ( id%INFO(1) .LT. 0 ) GOTO 10
+      CALL SCOTCHFDGRAPHORDEREXIT(GRAPHDAT, ORDEDAT)
+      CALL SCOTCHFSTRATEXIT(STRADAT) 
+      CALL SCOTCHFDGRAPHEXIT(GRAPHDAT)
+ 10   CONTINUE
+      IF (id%KEEP(10).NE.1) THEN
+       CALL MUMPS_I8DEALLOC(EDGELOCTAB_I8, MEMCNT=MEMCNT)
+       IF(MYWORKID .EQ. 0) THEN
+         CALL SCOTCHFDGRAPHCORDEREXIT(GRAPHDAT, CORDEDAT)
+         CALL MUMPS_COPY_INT_64TO32(PERMTAB_I8,
+     &        size(ord%PERMTAB), ord%PERMTAB)
+         CALL MUMPS_COPY_INT_64TO32(PERITAB_I8,
+     &        size(ord%PERITAB), ord%PERITAB)
+         CALL MUMPS_COPY_INT_64TO32(TREETAB_I8,
+     &        size(ord%TREETAB), ord%TREETAB)
+         CALL MUMPS_COPY_INT_64TO32(RANGTAB_I8,
+     &        size(ord%RANGTAB), ord%RANGTAB)
+         ord%CBLKNBR = int(CBLKNBR_I8)
+         CALL MUMPS_I8DEALLOC(PERMTAB_I8, MEMCNT=MEMCNT)
+         CALL MUMPS_I8DEALLOC(PERITAB_I8, MEMCNT=MEMCNT)
+         CALL MUMPS_I8DEALLOC(RANGTAB_I8, MEMCNT=MEMCNT)
+         CALL MUMPS_I8DEALLOC(TREETAB_I8, MEMCNT=MEMCNT)
+       END IF
+      ENDIF
+      RETURN
+      END SUBROUTINE MUMPS_PTSCOTCH_MIXEDto64
+#endif      
       END MODULE

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -27,8 +27,9 @@ C
      &    FILS, PTRARW, PTRAIW, INTARR, DBLARR,
      &    ND, FRERE, LPTRAR, NELT, FRTPTR, FRTELT,
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &    )
-      USE DMUMPS_COMM_BUFFER
+      USE DMUMPS_BUF
       USE DMUMPS_LOAD
       IMPLICIT NONE
       INCLUDE 'dmumps_root.h'
@@ -37,7 +38,7 @@ C
       INTEGER COMM, MYID, TYPE, TYPEF
       INTEGER N, LIW, INODE,IFLAG,IERROR
       INTEGER ICNTL(40), KEEP(500)
-      DOUBLE PRECISION    DKEEP(130)
+      DOUBLE PRECISION    DKEEP(230)
       INTEGER(8) KEEP8(150)
       INTEGER(8) :: LA, POSFAC, LRLU, LRLUS, IPTRLU
       INTEGER IWPOSCB, IWPOS,
@@ -49,9 +50,10 @@ C
       INTEGER PTRIST(KEEP(28)), PTLUST_S(KEEP(28))
       INTEGER STEP(N), PIMASTER(KEEP(28)), NE(KEEP(28))
       DOUBLE PRECISION    A(LA)
+      INTEGER, intent(in) :: LRGROUPS(N)
       DOUBLE PRECISION OPASSW, OPELIW
-      DOUBLE PRECISION DBLARR(max(1,KEEP(13)))
-      INTEGER INTARR(max(1,KEEP(14))) 
+      DOUBLE PRECISION DBLARR(KEEP8(26))
+      INTEGER INTARR(KEEP8(27)) 
       INTEGER ITLOC( N + KEEP(253) ), FILS( N ),
      &        ND( KEEP(28) ), FRERE( KEEP(28) )
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
@@ -59,7 +61,7 @@ C
      &        TAB_POS_IN_PERE(SLAVEF+2,max(1,KEEP(56)))
       INTEGER NELT, LPTRAR
       INTEGER FRTPTR( N+1 ), FRTELT( NELT )
-      INTEGER PTRAIW( LPTRAR ), PTRARW( LPTRAR )
+      INTEGER(8), INTENT(IN) :: PTRAIW( LPTRAR ), PTRARW( LPTRAR )
       INTEGER LPOOL, LEAF, COMP
       INTEGER IPOOL( LPOOL )
       INTEGER NSTK_S( KEEP(28) )
@@ -237,6 +239,7 @@ C
      &    INTARR,DBLARR,ICNTL,KEEP,KEEP8,DKEEP,.FALSE., ND, FRERE,
      &    LPTRAR, NELT, FRTPTR, FRTELT, 
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE
+     &               , LRGROUPS
      &     )
           IF (IFLAG < 0 ) GOTO 500
        ENDIF
@@ -265,7 +268,7 @@ C
         DO WHILE (IERR.EQ.-1)
          CALL DMUMPS_BUF_SEND_RTNELIND( INODE, NELIM, 
      &     IW(LIST_ROW_SON), IW(LIST_COL_SON), NSLAVES, 
-     &     IW(LIST_SLAVES), MSGDEST, COMM, IERR)
+     &     IW(LIST_SLAVES), MSGDEST, COMM, KEEP, IERR)
          IF ( IERR .EQ. -1 ) THEN
             BLOCKING   =.FALSE.
             SET_IRECV  =.TRUE.
@@ -291,6 +294,7 @@ C
      &       FRTPTR, FRTELT, 
      &       ISTEP_TO_INIV2, TAB_POS_IN_PERE,
      &       .TRUE.
+     &               , LRGROUPS
      &        )
             IF ( IFLAG .LT. 0 ) GOTO 500
             IOLDPS = PTLUST_S(STEP(INODE))
@@ -331,7 +335,7 @@ C
      &         LCONT, NASS, NPIV, IW( IOLDPS +  H_INODE + NPIV ),
      &         IW( IOLDPS +  H_INODE + NPIV + NFRONT ),
      &         A( OPSFAC ), COMPRESSCB,
-     &         MSGDEST, MSGTAG, COMM, IERR )
+     &         MSGDEST, MSGTAG, COMM, KEEP, IERR )
           ELSE
              IF ( TYPE.EQ.2 ) THEN
               INIV2 = ISTEP_TO_INIV2 ( STEP(INODE) )
@@ -362,8 +366,7 @@ C
      &       PTRIST, PTLUST_S, PTRFAC,
      &       PTRAST, STEP, PIMASTER, PAMASTER, NSTK_S, COMP,
      &       IFLAG, IERROR, COMM,
-     &       NBPROCFILS,
-     &       IPOOL, LPOOL, LEAF,
+     &       NBPROCFILS, IPOOL, LPOOL, LEAF,
      &       NBFIN, MYID, SLAVEF,
      &
      &       root, OPASSW, OPELIW, ITLOC, RHS_MUMPS,
@@ -371,7 +374,7 @@ C
      &       INTARR, DBLARR, ICNTL, KEEP,KEEP8,DKEEP, ND, FRERE,
      &       LPTRAR, NELT, FRTPTR, FRTELT,
      &       ISTEP_TO_INIV2, TAB_POS_IN_PERE, .TRUE.  
-     &        )
+     &               , LRGROUPS )
              IF ( IFLAG .LT. 0 ) GOTO 500
           ENDIF
           IOLDPS = PTLUST_S(STEP( INODE ))
@@ -484,7 +487,8 @@ C
      &     .AND. MUST_COMPACT_FACTORS ) THEN
         POSELT = PTRFAC(STEP(INODE))
         CALL DMUMPS_COMPACT_FACTORS(A(POSELT), LDA, 
-     &                         NPIV, NBROW, KEEP(50))
+     &                         NPIV, NBROW, KEEP(50),
+     &                         int(LDA,8)*int(NBROW+NPIV,8))
         MUST_COMPACT_FACTORS = .FALSE.
       ENDIF
       IF (  KEEP(50).EQ.0 .AND. MUST_COMPACT_FACTORS )
@@ -518,7 +522,8 @@ C
         FACTOR_POS = POSELT +
      &         int(LDA,8)*int(NPIV+NBROW-NCBROW_ALREADY_MOVED,8)
         CALL DMUMPS_COMPACT_FACTORS_UNSYM( A(FACTOR_POS), LDA, NPIV,
-     &       NCBROW_NEWLY_MOVED )
+     &       NCBROW_NEWLY_MOVED,
+     &       int(NCBROW_NEWLY_MOVED,8) * int(LDA,8) )
         INEW = FACTOR_POS + int(NPIV,8) * int(NCBROW_NEWLY_MOVED,8)
         IOLD = INEW + int(NCBROW_NEWLY_MOVED,8) * int(NBCOL_STACK,8)
         DO I = 1, NCBROW_PREVIOUSLY_MOVED*NPIV
@@ -537,7 +542,8 @@ C
       IF (MUST_COMPACT_FACTORS) THEN
        POSELT = PTRFAC(STEP(INODE))
        CALL DMUMPS_COMPACT_FACTORS(A(POSELT), LDA, 
-     &                         NPIV, NBROW, KEEP(50))
+     &                         NPIV, NBROW, KEEP(50),
+     &                         int(LDA,8)*int(NBROW+NPIV,8))
        MUST_COMPACT_FACTORS = .FALSE.
       ENDIF
       IOLDPS = PTLUST_S(STEP(INODE))
@@ -556,7 +562,9 @@ C
       ENDIF
       CALL DMUMPS_COMPRESS_LU(SIZE_INPLACE,MYID,N,IOLDPS,TYPE, IW, LIW, 
      &    A, LA, POSFAC, LRLU, LRLUS, 
-     &    IWPOS, PTRAST, PTRFAC, STEP, KEEP,KEEP8, SSARBR,INODE,IERR)
+     &    IWPOS, PTRAST, PTRFAC, STEP, KEEP,KEEP8, SSARBR,INODE,IERR
+     &    , LRGROUPS, NASS
+     &    )
       IF(IERR.LT.0)THEN
          IFLAG=IERR
          IERROR=0
@@ -565,6 +573,8 @@ C
  500  CONTINUE
       RETURN
   600 CONTINUE
-      IF (IFLAG .NE. -1) CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM )
+      IF (IFLAG .NE. -1) THEN
+        CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
+      ENDIF
       RETURN
       END SUBROUTINE DMUMPS_FAC_STACK

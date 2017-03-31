@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -762,7 +762,7 @@ C
           TYPE ( DDLL_T ), POINTER :: DLL
           TYPE ( DDLL_NODE_T ), POINTER :: NODE_AFTER
 #endif
-          INTEGER, INTENT ( IN ) :: ELMT
+          DOUBLE PRECISION, INTENT ( IN ) :: ELMT
           TYPE ( DDLL_NODE_T ), POINTER :: NODE_BEFORE
           INTEGER :: IERR
           ALLOCATE ( NODE_BEFORE, STAT=IERR )
@@ -793,7 +793,7 @@ C
           TYPE ( DDLL_T ), POINTER :: DLL
           TYPE ( DDLL_NODE_T ), POINTER :: NODE_BEFORE
 #endif
-          INTEGER, INTENT ( IN ) :: ELMT
+          DOUBLE PRECISION, INTENT ( IN ) :: ELMT
           TYPE ( DDLL_NODE_T ), POINTER :: NODE_AFTER
           INTEGER :: IERR
           ALLOCATE ( NODE_AFTER, STAT=IERR )

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -14,36 +14,43 @@ C
      &                ( JOB, THRESH, NDENSE, 
      &                 N, IWLEN, PE, PFREE, LEN, IW, NV, 
      &                 ELEN, LAST, NCMPA, DEGREE, HEAD, NEXT, W, 
-     &                 PERM, COMPLEM_LIST, SIZE_COMPLEM_LIST, AGG6 ) 
+     &                 PERM, COMPLEM_LIST, SIZE_COMPLEM_LIST, 
+     &                 AGG6 ) 
       IMPLICIT NONE
-      INTEGER JOB
-      INTEGER N, IWLEN, PE(N), PFREE, LEN(N), IW(IWLEN), NV(N), 
-     &        ELEN(N), LAST(N), NCMPA, DEGREE(N), HEAD(N), NEXT(N), 
-     &        W(N)
-      LOGICAL AGG6
-      INTEGER, intent(in) :: SIZE_COMPLEM_LIST
-      INTEGER NDENSE(N)
-      INTEGER, intent (in) :: COMPLEM_LIST(max(1,SIZE_COMPLEM_LIST))
-      INTEGER PERM(N)
-      INTEGER THRESH
+      INTEGER, INTENT(IN)    :: N, SIZE_COMPLEM_LIST
+      INTEGER(8), INTENT(IN) :: IWLEN
+      INTEGER, INTENT(IN)    :: THRESH
+      LOGICAL, INTENT(IN)  ::  AGG6
+      INTEGER, INTENT (IN) :: COMPLEM_LIST(max(1,SIZE_COMPLEM_LIST))
+      INTEGER, INTENT(INOUT) :: JOB
+      INTEGER, INTENT(INOUT)  :: LEN(N), IW(IWLEN)
+      INTEGER(8), INTENT(INOUT) :: PFREE
+      INTEGER(8), INTENT(INOUT) :: PE(N)
+      INTEGER, INTENT(INOUT)    :: PERM(N)
+      INTEGER, INTENT(OUT)   :: NCMPA
+      INTEGER, INTENT(OUT)   :: NV(N), ELEN(N), LAST(N)
+      INTEGER, INTENT(OUT) :: NDENSE(N), DEGREE(N), 
+     &                        HEAD(N), NEXT(N), W(N)
       INTEGER THRESM, NDME, PERMeqN
       INTEGER NBD,NBED, NBDM, LASTD, NELME
       LOGICAL IDENSE
-      INTEGER FDEG, ThresMin, ThresPrev, IBEGSchur, 
+      INTEGER :: FDEG, ThresMin, ThresPrev, IBEGSchur, 
      &        ThresMinINIT
-      LOGICAL SchurON
-      INTEGER DEG, DEGME, DEXT, DMAX, E, ELENME, ELN, I,
+      LOGICAL :: SchurON
+      INTEGER :: DEG, DEGME, DEXT, DMAX, E, ELENME, ELN, I,
      &        ILAST, INEXT, J, JLAST, JNEXT, K, KNT1, KNT2, KNT3,
-     &        LENJ, LN, MAXMEM, ME, MEM, MINDEG, NEL, NEWMEM,
+     &        LENJ, LN, ME, MINDEG, NEL, 
      &        NLEFT, NVI, NVJ, NVPIV, SLENME, WE, WFLG, WNVI, X
-      INTEGER MAXINT_N
-      INTEGER(8) HASH, HMOD 
-      INTEGER P, P1, P2, P3, PDST, PEND, PJ, PME, PME1, PME2, PN, PSRC
+      INTEGER(8) MAXMEM, MEM, NEWMEM
+      INTEGER :: MAXINT_N
+      INTEGER(8) :: HASH, HMOD 
+      INTEGER(8) :: P, P1, P2, P3, PDST, PEND, PJ, PME, PME1, PME2, 
+     &              PN, PSRC, PLN, PELN
       INTRINSIC max, min, mod
         IF (N.EQ.1) THEN
            ELEN(1) = 1
            LAST(1) = 1
-           PE(1) = 0
+           PE(1) = 0_8
            NV(1) = 1
            RETURN
         ENDIF
@@ -54,20 +61,21 @@ C
         IF (JOB.EQ.2) THEN
           SchurON = .FALSE.        
         ENDIF
+        THRESM    = THRESH  
         IF (JOB.NE.2) THEN
           SchurON   = (SIZE_COMPLEM_LIST > 0)
           IF ((JOB.EQ.1) .AND. (.NOT.SchurON) .AND. (N .GT. 0)) THEN
            WRITE(6,*) ' WARNING MUMPS_SYMQAMD_NEW on Options '
           ENDIF
           IBEGSchur = N-SIZE_COMPLEM_LIST+1
-          IF (THRESH.GT.N) THRESH = N
-          IF (THRESH.LT.0) THRESH = 0
+          IF (THRESM.GT.N) THRESM = N
+          IF (THRESM.LT.0) THRESM = 0
           IF ( SchurON )  THEN 
            DO I= 1, N
              IF ( PERM(I) .GE. IBEGSchur) THEN 
                  PERM(I) = N + 1
                 IF (LEN(I) .EQ.0) THEN
-                  PE(I) = 0
+                  PE(I) = 0_8
                 ENDIF
              ENDIF
            ENDDO
@@ -78,7 +86,7 @@ C
              ThresMin  = N
              ThresPrev = N
         ELSE
-             THRESM    = max(int(31*N/32),THRESH)
+             THRESM    = max(int(31*N/32),THRESM)
              THRESM    = max(THRESM,1)
              ThresMin  = max( 3*THRESM / 4, 1)
              ThresPrev = THRESM
@@ -175,7 +183,7 @@ C
         ELSE
           NEL = NEL + 1
           ELEN (I) = -NEL
-          PE (I) = 0
+          PE (I) = 0_8
           W (I) = 0
         ENDIF
    20 CONTINUE
@@ -216,16 +224,16 @@ C
             NDENSE(ME) = 0
             W(ME)      = WFLG
             P1 = PE(ME)
-            P2 = P1 + LEN(ME) -1
-            LN       = P1
-            ELN      = P1
+            P2 = P1 + int(LEN(ME) -1,8)
+            PLN       = P1
+            PELN      = P1
             DO 55 P=P1,P2
               E= IW(P)
               IF (W(E).EQ.WFLG) GOTO 55
               W(E) = WFLG
-              IF (PE(E).LT.0) THEN
+              IF (PE(E).LT.0_8) THEN
                 X = E
-  53            X = -PE(X)
+  53            X = int(-PE(X))
                 IF (W(X) .EQ.WFLG) GOTO 55
                 W(X) = WFLG
                 IF ( PE(X) .LT. 0 ) GOTO 53
@@ -233,10 +241,10 @@ C
               ENDIF
               IF (ELEN(E).LT.0) THEN
                NDENSE(E) = NDENSE(E) - NV(ME)
-               IW(LN) = IW(ELN)
-               IW(ELN) = E
-               LN  = LN+1
-               ELN = ELN + 1
+               IW(PLN) = IW(PELN)
+               IW(PELN) = E
+               PLN  = PLN  + 1_8
+               PELN = PELN + 1_8
                PME1 = PE(E)
                DO 54 PME = PME1, PME1+LEN(E)-1
                 X = IW(PME)
@@ -247,13 +255,13 @@ C
  54            CONTINUE
               ELSE
                NDENSE(ME) = NDENSE(ME) + NV(E)
-               IW(LN)=E
-               LN = LN+1
+               IW(PLN)=E
+               PLN = PLN+1_8
               ENDIF
   55        CONTINUE
             WFLG     = WFLG + 1
-            LEN(ME)  = LN-P1
-            ELEN(ME) = ELN- P1
+            LEN(ME)  = int(PLN-P1)
+            ELEN(ME) = int(PELN-P1)
             NDME = NDENSE(ME)+NV(ME)
             IF (NDENSE(ME).EQ.0) NDENSE(ME) =1
             DEGREE(ME) = NDENSE(ME)
@@ -293,24 +301,24 @@ C
              X       = COMPLEM_LIST(I)
              ELEN(X) = -(N-SIZE_COMPLEM_LIST+I)   
              NV(X)   = 1                
-             PE(X)   = 0                
+             PE(X)   = 0_8              
             ENDDO
             GOTO 265
            ENDIF
            NELME    = -(NEL+1)
            DO 59 X=1,N
-            IF ((PE(X).GT.0) .AND. (ELEN(X).LT.0)) THEN
-             PE(X) = -COMPLEM_LIST(1)
+            IF ((PE(X).GT.0_8) .AND. (ELEN(X).LT.0)) THEN
+             PE(X) = int(-COMPLEM_LIST(1),8)
             ELSEIF (DEGREE(X).EQ.N+1) THEN
              NEL   = NEL + NV(X)
-             PE(X) = -ME
+             PE(X) = int(-ME,8)
              ELEN(X) = 0
              NV(X) = 0
             ENDIF
    59      CONTINUE
            ELEN(ME) = NELME
            NV(ME)   = NBD
-           PE(ME)   = 0
+           PE(ME)   = 0_8
            IF (NEL.NE.N) THEN
             write(6,*) 'Internal ERROR 2 detected in QAMD'
             write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
@@ -318,9 +326,9 @@ C
            ENDIF
            IF (ME.NE. COMPLEM_LIST(1)) THEN
              DO I=1, SIZE_COMPLEM_LIST
-               PE(COMPLEM_LIST(I)) = -COMPLEM_LIST(1)
+               PE(COMPLEM_LIST(I)) = int(-COMPLEM_LIST(1),8)
              ENDDO
-             PE(COMPLEM_LIST(1)) = 0
+             PE(COMPLEM_LIST(1)) = 0_8
              NV( COMPLEM_LIST(1))= NV(ME)
              NV(ME)               = 0
              ELEN( COMPLEM_LIST(1)) = ELEN(ME)
@@ -339,7 +347,7 @@ C
         IF (ELENME .EQ. 0) THEN
           PME1 = PE (ME)
           PME2 = PME1 - 1
-          DO 60 P = PME1, PME1 + LEN (ME) - 1
+          DO 60 P = PME1, PME1 + int(LEN (ME) - 1,8)
             I = IW (P)
             NVI = NV (I)
             IF (NVI .GT. 0) THEN
@@ -385,15 +393,15 @@ C
                 IF (PFREE .GT. IWLEN) THEN
                   PE (ME) = P
                   LEN (ME) = LEN (ME) - KNT1
-                  IF (LEN (ME) .EQ. 0) PE (ME) = 0
+                  IF (LEN (ME) .EQ. 0) PE (ME) = 0_8
                   PE (E) = PJ
                   LEN (E) = LN - KNT2
-                  IF (LEN (E) .EQ. 0) PE (E) = 0
+                  IF (LEN (E) .EQ. 0) PE (E) = 0_8
                   NCMPA = NCMPA + 1
                   DO 70 J = 1, N
                     PN = PE (J)
                     IF (PN .GT. 0) THEN
-                      PE (J) = IW (PN)
+                      PE (J) = int(IW (PN),8)
                       IW (PN) = -J
                     ENDIF
    70             CONTINUE
@@ -405,15 +413,15 @@ C
                     J = -IW (PSRC)
                     PSRC = PSRC + 1
                     IF (J .GT. 0) THEN
-                      IW (PDST) = PE (J)
+                      IW (PDST) = int(PE (J))
                       PE (J) = PDST
-                      PDST = PDST + 1
+                      PDST = PDST + 1_8
                       LENJ = LEN (J)
                       DO 90 KNT3 = 0, LENJ - 2
                         IW (PDST + KNT3) = IW (PSRC + KNT3)
    90                 CONTINUE
-                      PDST = PDST + LENJ - 1
-                      PSRC = PSRC + LENJ - 1
+                      PDST = PDST + int(LENJ - 1,8)
+                      PSRC = PSRC + int(LENJ - 1,8)
                     ENDIF
                     GO TO 80
                   ENDIF
@@ -446,7 +454,7 @@ C
               ENDIF
   110       CONTINUE
             IF (E .NE. ME) THEN
-              PE (E) = -ME
+              PE (E) = int(-ME,8)
               W (E) = 0
             ENDIF
   120     CONTINUE
@@ -457,7 +465,7 @@ C
         ENDIF
         DEGREE (ME) = DEGME
         PE (ME) = PME1
-        LEN (ME) = PME2 - PME1 + 1
+        LEN (ME) = int(PME2 - PME1 + 1_8)
         IF (WFLG .GT. MAXINT_N) THEN
           DO 130 X = 1, N
             IF (W (X) .NE. 0) W (X) = 1
@@ -471,7 +479,7 @@ C
           IF (ELN .GT. 0) THEN
             NVI = -NV (I)
             WNVI = WFLG - NVI
-            DO 140 P = PE (I), PE (I) + ELN - 1
+            DO 140 P = PE (I), PE (I) + int(ELN - 1,8)
               E = IW (P)
               WE = W (E)
               IF (WE .GE. WFLG) THEN
@@ -505,7 +513,7 @@ C
               HASH = HASH + int(E,kind=8)
             ELSE IF (AGG6 .AND. (DEXT .EQ. 0) .AND.
      &            ((NDENSE(ME).EQ.NBD).OR.(NDENSE(E).EQ.0))) THEN
-                PE (E) = -ME
+                PE (E) = int(-ME,8)
                 W (E)  = 0
              ELSE IF (AGG6 .AND. DEXT.EQ.0) THEN
                   IW(PN) = E
@@ -513,7 +521,7 @@ C
                   HASH   = HASH + int(E,kind=8)
             ENDIF
   160     CONTINUE
-          ELEN (I) = PN - P1 + 1
+          ELEN (I) = int(PN - P1 + 1_8)
           P3 = PN
           DO 170 P = P2 + 1, P1 + LEN (I) - 1
             J = IW (P)
@@ -530,7 +538,7 @@ C
      &         (AGG6.AND.(DEG .EQ. 0).AND.(NDENSE(ME).EQ.NBD))
      &       )
      &    THEN
-            PE (I) = -ME
+            PE (I) = int(-ME, 8)
             NVI = -NV (I)
             DEGME = DEGME - NVI
             NVPIV = NVPIV + NVI
@@ -543,7 +551,7 @@ C
             IW (PN) = IW (P3)
             IW (P3) = IW (P1)
             IW (P1) = ME
-            LEN (I) = PN - P1 + 1
+            LEN (I) = int(PN - P1 + 1)
             HASH = mod (HASH, HMOD) + 1_8
             J = HEAD (HASH)
             IF (J .LE. 0) THEN
@@ -584,7 +592,7 @@ C
              X = I 
               LN = LEN (I)
               ELN = ELEN (I)
-              DO 210 P = PE (I) + 1, PE (I) + LN - 1
+              DO 210 P = PE (I) + 1, PE (I) + int(LN - 1,8)
                 W (IW (P)) = WFLG
   210         CONTINUE
               JLAST = I
@@ -593,16 +601,16 @@ C
               IF (J .NE. 0) THEN
                 IF (LEN (J) .NE. LN) GO TO 240
                 IF (ELEN (J) .NE. ELN) GO TO 240
-                DO 230 P = PE (J) + 1, PE (J) + LN - 1
+                DO 230 P = PE (J) + 1, PE (J) + int(LN - 1,8)
                   IF (W (IW (P)) .NE. WFLG) GO TO 240
   230           CONTINUE
                 IF (PERM(J).GT.PERM(X)) THEN
-                  PE (J) = -X
+                  PE (J) = int(-X,8)
                   NV (X) = NV (X) + NV (J)
                   NV (J) = 0
                   ELEN (J) = 0
                 ELSE
-                  PE (X) = -J
+                  PE (X) = int(-J,8)
                   NV (J) = NV (X) + NV (J)
                   NV (X) = 0
                   ELEN (X) = 0
@@ -643,7 +651,7 @@ C
              ENDIF
              IF (IDENSE) THEN
                P1 = PE(I)
-               P2 = P1 + ELEN(I) - 1
+               P2 = P1 + int(ELEN(I) - 1, 8)
                IF (P2.GE.P1) THEN
                DO 264 PJ=P1,P2
                  E= IW(PJ)
@@ -676,24 +684,24 @@ C
           ENDIF
   260   CONTINUE
         NV (ME) = NVPIV + DEGME
-        LEN (ME) = P - PME1
+        LEN (ME) = int(P - PME1)
         IF (LEN (ME) .EQ. 0) THEN
-          PE (ME) = 0
+          PE (ME) = 0_8
           W (ME) = 0
         ENDIF
         IF (NEWMEM .NE. 0) THEN
           PFREE = P
-          MEM = MEM - NEWMEM + LEN (ME)
+          MEM = MEM - NEWMEM + int(LEN (ME),8)
         ENDIF
       GO TO 30
       ENDIF
   265 CONTINUE
       DO 290 I = 1, N
         IF (ELEN (I) .EQ. 0) THEN
-          J = -PE (I)
+          J = int(-PE (I))
   270     CONTINUE
             IF (ELEN (J) .GE. 0) THEN
-              J = -PE (J)
+              J = int(-PE (J))
               GO TO 270
             ENDIF
             E = J
@@ -701,8 +709,8 @@ C
             J = I
   280       CONTINUE
             IF (ELEN (J) .GE. 0) THEN
-              JNEXT = -PE (J)
-              PE (J) = -E
+              JNEXT = int(-PE (J))
+              PE (J)= int(-E,8)
               IF (ELEN (J) .EQ. 0) THEN
                 ELEN (J) = K
                 K = K + 1
@@ -721,6 +729,6 @@ C
       IF (.NOT.SchurON) THEN
         IF (PERMeqN.GT.0) PERM(PERMeqN) = N
       ENDIF
-      PFREE = MAXMEM
+      pfree = maxmem
       RETURN
       END SUBROUTINE MUMPS_SYMQAMD_NEW

@@ -15,6 +15,7 @@ public:
   NumericVector rhs_sparse;
   NumericVector anz;
   bool copy;
+  int ncore;
   std::set<int> jobs;
   MUMPS_INT sym;
   char buf[512];
@@ -29,6 +30,8 @@ public:
   void clean();
   bool get_copy();
   void set_copy(bool copy_);
+  int get_ncore();
+  void set_ncore(int ncore_);
   int get_sym();
   void set_sym(int sym);
   void do_job(int job);

@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -138,11 +138,12 @@ C
       INTEGER NBROWS, NBCOLS 
       INTEGER(8) :: PTRAST(KEEP(28))
       INTEGER IW(LIW), ITLOC(N+KEEP(253)), STEP(N),
-     &        PTRIST(KEEP(28)), FILS(N), PTRARW(N), PTRAIW(N)
+     &        PTRIST(KEEP(28)), FILS(N)
+      INTEGER(8), INTENT(IN) :: PTRARW(N), PTRAIW(N)
       DOUBLE PRECISION :: RHS_MUMPS(KEEP(255))
-      INTEGER INTARR(max(1,KEEP(14)))
-      DOUBLE PRECISION A(LA),
-     &        DBLARR(max(1,KEEP(13)))
+      DOUBLE PRECISION :: A(LA)
+      INTEGER :: INTARR(KEEP8(27))
+      DOUBLE PRECISION :: DBLARR(KEEP8(26))
       DOUBLE PRECISION OPASSW, OPELIW
       INTEGER(8) :: POSELT
       INTEGER IOLDPS, NBCOLF, NBROWF, NSLAVES, HF,
@@ -161,8 +162,9 @@ C
           NASS         = -NASS
           IW(IOLDPS+1+KEEP(IXSZ)) = NASS
           CALL DMUMPS_ASM_SLAVE_ARROWHEADS(INODE, N, IW, LIW,
-     &           IOLDPS, A, LA, POSELT, KEEP,
+     &           IOLDPS, A, LA, POSELT, KEEP, KEEP8,
      &           ITLOC, FILS, PTRAIW, PTRARW, INTARR, DBLARR,
+     &           KEEP8(27), KEEP8(26),
      &           RHS_MUMPS)
       ENDIF
       IF (NBROWS.GT.0) THEN
@@ -242,6 +244,7 @@ C
           WRITE(*,*) ' ERR: INODE =', INODE
           WRITE(*,*) ' ERR: NBROW=',NBROWS,'NBROWF=',NBROWF
           WRITE(*,*) ' ERR: ROW_LIST=', ROWLIST
+          WRITE(*,*) ' ERR: NBCOLF/NASS=', NBCOLF, NASS
           CALL MUMPS_ABORT()
        END IF
       NSLAVES = IW(IOLDPS+5+KEEP(IXSZ))
@@ -592,26 +595,30 @@ C
       RETURN
       END SUBROUTINE DMUMPS_ASM_MAX
       SUBROUTINE DMUMPS_ASM_SLAVE_ARROWHEADS(INODE, N, IW, LIW, IOLDPS,
-     &           A, LA, POSELT, KEEP,
+     &           A, LA, POSELT, KEEP, KEEP8,
      &           ITLOC, FILS, PTRAIW, PTRARW, INTARR, DBLARR,
-     &           RHS_MUMPS)
+     &           LINTARR, LDBLARR, RHS_MUMPS)
       IMPLICIT NONE
       INTEGER, intent(in)    :: N, LIW, IOLDPS, INODE
       INTEGER(8), intent(in) :: LA, POSELT
+      INTEGER(8), intent(in) :: LINTARR, LDBLARR
       INTEGER, intent(in)    :: IW(LIW)
       INTEGER, intent(in)    :: KEEP(500)
+      INTEGER(8), intent(in) :: KEEP8(150)
       INTEGER, intent(inout) :: ITLOC(N+KEEP(253))
       DOUBLE PRECISION, intent(inout) :: A(LA)
       DOUBLE PRECISION, intent(in)    :: RHS_MUMPS(KEEP(255))
-      INTEGER, intent(in)    :: INTARR(max(1,KEEP(14)))
-      DOUBLE PRECISION, intent(in)    :: DBLARR(max(1,KEEP(13)))
-      INTEGER, intent(in)    :: FILS(N), PTRAIW(N), PTRARW(N)
+      DOUBLE PRECISION, intent(in)    :: DBLARR(LDBLARR)
+      INTEGER, intent(in)    :: INTARR(LINTARR)
+      INTEGER, intent(in)    :: FILS(N)
+      INTEGER(8), intent(in) :: PTRAIW(N), PTRARW(N)
       INCLUDE 'mumps_headers.h'
       INTEGER    :: HF, NBROWF, NBCOLF, NASS, NSLAVES
-      INTEGER    :: ILOC, J, J1, J2, JJ, JK, K, K1, K2, JPOS, IJROW
+      INTEGER    :: ILOC, J, K, K1, K2, JPOS, IJROW
       INTEGER    :: IN
+      INTEGER(8) :: J18, J28, JJ8, JK8
       INTEGER(8) :: APOS, ICT12
-      INTEGER    :: AINPUT  
+      INTEGER(8) :: AINPUT8
       INTEGER    :: K1RHS, K2RHS, JFirstRHS
       DOUBLE PRECISION ZERO
       PARAMETER( ZERO = 0.0D0 )
@@ -669,20 +676,20 @@ C
       ENDIF
       IN = INODE
       DO WHILE (IN.GT.0) 
-           AINPUT = PTRARW(IN)
-           JK     = PTRAIW(IN)
-           JJ     = JK + 1
-           J1     = JJ + 1
-           J2 = J1 + INTARR(JK)
-           IJROW = -ITLOC(INTARR(J1))
+           AINPUT8 = PTRARW(IN)
+           JK8     = PTRAIW(IN)
+           JJ8     = JK8 + 1_8
+           J18     = JJ8 + 1_8
+           J28 = J18 + INTARR(JK8)
+           IJROW = -ITLOC(INTARR(J18))
            ICT12 = POSELT +int(- NBCOLF + IJROW - 1,8)
-           DO JJ= J1,J2
-            ILOC = ITLOC(INTARR(JJ))
+           DO JJ8= J18,J28
+            ILOC = ITLOC(INTARR(JJ8))
             IF (ILOC.GT.0) THEN
               APOS = ICT12 + int(ILOC,8)*int(NBCOLF,8)
-              A(APOS) = A(APOS) + DBLARR(AINPUT)
+              A(APOS) = A(APOS) + DBLARR(AINPUT8)
             ENDIF
-            AINPUT  = AINPUT + 1
+            AINPUT8 = AINPUT8 + 1_8
            ENDDO
            IN = FILS(IN)
       ENDDO

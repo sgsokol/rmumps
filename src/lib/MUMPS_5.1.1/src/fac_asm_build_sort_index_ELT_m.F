@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -29,15 +29,16 @@ C
       IMPLICIT NONE
       INTEGER NELT, INODE, N, IOLDPS, HF, NFRONT, NASS1, LIW, NASS,
      &        NUMSTK, NUMORG, IFSON, MYID, IFLAG,
-     &        LINTARR, NUMELT
+     &        NUMELT
       INTEGER KEEP(500)
       INTEGER LIST_ELT(*)
+      INTEGER(8), INTENT(IN) :: PTRAIW(NELT+1)
       INTEGER STEP(N), PIMASTER(KEEP(28)), PTRIST(KEEP(28)),
-     &  PTRAIW(NELT+1),
      &        ITLOC(N+KEEP(253)), FILS(N), FRERE_STEPS(KEEP(28)),
      &        NBPROCFILS(KEEP(28)), PERM(N)
       INTEGER, TARGET :: IW(LIW)
       INTEGER, INTENT(IN), TARGET :: IWPOSCB
+      INTEGER(8), INTENT(IN) :: LINTARR
       INTEGER INTARR(LINTARR)
       LOGICAL, intent(in)    :: NIV1
       LOGICAL, intent(out)   :: SON_LEVEL2
@@ -50,10 +51,12 @@ C
       INTEGER, intent(out)   :: SONROWS_PER_ROW(LSONROWS_PER_ROW)
       INTEGER NEWEL, IOLDP2, INEW, INEW1,
      &        IN, NTOTFS, ICT11, NELIM, NPIVS, NSLSON, NCOLS,
-     &        ITRANS, J, JJ, J1, J2, J3, JT1, ISON, IELL, LSTK, 
-     &        NROWS, HS, IP1, IP2, K1, K2, IBROT,
-     &        I, K, ILOC, NEWEL_SAVE, NEWEL1_SAVE,
+     &        ITRANS, J, JT1, ISON, IELL, LSTK, 
+     &        NROWS, HS, IP1, IP2, IBROT,
+     &        I, ILOC, NEWEL_SAVE, NEWEL1_SAVE,
      &        LAST_J_ASS, JMIN, MIN_PERM
+      INTEGER :: K, K1, K2, K3, KK
+      INTEGER(8) :: JJ8, J18, J28
       LOGICAL LEVEL1_SON
 #if ! defined(NO_XXNBPR)
       INTEGER INBPROCFILS_SON
@@ -79,12 +82,12 @@ C
       NFRONT_EFF = NASS1
       NTOTFS     = 0
       IF ( (TYPESPLIT.EQ.5).OR.(TYPESPLIT.EQ.6) ) THEN
-        J2    = PIMASTER(STEP(IFSON))
-        LSTK  = IW(J2    +KEEP(IXSZ))
-        NELIM = IW(J2 + 1+KEEP(IXSZ))
-        NPIVS  = IW(J2 + 3+KEEP(IXSZ))
+        K2    = PIMASTER(STEP(IFSON))
+        LSTK  = IW(K2    +KEEP(IXSZ))
+        NELIM = IW(K2 + 1+KEEP(IXSZ))
+        NPIVS  = IW(K2 + 3+KEEP(IXSZ))
         IF (NPIVS.LT.0) NPIVS = 0
-        NSLSON = IW(J2 + 5+KEEP(IXSZ))
+        NSLSON = IW(K2 + 5+KEEP(IXSZ))
         IF( NSLSON.GT.0) SON_LEVEL2 = .TRUE.
         LEVEL1_SON    = NSLSON.EQ.0
         NCOLS  = NPIVS + LSTK
@@ -92,7 +95,7 @@ C
         ITRANS = NROWS
         IF (NIV1) THEN
           write(6,*) MYID, ':',
-     &    ' Internal error 2 in MUMPS_BUILD_SORT_INDEX ',
+     &    ' Internal error 2 in MUMPS_ELT_BUILD_SORT ',
      &    ' interior split node of type 1 '
           CALL MUMPS_ABORT()
         ENDIF
@@ -101,7 +104,7 @@ C
      &              SLAVEF)
         IF (LEVEL1_SON.or.J.LT.4) THEN
            write(6,*) MYID, ':',
-     &     ' Internal error 3 in MUMPS_BUILD_SORT_INDEX ',
+     &     ' Internal error 3 in MUMPS_ELT_BUILD_SORT ',
      &     ' son', IFSON, 
      &     ' of interior split node', INODE, ' of type 1 ', 
      &     ' NSLSON =', NSLSON, ' TYPE_SON=', I, 'TYPESPLIT_SON=', J
@@ -122,45 +125,45 @@ C
         CALL CHECK_EQUAL(NBPROCFILS(STEP(INODE)),IW(IOLDPS+XXNBPR))
 #endif
         SONROWS_PER_ROW(1:NFRONT-NASS1) = 1
-        IF ( J2.GT. IWPOSCB ) THEN
-          NROWS = IW(J2 + 2+KEEP(IXSZ))
+        IF ( K2.GT. IWPOSCB ) THEN
+          NROWS = IW(K2 + 2+KEEP(IXSZ))
           ITRANS = NPIVS + NROWS
         ENDIF
         HS = NSLSON + 6 + KEEP(IXSZ)
-        J1 = J2 + HS + NROWS + NPIVS
-        J2 = J1 + LSTK - 1
-        J3 = J1 + NELIM - 1
+        K1 = K2 + HS + NROWS + NPIVS
+        K2 = K1 + LSTK - 1
+        K3 = K1 + NELIM - 1
         IF (NELIM.GT.0) THEN
-         DO JJ=J1,J3
+         DO KK=K1,K3
           NTOTFS = NTOTFS + 1
-          JT1 = IW(JJ)
+          JT1 = IW(KK)
           IW(ICT11 + NTOTFS) = JT1
-          IW(JJ) = NTOTFS
-          IW(IOLDP2 + NTOTFS) = IW(JJ - ITRANS)
+          IW(KK) = NTOTFS
+          IW(IOLDP2 + NTOTFS) = IW(KK - ITRANS)
          ENDDO
         ENDIF
-        DO JJ =J3+1, J2
+        DO KK =K3+1, K2
          NTOTFS = NTOTFS + 1
-         JT1 = IW(JJ)
+         JT1 = IW(KK)
          ITLOC(JT1) = NTOTFS 
-         IW(JJ) = NTOTFS
+         IW(KK) = NTOTFS
          IW(ICT11 + NTOTFS) = JT1
          IW(IOLDP2 + NTOTFS) = JT1
         ENDDO
         NFRONT_EFF = NTOTFS
         DO IELL=1,NUMELT
           ELTI = LIST_ELT(IELL)
-          J1= PTRAIW(ELTI)
-          J2= PTRAIW(ELTI+1)-1
-          DO JJ=J1,J2
-           J = INTARR(JJ)
-            INTARR(JJ) = ITLOC(J)
+          J18= PTRAIW(ELTI)
+          J28= PTRAIW(ELTI+1)-1
+          DO JJ8=J18,J28
+           J = INTARR(JJ8)
+            INTARR(JJ8) = ITLOC(J)
           ENDDO
         ENDDO
         Pos_First_NUMORG = ITLOC(INODE)
         K1 = IOLDPS+HF
-        DO JJ=K1+NELIM,K1+NFRONT_EFF-1
-          ITLOC(IW(JJ)) = 0
+        DO KK=K1+NELIM,K1+NFRONT_EFF-1
+          ITLOC(IW(KK)) = 0
         ENDDO
         RETURN   
       ENDIF
@@ -192,14 +195,14 @@ C
       IF (NUMSTK .NE. 0) THEN
         ISON = IFSON
         DO IELL = 1, NUMSTK
-          J2 = PIMASTER(STEP(ISON))
+          K2 = PIMASTER(STEP(ISON))
           SON_IW => IW
           SON_IWPOSCB => IWPOSCB
-          LSTK   = SON_IW(J2    +KEEP(IXSZ))
-          NELIM  = SON_IW(J2 + 1+KEEP(IXSZ))
-          NPIVS  = SON_IW(J2 + 3+KEEP(IXSZ))
+          LSTK   = SON_IW(K2    +KEEP(IXSZ))
+          NELIM  = SON_IW(K2 + 1+KEEP(IXSZ))
+          NPIVS  = SON_IW(K2 + 3+KEEP(IXSZ))
           IF (NPIVS.LT.0) NPIVS = 0
-          NSLSON = SON_IW(J2 + 5+KEEP(IXSZ))
+          NSLSON = SON_IW(K2 + 5+KEEP(IXSZ))
           IF( NSLSON.GT.0) SON_LEVEL2 = .TRUE.
           LEVEL1_SON    = NSLSON.EQ.0
           NCOLS  = NPIVS + LSTK
@@ -240,41 +243,41 @@ C
            CALL CHECK_EQUAL(NBPROCFILS(STEP(INODE)),IW(IOLDPS+XXNBPR))
 #endif
           ENDIF
-          IF (J2.GT.SON_IWPOSCB) THEN
-           NROWS = SON_IW(J2 + 2+KEEP(IXSZ))
+          IF (K2.GT.SON_IWPOSCB) THEN
+           NROWS = SON_IW(K2 + 2+KEEP(IXSZ))
            ITRANS = NPIVS + NROWS
           ENDIF
           HS = NSLSON + 6 + KEEP(IXSZ)
-          J1 = J2 + HS + NROWS + NPIVS
-          J2 = J1 + LSTK - 1 - KEEP(253)
-          J3 = J1 + NELIM - 1
+          K1 = K2 + HS + NROWS + NPIVS
+          K2 = K1 + LSTK - 1 - KEEP(253)
+          K3 = K1 + NELIM - 1
           IF (NELIM .NE. 0) THEN
-            DO JJ = J1, J3
+            DO KK = K1, K3
               NTOTFS = NTOTFS + 1
-              JT1 = SON_IW(JJ)
+              JT1 = SON_IW(KK)
               IW(ICT11 + NTOTFS) = JT1
               ITLOC(JT1) = NTOTFS
-              SON_IW(JJ) = NTOTFS
-              IW(IOLDP2 + NTOTFS) = SON_IW(JJ - ITRANS)
+              SON_IW(KK) = NTOTFS
+              IW(IOLDP2 + NTOTFS) = SON_IW(KK - ITRANS)
             ENDDO
           ENDIF
-          PTTRI(IELL)  = J2+1
-          PTLAST(IELL) = J2
-          J1 = J3 + 1
+          PTTRI(IELL)  = K2+1
+          PTLAST(IELL) = K2
+          K1 = K3 + 1
           IF (NASS1 .NE. NFRONT - KEEP(253)) THEN
-            DO JJ = J1, J2
-              J = SON_IW(JJ)
+            DO KK = K1, K2
+              J = SON_IW(KK)
               IF (ITLOC(J) .EQ. 0) THEN 
-                PTTRI(IELL) = JJ
+                PTTRI(IELL) = KK
                 EXIT
               ENDIF
             ENDDO
           ELSE
-            DO JJ = J1, J2
-              SON_IW(JJ) = ITLOC(SON_IW(JJ))
+            DO KK = K1, K2
+              SON_IW(KK) = ITLOC(SON_IW(KK))
             ENDDO
-            DO JJ=J2+1, J2+KEEP(253)
-              SON_IW(JJ)=NFRONT-KEEP(253)+JJ-J2
+            DO KK=K2+1, K2+KEEP(253)
+              SON_IW(KK)=NFRONT-KEEP(253)+KK-K2
            ENDDO
           ENDIF
           ISON = FRERE_STEPS(STEP(ISON))
@@ -320,10 +323,10 @@ C
       IF (NEWEL1_SAVE.LT.NFRONT - KEEP(253)) THEN 
       DO IELL = 1,NUMELT
         ELTI = LIST_ELT(IELL)
-         J1= PTRAIW(ELTI)
-         J2= PTRAIW(ELTI+1)-1
-         DO JJ=J1,J2
-           J     = INTARR( JJ )
+         J18= PTRAIW(ELTI)
+         J28= PTRAIW(ELTI+1)-1_8
+         DO JJ8=J18,J28
+           J     = INTARR( JJ8 )
            IF ( ITLOC( J ) .eq. 0 ) THEN
             NEWEL  = NEWEL + 1
             NFRONT_EFF = NFRONT_EFF + 1
@@ -352,10 +355,10 @@ C
           IF (NUMELT_IBROT.EQ.0) CYCLE 
           DO IELL = FRT_PTR(IBROT), FRT_PTR(IBROT+1)
             ELTI = FRT_ELT(IELL)
-            J1= PTRAIW(ELTI)
-            J2= PTRAIW(ELTI+1)-1
-            DO JJ = J1, J2
-              J     = INTARR( JJ )
+            J18= PTRAIW(ELTI)
+            J28= PTRAIW(ELTI+1)-1
+            DO JJ8 = J18, J28
+              J     = INTARR( JJ8 )
               IF ( ITLOC( J ) .eq. 0 ) THEN
                 NEWEL  = NEWEL + 1
                 NFRONT_EFF = NFRONT_EFF + 1
@@ -366,11 +369,18 @@ C
           ENDDO
           IF (NFRONT_EFF.EQ.NFRONT-KEEP(253)) EXIT
         ENDDO
+        IF (NFRONT_EFF.NE.NFRONT-KEEP(253) .AND.
+     &      .NOT. (KEEP(376).EQ.1 .AND. KEEP(79) .GE.1)) THEN
+          write(6,*) MYID, ': INODE', INODE, ' of type 4 ', 
+     &             ' not yet fully assembled ', 
+     &             ' NFRONT_EFF, NFRONT =',  NFRONT_EFF, NFRONT
+          CALL MUMPS_ABORT()
+        ENDIF
        ENDIF
       ENDIF
       IF ( NEWEL1_SAVE .eq. NFRONT_EFF ) THEN
-         DO JJ=NASS1+1, NFRONT_EFF
-           IW( IOLDP2+JJ ) = IW( ICT11+JJ )
+         DO KK=NASS1+1, NFRONT_EFF
+           IW( IOLDP2+KK ) = IW( ICT11+KK )
          ENDDO
       ELSE
         CALL MUMPS_SORT( N, PERM, 
@@ -379,8 +389,8 @@ C
      &    IW( NEWEL_SAVE + 1), NFRONT_EFF - NEWEL1_SAVE,
      &    IW( ICT11  + NASS1 + 1 ), NEWEL1_SAVE - NASS1,
      &    IW( IOLDP2 + NASS1 + 1 ), NFRONT_EFF - NASS1 )
-        DO JJ = NASS1+1, NFRONT_EFF
-          IW(ICT11 + JJ) = IW(IOLDP2+JJ)
+        DO KK = NASS1+1, NFRONT_EFF
+          IW(ICT11 + KK) = IW(IOLDP2+KK)
         ENDDO
       END IF
   500 CONTINUE
@@ -403,48 +413,49 @@ C
       ELSE IF (NFRONT .LT. NFRONT_EFF) THEN
         WRITE(*,*) "Internal error in MUMPS_ELT_BUILD_SORT",
      &             NFRONT, NFRONT_EFF
-        CALL MUMPS_ABORT()
+        IFLAG = -53
+        GOTO 800
       ENDIF
       IF ( (NUMSTK .NE.0) 
      & .AND. (NFRONT-KEEP(253).GT.NASS1 )   
      &  ) THEN
         ISON = IFSON
         DO IELL = 1, NUMSTK
-          J2 = PIMASTER(STEP(ISON))
+          K2 = PIMASTER(STEP(ISON))
           SON_IW => IW
           SON_IWPOSCB => IWPOSCB
-          LSTK = SON_IW(J2+KEEP(IXSZ))
-          NELIM = SON_IW(J2 + 1 +KEEP(IXSZ))
-          NPIVS = SON_IW(J2 + 3 +KEEP(IXSZ))
+          LSTK = SON_IW(K2+KEEP(IXSZ))
+          NELIM = SON_IW(K2 + 1 +KEEP(IXSZ))
+          NPIVS = SON_IW(K2 + 3 +KEEP(IXSZ))
           IF (NPIVS.LT.0) NPIVS = 0
-          NSLSON = SON_IW(J2 + 5 +KEEP(IXSZ))
+          NSLSON = SON_IW(K2 + 5 +KEEP(IXSZ))
           LEVEL1_SON = (NSLSON .EQ. 0)
           NCOLS = NPIVS + LSTK
           NROWS = NCOLS
-          IF (J2.GT.SON_IWPOSCB) THEN
-           NROWS = SON_IW(J2 + 2+KEEP(IXSZ))
+          IF (K2.GT.SON_IWPOSCB) THEN
+           NROWS = SON_IW(K2 + 2+KEEP(IXSZ))
           ENDIF
           HS = NSLSON + 6 +KEEP(IXSZ)
-          J1 = J2 + HS + NROWS + NPIVS
-          J2 = J1 + LSTK - 1
-          J3 = J1 + NELIM - 1
-          J1 = J3 + 1
+          K1 = K2 + HS + NROWS + NPIVS
+          K2 = K1 + LSTK - 1
+          K3 = K1 + NELIM - 1
+          K1 = K3 + 1
           IF (NFRONT-KEEP(253).GT.NASS1) THEN
-            DO JJ = J1, J2
-              J = SON_IW(JJ)
-              SON_IW(JJ) = ITLOC(J)
+            DO KK = K1, K2
+              J = SON_IW(KK)
+              SON_IW(KK) = ITLOC(J)
               IF (NIV1 .AND. NSLSON.EQ.0) THEN
               ELSE
-                IF (SON_IW(JJ) .LE. NASS1 .OR. NIV1) THEN
+                IF (SON_IW(KK) .LE. NASS1 .OR. NIV1) THEN
                 ELSE
-                  SONROWS_PER_ROW(SON_IW(JJ)-NASS1) =
-     &                         SONROWS_PER_ROW(SON_IW(JJ)-NASS1) + 1
+                  SONROWS_PER_ROW(SON_IW(KK)-NASS1) =
+     &                         SONROWS_PER_ROW(SON_IW(KK)-NASS1) + 1
                 ENDIF
               ENDIF
             ENDDO
           ELSE
               IF (.not. NIV1) THEN
-                WRITE(*,*) "Internal error 1 in CMUMPS_BUILD_SORT_INDEX"
+                WRITE(*,*) "Internal error 1 in MUMPS_ELT_BUILD_SORT"
                 CALL MUMPS_ABORT() 
               ENDIF
               IF (.not.LEVEL1_SON) THEN
@@ -455,11 +466,11 @@ C
       ENDIF
       DO IELL=1,NUMELT
         ELTI = LIST_ELT(IELL)
-        J1 = PTRAIW(ELTI)
-        J2= PTRAIW(ELTI+1)-1
-        DO JJ=J1,J2
-          J = INTARR(JJ)
-            INTARR(JJ) = ITLOC(J)
+        J18 = PTRAIW(ELTI)
+        J28 = PTRAIW(ELTI+1)-1
+        DO JJ8=J18,J28
+          J = INTARR(JJ8)
+            INTARR(JJ8) = ITLOC(J)
         ENDDO
       ENDDO
         K1 = IOLDPS + HF + NUMORG

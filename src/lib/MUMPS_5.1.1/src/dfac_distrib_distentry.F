@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -11,35 +11,37 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       SUBROUTINE DMUMPS_BUILD_MAPPING
-     & ( N, MAPPING, NZ, IRN, JCN, PROCNODE, STEP,
+     & ( N, MAPPING, NNZ, IRN, JCN, PROCNODE, STEP,
      &   SLAVEF, PERM, FILS,
      &   RG2L, KEEP,KEEP8, MBLOCK, NBLOCK, NPROW, NPCOL )
       USE DMUMPS_STRUC_DEF
       IMPLICIT NONE
-      INTEGER N, NZ, SLAVEF, MBLOCK, NBLOCK, NPROW, NPCOL
+      INTEGER N, SLAVEF, MBLOCK, NBLOCK, NPROW, NPCOL
+      iNTEGER(8) :: NNZ
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      INTEGER IRN( NZ ), JCN( NZ ) 
-      INTEGER MAPPING( NZ ), STEP( N )
+      INTEGER IRN( NNZ ), JCN( NNZ ) 
+      INTEGER MAPPING( NNZ ), STEP( N )
       INTEGER PROCNODE( KEEP(28) ), PERM( N ), FILS( N ), RG2L( N )
       INTEGER MUMPS_PROCNODE, MUMPS_TYPENODE
       EXTERNAL MUMPS_PROCNODE, MUMPS_TYPENODE
-      INTEGER K, IOLD, JOLD, INEW, JNEW, ISEND, JSEND, IARR, INODE
+      INTEGER K4, IOLD, JOLD, INEW, JNEW, ISEND, JSEND, IARR, INODE
+      INTEGER(8) :: K8
       INTEGER TYPE_NODE, DEST
       INTEGER IPOSROOT, JPOSROOT, IROW_GRID, JCOL_GRID
       INODE = KEEP(38)
-      K = 1
+      K4 = 1
       DO WHILE ( INODE .GT. 0 )
-        RG2L( INODE ) = K
+        RG2L( INODE ) = K4
         INODE = FILS( INODE )
-        K = K + 1
+        K4 = K4 + 1
       END DO
-      DO K = 1, NZ
-        IOLD = IRN( K )
-        JOLD = JCN( K )
+      DO K8 = 1_8, NNZ
+        IOLD = IRN( K8 )
+        JOLD = JCN( K8 )
         IF ( IOLD .GT. N .OR. IOLD .LT. 1 .OR.
      &       JOLD .GT. N .OR. JOLD .LT. 1 ) THEN
-           MAPPING( K ) = -1
+           MAPPING( K8 ) = -1
            CYCLE
         END IF
         IF ( IOLD .eq. JOLD ) THEN
@@ -84,27 +86,28 @@ C
             DEST = IROW_GRID * NPCOL + JCOL_GRID
           END IF
         END IF
-        MAPPING( K ) = DEST
+        MAPPING( K8 ) = DEST
       END DO
       RETURN
       END SUBROUTINE DMUMPS_BUILD_MAPPING
       SUBROUTINE DMUMPS_REDISTRIBUTION(
-     & N, NZ_loc, id,
+     & N, NZ_loc8, id,
      & DBLARR, LDBLARR, INTARR, LINTARR,
      & PTRAIW, PTRARW, KEEP,KEEP8, MYID, COMM, NBRECORDS,
      &
      & A, LA, root, PROCNODE_STEPS, SLAVEF, PERM, STEP,
-     & ICNTL, INFO, NSEND, NLOCAL,
+     & ICNTL, INFO, NSEND8, NLOCAL8,
      & ISTEP_TO_INIV2, CANDIDATES
      & )
       USE DMUMPS_STRUC_DEF
       IMPLICIT NONE
-      INTEGER N, NZ_loc
+      INTEGER N
+      INTEGER(8) :: NZ_loc8
       TYPE (DMUMPS_STRUC) :: id
-      INTEGER LDBLARR, LINTARR
+      INTEGER(8) :: LDBLARR, LINTARR
       DOUBLE PRECISION DBLARR( LDBLARR )
       INTEGER INTARR( LINTARR )
-      INTEGER PTRAIW( N ), PTRARW( N )
+      INTEGER(8), INTENT(IN) :: PTRAIW( N ), PTRARW( N )
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
       INTEGER MYID, COMM, NBRECORDS
@@ -128,7 +131,9 @@ C
       PARAMETER( ZERO = 0.0D0 )
       INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IW4
       INTEGER END_MSG_2_RECV
-      INTEGER I, K, I1, IA
+      INTEGER I
+      INTEGER(8) :: I18, IA8
+      INTEGER(8) :: K8
       INTEGER TYPE_NODE, DEST
       INTEGER IOLD, JOLD, IARR, ISEND, JSEND, INEW, JNEW
       INTEGER allocok,  TYPESPLIT, T4MASTER, INIV2
@@ -146,10 +151,10 @@ C
       INTEGER, ALLOCATABLE, DIMENSION(:) :: IACT, IREQI, IREQR
       LOGICAL, ALLOCATABLE, DIMENSION(:) :: SEND_ACTIVE
       LOGICAL FLAG
-      INTEGER NSEND, NLOCAL
+      INTEGER(8), INTENT(OUT) :: NSEND8, NLOCAL8
       INTEGER MASTER_NODE, ISTEP
-      NSEND = 0
-      NLOCAL = 0
+      NSEND8  = 0_8
+      NLOCAL8 = 0_8
       LP = ICNTL(1)
       MP = ICNTL(2)
       END_MSG_2_RECV = SLAVEF
@@ -244,13 +249,13 @@ C
       IF ( INFO(1) .LT. 0 ) GOTO 100
       ARROW_ROOT = 0
       DO I = 1, N
-          I1 = PTRAIW( I )
-          IA = PTRARW( I )
-          IF ( IA .GT. 0 ) THEN
-            DBLARR( IA ) = ZERO
-            IW4( I, 1 ) = INTARR( I1 )
-            IW4( I, 2 ) = -INTARR( I1 + 1 )
-            INTARR( I1 + 2 ) = I
+          I18 = PTRAIW( I )
+          IA8 = PTRARW( I )
+          IF ( IA8 .GT. 0_8 ) THEN
+            DBLARR( IA8 ) = ZERO
+            IW4( I, 1 ) = INTARR( I18 )
+            IW4( I, 2 ) = -INTARR( I18 + 1_8 )
+            INTARR( I18 + 2_8 ) = I
           END IF
       END DO
       IF ( KEEP(38) .NE. 0 ) THEN
@@ -283,7 +288,7 @@ C
       END DO
       KPROBE = 0
       FREQPROBE = max(1,NBRECORDS/10)
-      DO K = 1, NZ_loc
+      DO K8 = 1_8, NZ_loc8
         KPROBE = KPROBE + 1
         IF ( KPROBE .eq. FREQPROBE ) THEN
           KPROBE = 0
@@ -296,7 +301,7 @@ C
      &                 MSGSOU, ARR_INT, COMM, STATUS, IERR )
             CALL MPI_RECV( BUFRECR(1), NBRECORDS, MPI_DOUBLE_PRECISION,
      &                 MSGSOU, ARR_REAL, COMM, STATUS, IERR )
-            CALL DMUMPS_DIST_TREAT_RECV_BUFFER(
+            CALL DMUMPS_DIST_TREAT_RECV_BUF(
      &             BUFRECI, BUFRECR, NBRECORDS, N, IW4(1,1),
      &             KEEP,KEEP8, LOCAL_M, LOCAL_N, root, PTR_ROOT,
      &             A, LA,
@@ -306,11 +311,11 @@ C
      &             )
           END IF
         END IF
-        IOLD = id%IRN_loc(K)
-        JOLD = id%JCN_loc(K)
+        IOLD = id%IRN_loc(K8)
+        JOLD = id%JCN_loc(K8)
         IF ( (IOLD.GT.N).OR.(JOLD.GT.N).OR.(IOLD.LT.1)
      &                 .OR.(JOLD.LT.1) ) CYCLE
-        VAL = id%A_loc(K)
+        VAL = id%A_loc(K8)
         IF ((KEEP(52).EQ.7).OR.(KEEP(52).EQ.8)) THEN
           VAL = VAL * id%ROWSCA(IOLD)*id%COLSCA(JOLD)
         ENDIF
@@ -367,13 +372,13 @@ C
           DEST = IROW_GRID * root%NPCOL + JCOL_GRID
         END IF
         if (DEST .eq. -1) then
-          NLOCAL = NLOCAL + 1
-          NSEND = NSEND + SLAVEF -1
+          NLOCAL8 = NLOCAL8 + 1_8
+          NSEND8  = NSEND8 + int(SLAVEF -1,8)
         else
           if (DEST .eq.MYID ) then
-            NLOCAL = NLOCAL + 1
+            NLOCAL8 = NLOCAL8 + 1_8
           else
-            NSEND = NSEND + 1
+            NSEND8 = NSEND8 + 1_8
           endif
         end if
         IF ( DEST.EQ.-1) THEN
@@ -439,7 +444,7 @@ C
         MSGSOU = STATUS( MPI_SOURCE )
         CALL MPI_RECV( BUFRECR(1), NBRECORDS, MPI_DOUBLE_PRECISION,
      &                 MSGSOU, ARR_REAL, COMM, STATUS, IERR )
-        CALL DMUMPS_DIST_TREAT_RECV_BUFFER(
+        CALL DMUMPS_DIST_TREAT_RECV_BUF(
      &           BUFRECI, BUFRECR, NBRECORDS, N, IW4(1,1),
      &           KEEP,KEEP8, LOCAL_M, LOCAL_N, root, PTR_ROOT,
      &           A, LA,
@@ -481,13 +486,14 @@ C
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
       INTEGER ARROW_ROOT, END_MSG_2_RECV, LOCAL_M, LOCAL_N
-      INTEGER LINTARR, LDBLARR
+      INTEGER(8) :: LINTARR, LDBLARR
       INTEGER(8) :: LA, PTR_ROOT
       INTEGER BUFI( NBRECORDS * 2 + 1, 2, SLAVEF )
       INTEGER BUFRECI( NBRECORDS * 2 + 1 )
       INTEGER IREQI(SLAVEF), IREQR(SLAVEF), IACT(SLAVEF)
       INTEGER IW4( N, 2 )
-      INTEGER PTRAIW( N ), PTRARW( N ), PERM( N ), STEP( N )
+      INTEGER(8) PTRAIW( N ), PTRARW( N )
+      INTEGER PERM( N ), STEP( N )
       INTEGER PROCNODE_STEPS( KEEP(28) )
       INTEGER INTARR( LINTARR )
       DOUBLE PRECISION DBLARR( LDBLARR ), A( LA )
@@ -529,7 +535,7 @@ C
                   CALL MPI_RECV( BUFRECR(1), NBRECORDS,
      &                  MPI_DOUBLE_PRECISION, MSGSOU,
      &                  ARR_REAL, COMM, STATUS, IERR )
-                  CALL DMUMPS_DIST_TREAT_RECV_BUFFER(
+                  CALL DMUMPS_DIST_TREAT_RECV_BUF(
      &              BUFRECI, BUFRECR, NBRECORDS, N, IW4(1,1),
      &              KEEP,KEEP8, LOCAL_M, LOCAL_N, root, PTR_ROOT,
      &              A, LA,
@@ -571,7 +577,7 @@ C
       END DO
       IF ( SEND_LOCAL ) THEN
             ISLAVE = MYID + 1
-            CALL DMUMPS_DIST_TREAT_RECV_BUFFER(
+            CALL DMUMPS_DIST_TREAT_RECV_BUF(
      &              BUFI(1,3-IACT(ISLAVE),ISLAVE),
      &              BUFR(1,3-IACT(ISLAVE),ISLAVE),
      &              NBRECORDS, N, IW4(1,1),
@@ -584,7 +590,7 @@ C
       END IF
       RETURN
       END SUBROUTINE DMUMPS_DIST_FILL_BUFFER
-      SUBROUTINE DMUMPS_DIST_TREAT_RECV_BUFFER
+      SUBROUTINE DMUMPS_DIST_TREAT_RECV_BUF
      &           ( BUFI, BUFR, NBRECORDS, N, IW4,
      &             KEEP,KEEP8, LOCAL_M, LOCAL_N, root, PTR_ROOT, A, LA,
      &             END_MSG_2_RECV, MYID, PROCNODE_STEPS,
@@ -601,9 +607,10 @@ C
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
       INTEGER END_MSG_2_RECV
-      INTEGER PTRAIW( N ), PTRARW( N ), PERM( N ), STEP( N )
+      INTEGER(8) :: PTRAIW( N ), PTRARW( N )
+      INTEGER :: PERM( N ), STEP( N )
       INTEGER PROCNODE_STEPS( KEEP(28) )
-      INTEGER LINTARR, LDBLARR
+      INTEGER(8), INTENT(IN) :: LINTARR, LDBLARR
       INTEGER INTARR( LINTARR )
       INTEGER LOCAL_M, LOCAL_N
       INTEGER(8) :: PTR_ROOT, LA
@@ -613,7 +620,8 @@ C
       INTEGER IREC, NB_REC, NODE_TYPE, IPROC
       INTEGER IPOSROOT, JPOSROOT, IROW_GRID, JCOL_GRID,
      &        ILOCROOT, JLOCROOT
-      INTEGER IA, IS1, ISHIFT, IIW, IS, IAS, IARR, JARR
+      INTEGER(8) :: IA8, IS18, IIW8, IS8, IAS8
+      INTEGER ISHIFT, IARR, JARR
       INTEGER TAILLE
       DOUBLE PRECISION VAL
       NB_REC = BUFI( 1 )
@@ -672,25 +680,25 @@ C
           ENDIF
         ELSE IF (IARR.GE.0) THEN
          IF (IARR.EQ.JARR) THEN
-          IA = PTRARW(IARR)
-          DBLARR(IA) = DBLARR(IA) + VAL
+          IA8 = PTRARW(IARR)
+          DBLARR(IA8) = DBLARR(IA8) + VAL
          ELSE
-          IS1 =  PTRAIW(IARR)
-          ISHIFT      = INTARR(IS1) + IW4(IARR,2)
-          IW4(IARR,2) = IW4(IARR,2) - 1
-          IIW         = IS1 + ISHIFT + 2
-          INTARR(IIW)     = JARR
-          IS          = PTRARW(IARR)
-          IAS         = IS + ISHIFT
-          DBLARR(IAS) = VAL
+          IS18         = PTRAIW(IARR)
+          ISHIFT       = INTARR(IS18) + IW4(IARR,2)
+          IW4(IARR,2)  = IW4(IARR,2) - 1
+          IIW8         = IS18 + ISHIFT + 2
+          INTARR(IIW8) = JARR
+          IS8          = PTRARW(IARR)
+          IAS8         = IS8 + ISHIFT
+          DBLARR(IAS8) = VAL
          ENDIF
         ELSE
            IARR = -IARR
-           ISHIFT      = PTRAIW(IARR)+IW4(IARR,1)+2
-           INTARR(ISHIFT)  = JARR
-           IAS         = PTRARW(IARR)+IW4(IARR,1)
-           IW4(IARR,1) = IW4(IARR,1) - 1
-           DBLARR(IAS)      = VAL
+           IS8          = PTRAIW(IARR)+IW4(IARR,1)+2
+           INTARR(IS8)  = JARR
+           IAS8         = PTRARW(IARR)+IW4(IARR,1)
+           IW4(IARR,1)  = IW4(IARR,1) - 1
+           DBLARR(IAS8) = VAL
            IPROC = MUMPS_PROCNODE( PROCNODE_STEPS(abs(STEP(IARR))),
      &                             SLAVEF )
            IF ( (KEEP(50) .NE. 0 .OR. KEEP(234).NE.0)
@@ -708,4 +716,4 @@ C
       ENDDO
  100  CONTINUE
       RETURN
-      END SUBROUTINE DMUMPS_DIST_TREAT_RECV_BUFFER
+      END SUBROUTINE DMUMPS_DIST_TREAT_RECV_BUF

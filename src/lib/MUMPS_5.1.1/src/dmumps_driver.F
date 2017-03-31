@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -17,8 +17,11 @@ C  ===========================
 C
       SUBROUTINE DMUMPS( id )
       USE DMUMPS_OOC
+      USE MUMPS_MEMORY_MOD
       USE DMUMPS_STRUC_DEF
       USE DMUMPS_STATIC_PTR_M ! For Schur pointer
+C      
+!$    USE OMP_LIB
 C
       IMPLICIT NONE
 C
@@ -51,7 +54,9 @@ C        -Out-of-Core factorization and solution
 C        -Solution phase:
 C          -Multiple Right-Hand-sides (RHS)
 C          -Sparse RHS
-C          -Computation of selected entries of the inverse of original matrix.
+C          -Computation of selected entries of the inverse of 
+C           original matrix.
+C        - Block Low-Rank (BLR) approximation based factorization
 C
 C Method
 C ------
@@ -69,7 +74,18 @@ C
 C References :
 C -----------
 C
-C  W. M. Sid-Lakhdar, PhD Thesis from Université de Lyon prepared at ENS Lyon,
+C  P. Amestoy, R. Brossier, A. Buttari, J.-Y. L'Excellent, T. Mary,
+C   L. Metivier, A. Miniussi, and S. Operto.
+C   Fast 3D frequency-domain full waveform inversion with a parallel
+C   Block Low-Rank multifrontal direct solver: application to OBC data 
+C   from the North Sea, Geophysics, 81(6):R363--R383, (2016).
+C  
+C  P. Amestoy, C. Ashcraft, O. Boiteau, A. Buttari, J.-Y. L'Excellent, 
+C   and C. Weisbecker.
+C   Improving multifrontal methods by means of block low-rank representations.
+C   SIAM Journal on Scientific Computing, 37(3):A1451--A1474 (2015).
+C
+C  W. M. Sid-Lakhdar, PhD Thesis from Universite de Lyon prepared at ENS Lyon,
 C   Scaling the solution of large sparse linear systems using multifrontal
 C   methods on hybrid shared-distributed memory architectures (2014).
 C
@@ -121,11 +137,11 @@ C   and B. Ucar, On computing inverse entries of a sparse matrix in
 C   an out-of-core environment,
 C   SIAM J. on Scientific Computing Vol. 34 N. 4, p. 1975-1999 (2012).
 C
-C  Amestoy, Buttari, Duff, Guermouche, L'Excellent, and Uçar
+C  Amestoy, Buttari, Duff, Guermouche, L'Excellent, and Ucar
 C   The Multifrontal Method, Encyclopedia of Parallel Computing,
 C   editor David Padua, Springer (2011).
 C
-C  Amestoy, Buttari, Duff, Guermouche, L'Excellent, and Uçar
+C  Amestoy, Buttari, Duff, Guermouche, L'Excellent, and Ucar
 C   MUMPS, Encyclopedia of Parallel Computing,
 C   editor David Padua, Springer (2011).
 C
@@ -161,12 +177,12 @@ C  Amestoy, Guermouche, L'Excellent, and Pralet,
 C   Hybrid scheduling for the parallel solution
 C   of linear systems.  Vol 32 (2), pp 136-156 (2006).
 C
-C  Stéphane Pralet, PhD from INPT prepared at CERFACS,
+C  Stephane Pralet, PhD from INPT prepared at CERFACS,
 C   Constrained orderings and scheduling for parallel sparse linear algebra,
 C   available as CERFACS technical report, TH/PA/04/105, (Sept 2004).
 C
 C  Abdou Guermouche, PhD Thesis from LIP-Ecole Normale Superieure de Lyon,
-C   Etude et optimisation du comportement mémoire dans les méthodes paralleles 
+C   Etude et optimisation du comportement memoire dans les methodes paralleles 
 C   de factorisation de matrices creuses (2004).
 C
 C  Guermouche, L'Excellent and Utard, Impact of Reordering on the Memory of a
@@ -202,9 +218,9 @@ C
 C  Jacko Koster, PhD from INPT prepared at CERFACS, On the parallel solution 
 C   and the reordering of unsymmetric sparse linear systems (1997).
 C
-C  Vincent Espirat, Master's thesis from INPT(ENSEEIHT)-IRIT, Développement 
-C   d'une approche multifrontale pour machines à mémoire distribuée et 
-C   réseau hétérogene de stations de travail (1996).
+C  Vincent Espirat, Master's thesis from INPT(ENSEEIHT)-IRIT, Developpement 
+C   d'une approche multifrontale pour machines a memoire distribuee et 
+C   reseau heterogene de stations de travail (1996).
 C
 C  Patrick Amestoy, PhD from INPT prepared at CERFACS, Factorization of large 
 C  sparse matrices based on a multifrontal approach in a multiprocessor 
@@ -244,7 +260,7 @@ C    user (on all processors) before a call with JOB=-1. These are
 C        id%COMM,
 C        id%SYM, and
 C        id%PAR.
-C    CNTL, ICNTL can then be modified (see documentation) by the user.²
+C    CNTL, ICNTL can then be modified (see documentation) by the user.
 C
 * A value of JOB = -1 cannot be combined with other values for JOB
 *
@@ -260,7 +276,7 @@ C
 C The following components of the structure define the centralized matrix 
 C pattern and must be set by the user (on the host only) 
 C before a call with JOB=1:
-C   --- id%N, id%NZ,
+C   --- id%N, id%NZ (32-bit int) or id%NNZ (64-bit int),
 C       id%IRN, and id%JCN
 C       if the user wishes to input the structure of the
 C       matrix in assembled format (ICNTL(5)=0, and ICNTL(18) $\neq$ 3),
@@ -328,8 +344,9 @@ C     --------------------------------------
 *  MPI
 *  ===
       INCLUDE 'mpif.h'
-      INTEGER MASTER, IERR
-      PARAMETER( MASTER = 0 )
+      INTEGER MASTER
+      PARAMETER ( MASTER = 0 )
+      INTEGER IERR
 *
 *  ==========
 *  Parameters
@@ -356,22 +373,27 @@ C  N is an INTEGER variable which must be set by the user to the
 C    order n of the matrix A.  It is not altered by the
 C     subroutine.  
 C
-C  NZ is an INTEGER variable which must be set by the user to the
-C    number of entries being input.  It is not altered by the
-C    subroutine. Only used if ICNTL(5).eq.0 (assembled matrix entry).
-C    Restriction: NZ > 0.
+C  NZ / NNZ are INTEGER / INTEGER(8) variables which must be set by the user
+C    to the number of entries being input, in case of centralized assembled
+C    entry.  It is not altered by the subroutine. Only used if
+C    ICNTL(5).eq.0 and ICNTL(18) .ne. 3 (assembled matrix entry,
+C    or, at least, centralized matrix graph during analysis).
+C
+C    Restriction: NZ > 0 or NNZ > 0.
+C    If NNZ is different from 0, NNZ is used. Otherwise, NZ is used.
 C
 C  NELT is an INTEGER variable which must be set by the user to the
 C    number of elements being input.  It is not altered by the
-C    subroutine. Only used if ICNTL(5).ne.0 (elemental matrix entry).
+C    subroutine. Only used if ICNTL(5).eq.1 (elemental matrix entry).
 C    Restriction: NELT > 0.
 C
-C  IRN and JCN  are INTEGER  arrays of length NZ. 
-C    IRN(k) and JCN(k), k=1..NZ must be set on entry to hold 
+C  IRN and JCN  are INTEGER  arrays of length [N]NZ.
+C    IRN(k) and JCN(k), k=1..[N]NZ must be set on entry to hold 
 C    the row and column indices respectively.
 C    They are not altered by the subroutine except when ICNTL(6) = 1.
 C    (in which case only the column indices are modified).
-C    The arrays are only used if ICNTL(5).eq.0 (assembled entry).
+C    The arrays are only used if ICNTL(5).eq.0 (assembled entry)
+C    or out-of-range.
 C
 C  ELTPTR is an INTEGER array of length NELT+1. 
 C  ELTVAR is an INTEGER array of length ELTPTR(NELT+1)-1.
@@ -383,7 +405,7 @@ C    for element I. No free space is allowed between variable lists.
 C    ELTPTR/ELTVAR are not altered by the subroutine.
 C    The arrays are only used if ICNTL(5).ne.0 (element entry).
 C
-C  A is a DOUBLE PRECISION array of length NZ. 
+C  A is a DOUBLE PRECISION array of length [N]NZ. 
 C     The user must set A(k) to the value 
 C     of the entry in row IRN(k) and column JCN(k) of the matrix.
 C     It is not altered by the subroutine.
@@ -523,15 +545,18 @@ C
 C      .. Local variables ..
 C
       INTEGER JOBMIN, JOBMAX, OLDJOB
+!$    INTEGER NOMP, NOMPMIN, NOMPMAX
       INTEGER I, J, MP, LP, MPG, KEEP235SAVE, KEEP242SAVE,
      &        KEEP243SAVE, KEEP495SAVE, KEEP497SAVE
+      INTEGER(8) :: I8
       LOGICAL LANA, LFACTO, LSOLVE, PROK, LPOK, FLAG, PROKG
       LOGICAL NOERRORBEFOREPERM
-      LOGICAL UNS_PERM_DONE
+      LOGICAL UNS_PERM_DONE,I_AM_SLAVE
 C     Saved communicator (pb of interference)
       INTEGER COMM_SAVE
-C     Local copies of fields JOB, N, NZ, NELT in the structure
-      INTEGER JOB, N, NZ, NELT
+C     Local copy of JOB
+      INTEGER JOB
+      CHARACTER(LEN=20) :: FROM_C_INTERFACE_STRING
       INTEGER, PARAMETER :: ICNTL18DIST_MIN = 1
       INTEGER, PARAMETER :: ICNTL18DIST_MAX = 3
       INTEGER, DIMENSION(:), ALLOCATABLE :: UNS_PERM_INV
@@ -540,9 +565,6 @@ C     TIMINGS
       NOERRORBEFOREPERM = .FALSE.
       UNS_PERM_DONE = .FALSE.
       JOB  = id%JOB
-      N    = id%N
-      NZ   = id%NZ
-      NELT = id%NELT
 C
 C     Initialize error return codes to 0.
       id%INFO(1) = 0
@@ -566,6 +588,23 @@ C     related to DMUMPS
 C     ---------------------------
        COMM_SAVE = id%COMM
        CALL MPI_COMM_DUP( COMM_SAVE, id%COMM, IERR )
+C
+C     Default setting for printing
+      LP = 6
+      MP = 0
+      MPG = 0
+      LPOK  = .TRUE.
+      PROK  = .FALSE.
+      PROKG = .FALSE.
+C     -----------------------------
+C     Check if number of threads is
+C     the same on all processes
+C     -----------------------------
+!$    NOMP = OMP_GET_MAX_THREADS()
+!$    CALL MPI_ALLREDUCE(NOMP,NOMPMIN,1,MPI_INTEGER,MPI_MIN,
+!$   &                   id%COMM,IERR)
+!$    CALL MPI_ALLREDUCE(NOMP,NOMPMAX,1,MPI_INTEGER,MPI_MAX,
+!$   &                   id%COMM,IERR)
 C     -------------------------
 C     Check if value of JOB is
 C     the same on all processes
@@ -579,18 +618,10 @@ C     -------------------------
         id%INFO(2) = JOB
         GOTO 499
       END IF
-C
-C     Default setting for printing
-      LP = 6
-      MP = 0
-      MPG = 0
-      LPOK  = .TRUE.
-      PROK  = .FALSE.
-      PROKG = .FALSE.
 C   
 C     Check value of JOB and previous value of JOB
 C
-      IF (JOB.LT.-2.OR.JOB.EQ.0.OR.JOB.GT.6) THEN
+      IF (JOB.LT.-2.OR.JOB.EQ.0.OR.JOB.GT.6) THEN 
 C       Out of range value
         id%INFO(1) = -3 
         id%INFO(2) = JOB
@@ -599,6 +630,7 @@ C       Out of range value
       IF (JOB.NE.-1) THEN
 C      Check the previous value of JOB
 C      One should be able to test for old job value
+C      Warning: non initialized value
        OLDJOB = id%KEEP( 40 ) + 456789
        IF (OLDJOB.NE.-1.AND.OLDJOB.NE.-2.AND.
      &    OLDJOB.NE.1.AND.OLDJOB.NE.2.AND.
@@ -608,10 +640,50 @@ C      One should be able to test for old job value
         GOTO 499
        END IF
       END IF
+C     ----------------------------------
+C     Initialize, LANA, LFACTO, LSOLVE
+C     LANA indicates if analysis must be performed
+C     LFACTO indicates if factorization must be performed
+C     LSOLVE indicates if solution must be performed
+C     ----------------------------------
+      LANA  = .FALSE.
+      LFACTO = .FALSE.
+      LSOLVE = .FALSE.
+      IF ((JOB.EQ.1).OR.(JOB.EQ.4).OR.
+     &    (JOB.EQ.6))               LANA  = .TRUE.
+      IF ((JOB.EQ.2).OR.(JOB.EQ.4).OR.
+     &    (JOB.EQ.5).OR.(JOB.EQ.6)) LFACTO = .TRUE.
+      IF ((JOB.EQ.3).OR.(JOB.EQ.5).OR.
+     &    (JOB.EQ.6))               LSOLVE = .TRUE.
+      IF (LFACTO) THEN
+C       Value defined on MASTER is the reference
+        CALL MPI_BCAST( id%KEEP(467), 1, MPI_INTEGER, MASTER, id%COMM,
+     &       IERR )
+        IF ( id%KEEP(467) .EQ. 1) THEN
+        ENDIF
+      ENDIF
+      IF (LANA) THEN
+C       Decode NZ / NNZ into KEEP8(28) now
+C       since we may want to print it.
+C       NZ and NNZ only accessed at analysis
+C       phase
+        CALL MUMPS_GET_NNZ_INTERNAL( id%NNZ, id%NZ, id%KEEP8(28) )
+      ENDIF
+C     Also decode NNZ_loc in the same way
+      IF (LANA .OR. LFACTO) THEN
+C       NZ_loc/NNZ_loc may be accessed both analysis
+C       and factorization:
+        IF (id%NNZ_loc > 0_8) THEN
+          id%KEEP8(29) = id%NNZ_loc
+        ELSE
+          id%KEEP8(29) = int(id%NZ_loc, 8)
+        ENDIF
+      ENDIF
 C
 C
       IF (JOB.EQ.-2.OR.JOB.EQ.1.OR.JOB.EQ.2.OR.JOB.EQ.3.OR.
-     &    JOB.EQ.4.OR.JOB.EQ.5.OR.JOB.EQ.6) THEN
+     &    JOB.EQ.4.OR.JOB.EQ.5.OR.JOB.EQ.6
+     &     ) THEN
 C       Correct value of JOB
 C       ICNTL should have been initialized and can be used
         LP      = id%ICNTL(1)
@@ -621,27 +693,58 @@ C       ICNTL should have been initialized and can be used
         PROK    = ((MP.GT.0).AND.(id%ICNTL(4).GE.2))
         PROKG   = ( MPG .GT. 0 .and. id%MYID .eq. MASTER )
         PROKG   = (PROKG.AND.(id%ICNTL(4).GE.2))
+        IF (id%KEEP(500).EQ.1) THEN
+          FROM_C_INTERFACE_STRING=" from C interface"
+        ELSE
+          FROM_C_INTERFACE_STRING=" "
+        ENDIF
         IF (PROKG) THEN
-C         Print basic information on matrix
-           IF (id%ICNTL(5) .NE. 1) THEN
-              IF (id%ICNTL(18) .EQ. 0) THEN
-                WRITE(MPG,'(A,A,A,I4,I12,I15)') 
-     &                'Entering DMUMPS ',
-     &                trim(adjustl(id%VERSION_NUMBER)),
-     &                ' driver with JOB, N, NZ =', JOB,N,NZ
-              ELSE
-                WRITE(MPG,'(A,A,A,I4,I12,I15)') 
-     &                'Entering DMUMPS ',
-     &                trim(adjustl(id%VERSION_NUMBER)),
-     &                ' driver with JOB, N =', JOB,N
-              ENDIF
+C          Print basic information on MUMPS call
+           IF (JOB .EQ. -2
+     &       ) THEN
+C            N, NELT, NNZ not meaningful
+             WRITE(MPG,'(A,A,A,A,I4,I12)') 
+     &               'Entering DMUMPS ',
+     &               trim(adjustl(id%VERSION_NUMBER)),
+     &               trim(FROM_C_INTERFACE_STRING),
+     &               ' with JOB =', JOB
+           ELSE IF (id%ICNTL(5) .NE. 1) THEN
+C            Assembled format
+             IF (id%ICNTL(18) .EQ. 0
+     &            ) THEN
+                 WRITE(MPG,'(A,A,A,A,I4,I12,I15)') 
+     &                 'Entering DMUMPS ',
+     &                 trim(adjustl(id%VERSION_NUMBER)),
+     &                 trim(FROM_C_INTERFACE_STRING),
+     &                 ' with JOB, N, NNZ =', JOB,id%N,id%KEEP8(28)
+             ELSE
+                 WRITE(MPG,'(A,A,A,A,I4,I12)') 
+     &                 'Entering DMUMPS ',
+     &                 trim(adjustl(id%VERSION_NUMBER)),
+     &                 trim(FROM_C_INTERFACE_STRING),
+     &                 ' with JOB, N =', JOB,id%N
+             ENDIF
            ELSE
-              WRITE(MPG,'(A,A,A,I4,I12,I15)') 
-     &             'Entering DMUMPS ',
-     &             trim(adjustl(id%VERSION_NUMBER)),
-     &             ' driver with JOB, N, NELT =', JOB,N
-     &             ,NELT
+C            Elemental format
+             WRITE(MPG,'(A,A,A,A,I4,I12,I15)') 
+     &                'Entering DMUMPS ',
+     &                trim(adjustl(id%VERSION_NUMBER)),
+     &                trim(FROM_C_INTERFACE_STRING),
+     &                ' driver with JOB, N, NELT =', JOB,id%N,id%NELT
            ENDIF
+C          MPI and OpenMP information
+!$         IF (.TRUE.) THEN
+!$           WRITE(MPG, '(A,I6,A,I6)') '      executing #MPI = ',
+!$   &                 id%NPROCS, ' and #OMP = ', NOMP
+!$           IF ( NOMPMIN .NE. NOMPMAX ) THEN
+!$             WRITE(MPG, '(A,I4,A,I4,A)')
+!$   &  '      WARNING detected: different number of threads (max ',
+!$   &         NOMPMAX, ', min ', NOMPMIN, ')'
+!$           END IF
+!$         ELSE
+             WRITE(MPG, '(A,I6,A)')    '      executing #MPI = ',
+     &                 id%NPROCS, ', without OMP'
+!$         ENDIF
         ENDIF
       END IF
 C
@@ -707,6 +810,7 @@ C       - Nullify pointers in the structure
 C       - Get rank and size of the communicator
 C       ----------------------------------------
         CALL DMUMPS_INI_DRIVER( id )
+        IF ( id%INFO(1) .LT. 0 ) GOTO 499
         GOTO 500
       END IF
       IF ( JOB .EQ. -2 ) THEN
@@ -724,43 +828,17 @@ C     MAIN DRIVER
 C     OTHER VALUES OF JOB : 1 to 6
 C
 C----------------------------------------------------------------
-C
-C     Check some input parameters first
-C     ---------------------------------
-C
-C     Check N on the master only
+      CALL MUMPS_MEMORY_SET_DATA_SIZES()
       IF (id%MYID.EQ.MASTER) THEN
-        IF ((N.LE.0).OR.((N+N+N)/3.NE.N)) THEN
-          id%INFO(1) = -16
-          id%INFO(2) = N
-        END IF
-C       Checking only for centralized matrix
-C       This is done by testing non-equality to
-C       distributed options (1..3)
-        IF ( id%ICNTL(18) .LT. ICNTL18DIST_MIN
-     &       .OR. id%ICNTL(18) .GT. ICNTL18DIST_MAX ) THEN
-          IF (id%ICNTL(5).NE.1) THEN
-            IF (NZ.LE.0) THEN
-              id%INFO(1) = -2
-              id%INFO(2) = NZ
-            END IF
-          ELSE
-C           Element entry: check NELT on the master only
-            IF (NELT.LE.0) THEN
-              id%INFO(1) = -24
-              id%INFO(2) = NELT
-            END IF
-          ENDIF
-        END IF
 C       -----------------------------
 C       Check incompatibility between
 C       par (=0) and nprocs (=1)
 C       -----------------------------
-        IF ( (id%KEEP(46).EQ.0).AND.(id%NPROCS.LE.1) ) 
-     &     THEN
-          id%INFO(1) = -21
-          id%INFO(2) = id%NPROCS
-        ENDIF
+         IF ( (id%KEEP(46).EQ.0).AND.(id%NPROCS.LE.1) ) 
+     &        THEN
+            id%INFO(1) = -21
+            id%INFO(2) = id%NPROCS
+         ENDIF
       END IF
 C
 C     Propagate possible error to all nodes
@@ -768,23 +846,6 @@ C     Propagate possible error to all nodes
      &                    id%INFO(1),
      &                    id%COMM, id%MYID )
       IF ( id%INFO(1) .LT. 0 ) GOTO 499
-C
-C     ----------------------------------
-C     Initialize, LANA, LFACTO, LSOLVE
-C     LANA indicates if analysis must be performed
-C     LFACTO indicates if factorization must be performed
-C     LSOLVE indicates if solution must be performed
-C     ----------------------------------
-      LANA  = .FALSE.
-      LFACTO = .FALSE.
-      LSOLVE = .FALSE.
-      IF ((JOB.EQ.1).OR.(JOB.EQ.4).OR.
-     &    (JOB.EQ.6))               LANA  = .TRUE.
-      IF ((JOB.EQ.2).OR.(JOB.EQ.4).OR.
-     &    (JOB.EQ.5).OR.(JOB.EQ.6)) LFACTO = .TRUE.
-      IF ((JOB.EQ.3).OR.(JOB.EQ.5).OR.
-     &    (JOB.EQ.6))               LSOLVE = .TRUE.
-C
 C
 C     Print ICNTL and KEEP
 C
@@ -883,11 +944,11 @@ C             --------------------------------
           DO I = 1, id%N
             UNS_PERM_INV(id%UNS_PERM(I))=I
           END DO
-          DO I = 1, id%NZ
-            J = id%JCN(I)
+          DO I8 = 1_8, id%KEEP8(28)
+            J = id%JCN(I8)
 C           -- skip out-of range (that are ignored in ANA_O)
             IF (J.LE.0.OR.J.GT.id%N) CYCLE
-            id%JCN(I)=UNS_PERM_INV(J)
+            id%JCN(I8)=UNS_PERM_INV(J)
           END DO
           DEALLOCATE(UNS_PERM_INV)
         END IF
@@ -913,7 +974,7 @@ C-       ANALYSIS : Max-Trans, Analysis, Distribution
 C-
 C-----------------------------------------------------
 C
-C        Allocations
+C        Few checks + allocations
 C
 C        IS1 :allocated on the master now, will be allocated on
 C             the slaves later
@@ -936,12 +997,39 @@ C       ----------------------------
         id%KEEP(40)=-1 -456789
 C
         IF (id%MYID.EQ.MASTER) THEN
+C         Check N, [N]NZ, NELT
+          IF ((id%N.LE.0).OR.((id%N+id%N+id%N)/3.NE.id%N)) THEN
+             id%INFO(1) = -16
+             id%INFO(2) = id%N
+             GOTO 100
+          END IF
+          IF (id%ICNTL(5).NE.1) THEN
+C           Assembled input
+            IF (id%ICNTL(18) .LT. 1 .OR. id%ICNTL(18) .GT. 3) THEN
+C             Centralized input
+              IF (id%KEEP8(28) .LE. 0_8) THEN
+                id%INFO(1) = -2
+                CALL MUMPS_SET_IERROR(id%KEEP8(28), id%INFO(2))
+                GOTO 100
+              ENDIF
+            ENDIF
+          ELSE
+C           Element entry: check NELT on the master
+            IF (id%NELT .LE. 0) THEN
+              id%INFO(1) = -24
+              id%INFO(2) = id%NELT
+              GOTO 100
+            ENDIF
+          ENDIF
 C     -- initialize values of respectively
 C     icntl(6), (7) and (12) to not done/chosen
           id%INFOG(7) = -9999
           id%INFOG(23) = 0
           id%INFOG(24) = 1
-          IF (associated(id%IS1)) DEALLOCATE(id%IS1)
+          IF (associated(id%IS1)) THEN
+            DEALLOCATE(id%IS1)
+            NULLIFY(id%IS1)
+          ENDIF
 C         -------------------------------------------
 C         Allocate array IS1 for analysis of size:
 C          - assembled entry: 10 * N or 11 * N
@@ -955,12 +1043,12 @@ C         -------------------------------------------
      &           (id%ICNTL(6) .NE. 0 .AND. id%ICNTL(7) .NE.1)
      &           .OR.
      &           id%ICNTL(12) .NE. 1) ) THEN
-              id%MAXIS1 = 11 * N
+              id%MAXIS1 = 7 * id%N
             ELSE
-              id%MAXIS1 = 10 * N
+              id%MAXIS1 = 6 * id%N
             END IF
           ELSE
-            id%MAXIS1 = 6 * N + 2 * NELT + 2
+            id%MAXIS1 = 6 * id%N
           ENDIF
           ALLOCATE( id%IS1(id%MAXIS1), stat=IERR )
           IF (IERR.gt.0) THEN
@@ -1006,19 +1094,34 @@ C         IRN/JCN
 C         Element entry: check input parameters ELTPTR/ELTVAR
 C         ---------------------------------------------------
           IF ( id%ICNTL(5) .NE. 1 ) THEN ! Assembled matrix
-            id%NA_ELT=0
+            id%KEEP8(30)=0_8
             IF ( id%ICNTL(18) .LT. ICNTL18DIST_MIN
      &           .OR. id%ICNTL(18) .GT. ICNTL18DIST_MAX ) THEN
               IF ( .not. associated( id%IRN ) ) THEN
                 id%INFO(1) = -22
                 id%INFO(2) = 1
-              ELSE IF ( size( id%IRN ) < id%NZ ) THEN
+#if defined(MUMPS_F2003)
+              ELSE IF ( size( id%IRN, KIND=8 ) < id%KEEP8(28) ) THEN
+#else
+C             size with kind=8 output not available. One can still
+C             check that if NZ can be stored in a 32-bit integer,
+C             the 32-bit size(id%IRN) (which we then assume not
+C             to overflow...) is large enough
+              ELSE IF ( id%KEEP8(28) .LE. int(huge(id%NZ),8) .AND.
+     &                  size(id%IRN) < int(id%KEEP8(28)) ) THEN
+#endif
                 id%INFO(1) = -22
                 id%INFO(2) = 1
               ELSE IF ( .not. associated( id%JCN ) ) THEN
                 id%INFO(1) = -22
                 id%INFO(2) = 2
-              ELSE IF ( size( id%JCN ) < id%NZ ) THEN
+#if defined(MUMPS_F2003)
+              ELSE IF ( size( id%JCN, KIND=8 ) < id%KEEP8(28) ) THEN
+#else
+C             Same as for IRN above
+              ELSE IF ( id%KEEP8(28) .LE. int(huge(id%NZ),8) .AND.
+     &                  size(id%JCN) < int(id%KEEP8(28)) ) THEN
+#endif
                 id%INFO(1) = -22
                 id%INFO(2) = 2
               END IF
@@ -1043,23 +1146,22 @@ C         ---------------------------------------------------
                 id%INFO(1) = -22
                 id%INFO(2) = 2
               ELSE
-C               If no error, we compute NA_ELT, required
-C               for DMUMPS_MAX_MEM already in analysis, and
+C               If no error, we compute KEEP8(30) (formerly NA_ELT),
+C               required for DMUMPS_MAX_MEM already in analysis, and
 C               then later during facto to check the size of A_ELT
-                id%NA_ELT = 0
+                id%KEEP8(30) = 0_8
                 IF ( id%KEEP(50) .EQ. 0 ) THEN
 C                 Unsymmetric elements (but symmetric structure)
-                  DO I = 1,NELT
+                  DO I = 1,id%NELT
                     J = id%ELTPTR(I+1) - id%ELTPTR(I)
-                    J = (J * J)
-                    id%NA_ELT = id%NA_ELT + J
+                    id%KEEP8(30) = id%KEEP8(30) + int(J,8) * int(J,8)
                   ENDDO
                 ELSE
 C                 Symmetric elements
-                  DO I = 1,NELT
+                  DO I = 1,id%NELT
                     J = id%ELTPTR(I+1) - id%ELTPTR(I)
-                    J = (J * (J+1))/2
-                    id%NA_ELT = id%NA_ELT + J
+                    id%KEEP8(30) = id%KEEP8(30) +
+     &                             (int(J,8) *int(J+1,8))/2_8
                   ENDDO
                 ENDIF
               ENDIF
@@ -1122,6 +1224,12 @@ C       TIMINGS:
           CALL MUMPS_SECFIN(TIMEG)
           id%DKEEP(71) = TIMEG
         ENDIF
+        IF (id%MYID .eq. MASTER.AND.id%KEEP(492).EQ.0) THEN
+C No front to be selected for LR
+          id%KEEP(486) = 0
+          IF (PROKG)
+     &  write(MPG,'(A)') " Low rank reset off since no front selected "
+        ENDIF
         IF (PROKG) THEN
           WRITE( MPG,'(A,F12.4)')
      &         ' ELAPSED TIME IN ANALYSIS DRIVER= ', TIMEG
@@ -1133,6 +1241,13 @@ C     -----------------------
         id%KEEP(40) = 1 -456789
       END IF
 C
+C-------------------------------------------------------
+C-
+C      
+C      BEGIN FACTORIZATION PHASE
+C
+C-
+C-------------------------------------------------------
       IF ( LFACTO ) THEN
          IF (id%MYID .eq. MASTER) THEN
             id%DKEEP(91)=0.0D0
@@ -1167,6 +1282,7 @@ C              into id%SCHUR.
                CALL DMUMPS_SET_TMP_PTR(id%SCHUR_CINTERFACE(1),
      &         id%SIZE_SCHUR*id%SIZE_SCHUR)
                CALL DMUMPS_GET_TMP_PTR(id%SCHUR)
+               NULLIFY(id%SCHUR_CINTERFACE)
              ENDIF
              IF ( .NOT. associated (id%SCHUR)) THEN
               IF (LP.GT.0) 
@@ -1183,30 +1299,82 @@ C              into id%SCHUR.
                 id%INFO(2)=9
              END IF
           END IF
-C         ------------------------------------------
-C         Assembled entry: check input parameter A
-C         Element entry: check input parameter A_ELT
-C         ------------------------------------------
-          IF ( id%KEEP(55) .EQ. 0 ) THEN
-           IF ( id%KEEP(54).eq.0 ) THEN
-            IF ( .not. associated( id%A ) ) THEN
-              id%INFO( 1 ) = -22
-              id%INFO( 2 ) = 4
-            ELSE IF ( size( id%A ) < id%NZ ) THEN
-              id%INFO( 1 ) = -22
-              id%INFO( 2 ) = 4
-            END IF
-           END IF
-          ELSE
-            IF ( .not. associated( id%A_ELT ) ) THEN
-              id%INFO( 1 ) = -22
-              id%INFO( 2 ) = 4
-            ELSE 
-              IF ( size( id%A_ELT ) < id%NA_ELT ) THEN
-                id%INFO( 1 ) = -22
-                id%INFO( 2 ) = 4
-              ENDIF
-            END IF
+C     ------------------------------------------------------------
+C     Assembled entry: check input parameterd IRN,JCN,A
+C     Element entry: check input parameters ELTPTR,ELTVAR,A_ELT
+C     ------------------------------------------------------------
+          IF ( id%KEEP(54) .EQ. 0 ) THEN
+             IF ( id%KEEP(55).eq.0 ) THEN
+C     Assembled entry
+                IF ( .not. associated( id%IRN ) ) THEN
+                   id%INFO(1) = -22
+                   id%INFO(2) = 1
+#if defined(MUMPS_F2003)
+                ELSE IF ( size( id%IRN, KIND=8 ) < id%KEEP8(28) ) THEN
+#else
+C     size with kind=8 output not available. One can still
+C     check that if NZ can be stored in a 32-bit integer,
+C     the 32-bit size(id%IRN) (which we then assume not
+C     to overflow...) is large enough
+                ELSE IF ( id%KEEP8(28) .LE. int(huge(id%NZ),8) .AND.
+     &                  size(id%IRN) < int(id%KEEP8(28)) ) THEN
+#endif
+                   id%INFO(1) = -22
+                   id%INFO(2) = 1
+                ELSE IF ( .not. associated( id%JCN ) ) THEN
+                   id%INFO(1) = -22
+                   id%INFO(2) = 2
+#if defined(MUMPS_F2003)
+                ELSE IF ( size( id%JCN, KIND=8 ) < id%KEEP8(28) ) THEN
+#else
+C     Same as for IRN above
+                ELSE IF ( id%KEEP8(28) .LE. int(huge(id%NZ),8) .AND.
+     &                  size(id%JCN) < int(id%KEEP8(28)) ) THEN
+#endif
+                   id%INFO(1) = -22
+                   id%INFO(2) = 2
+                ELSEIF ( .not. associated( id%A ) ) THEN
+                   id%INFO( 1 ) = -22
+                   id%INFO( 2 ) = 4
+#if defined(MUMPS_F2003)
+                ELSE IF ( size( id%A, KIND=8 ) < id%KEEP8(28) ) THEN
+#else
+C     Same as for IRN/JCN above
+                ELSE IF ( id%KEEP8(28) .LE. int(huge(id%NZ),8) .AND.
+     &                  size( id%A ) < int(id%KEEP8(28)) ) THEN
+#endif
+                   id%INFO( 1 ) = -22
+                   id%INFO( 2 ) = 4
+                END IF
+             ELSE
+C     Element entry                
+                IF ( .not. associated( id%ELTPTR ) ) THEN
+                   id%INFO(1) = -22
+                   id%INFO(2) = 1
+                ELSE IF ( size( id%ELTPTR ) < id%NELT+1 ) THEN
+                   id%INFO(1) = -22
+                   id%INFO(2) = 1
+                ELSE IF ( .not. associated( id%ELTVAR ) ) THEN
+                   id%INFO(1) = -22
+                   id%INFO(2) = 2
+                ELSEIF ( size( id%ELTVAR ) < id%LELTVAR ) THEN 
+                   id%INFO(1) = -22
+                   id%INFO(2) = 2
+                ELSEIF ( .not. associated( id%A_ELT ) ) THEN
+                   id%INFO( 1 ) = -22
+                   id%INFO( 2 ) = 4
+                ELSE 
+#if defined(MUMPS_F2003)
+                   IF ( size( id%A_ELT, KIND=8 ) < id%KEEP8(30) ) THEN
+#else
+                   IF ( id%KEEP8(30) < int(huge(id%NZ),8) .AND.
+     &                     size( id%A_ELT ) < int(id%KEEP8(30)) ) THEN
+#endif
+                      id%INFO( 1 ) = -22
+                      id%INFO( 2 ) = 4
+                   ENDIF
+                END IF
+             ENDIF
           ENDIF
 C         ----------------------
 C         Get the value of PERLU
@@ -1218,7 +1386,8 @@ C         ----------------------
 C         Get null space options
 C         Note that nullspace is forbidden in case of Schur complement
 C         ----------------------
-          CALL DMUMPS_GET_NS_OPTIONS_FACTO(N,id%KEEP(1),id%ICNTL(1),MPG)
+          CALL DMUMPS_GET_NS_OPTIONS_FACTO(id%N,id%KEEP(1),
+     &                                     id%ICNTL(1),MPG)
 C         ========================================
 C         Decode and set scaling options for facto
 C         ========================================
@@ -1295,7 +1464,8 @@ C         -------------------------------
 C         ------------------------------------
 C         If matrix is symmetric, only scaling
 C         options -1 (given scaling), 1
-C         (diagonal scaling), and 7 (SIMSCALING)
+C         (diagonal scaling), 7 and 8 (SIMSCALING)
+C         are allowed.
 C         ------------------------------------
           IF ( id%KEEP(50) .NE. 0 ) THEN
              IF ( id%KEEP(52).ne.  1 .and.
@@ -1358,9 +1528,9 @@ C
      &             DEALLOCATE( id%COLSCA )
             IF ( associated(id%ROWSCA))
      &             DEALLOCATE( id%ROWSCA )
-            ALLOCATE( id%COLSCA(N), stat=IERR)
+            ALLOCATE( id%COLSCA(id%N), stat=IERR)
             IF (IERR .GT.0) id%INFO(1)=-13
-            ALLOCATE( id%ROWSCA(N), stat=IERR)
+            ALLOCATE( id%ROWSCA(id%N), stat=IERR)
             IF (IERR .GT.0) id%INFO(1)=-13
           END IF
 C
@@ -1391,7 +1561,55 @@ C            Sets KEEP(221) and do some checks
         END IF        ! End of IF (MYID .eq. MASTER)
 C       KEEP(221) was set in DMUMPS_SET_K221 but not broadcast
         CALL MPI_BCAST( id%KEEP(221), 1, MPI_INTEGER, MASTER, id%COMM,
-     &                  IERR )
+     &       IERR )
+C
+C     Check distributed matrices on all processors.
+        I_AM_SLAVE = ( id%MYID .ne. MASTER  .OR.
+     &     ( id%MYID .eq. MASTER .AND.
+     &     id%KEEP(46) .eq. 1 ) )
+        IF (I_AM_SLAVE .AND.
+     &      id%KEEP(54).NE.0 .AND. id%KEEP8(29).GT.0) THEN
+           IF ( .not. associated( id%IRN_loc ) ) THEN
+              id%INFO(1) = -22
+              id%INFO(2) = 16
+#if defined(MUMPS_F2003)
+           ELSE IF ( size( id%IRN_loc, KIND=8 ) < id%KEEP8(29) ) THEN
+#else
+C     size with kind=8 output not available. One can still
+C     check that if NZ_loc can be stored in a 32-bit integer,
+C     the 32-bit size(id%IRN_loc) (which we then assume not
+C     to overflow...) is large enough
+           ELSE IF ( id%KEEP8(29) .LE. int(huge(id%NZ_loc),8) .AND.
+     &             size(id%IRN_loc) < int(id%KEEP8(29)) ) THEN
+#endif
+              id%INFO(1) = -22
+              id%INFO(2) = 16
+           ELSE IF ( .not. associated( id%JCN_loc ) ) THEN
+              id%INFO(1) = -22
+              id%INFO(2) = 16
+#if defined(MUMPS_F2003)
+           ELSE IF ( size( id%JCN_loc, KIND=8 ) < id%KEEP8(29) ) THEN
+#else
+C     Same as for IRN_loc above
+           ELSE IF ( id%KEEP8(29) .LE. int(huge(id%NZ_loc),8) .AND.
+     &             size(id%JCN_loc) < int(id%KEEP8(29)) ) THEN
+#endif
+              id%INFO(1) = -22
+              id%INFO(2) = 16
+           ELSEIF ( .not. associated( id%A_loc ) ) THEN
+              id%INFO( 1 ) = -22
+              id%INFO( 2 ) = 16
+#if defined(MUMPS_F2003)
+           ELSE IF ( size( id%A_loc, KIND=8 ) < id%KEEP8(29) ) THEN
+#else
+C     Same as for IRN_loc/JCN_loc above
+           ELSE IF ( id%KEEP8(29) .LE. int(huge(id%NZ_loc),8) .AND.
+     &             size( id%A_loc ) < int(id%KEEP8(29)) ) THEN
+#endif
+              id%INFO( 1 ) = -22
+              id%INFO( 2 ) = 16
+           END IF
+        ENDIF
 C
 C  Check Schur complement on all processors.
 C  DMUMPS_PROPINFO will be called right after those checks.
@@ -1400,10 +1618,18 @@ C
           IF ( id%root%yes ) THEN
             IF ( associated( id%SCHUR_CINTERFACE )) THEN
 C             Called from C interface...
-C             
-              id%SCHUR=>id%SCHUR_CINTERFACE
-     &          (1:id%SCHUR_LLD*(id%root%SCHUR_NLOC-1)+
-     &          id%root%SCHUR_MLOC)
+C             The next instruction may cause
+C             bound check errors at runtime
+C             id%SCHUR=>id%SCHUR_CINTERFACE
+C    &          (1:id%SCHUR_LLD*(id%root%SCHUR_NLOC-1)+
+C    &          id%root%SCHUR_MLOC)
+C             Instead, we set a temporary
+C             pointer and then retrieve it
+              CALL DMUMPS_SET_TMP_PTR(id%SCHUR_CINTERFACE(1),
+     &         id%SCHUR_LLD*(id%root%SCHUR_NLOC-1)+
+     &         id%root%SCHUR_MLOC)
+              CALL DMUMPS_GET_TMP_PTR(id%SCHUR)
+              NULLIFY(id%SCHUR_CINTERFACE)
             ENDIF
 C           Check that SCHUR_LLD is large enough
             IF (id%SCHUR_LLD < id%root%SCHUR_MLOC) THEN
@@ -1462,14 +1688,24 @@ C       In the case of Schur, free or not associated
 C       id%root%SCHUR_POINTER now rather than in end_driver.F
 C       (Case of repeated factorizations).
         IF (id%KEEP(60).EQ.2.OR.id%KEEP(60).EQ.3) THEN
-          IF (id%root%yes) THEN
-            IF (id%root%SCHUR_NLOC==0) THEN
-               DEALLOCATE(id%root%SCHUR_POINTER)
-               NULLIFY(id%root%SCHUR_POINTER)
-            ELSE
-               NULLIFY(id%root%SCHUR_POINTER)
-            ENDIF
-          ENDIF
+           IF (id%root%yes) THEN
+              IF (id%root%SCHUR_NLOC==0) THEN
+                 DEALLOCATE(id%root%SCHUR_POINTER)
+                 NULLIFY(id%root%SCHUR_POINTER)
+              ELSE
+                 NULLIFY(id%root%SCHUR_POINTER)
+              ENDIF
+           ENDIF
+        ENDIF
+C     root%RG2L_ROW and root%RG2L_COL
+C     are not used outside of the facto
+        IF (associated(id%root%RG2L_ROW))THEN
+           DEALLOCATE(id%root%RG2L_ROW)
+           NULLIFY(id%root%RG2L_ROW)
+        ENDIF
+        IF (associated(id%root%RG2L_COL))THEN
+           DEALLOCATE(id%root%RG2L_COL)
+           NULLIFY(id%root%RG2L_COL)
         ENDIF
         IF (id%MYID .eq. MASTER) THEN
            CALL MUMPS_SECFIN(TIMEG)
@@ -1482,12 +1718,26 @@ C       (Case of repeated factorizations).
 C
 C       Check for errors after FACTO
 C       (it was propagated inside)
-        IF ( id%INFO(1) .LT. 0 ) GO TO 499
+        IF(id%INFO(1).LT.0) THEN
+C     Free id%S if facto failed     
+           if (associated(id%S))  then 
+              DEALLOCATE(id%S)
+              NULLIFY(id%S)
+           endif
+           GO TO 499
+        ENDIF
 C
 C       Update last successful step
 C
         id%KEEP(40) = 2 - 456789
       END IF
+C-------------------------------------------------------
+C-
+C      
+C      BEGIN SOLVE PHASE
+C
+C-
+C-------------------------------------------------------     
       IF (LSOLVE) THEN
         IF (id%MYID .eq. MASTER) THEN
            id%DKEEP(111)=0.0D0
@@ -1515,10 +1765,37 @@ C       ------------------------------------------
            ! used (note though that 
            ! they # with A-1/sparseRHS and Null Space)
            IF (id%KEEP(242).EQ.0) id%KEEP(243)=0
+C     --------------------------------------
+C     Check input parameters ROWSCA / COLSCA
+C     Only if KEEP(52).NE.0 because
+C     only 0 means that no colsca/rowsca are needed
+C     --------------------------------------
+           IF ( id%KEEP(52) .ne. 0) THEN
+              IF ( .not. associated( id%ROWSCA ) ) THEN
+                 id%INFO(1) = -22
+                 id%INFO(2) = 5
+              ELSE IF ( size( id%ROWSCA ) < id%N ) THEN
+                 id%INFO(1) = -22
+                 id%INFO(2) = 5
+              ELSE IF ( .not. associated( id%COLSCA ) ) THEN
+                 id%INFO(1) = -22
+                 id%INFO(2) = 6
+              ELSE IF ( size( id%COLSCA ) < id%N ) THEN
+                 id%INFO(1) = -22
+                 id%INFO(2) = 6
+              END IF
+           ENDIF
         ENDIF
+C     -------------------------
+C     Propagate possible errors
+C     -------------------------
+        CALL MUMPS_PROPINFO( id%ICNTL(1),
+     &       id%INFO(1),
+     &       id%COMM, id%MYID )
+        IF ( id%INFO(1) .LT. 0 ) GO TO 499
         CALL DMUMPS_SOLVE_DRIVER(id)
         IF (id%MYID .eq. MASTER) THEN
-            CALL MUMPS_SECFIN(TIMEG)
+           CALL MUMPS_SECFIN(TIMEG)
             id%DKEEP(111) = TIMEG
         ENDIF
         IF (PROKG) THEN
@@ -1553,6 +1830,14 @@ C
       IF (LPOK) WRITE (LP,99994) id%INFO(2)
 *
 500   CONTINUE
+      IF (associated(id%IS1)) THEN
+        DEALLOCATE(id%IS1)
+        NULLIFY(id%IS1)
+      ENDIF
+      IF (associated(id%PROCNODE)) THEN
+        DEALLOCATE(id%PROCNODE)
+        NULLIFY(id%PROCNODE)
+      ENDIF
 #if ! defined(LARGEMATRICES)
 C     ---------------------------------
 C     Permute JCN on output to DMUMPS if
@@ -1567,23 +1852,33 @@ C       error analysis), then we do not
 C       permute JCN back.
 C       -------------------------------
         IF (id%JOB .NE. 3 .OR. UNS_PERM_DONE) THEN
-          DO I = 1, id%NZ
-            J=id%JCN(I)
+         IF (.not.associated(id%UNS_PERM)) THEN
+C         I may happen 
+C           (for ex in case of error -7 during analysis:
+C           UNS_PERM can be not associated, 
+C           KEEP(23) was set to to automatic choice(=7) and
+C           an error of memory allocation occurs during analysis
+C           before having decided value of KEEP(23))
+C         UNS_PERM not associated and KEEP(23).NE.0
+C         Permuting JCN back does not make sense and KEEP(23) 
+C         should be reset to zero
+          id%KEEP(23) = 0
+         ELSE
+           DO I8 = 1_8, id%KEEP8(28)
+            J=id%JCN(I8)
 C           -- skip out-of range (that are ignored in ANA_O)
             IF (J.LE.0.OR.J.GT.id%N) CYCLE
-            id%JCN(I)=id%UNS_PERM(J)
-          END DO
+            id%JCN(I8)=id%UNS_PERM(J)
+           END DO
+          ENDIF
         END IF
       END IF
 #endif
  510  CONTINUE
-C     ---------------------------------
-C     Modify INFOG(1:2) for concordance
-C     with specification sheets 3.2, ie
-C     return the same significant error
-C     code on all processors.
-C     And broadcast other INFOG entries
-C     ---------------------------------
+C     ------------------------------------
+C     Set INFOG(1:2): same value on all
+C     processors + broadcast other entries
+C     ------------------------------------
       CALL DMUMPS_SET_INFOG(id%INFO(1), id%INFOG(1), id%COMM, id%MYID)
 C
 C     --------------------------------
@@ -1604,9 +1899,9 @@ C     --------------------------------
 *===============
       IF (id%MYID.EQ.MASTER.and.MPG.GT.0.and.
      & id%INFOG(1).lt.0) THEN
-        WRITE(MPG,'(A,I12)') ' On return from DMUMPS, INFOG(1)=',
+        WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(1)=',
      &      id%INFOG(1)
-        WRITE(MPG,'(A,I12)') ' On return from DMUMPS, INFOG(2)=',
+        WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(2)=',
      &      id%INFOG(2)
       END IF
 C     -------------------------
@@ -1616,8 +1911,8 @@ C     -------------------------
        id%COMM = COMM_SAVE
       RETURN
 *
-99995 FORMAT (' ** ERROR RETURN ** FROM DMUMPS INFO(1)=', I3)
-99994 FORMAT (' ** INFO(2)=', I10)
+99995 FORMAT (' ** ERROR RETURN ** FROM DMUMPS INFO(1)=', I5)
+99994 FORMAT (' ** INFO(2)=', I16)
 99993 FORMAT (' ** Allocation error: could not permute JCN.')
       END SUBROUTINE DMUMPS
 *
@@ -1634,12 +1929,19 @@ C
 C  Arguments:
 C  =========
 C
-      INTEGER INFO(40), INFOG(40), COMM, MYID
+      INTEGER, PARAMETER :: SIZE_INFOG = 40
+      INTEGER :: INFO(40)
+      INTEGER :: INFOG(SIZE_INFOG)  ! INFOG(40)
+      INTEGER :: COMM, MYID
 C
 C  Local variables
 C  ===============
 C
-      INTEGER TMP1(2),TMP(2)
+#if defined(WORKAROUNDINTELILP64MPI2INTEGER)
+      INTEGER(4) :: TMP1(2),TMP(2)
+#else
+      INTEGER :: TMP1(2),TMP(2)
+#endif
       INTEGER ROOT, IERR
       INTEGER MASTER
       PARAMETER (MASTER=0)
@@ -1672,7 +1974,8 @@ C        INFOG(2) = MYID
 C
 C    Make INFOG available on all procs:
 C
-      CALL MPI_BCAST(INFOG(3), 38, MPI_INTEGER, MASTER, COMM, IERR )
+      CALL MPI_BCAST(INFOG(3), SIZE_INFOG-2, MPI_INTEGER,
+     &               MASTER, COMM, IERR )
       RETURN
       END SUBROUTINE DMUMPS_SET_INFOG
       SUBROUTINE DMUMPS_PRINT_ICNTL(id, LP)

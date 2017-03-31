@@ -12,7 +12,7 @@
 /*****************************************************************************
 A macro defining the size of integers 
 ******************************************************************************/
-#ifdef  INTSIZE64
+#if defined(INTSIZE64) || defined(PORD_INTSIZE64)
 #include <inttypes.h>
 #define PORD_INT int64_t
 #else

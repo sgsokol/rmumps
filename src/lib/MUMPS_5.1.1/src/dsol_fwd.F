@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -17,26 +17,27 @@ C
      &    NE_STEPS, NA, LNA, STEP,
      &    FRERE, DAD, FILS,
      &    NSTK_S, IPOOL, LPOOL, PTRIST, PTRFAC, MYLEAF, INFO,
-     &    KEEP,KEEP8,
+     &    KEEP, KEEP8, DKEEP,
      &    PROCNODE_STEPS,
      &    SLAVEF, COMM, MYID, BUFR, LBUFR, LBUFR_BYTES,
      &    RHS_ROOT, LRHS_ROOT, MTYPE, 
      &
      &    ISTEP_TO_INIV2, TAB_POS_IN_PERE
-     &    , RHS_BOUNDS, LRHS_BOUNDS, DO_NBSPARSE 
+     &    , RHS_BOUNDS, LRHS_BOUNDS, DO_NBSPARSE, FROM_PP
      &    )
       USE DMUMPS_OOC
       IMPLICIT NONE
       INTEGER MTYPE
-      INTEGER(8) :: LA
-      INTEGER, INTENT(IN) :: N, LIW, LWCB, LPOOL, LIWCB, LNA
+      INTEGER(8), INTENT(IN) :: LA, LWCB
+      INTEGER, INTENT(IN) :: N, LIW, LPOOL, LIWCB, LNA
       INTEGER SLAVEF, MYLEAF, COMM, MYID
       INTEGER INFO( 40 ), KEEP(500)
       INTEGER(8) KEEP8(150)
+      DOUBLE PRECISION, INTENT(INOUT) :: DKEEP(230)
       INTEGER PROCNODE_STEPS( KEEP(28) )
       INTEGER NRHS
       DOUBLE PRECISION A( LA ), WCB( LWCB )
-      INTEGER LRHS_ROOT
+      INTEGER(8), intent(in) :: LRHS_ROOT
       DOUBLE PRECISION RHS_ROOT( LRHS_ROOT )
       INTEGER LBUFR, LBUFR_BYTES
       INTEGER BUFR( LBUFR )
@@ -59,12 +60,14 @@ C
 #else
       DOUBLE PRECISION, intent(inout) :: RHSCOMP(LRHSCOMP,NRHS)
 #endif
+      LOGICAL, intent(in) :: FROM_PP
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
       INTEGER MSGTAG, MSGSOU, DUMMY(1)
       LOGICAL FLAG
       INTEGER NBFIN, MYROOT
-      INTEGER POSIWCB,POSWCB,PLEFTWCB
+      INTEGER POSIWCB
+      INTEGER(8) :: POSWCB, PLEFTWCB
       INTEGER INODE
       INTEGER I
       INTEGER III, NBROOT,LEAF
@@ -72,9 +75,10 @@ C
       EXTERNAL MUMPS_PROCNODE
       INTEGER MUMPS_PROCNODE
       DUMMY(1) = 1
+      KEEP(266)=0
       POSIWCB = LIWCB
       POSWCB  = LWCB
-      PLEFTWCB= 1
+      PLEFTWCB= 1_8
       DO I = 1, KEEP(28)
         NSTK_S(I)   = NE_STEPS(I)
       ENDDO
@@ -89,7 +93,7 @@ C
       IF ( MYROOT .EQ. 0 ) THEN
         NBFIN = NBFIN - 1
         CALL DMUMPS_MCAST2(DUMMY, 1, MPI_INTEGER, MYID, COMM,
-     &       RACINE_SOLVE, SLAVEF)
+     &       RACINE_SOLVE, SLAVEF, KEEP)
         IF (NBFIN.EQ.0) GOTO 260
       END IF
       MYLEAF = LEAF - 1
@@ -111,10 +115,10 @@ C
      &     IWCB, LIWCB,
      &     WCB, LWCB, POSWCB,
      &     PLEFTWCB, POSIWCB,
-     &     PTRICB, INFO, KEEP,KEEP8, STEP,
+     &     PTRICB, INFO, KEEP,KEEP8, DKEEP, STEP,
      &     PROCNODE_STEPS,
      &     RHSCOMP, LRHSCOMP, POSINRHSCOMP_FWD
-     &     )
+     &     , FROM_PP )
       IF ( INFO( 1 ) .LT. 0 .OR. NBFIN .EQ. 0 ) GOTO 260
       IF (.not. FLAG) THEN
          IF (III .NE. LEAF) THEN
@@ -134,15 +138,16 @@ C
      &        POSWCB, PLEFTWCB, POSIWCB,
      &        PTRICB, PTRIST, PTRFAC, PROCNODE_STEPS,
      &        FILS, STEP, FRERE, DAD,
-     &        MYROOT, INFO, KEEP,KEEP8, RHS_ROOT, MTYPE, 
+     &        MYROOT, INFO, KEEP,KEEP8, DKEEP, RHS_ROOT, MTYPE, 
      &        RHSCOMP, LRHSCOMP, POSINRHSCOMP_FWD,
      &        ISTEP_TO_INIV2, TAB_POS_IN_PERE
      &        , RHS_BOUNDS, LRHS_BOUNDS, DO_NBSPARSE 
-     &     )
+     &     , FROM_PP )
       IF ( INFO( 1 ) .LT. 0 .OR. NBFIN .EQ. 0 ) GOTO 260
       GOTO 50
   260 CONTINUE
-      CALL DMUMPS_FINISH_RECV( MYID,COMM,BUFR,
-     &                            LBUFR,LBUFR_BYTES )
+      CALL DMUMPS_CLEAN_PENDING(INFO(1), KEEP, BUFR, LBUFR,LBUFR_BYTES,
+     &     COMM, DUMMY(1),  
+     &     SLAVEF, .TRUE., .FALSE.) 
       RETURN
       END SUBROUTINE DMUMPS_SOL_R

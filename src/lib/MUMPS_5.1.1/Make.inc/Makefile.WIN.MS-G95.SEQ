@@ -1,29 +1,30 @@
 #
-#  This file is part of MUMPS 5.0.1, released
-#  on Thu Jul 23 17:08:29 UTC 2015
+#  This file is part of MUMPS 5.1.1, released
+#  on Mon Mar 20 14:34:33 UTC 2017
 #
 # We are grateful to Evgenii Rudnyi for his help and suggestions
 # regarding Windows installation.
 #Begin orderings
 
-# NOTE that PORD is distributed within MUMPS by default. If you would like to
-# use other orderings, you need to obtain the corresponding package and modify
-# the variables below accordingly.
+# NOTE that PORD is distributed within MUMPS by default. It is recommended to
+# install other orderings. For that, you need to obtain the corresponding package
+# and modify the variables below accordingly.
 # For example, to have Metis available within MUMPS:
 #          1/ download Metis and compile it
 #          2/ uncomment (suppress # in first column) lines
-#             starting with LMETISDIR,  LMETIS, PATHMETIS
+#             starting with LMETISDIR,  LMETIS,  PATHMETIS
 #          3/ add -Dmetis in line ORDERINGSF
 #             ORDERINGSF  = -Dpord -Dmetis
 #          4/ Compile and install MUMPS
 #             make clean; make   (to clean up previous installation)
 #
-#          Metis/ParMetis and SCOTCH/PT-SCOTCH (ver 6.0 and later) orderings are now available for MUMPS.
+#          Metis/ParMetis and SCOTCH/PT-SCOTCH (ver 6.0 and later) orderings are recommended.
 #
 
 #SCOTCHDIR  = ${HOME}/scotch_6.0
 #PATHSCOTCH = -LIBPATH:$(SCOTCHDIR)/lib
-#ISCOTCH    = -I$(SCOTCHDIR)/include  # only needed for pt-scotch
+#ISCOTCH    = -I$(SCOTCHDIR)/include
+#
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF
@@ -39,9 +40,9 @@ IPORD    = -I$(topdir)/PORD/include/
 PATHPORD = -LIBPATH:$(LPORDDIR)
 LPORD    = libpord.lib
 
-#LMETISDIR = /local/metis/
-#PATHMETIS = -LIBPATH:$(PATHMETIS)
-#IMETIS    = # should be provided if you use parmetis, to access parmetis.h
+#LMETISDIR = /opt/metis-5.1.0/build/Linux-x86_64/libmetis
+#PATHMETIS = -LIBPATH:$(LMETISDIR)
+#IMETIS    = /opt/metis-5.1.0/include
 
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
@@ -54,6 +55,8 @@ LPORD    = libpord.lib
 
 # The following variables will be used in the compilation process.
 # Please note that -Dptscotch and -Dparmetis imply -Dscotch and -Dmetis respectively.
+# If you want to use Metis 4.X or an older version, you should use -Dmetis4 instead of -Dmetis
+# or in addition with -Dparmetis (if you are using parmetis 3.X or older).
 #ORDERINGSF = -Dscotch -Dmetis -Dpord -Dptscotch -Dparmetis
 ORDERINGSF  = -Dpord
 ORDERINGSC  = $(ORDERINGSF)
@@ -83,10 +86,8 @@ RANLIB  = echo
 
 INCSEQ = -I$(topdir)/libseq
 LIBSEQ = $(topdir)/libseq/libmpiseq.lib
-#LIBBLAS = /usr/local/lib/libgoto_coppermine32p-r1.00.so
-#LIBBLAS =/usr/local/ATLAS/lib/Linux_P4SSE2/libf77blas.a  /usr/local/ATLAS/lib/Linux_P4SSE2/libatlas.a -lg2c
+
 LIBBLAS = mkl_intel_c.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib
-#LIBOTHERS = -lpthread
 LIBOTHERS = libf95.lib libgcc.lib -link $(PATHORDERINGS)
 #Preprocessor defs for calling Fortran from C (-DAdd_ or -DAdd__ or -DUPPER)
 CDEFS   = -DAdd__

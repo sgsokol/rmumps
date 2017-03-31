@@ -1,9 +1,9 @@
 C
-C  This file is part of MUMPS 5.0.1, released
-C  on Thu Jul 23 17:08:29 UTC 2015
+C  This file is part of MUMPS 5.1.1, released
+C  on Mon Mar 20 14:34:33 UTC 2017
 C
 C
-C  Copyright 1991-2015 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
+C  Copyright 1991-2017 CERFACS, CNRS, ENS Lyon, INP Toulouse, Inria,
 C  University of Bordeaux.
 C
 C  This version of MUMPS is provided to you free of charge. It is
@@ -11,11 +11,11 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
       SUBROUTINE MUMPS_SET_ORDERING(N, SYM, NPROCS, IORD,
-     &                       symmetry,MedDens, NBQD, AvgDens,
+     &                       symmetry, NBQD, AvgDens,
      &                       PROK, MP)
       IMPLICIT NONE
       INTEGER, intent(in)    :: N, NPROCS, SYM
-      INTEGER, intent(in)    :: symmetry, MedDens, NBQD, AvgDens, MP
+      INTEGER, intent(in)    :: symmetry, NBQD, AvgDens, MP
       LOGICAL, intent(in)    :: PROK
       INTEGER, intent(inout) :: IORD
       INTEGER MAXQD

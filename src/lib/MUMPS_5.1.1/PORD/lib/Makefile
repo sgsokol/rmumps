@@ -2,8 +2,6 @@
 # To compile directly, uncomment the line below.
 # include ../Make.in
 # # include $(BUILDDIR)/Makefile.inc
-topdir = ../..
-include $(topdir)/Makefile.inc
 #
 # Otherwise, adequate variables for CC, CFLAGS, AR and
 # RANLIB must be passed to make.
@@ -11,8 +9,7 @@ include $(topdir)/Makefile.inc
 
 INCLUDES = -I../include
 
-#COPTIONS = $(INCLUDES) $(CFLAGS) $(OPTFLAGS)
-COPTIONS = $(INCLUDES) $(OPTC)
+COPTIONS = $(INCLUDES) $(CFLAGS) $(OPTFLAGS)
 
 OBJS = graph.o gbipart.o gbisect.o ddcreate.o ddbisect.o nestdiss.o \
        multisector.o gelim.o bucket.o tree.o \
