@@ -14,10 +14,10 @@ ifeq "$(INC_OS)" ".win"
 endif
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
-PKG_CXXFLAGS += $(FLAGS.MUMPS) #-DINTSIZE64
-PKG_CFLAGS += -DAdd_ #-DINTSIZE64
+#PKG_CXXFLAGS += $(FLAGS.MUMPS) #-DINTSIZE64
+#PKG_CFLAGS += -DAdd_ #-DINTSIZE64
 #PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
-PKG_FCFLAGS += $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
+#PKG_FCFLAGS += $(FLAGS.MUMPS) $(FLAGS.MPI) -w #-fcray-pointer -fdefault-integer-8 
 
 SOURCES.C = $(wildcard $(DMETIS)/libmetis/*.c $(DMETIS)/GKlib/*.c)
 
@@ -46,11 +46,12 @@ metislib: $(SOURCES.C:.c=.o)
 allmumps: scotchlibs metislib
 	@(mkdir -p $(DMUMPS)/lib)
 	#$(MAKE) -C $(DMUMPS)/libseq CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS)" PKG_FCFLAGS="$(PKG_FCFLAGS)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
-	$(MAKE) -C $(DMUMPS) mumps_lib ARITH=$(ARITH) CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH)" PKG_FCFLAGS="$(PKG_FCFLAGS)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
-	$(AR) cqT $(DLIB)/MUMPS_thin $(FUSELIBS)
-	@(cd $(DLIB) && \
-	 echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)
-	$(RANLIB) $(DLIB)/liballmumps.a
+	$(MAKE) -C $(DMUMPS) mumps_lib ARITH=$(ARITH) CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH)" PKG_FCFLAGS="$(PKG_FCFLAGS) $(FLAGS.MUMPS) $(FLAGS.MPI)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
+	#$(AR) cqT $(DLIB)/MUMPS_thin $(FUSELIBS)
+	#@(cd $(DLIB) && \
+	# echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)
+	cp $(FUSELIBS) $(DLIB)/
+	#$(RANLIB) $(DLIB)/liballmumps.a
 
 clean:
 	$(RM) $(DMUMPS)/PORD/lib/*.[oa] $(DMUMPS)/libseq/*.[oa] $(DMETIS)/GKlib/*.[oa] $(DMETIS)/libmetis/*.[oa]

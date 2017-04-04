@@ -142,12 +142,12 @@ INCSEQ  = -I$(topdir)/libseq
 #     leave empty if your Fortran compiler does not change the symbols.
 #
 
-CDEFS = -DAdd_
+#CDEFS = -DAdd_
 
 #COMPILER OPTIONS
 
 #OPTC    = -O -I. -fPIC
-OPTC    = $(PKG_CFLAGS)
+OPTC    = -DAdd_ $(PKG_CFLAGS)
 OPTF    = $(PKG_FCFLAGS)
 
 #Sequential:
