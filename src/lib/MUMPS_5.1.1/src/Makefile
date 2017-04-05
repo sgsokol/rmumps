@@ -72,7 +72,6 @@ OBJS_COMMON_OTHER = \
         mumps_io_err.o\
         ana_set_ordering.o\
         mumps_numa.o \
-        mumps_thread.o \
 	mumps_save_restore_C.o
 
 OBJS_MOD =   \

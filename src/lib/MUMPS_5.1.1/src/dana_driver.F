@@ -645,8 +645,8 @@ C     in the case of a distributed Schur complement (KEEP(60)=2 or 3).
 C     In that case, PROCNODE should be set accordingly and KEEP(38) is
 C     not modified.
             IF (id%KEEP(60) .EQ. 2 .OR. id%KEEP(60).EQ.3) THEN
-               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1),
-     &              1+2*id%NSLAVES, id%IS1(FILS),id%N)
+               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1:),
+     &              1+2*id%NSLAVES, id%IS1(FILS:),id%N)
             ENDIF
 C        *******************
 C        END SEQUENTIAL CODE
@@ -665,14 +665,14 @@ C     IKEEP(1:N,1) can be used as a work space since it is set
 C     to its final state by the SORT_PERM subroutine below.
             SSARBR => id%IS1(IKEEP:IKEEP+id%N-1)
 C     Map nodes and assign candidates for dynamic scheduling
-            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1),
-     &           INFOG(1),
-     &           id%IS1(NE),
-     &           id%IS1(NFSIZ),
-     &           id%IS1(FRERE),
-     &           id%IS1(FILS),
-     &           KEEP(1),KEEP8(1),id%PROCNODE(1),
-     &           SSARBR(1),id%NBSA,PEAK,IERR
+            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1:),
+     &           INFOG(1:),
+     &           id%IS1(NE:),
+     &           id%IS1(NFSIZ:),
+     &           id%IS1(FRERE:),
+     &           id%IS1(FILS:),
+     &           KEEP(1:),KEEP8(1:),id%PROCNODE(1:),
+     &           SSARBR(1:),id%NBSA,PEAK,IERR
      &           )
             NULLIFY(SSARBR)
             if(IERR.eq.-999) then 
@@ -1278,23 +1278,23 @@ C     clustering.
             END IF
             IF (KEEP(469).EQ.0) THEN
               CALL DMUMPS_LR_GROUPING(id%N, id%KEEP8(28), id%KEEP(28),
-     &           id%IRN(1),
-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
-     &           id%LNA, id%LRGROUPS(1),
+     &           id%IRN(1:),
+     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
+     &           id%DAD_STEPS(1:),id%NE_STEPS(1:),id%STEP(1:),id%NA(1:),
+     &           id%LNA, id%LRGROUPS(1:),
      &           id%KEEP(50),
-     &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
+     &           id%ICNTL(1:), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60),
      &           id%INFO(1), id%INFO(2),
      &           id%KEEP(264), id%KEEP(265), id%KEEP(482), id%KEEP(472),
      &           id%KEEP(127), id%KEEP(10), LPOK, LP)
             ELSE
               CALL DMUMPS_LR_GROUPING_NEW(id%N, id%KEEP8(28), 
-     &           id%KEEP(28), id%IRN(1),
-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
-     &           id%LNA, id%LRGROUPS(1), id%KEEP(50),
-     &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
+     &           id%KEEP(28), id%IRN(1:),
+     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
+     &           id%DAD_STEPS(1:),id%NE_STEPS(1:),id%STEP(1:),id%NA(1:),
+     &           id%LNA, id%LRGROUPS(1:), id%KEEP(50),
+     &           id%ICNTL(1:), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60), 
      &           id%INFO(1), id%INFO(2),
      &           id%KEEP(264), id%KEEP(265), id%KEEP(482), id%KEEP(472),
@@ -1783,7 +1783,7 @@ C
          END DO 
          CALL DMUMPS_BUILD_I_AM_CAND( id%NSLAVES, KEEP(79),
      &        NB_NIV2, id%MYID_NODES,
-     &        id%CANDIDATES(1,1), id%I_AM_CAND(1) )
+     &        id%CANDIDATES(1:,1:), id%I_AM_CAND(1:) )
       ENDIF
       IF ( I_AM_SLAVE ) THEN
 #if ! defined(OLD_LOAD_MECHANISM)
