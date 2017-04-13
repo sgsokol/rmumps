@@ -1,0 +1,678 @@
+diff -Naur src/dsol_bwd_aux.F new/dsol_bwd_aux.F
+--- src/dsol_bwd_aux.F	2017-04-12 16:16:06.460041823 +0200
++++ new/dsol_bwd_aux.F	2017-04-12 16:18:47.572452052 +0200
+@@ -69,7 +69,9 @@
+       INTEGER :: IERR
+       DOUBLE PRECISION :: TIME_TMP
+       FLAG = .FALSE.
++#if defined(ALLTIMERS)
+       TIME_TMP=MPI_WTIME()
++#endif
+       IF ( BLOQ ) THEN
+         CALL MPI_PROBE( MPI_ANY_SOURCE, MPI_ANY_TAG,
+      &                   COMM, STATUS, IERR )
+@@ -78,7 +80,9 @@
+         CALL MPI_IPROBE( MPI_ANY_SOURCE, MPI_ANY_TAG, COMM,
+      &                   FLAG, STATUS, IERR )
+       END IF
++#if defined(ALLTIMERS)
+       DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
++#endif
+       IF (FLAG) THEN
+          KEEP(266)=KEEP(266)-1
+          MSGSOU=STATUS(MPI_SOURCE)
+@@ -89,10 +93,14 @@
+            INFO(2) = MSGLEN
+            CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
+          ELSE
++#if defined(ALLTIMERS)
+            TIME_TMP=MPI_WTIME()
++#endif
+            CALL MPI_RECV(BUFR, LBUFR_BYTES, MPI_PACKED, MSGSOU,
+      &                   MSGTAG, COMM, STATUS, IERR)
++#if defined(ALLTIMERS)
+            DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
++#endif
+            CALL DMUMPS_BACKSLV_TRAITER_MESSAGE( MSGTAG, MSGSOU,
+      &                BUFR, LBUFR, LBUFR_BYTES,
+      &                MYID, SLAVEF, COMM,
+@@ -211,7 +219,9 @@
+       IF (MSGTAG .EQ. FEUILLE) THEN
+           NBFINF = NBFINF - 1
+       ELSE IF (MSGTAG .EQ. NOEUD) THEN
++#if defined(ALLTIMERS)
+           TIME_TMP=MPI_WTIME()
++#endif
+           POSITION = 0
+           CALL MPI_UNPACK(BUFR, LBUFR_BYTES, POSITION,
+      &        INODE, 1, MPI_INTEGER,
+@@ -267,7 +277,9 @@
+             POSIWCB = POSIWCB + LONG
+             POSWCB = POSWCB + LONG
+           ENDIF
++#if defined(ALLTIMERS)
+           DKEEP(148)=DKEEP(148)+MPI_WTIME()-TIME_TMP
++#endif
+           POOL_FIRST_POS = IIPOOL
+           IF ( KEEP(237).GT. 0 ) THEN
+              IF (.NOT.TO_PROCESS(STEP(INODE))) 
+@@ -340,15 +352,19 @@
+         P_UPDATE  = PLEFTW
+         P_SOL_MAS = PLEFTW + NPIV * NRHS_B
+         PLEFTW    = P_SOL_MAS + NROW_L * NRHS_B
++#if defined(ALLTIMERS)
+         TIME_TMP=MPI_WTIME()
++#endif
+         DO K=JBDEB, JBFIN
+           CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
+      &                   W( P_SOL_MAS+(K-JBDEB)*NROW_L),NROW_L,
+      &                   MPI_DOUBLE_PRECISION,
+      &                   COMM, IERR )
+         ENDDO
++#if defined(ALLTIMERS)
+         DKEEP(149)=DKEEP(149)+MPI_WTIME()-TIME_TMP
+         TIME_TMP=MPI_WTIME()
++#endif
+         IF (KEEP(201).EQ.1) THEN 
+ #if defined(MUMPS_USE_BLAS2)
+           IF ( NRHS_B == 1 ) THEN
+@@ -378,7 +394,9 @@
+           END IF
+ #endif
+         ENDIF 
++#if defined(ALLTIMERS)
+         DKEEP(150)=DKEEP(150)+MPI_WTIME()-TIME_TMP
++#endif
+         IF (KEEP(201).GT.0) THEN
+          CALL DMUMPS_FREE_FACTORS_FOR_SOLVE(INODE,PTRFAC,KEEP(28),
+      &          A,LA,.TRUE.,IERR)
+@@ -390,7 +408,9 @@
+         ENDIF
+         PLEFTW = PLEFTW - NROW_L * NRHS_B
+  100    CONTINUE
++#if defined(ALLTIMERS)
+         TIME_TMP=MPI_WTIME()
++#endif
+         CALL DMUMPS_BUF_SEND_BACKVEC( NRHS_B, INODE, 
+      &                               W(P_UPDATE),
+      &                               NPIV, NPIV,
+@@ -398,11 +418,13 @@
+      &                                BACKSLV_UPDATERHS,
+      &                                JBDEB, JBFIN,
+      &                                KEEP, COMM, IERR )
++#if defined(ALLTIMERS)
+         IF (IERR.EQ.0) THEN
+           DKEEP(151)=DKEEP(151)+MPI_WTIME()-TIME_TMP
+         ELSE
+           DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
+         ENDIF
++#endif
+         IF ( IERR .EQ. -1 ) THEN
+           CALL DMUMPS_BACKSLV_RECV_AND_TREAT(
+      &     .FALSE., FLAG,
+@@ -463,7 +485,9 @@
+              J1 = IPOS + 1
+              J2 = IPOS + NPIV
+         ENDIF
++#if defined(ALLTIMERS)
+         TIME_TMP=MPI_WTIME()
++#endif
+         IPOSINRHSCOMP =  POSINRHSCOMP_BWD(IW(J1)) 
+         DO K=JBDEB, JBFIN
+           CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
+@@ -494,7 +518,9 @@
+           ENDDO
+          ENDIF
+         ENDDO  
++#if defined(ALLTIMERS)
+         DKEEP(152)=DKEEP(152)+MPI_WTIME()-TIME_TMP
++#endif
+         IW(PTRIST(STEP(INODE))+XXS) = 
+      &      IW(PTRIST(STEP(INODE))+XXS) - 1
+         IF ( IW(PTRIST(STEP(INODE))+XXS).EQ.C_FINI ) THEN
+@@ -556,7 +582,9 @@
+            END IF
+            IPOSINRHSCOMP =  POSINRHSCOMP_BWD(IW(J1)) 
+            IFR8 = PTRACB(STEP( INODE ))
++#if defined(ALLTIMERS)
+            TIME_TMP=MPI_WTIME()
++#endif
+            IF (KEEP(350).EQ.0) THEN
+              DO K=JBDEB, JBFIN
+                DO JJ = J1, J2
+@@ -573,7 +601,9 @@
+              WRITE(*,*) "Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE"
+              CALL MUMPS_ABORT()
+            ENDIF
++#if defined(ALLTIMERS)
+            DKEEP(140)=DKEEP(140)+MPI_WTIME()-TIME_TMP
++#endif
+            IFR8 = PTRACB(STEP(INODE))+NPIV-1
+            IF ( MTYPE .EQ. 1 .AND. KEEP(50).EQ.0 ) THEN
+              J1 = IPOS + LIELL + NPIV + 1
+@@ -582,7 +612,9 @@
+              J1 = IPOS + NPIV + 1
+              J2 = IPOS + LIELL
+            END IF
++#if defined(ALLTIMERS)
+            TIME_TMP=MPI_WTIME()
++#endif
+            IF (KEEP(350).EQ.0) THEN
+              DO JJ = J1, J2-KEEP(253)   
+                J = IW(JJ)
+@@ -606,8 +638,10 @@
+              WRITE(*,*) "Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE"
+              CALL MUMPS_ABORT()
+            ENDIF
++#if defined(ALLTIMERS)
+            DKEEP(142)=DKEEP(142)+MPI_WTIME()-TIME_TMP
+        TIME_TMP=MPI_WTIME()
++#endif
+        IF ( KEEP(201).EQ.1 .AND.
+      &    (( NELIM .GT. 0 ).OR. (MTYPE.NE.1 )))  THEN
+           J = NPIV / PANEL_SIZE  
+@@ -840,7 +874,9 @@
+           END IF
+ #endif
+  1234     CONTINUE   
++#if defined(ALLTIMERS)
+           DKEEP(141)=DKEEP(141)+MPI_WTIME()-TIME_TMP
++#endif
+           IF (KEEP(201).GT.0) THEN
+            CALL DMUMPS_FREE_FACTORS_FOR_SOLVE(INODE,PTRFAC,KEEP(28),
+      &          A,LA,.TRUE.,IERR)
+@@ -853,7 +889,9 @@
+           IPOS =   PTRIST(STEP(INODE)) +  KEEP(IXSZ) + 6 + NSLAVES
+           IPOSINRHSCOMP     = POSINRHSCOMP_BWD(IW(IPOS))
+           IF (KEEP(350).EQ.0) THEN
++#if defined(ALLTIMERS)
+             TIME_TMP=MPI_WTIME()
++#endif
+             IPOSINRHSCOMP_TMP = IPOSINRHSCOMP
+             DO I = 1, NPIV
+               DO K=JBDEB,JBFIN
+@@ -867,7 +905,9 @@
+               ENDDO
+               IPOSINRHSCOMP_TMP =  IPOSINRHSCOMP_TMP + 1
+             END DO
++#if defined(ALLTIMERS)
+             DKEEP(147)=DKEEP(147)+MPI_WTIME()-TIME_TMP
++#endif
+           ELSE IF (KEEP(350).EQ.1.OR.KEEP(350).EQ.2) THEN
+           ELSE
+             WRITE(*,*)"Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+@@ -917,7 +957,9 @@
+      &                   SLAVEF )
+               IF ( .NOT. DEJA_SEND( PROCDEST ) ) THEN
+  110            CONTINUE
++#if defined(ALLTIMERS)
+                 TIME_TMP=MPI_WTIME()
++#endif
+                 CALL DMUMPS_BUF_SEND_VCB( NRHS_B, IN, 0, 0,
+      &          LIELL, LIELL-KEEP(253),
+      &          IW( POSINDICES ) ,
+@@ -925,11 +967,13 @@
+      &          RHSCOMP(1, 1), NRHS, LRHSCOMP,
+      &          IPOSINRHSCOMP, NPIV, KEEP,
+      &          PROCDEST, NOEUD, COMM, IERR )
++#if defined(ALLTIMERS)
+                 IF (IERR.EQ.0) THEN
+                   DKEEP(145)=DKEEP(145)+MPI_WTIME()-TIME_TMP
+                 ELSE
+                   DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
+                 ENDIF
++#endif
+                 IF ( IERR .EQ. -1 ) THEN
+                   CALL DMUMPS_BACKSLV_RECV_AND_TREAT(
+      &            .FALSE., FLAG,
+diff -Naur src/dsol_bwd.F new/dsol_bwd.F
+--- src/dsol_bwd.F	2017-04-12 16:16:06.460041823 +0200
++++ new/dsol_bwd.F	2017-04-12 16:18:47.576452063 +0200
+@@ -224,7 +224,9 @@
+          END IF
+          IFR  = 0_8
+          IPOSINRHSCOMP = POSINRHSCOMP_BWD(IW(J1))  
++#if defined(ALLTIMERS)
+          TIME_TMP=MPI_WTIME()
++#endif
+          IF (KEEP(350).EQ.0) THEN
+            IPOSINRHSCOMP_TMP = IPOSINRHSCOMP
+            DO JJ = J1, J2
+@@ -243,7 +245,9 @@
+      &          KEEP, RHSCOMP, NRHS, LRHSCOMP, IPOSINRHSCOMP,
+      &          RHS_ROOT(1+NPIV*(JBDEB-1)), NPIV, 1)
+          ENDIF
++#if defined(ALLTIMERS)
+          DKEEP(144)=DKEEP(144)+MPI_WTIME()-TIME_TMP
++#endif
+          IN = INODE
+  270     IN = FILS(IN)
+          IF (IN .GT. 0) GOTO 270
+@@ -297,7 +301,9 @@
+      &              SLAVEF)
+                IF (.NOT. DEJA_SEND( PROCDEST ))  THEN
+  600              CONTINUE
++#if defined(ALLTIMERS)
+                   TIME_TMP=MPI_WTIME()
++#endif
+                   CALL DMUMPS_BUF_SEND_VCB( NRHS_B, IF, 0, 0,
+      &                 LONG, LONG, IW( J1 ),
+      &                 RHS_ROOT( 1+NPIV*(JBDEB-1) ), 
+@@ -306,11 +312,13 @@
+      &                 IPOSINRHSCOMP, NPIV,
+      &                 KEEP, PROCDEST,
+      &                 NOEUD, COMM, IERR )
++#if defined(ALLTIMERS)
+                   IF (IERR.EQ.0) THEN
+                     DKEEP(145)=DKEEP(145)+MPI_WTIME()-TIME_TMP
+                   ELSE
+                     DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
+                   ENDIF
++#endif
+                   IF ( IERR .EQ. -1 ) THEN
+                      CALL DMUMPS_BACKSLV_RECV_AND_TREAT(
+      &                    .FALSE., FLAG,
+@@ -424,7 +432,9 @@
+                J2 = IPOS + LIELL
+            END IF
+            IFR = PTRACB(STEP( INODE )) - 1_8
++#if defined(ALLTIMERS)
+            TIME_TMP = MPI_WTIME()
++#endif
+            IF (KEEP(350).EQ.0) THEN
+              DO JJ = J1, J2 - KEEP(253)
+                J = IW(JJ)
+@@ -461,7 +471,9 @@
+               ENDDO
+              ENDDO
+            ENDIF
++#if defined(ALLTIMERS)
+            DKEEP(142)=DKEEP(142)+MPI_WTIME()-TIME_TMP
++#endif
+            DO ISLAVE = 1, NSLAVES
+               CALL MUMPS_BLOC2_GET_SLAVE_INFO( 
+      &                KEEP,KEEP8, INODE, STEP, N, SLAVEF,
+@@ -472,18 +484,22 @@
+      &                FirstIndex )
+  500         CONTINUE
+              DEST = IW( PTRIST(STEP(INODE))+5+ISLAVE+KEEP(IXSZ))
++#if defined(ALLTIMERS)
+              TIME_TMP=MPI_WTIME()
++#endif
+              CALL DMUMPS_BUF_SEND_BACKVEC(NRHS_B, INODE,
+      &             W(Offset+PTRACB(STEP(INODE))), 
+      &             EffectiveSize, 
+      &             NCB, DEST,
+      &             BACKSLV_MASTER2SLAVE, JBDEB, JBFIN,
+      &             KEEP, COMM, IERR )
++#if defined(ALLTIMERS)
+              IF (IERR.EQ.0) THEN
+                DKEEP(146)=DKEEP(146)+MPI_WTIME()-TIME_TMP
+              ELSE
+                DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
+              ENDIF
++#endif
+               IF ( IERR .EQ. -1 ) THEN
+                  CALL DMUMPS_BACKSLV_RECV_AND_TREAT(
+      &                .FALSE., FLAG,
+@@ -610,7 +626,9 @@
+       ELSE
+         IPOSINRHSCOMP = -99999
+       ENDIF
++#if defined(ALLTIMERS)
+       TIME_TMP=MPI_WTIME()
++#endif
+       IF (J2.GE.J1) THEN
+         DO K=JBDEB, JBFIN
+           IF (KEEP(350).eq.0) THEN
+@@ -641,10 +659,14 @@
+           ENDIF
+         END DO
+       ENDIF
++#if defined(ALLTIMERS)
+       DKEEP(140)=DKEEP(140)+MPI_WTIME()-TIME_TMP
++#endif
+       IFR   = PTWCB + int(NPIV - 1,8)
+       IF ( LIELL .GT. NPIV ) THEN
++#if defined(ALLTIMERS)
+         TIME_TMP=MPI_WTIME()
++#endif
+         IF ( MTYPE .EQ. 1 .AND. KEEP(50).EQ.0 ) THEN
+           J1 = IPOS + LIELL + NPIV + 1
+           J2 = IPOS + 2 * LIELL
+@@ -688,11 +710,15 @@
+            ENDDO
+           ENDDO
+         ENDIF
++#if defined(ALLTIMERS)
+         DKEEP(142)=DKEEP(142)+MPI_WTIME()-TIME_TMP
++#endif
+         NCB = LIELL - NPIV
+         IF (NPIV .EQ. 0) GOTO 160
+       ENDIF
++#if defined(ALLTIMERS)
+       TIME_TMP=MPI_WTIME() 
++#endif
+       IF (KEEP(201).EQ.1) THEN 
+        J = NPIV / PANEL_SIZE 
+        TWOBYTWO = KEEP(50).EQ.2 .AND.
+@@ -1035,7 +1061,9 @@
+ #endif
+        END IF 
+       ENDIF 
++#if defined(ALLTIMERS)
+       DKEEP(141)=DKEEP(141)+MPI_WTIME()-TIME_TMP
++#endif
+       IF ( MTYPE .EQ. 1 .AND. KEEP(50).EQ.0) THEN
+         J1 = IPOS + LIELL + 1
+       ELSE
+@@ -1043,7 +1071,9 @@
+       END IF
+       IPOSINRHSCOMP =  POSINRHSCOMP_BWD(IW(J1)) 
+       IF (KEEP(350).EQ.0) THEN
++#if defined(ALLTIMERS)
+         TIME_TMP=MPI_WTIME()
++#endif
+         IPOSINRHSCOMP_TMP = IPOSINRHSCOMP
+         DO 150 I = 1, NPIV
+           DO K=JBDEB, JBFIN
+@@ -1055,7 +1085,9 @@
+           ENDDO
+           IPOSINRHSCOMP_TMP =  IPOSINRHSCOMP_TMP + 1
+   150   CONTINUE
++#if defined(ALLTIMERS)
+         DKEEP(147)=DKEEP(147)+MPI_WTIME()-TIME_TMP
++#endif
+       ELSE IF (KEEP(350).EQ.1.OR.KEEP(350).EQ.2) THEN
+       ELSE
+         WRITE(*,*)"Internal error in DMUMPS_SOL_S"
+@@ -1147,7 +1179,9 @@
+             PROCDEST = MUMPS_PROCNODE(PROCNODE_STEPS(STEP(IF)),SLAVEF)
+             IF (.not. DEJA_SEND( PROCDEST ))  THEN
+  400          CONTINUE
++#if defined(ALLTIMERS)
+               TIME_TMP=MPI_WTIME()
++#endif
+               CALL DMUMPS_BUF_SEND_VCB( NRHS_B, IF, 0, 0, LIELL,
+      &          LIELL - KEEP(253),
+      &          IW( POSINDICES ), 
+@@ -1156,11 +1190,13 @@
+      &          RHSCOMP(1, 1), NRHS, LRHSCOMP,
+      &          IPOSINRHSCOMP, NPIV,
+      &          KEEP, PROCDEST,     NOEUD, COMM, IERR )
++#if defined(ALLTIMERS)
+               IF (IERR.EQ.0) THEN
+                 DKEEP(145)=DKEEP(145)+MPI_WTIME()-TIME_TMP
+               ELSE
+                 DKEEP(153)=DKEEP(153)+MPI_WTIME()-TIME_TMP
+               ENDIF
++#endif
+               IF ( IERR .EQ. -1 ) THEN
+                 CALL DMUMPS_BACKSLV_RECV_AND_TREAT(
+      &          .FALSE., FLAG,
+diff -Naur src/dsol_fwd_aux.F new/dsol_fwd_aux.F
+--- src/dsol_fwd_aux.F	2017-04-12 16:16:06.460041823 +0200
++++ new/dsol_fwd_aux.F	2017-04-12 16:18:47.576452063 +0200
+@@ -72,7 +72,9 @@
+          NBFIN = NBFIN - 1
+          IF ( NBFIN .eq. 0 ) GOTO 270
+       ELSE  IF (MSGTAG .EQ. ContVec ) THEN
++#if defined(ALLTIMERS)
+          TIME_TMP = MPI_WTIME()
++#endif
+          POSITION = 0
+          CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
+      &        FINODE, 1, MPI_INTEGER, COMM, IERR )
+@@ -150,9 +152,13 @@
+                 END IF
+              ENDIF
+           END IF
++#if defined(ALLTIMERS)
+           DKEEP(128)=DKEEP(128)+MPI_WTIME()-TIME_TMP
++#endif
+        ELSEIF ( MSGTAG .EQ. Master2Slave ) THEN
++#if defined(ALLTIMERS)
+           TIME_TMP=MPI_WTIME()
++#endif
+           POSITION = 0
+           CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
+      &         FINODE, 1, MPI_INTEGER, COMM, IERR )
+@@ -187,7 +193,9 @@
+      &               MPI_DOUBLE_PRECISION, COMM, IERR )
+              END DO
+           END IF
++#if defined(ALLTIMERS)
+           DKEEP(129)=DKEEP(129)+MPI_WTIME()-TIME_TMP
++#endif
+           IF (KEEP(201).GT.0) THEN
+              CALL DMUMPS_SOLVE_GET_OOC_NODE(
+      &            FINODE,PTRFAC,KEEP,A,LA,STEP,
+@@ -199,7 +207,9 @@
+              ENDIF
+           ENDIF
+           APOS = PTRFAC(STEP(FINODE))
++#if defined(ALLTIMERS)
+           TIME_TMP=MPI_WTIME()
++#endif
+           IF (KEEP(201).EQ.1) THEN
+ #if defined(MUMPS_USE_BLAS2)
+              IF ( NRHS_B == 1 ) THEN
+@@ -231,7 +241,9 @@
+              ENDIF
+ #endif
+           ENDIF
++#if defined(ALLTIMERS)
+           DKEEP(130)=DKEEP(130)+MPI_WTIME()-TIME_TMP
++#endif
+           IF (KEEP(201).GT.0) THEN
+              CALL DMUMPS_FREE_FACTORS_FOR_SOLVE(FINODE,PTRFAC,
+      &            KEEP(28),A,LA,.TRUE.,IERR)
+@@ -245,7 +257,9 @@
+           PDEST = MUMPS_PROCNODE( PROCNODE_STEPS(STEP(FPERE)),
+      &                            SLAVEF )
+           IF ( PDEST .EQ. MYID ) THEN
++#if defined(ALLTIMERS)
+              TIME_TMP=MPI_WTIME()
++#endif
+              IF ( PTRICB(STEP(FINODE)) .EQ. 0 ) THEN
+                 NCB = IW( PTRIST(STEP(FINODE)) + 2 + KEEP(IXSZ) )
+                 PTRICB(STEP(FINODE)) = NCB + 1
+@@ -291,7 +305,9 @@
+                   WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+                   CALL MUMPS_ABORT()
+               ENDIF
++#if defined(ALLTIMERS)
+              DKEEP(131)=DKEEP(131)+MPI_WTIME()-TIME_TMP
++#endif
+              PTRICB(STEP(FINODE)) =
+      &            PTRICB(STEP(FINODE)) - NCV
+              IF ( PTRICB( STEP( FINODE ) ) == 1 ) THEN
+@@ -307,7 +323,9 @@
+              ENDIF
+           ELSE
+  210         CONTINUE
++#if defined(ALLTIMERS)
+              TIME_TMP=MPI_WTIME()
++#endif
+              CALL DMUMPS_BUF_SEND_VCB( NRHS_B, FINODE, FPERE,
+      &            IW(PTRIST(STEP( FINODE )) + 2 + KEEP(IXSZ) ), NCV,NCV,
+      &            IW(PTRIST(STEP(FINODE))+4+ KEEP(IXSZ) ),
+@@ -315,9 +333,13 @@
+      &            RHSCOMP, 1, 1, -9999, -9999,
+      &            KEEP, PDEST, ContVec, COMM, IERR )
+              IF (IERR.EQ.0) THEN
++#if defined(ALLTIMERS)
+                DKEEP(132)=DKEEP(132)+MPI_WTIME()-TIME_TMP
++#endif
+              ELSE
++#if defined(ALLTIMERS)
+                DKEEP(134)=DKEEP(134)+MPI_WTIME()-TIME_TMP
++#endif
+              ENDIF
+              IF ( IERR .EQ. -1 ) THEN
+                 CALL DMUMPS_SOLVE_RECV_AND_TREAT( .FALSE., FLAG,
+@@ -630,7 +652,9 @@
+          LD_WCBCB  = NCB
+          PCB_COURANT = PPIV_COURANT + NPIV*NRHS_B
+          IFR8 = PPIV_COURANT - 1_8
++#if defined(ALLTIMERS)
+          TIME_TMP=MPI_WTIME()
++#endif
+          IFR_ini8 = IFR8
+          IPOSINRHSCOMP = POSINRHSCOMP_FWD(IW(J1)) 
+          IF (KEEP(350).EQ.0) THEN
+@@ -671,11 +695,15 @@
+              WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+              CALL MUMPS_ABORT()
+          ENDIF
++#if defined(ALLTIMERS)
+          DKEEP(123)=DKEEP(123)+MPI_WTIME()-TIME_TMP
++#endif
+          IFR8 = PCB_COURANT - 1_8
+          IF (NPIV .LT. LIELL) THEN
+             IFR_ini8 = IFR8
++#if defined(ALLTIMERS)
+             TIME_TMP=MPI_WTIME()
++#endif
+             IF (KEEP(350).EQ.0) THEN
+ !$OMP PARALLEL DO PRIVATE(J,IFR8,K,IPOSINRHSCOMP) IF(OMP_FLAG)
+             DO 140 JJ = J3 + 1, J2
+@@ -722,10 +750,14 @@
+              WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+              CALL MUMPS_ABORT()
+            ENDIF
++#if defined(ALLTIMERS)
+          DKEEP(124)=DKEEP(124)+MPI_WTIME()-TIME_TMP
++#endif
+          ENDIF
+       ENDIF                     
++#if defined(ALLTIMERS)
+       TIME_TMP=MPI_WTIME()  
++#endif
+       IF ( NPIV .NE. 0 ) THEN
+          IF (KEEP(201).EQ.1) THEN 
+         APOSDEB = APOS
+@@ -904,8 +936,10 @@
+             END IF
+          END IF
+       END IF                    
++#if defined(ALLTIMERS)
+       DKEEP(125)=DKEEP(125)+MPI_WTIME()-TIME_TMP
+       TIME_TMP=MPI_WTIME()
++#endif
+       IPOSINRHSCOMP =  POSINRHSCOMP_FWD(IW(J1)) 
+       IF ( KEEP(50) .eq. 0 ) THEN
+          IF (KEEP(350).EQ.0) THEN
+@@ -1116,7 +1150,9 @@
+              CALL MUMPS_ABORT()
+          ENDIF
+       END IF
++#if defined(ALLTIMERS)
+       DKEEP(126)=DKEEP(126)+MPI_WTIME()-TIME_TMP
++#endif
+       IF (KEEP(201).GT.0) THEN
+          CALL DMUMPS_FREE_FACTORS_FOR_SOLVE(INODE,PTRFAC,KEEP(28),
+      &        A,LA,.TRUE.,IERR)
+@@ -1146,7 +1182,9 @@
+              PTRICB(STEP(INODE)) = NCB + 1
+              IF (KEEP(350).EQ.0) THEN
+ !$             OMP_FLAG = .FALSE. 
++#if defined(ALLTIMERS)
+                TIME_TMP=MPI_WTIME()
++#endif
+ !$OMP PARALLEL DO PRIVATE(K,IPOSINRHSCOMP_TMP) IF(OMP_FLAG)
+                DO 190 I = 1, NUPDATE
+                   IPOSINRHSCOMP_TMP = 
+@@ -1187,7 +1225,9 @@
+              WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+              CALL MUMPS_ABORT()
+          ENDIF
++#if defined(ALLTIMERS)
+                DKEEP(127)=DKEEP(127)+MPI_WTIME()-TIME_TMP
++#endif
+                PTRICB(STEP( INODE )) = PTRICB(STEP( INODE )) - NUPDATE
+                IF ( PTRICB(STEP(INODE)) == 1 ) THEN
+                   NSTK_S(STEP(FPERE)) = NSTK_S(STEP(FPERE)) - 1
+@@ -1206,7 +1246,9 @@
+             ENDIF
+          ELSE
+  210        CONTINUE
++#if defined(ALLTIMERS)
+             TIME_TMP=MPI_WTIME()
++#endif
+             CALL DMUMPS_BUF_SEND_VCB( NRHS_B, INODE, FPERE, 
+      &           NCB, LD_WCBCB,
+      &           NUPDATE,
+@@ -1216,11 +1258,13 @@
+      &           MUMPS_PROCNODE(PROCNODE_STEPS(STEP(FPERE)), SLAVEF),
+      &           ContVec,
+      &           COMM, IERR )
++#if defined(ALLTIMERS)
+             IF (IERR.EQ.0) THEN
+               DKEEP(132)=DKEEP(132)+MPI_WTIME()-TIME_TMP
+             ELSE
+               DKEEP(134)=DKEEP(134)+MPI_WTIME()-TIME_TMP
+             ENDIF
++#endif
+             IF ( IERR .EQ. -1 ) THEN
+                CALL DMUMPS_SOLVE_RECV_AND_TREAT( .FALSE., FLAG,
+      &              BUFR, LBUFR, LBUFR_BYTES,
+@@ -1259,7 +1303,9 @@
+      &           NSLAVES, 
+      &           Effective_CB_Size, FirstIndex )
+  222        CONTINUE
++#if defined(ALLTIMERS)
+                  TIME_TMP=MPI_WTIME()
++#endif
+                  CALL DMUMPS_BUF_SEND_MASTER2SLAVE( NRHS_B,
+      &           INODE, FPERE,
+      &           Effective_CB_Size, LD_WCBCB, LD_WCBPIV, NPIV,
+@@ -1267,11 +1313,13 @@
+      &           WCB( PCB_COURANT + NELIM + FirstIndex - 1 ),
+      &           WCB( PPIV_COURANT ),
+      &           PDEST, COMM, KEEP, IERR )
++#if defined(ALLTIMERS)
+                  IF (IERR.EQ.0) THEN
+                    DKEEP(133)=DKEEP(133)+MPI_WTIME()-TIME_TMP
+                  ELSE
+                    DKEEP(134)=DKEEP(134)+MPI_WTIME()-TIME_TMP
+                  ENDIF
++#endif
+             IF ( IERR .EQ. -1 ) THEN
+                CALL DMUMPS_SOLVE_RECV_AND_TREAT( .FALSE., FLAG,
+      &              BUFR, LBUFR, LBUFR_BYTES,
+@@ -1352,7 +1400,9 @@
+       INTEGER :: STATUS(MPI_STATUS_SIZE)
+       INTEGER MSGSOU, MSGTAG, MSGLEN
+       DOUBLE PRECISION :: TIME_TMP
++#if defined(ALLTIMERS)
+       TIME_TMP=MPI_WTIME()
++#endif
+       FLAG = .FALSE.
+       IF ( BLOQ ) THEN
+         CALL MPI_PROBE( MPI_ANY_SOURCE, MPI_ANY_TAG,
+@@ -1362,7 +1412,9 @@
+         CALL MPI_IPROBE( MPI_ANY_SOURCE, MPI_ANY_TAG, COMM,
+      &                   FLAG, STATUS, IERR )
+       END IF
++#if defined(ALLTIMERS)
+       DKEEP(134)=DKEEP(134)+MPI_WTIME()-TIME_TMP
++#endif
+       IF ( FLAG ) THEN
+          KEEP(266) = KEEP(266) -1
+          MSGSOU = STATUS( MPI_SOURCE )
+@@ -1373,10 +1425,14 @@
+            INFO(2) = MSGLEN
+            CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
+          ELSE
++#if defined(ALLTIMERS)
+            TIME_TMP=MPI_WTIME()
++#endif
+            CALL MPI_RECV( BUFR, LBUFR_BYTES, MPI_PACKED,
+      &                  MSGSOU, MSGTAG, COMM, STATUS, IERR )
++#if defined(ALLTIMERS)
+            DKEEP(134)=DKEEP(134)+MPI_WTIME()-TIME_TMP
++#endif
+            CALL DMUMPS_TRAITER_MESSAGE_SOLVE( BUFR, LBUFR, LBUFR_BYTES,
+      &          MSGTAG, MSGSOU, MYID, SLAVEF, COMM,
+      &          N, NRHS, IPOOL, LPOOL, III, LEAF,

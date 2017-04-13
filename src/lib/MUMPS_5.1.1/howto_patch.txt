@@ -1,0 +1,3 @@
+# 2017-04-12 sokol@insa-toulouse.fr
+# to apply the patch from MUMPS team (cf their email from 12/04/2017)
+patch -p1 -d src < patch_dsol.diff
