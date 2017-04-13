@@ -1,3 +1,11 @@
+# R vars from rmumps building
+CC=gcc
+FC=gfortran
+PKG_CFLAGS=-O3 -mtune=native -fpic
+PKG_FCFLAGS=-O3 -mtune=native -ffast-math  -fpic
+AR=ar
+RANLIB=ranlib
+INC_OS=
 ## Copyright 2004,2007,2008,2010-2012,2014 IPB, Universite de Bordeaux, INRIA & CNRS
 ##
 ## This file is part of the Scotch software package for static mapping,

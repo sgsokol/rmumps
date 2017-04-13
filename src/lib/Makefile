@@ -30,7 +30,7 @@ FUSELIBS=$(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/lib
 all: allmumps
 
 scotchlibs:
-	$(MAKE) -C $(DSCOTCH)/src INC_OS="$(INC_OS)" scotch esmumps
+	$(MAKE) -C $(DSCOTCH)/src CC=$(CC) PKG_CFLAGS="$(CFLAGS) $(PKG_CFLAGS)" INC_OS="$(INC_OS)" scotch esmumps
 	mkdir -p $(DLIB)
 	mv -f $(DSCOTCH)/lib/libscotch.a $(DSCOTCH)/lib/libscotcherr.a $(DSCOTCH)/src/esmumps/libesmumps.a $(DLIB)/
 metislib: $(SOURCES.C:.c=.o) 

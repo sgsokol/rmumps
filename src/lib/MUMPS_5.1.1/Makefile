@@ -39,9 +39,6 @@ include Makefile.inc
 mumps_lib: requiredobj
 	(cd src ; $(MAKE) $(ARITH))
 
-scotch_lib:
-	(cd $(SCOTCHDIR) ; $(MAKE) INC_OS=$(INC_OS))
-
 cexamples:	c
 	(cd examples ; $(MAKE) c)
 
@@ -77,7 +74,4 @@ clean:
 	(cd libseq; $(MAKE) clean)
 	if [ "$(LPORDDIR)" != "" ] ; then \
 	  cd $(LPORDDIR); $(MAKE) realclean; \
-    fi;
-	if [ "$(LSCOTCHDIR)" != "" ] ; then \
-	  cd $(LSCOTCHDIR); $(MAKE) realclean; \
     fi;
