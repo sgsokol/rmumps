@@ -446,6 +446,19 @@ List Rmumps::get_infos() {
     _("rinfog")=rinfog
   );
 }
+void Rmumps::set_keep(IntegerVector iv, IntegerVector ii) {
+  // set control vector KEEP at positions in ii (1-based)) to the values in iv
+  // only 1 <= ii <= 500 are effectively used
+  if (iv.size() != ii.size()) {
+    sprintf(buf, "set_keep: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
+    stop(buf);
+  }
+  for (auto i=0; i < ii.size(); i++) {
+    if (ii[i] > 500 || ii[i] < 1)
+      continue;
+    param.keep[ii[i]-1]=iv[i];
+  }
+}
 
 IntegerVector Rmumps::dim() {
   return IntegerVector::create(param.n, param.n);
@@ -681,6 +694,7 @@ RCPP_MODULE(mod_Rmumps){
   .method("set_cntl", &Rmumps::set_cntl, "Set CNTL parameter vector")
   .method("get_cntl", &Rmumps::get_cntl, "Get CNTL parameter vector")
   .method("get_infos", &Rmumps::get_infos, "Get a named list of information vectors")
+  .method("set_keep", &Rmumps::set_icntl, "Set KEEP parameter vector")
   .method("dim", &Rmumps::dim, "Return a vector with matrix dimensions")
   .method("nrow", &Rmumps::nrow, "Return an integer with matrix row number")
   .method("ncol", &Rmumps::ncol, "Return an integer with matrix column number")
