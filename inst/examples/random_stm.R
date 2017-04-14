@@ -37,14 +37,6 @@ aau=t(aal)
 aum=Rmumps$new(aau, 1)
 system.time(xu <- aum$solve(ba))
 
-# using multithread for multiple RHS
-am$ncore # by default, set to 1
-# prepare many RHS
-bb=matprod_simple_triplet_matrix(a, matrix(1:n^2, n, n))
-system.time(xx<-am$solve(bb))
-am$ncore=2
-system.time(xx<-am$solve(bb))
-
 # clean up by hand to avoid a possible interference between gc() and
 # Rcpp object destructor after unloading rmumps namespace
 rm(am, alm, aum)
