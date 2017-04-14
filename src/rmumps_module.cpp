@@ -18,13 +18,20 @@ using namespace Rcpp;
 #endif
 
 #include "../inst/include/rmumps.h"
-Rmumps::~Rmumps() { clean(); }
+Rmumps::~Rmumps() { if (ref == 0) clean(); }
 void Rmumps::clean() {
   //Rprintf("clean() is called...\n");
   param.job=JOB_END;
   dmumps_c(&param);
   //Rprintf("clean(): done\n");
 }
+/* unfortunately, there is an unwanted extra destructor call
+Rmumps Rmumps::shallow_copy(Rmumps a) {
+  Rmumps x=a;
+  x.ref++;
+  return x;
+}
+* */
 bool Rmumps::get_copy() {
   return copy;
 }
@@ -190,11 +197,42 @@ NumericMatrix Rmumps::solvem(NumericMatrix b) {
   } else {
     mrhs=b;
   }
-  param.rhs=&*mrhs.begin();
-  param.nrhs=b.ncol();
   param.lrhs=b.nrow();
   param.ICNTL(20)=0; // rhs is dense
+  param.rhs=&*mrhs.begin();
+  param.nrhs=b.ncol();
+#if 0 // #ifdef _OPENMP
+  // unfortunately, MUMPS is not thread safe, there is a writing in working arrays during solving phase
+  int ncol=b.ncol();
+  int nthr=std::max(1, std::min(ncol , ncore)); // thread number to launch
+  int ncol_th=b.ncol()/nthr; // col number per thread
+  if (nthr == 1) {
+    param.nrhs=ncol;
+    do_job(6);
+  } else {
+    #pragma omp parallel for num_threads(nthr)
+    for (int ith=0; ith < nthr; ith++) {
+      Rmumps pth=*this;
+      pth.ref++;
+      /* Rcout << "jobs=" << std::endl;
+      std::copy(jobs.begin(), jobs.end(), std::ostream_iterator<int>(Rcout, ", "));
+      Rcout << std::endl;
+      Rcout << "pth.jobs=" << std::endl;
+      std::copy(pth.jobs.begin(), pth.jobs.end(), std::ostream_iterator<int>(Rcout, ", "));
+      Rcout << std::endl;
+      */
+      pth.param.rhs=&*mrhs.begin()+ith*ncol_th*pth.param.lrhs;
+      pth.param.nrhs=(ith == nthr-1 ? ncol-ith*ncol_th : ncol_th);
+      /*
+      Rcout << "param.rhs=" << param.rhs << ", nrhs=" << pth.param.nrhs << std::endl;
+      Rcout << "pth.param.rhs=" << pth.param.rhs << std::endl;
+      */
+      pth.do_job(6);
+    }
+  }
+#else
   do_job(6);
+#endif
   return(mrhs);
 }
 void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
@@ -625,6 +663,7 @@ void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_
 void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) {
   this->sym=sym;
   this->ncore=1;
+  this->ref=0;
   /* Initialize a MUMPS instance. Use MPI_COMM_WORLD */
   param.job=JOB_INIT;
   param.keep[39]=0; // otherwise valgrind complaints

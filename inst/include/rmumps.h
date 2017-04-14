@@ -28,6 +28,7 @@ public:
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, int sym, bool copy_);
   ~Rmumps();
   void clean();
+  //Rmumps shallow_copy(Rmumps a);
   bool get_copy();
   void set_copy(bool copy_);
   int get_ncore();
@@ -64,6 +65,7 @@ public:
   std::string mumps_version();
   double det();
 private:
+  int ref; // counts shallow copies of this object
   DMUMPS_STRUC_C param;
   void new_mat(RObject mat, int sym, bool copy_);
   void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym, bool copy_);
