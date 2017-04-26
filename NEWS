@@ -1,3 +1,12 @@
+Version 5.1.1-1
+================
+
+* 2017-04-26
+ - upgraded MUMPS to the latest version 5.1.1
+ - added set_keep() method
+ - added mumps_version() method
+
+
 Version 5.0.1.12
 ================
 

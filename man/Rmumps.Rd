@@ -76,7 +76,7 @@ Rcpp Exported Class Wrapping MUMPS library
 \references{
  MUMPS official site http://mumps.enseeiht.fr
 
- Sokol S (2015). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.X, <URL:
+ Sokol S (2017). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.1.1-X, <URL:
  http://CRAN.R-project.org/package=rmumps>.
 }
 \author{
@@ -108,23 +108,25 @@ Rcpp Exported Class Wrapping MUMPS library
   \describe{
     \item{\code{new(asp, sym=0, copy=TRUE)}:}{constructor from Matrix::dgTMatrix class (or from convertible to it) and slam::simple_triplet_matrix class}
     \item{\code{new(i, j, x, n, copy=TRUE)}:}{constructor from triade rows, cols, vals}
-    \item{\code{symbolic()}:}{do symbolic analysis (stored internally) }
-    \item{\code{numeric()}:}{do LU factorization (stored internally)}
+    \item{\code{symbolic()}:}{do symbolic analysis (stored internally)}
+    \item{\code{numeric()}:}{do LU or LDL^t factorization (stored internally)}
     \item{\code{solve(b)}:}{solve single rhs (if b is a vector) or
      multiple rhs if b is a matrix (can be dense or sparse). Return the solution(s).}
     \item{\code{solvet(b)}:}{same as solve() but solves with transposed matrix}
-    \item{\code{det()}:}{Return determinant of the matrix)}
+    \item{\code{det()}:}{Return determinant of the matrix}
     \item{\code{inv()}:}{Return inverse of the matrix)}
-    \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in the same order as in previous calls)}
+    \item{\code{set_mat_data(x)}:}{updates matrix entries (x must be in the same order as in previous calls}
     \item{\code{set_icntl(iv, ii)}:}{set ICNTL parameter vector}
     \item{\code{get_icntl()}:}{get ICNTL parameter vector}
     \item{\code{set_cntl(v, iv)}:}{set CNTL parameter vector}
     \item{\code{get_cntl()}:}{get CNTL parameter vector}
     \item{\code{get_infos()}:}{get a named list of information vectors: info, rinfo, infog and rinfog}
-    \item{\code{dim()}:}{Return a dimension vector of the matrix)}
-    \item{\code{nrow()}:}{Return a row number of the matrix)}
-    \item{\code{ncol()}:}{Return a column number of the matrix)}
-    \item{\code{print()}:}{Print summary information on the matrix)}
-    \item{\code{show()}:}{Print summary information on the matrix)}
+    \item{\code{dim()}:}{Return a dimension vector of the matrix}
+    \item{\code{nrow()}:}{Return a row number of the matrix}
+    \item{\code{ncol()}:}{Return a column number of the matrix}
+    \item{\code{print()}:}{Print summary information on the matrix}
+    \item{\code{show()}:}{Print summary information on the matrix}
+    \item{\code{set_keep()}:}{Set KEEP array elements (undocumented feature of MUMPS)}
+    \item{\code{mumps_version()}:}{Return a string with MUMPS version used in rmumps}
   }
 }

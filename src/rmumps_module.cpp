@@ -741,5 +741,6 @@ RCPP_MODULE(mod_Rmumps){
   .method("show", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")
   .method("det", &Rmumps::det, "Return determinant of the matrix")
+  .method("mumps_version", &Rmumps::mumps_version, "Return determinant of the matrix")
   ;
 }
