@@ -393,7 +393,8 @@ C
       IF (KEEP(210).EQ.0.AND.KEEP(201).EQ.0) KEEP(210)=2 
       IF (KEEP(210).EQ.2) KEEP8(79)=huge(KEEP8(79))
       IF (KEEP(210).EQ.1.AND.KEEP8(79).LE.0_8) THEN
-        IF ( huge(KEEP8(79)) / K79REF + 1_8 .GE. int(NSLAVES,8) ) THEN
+C        IF ( huge(KEEP8(79)) / K79REF + 1_8 .GE. int(NSLAVES,8) ) THEN
+        IF (.FALSE.) THEN
         KEEP8(79)=huge(KEEP8(79))
         ELSE
         KEEP8(79)=K79REF * int(NSLAVES,8)

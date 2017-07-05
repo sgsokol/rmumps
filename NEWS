@@ -1,5 +1,12 @@
+Version 5.1.1-2
+===============
+
+* 2017-07-05
+ - fixed gfortran-6 warning "Integer division truncated to constant ‘768614336404’"
+ - fixed C warning about header guard
+
 Version 5.1.1-1
-================
+===============
 
 * 2017-04-26
  - upgraded MUMPS to the latest version 5.1.1

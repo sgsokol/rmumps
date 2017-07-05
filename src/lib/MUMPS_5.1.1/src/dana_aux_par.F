@@ -167,8 +167,9 @@ C
      &        id%KEEP(210)=2    
          IF (id%KEEP(210).EQ.2) id%KEEP8(79)=huge(id%KEEP8(79))
          IF ((id%KEEP(210).EQ.1) .AND. (id%KEEP8(79).LE.0_8)) THEN
-            IF ( huge(id%KEEP8(79)) / K79REF + 1_8 .GE.
-     &                                 int(id%NSLAVES,8) ) THEN
+C            IF ( huge(id%KEEP8(79)) / K79REF + 1_8 .GE.
+C     &                                 int(id%NSLAVES,8) ) THEN
+            IF (.FALSE.) THEN
                id%KEEP8(79)=huge(id%KEEP8(79))
             ELSE
                id%KEEP8(79)=K79REF * int(id%NSLAVES,8)

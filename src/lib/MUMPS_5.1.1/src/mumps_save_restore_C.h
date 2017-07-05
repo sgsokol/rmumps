@@ -12,7 +12,7 @@
  *  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
  *
  */
-#ifndef MUMPS_SAVE_RESTORE_H
+#ifndef MUMPS_SAVE_RESTORE_C_H
 #define MUMPS_SAVE_RESTORE_C_H
 #include "mumps_common.h"
 #define MUMPS_SAVE_RESTORE_RETURN_C \
