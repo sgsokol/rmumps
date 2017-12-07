@@ -1,0 +1,15 @@
+--- dana_aux.F
++++ dana_aux.F
+@@ -1885,10 +1885,10 @@ C
+       FLAG => id%IS1(3*N+1:4*N)
+       IF(MTRANSLOC.NE.1) THEN
+          CALL DMUMPS_SUPPRESS_DUPPLI_VAL(N,NZREAL,IW(IP),IW(IRNW),S2,
+-     &        PERM,FLAG(1))
++     &        PERM,FLAG(1:))
+       ELSE
+          CALL DMUMPS_SUPPRESS_DUPPLI_STR(N,NZREAL,IW(IP),IW(IRNW),
+-     &        PERM,FLAG(1))
++     &        PERM,FLAG(1:))
+       ENDIF
+       IF(NZREAL .NE. I) DUPPLI = .TRUE.
+       LS2 = NZTOT

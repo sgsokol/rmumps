@@ -1,0 +1,475 @@
+From e9bb5fd931204cf3b3a1e554799d8a78701294d4 Mon Sep 17 00:00:00 2001
+From: Serguei Sokol <sokol at insa-toulouse.fr>
+Date: Thu, 25 Aug 2016 14:42:30 +0200
+Subject: [PATCH] fixed compilation with -pedantic option
+
+---
+ DESCRIPTION                                 |  4 ++--
+ NEWS                                        | 12 +++++++++++
+ configure.win                               |  4 ++--
+ man/rmumps-package.Rd                       |  2 +-
+ src/Makevars                                |  2 +-
+ src/lib/MUMPS_5.0.1/Makefile.inc            | 12 +++++------
+ src/lib/MUMPS_5.0.1/libseq/Makefile         |  2 +-
+ src/lib/MUMPS_5.0.1/libseq/mpi.f            | 33 +++++++++++++++++++++--------
+ src/lib/MUMPS_5.0.1/src/Makefile            |  2 +-
+ src/lib/MUMPS_5.0.1/src/dana_aux.F          |  4 ++--
+ src/lib/MUMPS_5.0.1/src/dana_driver.F       | 24 ++++++++++-----------
+ src/lib/MUMPS_5.0.1/src/dfac_distrib_ELT.F  | 14 ++++++------
+ src/lib/MUMPS_5.0.1/src/dfac_process_band.F |  2 +-
+ src/lib/MUMPS_5.0.1/src/dtype3_root.F       | 10 ++++-----
+ src/lib/Makefile.win                        |  7 +++---
+ src/rmumps_module.cpp                       | 20 ++++++++---------
+ 16 files changed, 91 insertions(+), 63 deletions(-)
+
+diff --git a/DESCRIPTION b/DESCRIPTION
+index 8baa70f..44338d7 100644
+--- a/DESCRIPTION
++++ b/DESCRIPTION
+@@ -1,8 +1,8 @@
+ Package: rmumps
+ Type: Package
+ Title: Wrapper for MUMPS Library
+-Version: 5.0.1.9-1
+-Date: 2016-04-14
++Version: 5.0.1.10
++Date: 2016-08-25
+ Author: Serguei Sokol
+ Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
+ Description: Exported class can be used for storing sparse matrix
+diff --git a/NEWS b/NEWS
+index 766992c..c751a26 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,3 +1,15 @@
++Version 5.0.1.10
++===============
++
++* 2016-08-25
++ - fixed compilation with -pedantic option
++
++Version 5.0.1.9-1
++===============
++
++* 2016-04-14
++ - fixed building process (by R-core team)
++ 
+ Version 5.0.1.9
+ ===============
+ 
+diff --git a/configure.win b/configure.win
+index 4d458de..f249816 100755
+--- a/configure.win
++++ b/configure.win
+@@ -9,6 +9,6 @@ MAKE=${MAKE:-make}
+ RANLIB=${RANLIB:-ranlib}
+ 
+ $MAKE -C src/lib -f Makefile.win clean
+-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
++$MAKE -C src/lib -f Makefile.win allmumps M3264="-m32" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS -pedantic" FCFLAGS="$FCFLAGS $FPICFLAGS -pedantic" RANLIB="$RANLIB"
+ $MAKE -C src/lib -f Makefile.win clean
+-$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS" FCFLAGS="$FCFLAGS $FPICFLAGS" RANLIB="$RANLIB"
++$MAKE -C src/lib -f Makefile.win allmumps M3264="-m64" AR="$AR" CC="$CC" FC="$FC" CFLAGS="$CFLAGS $CPICFLAGS -pedantic" FCFLAGS="$FCFLAGS $FPICFLAGS -pedantic" RANLIB="$RANLIB"
+diff --git a/man/rmumps-package.Rd b/man/rmumps-package.Rd
+index 63a7d54..b53e1f2 100644
+--- a/man/rmumps-package.Rd
++++ b/man/rmumps-package.Rd
+@@ -24,7 +24,7 @@ Maintainer: Serguei Sokol (sokol at insa-toulouse.fr)
+ \references{
+ MUMPS official site http://mumps.enseeiht.fr
+ 
+-Sokol S (2016). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.9, <URL:
++Sokol S (2016). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.0.1.10, <URL:
+ http://CRAN.R-project.org/package=rmumps>.
+ }
+ \examples{
+diff --git a/src/Makevars b/src/Makevars
+index d4f74a7..f700713 100644
+--- a/src/Makevars
++++ b/src/Makevars
+@@ -8,4 +8,4 @@ $(SHLIB): lib/liballmumps.a
+ 
+ lib/liballmumps.a:
+ 	@($(MAKE) -C lib distclean && $(MAKE) -C lib \
+-	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" FCFLAGS="$(FCFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
++	  CC="$(CC)" FC="$(FC)" CFLAGS="$(CFLAGS) $(CPICFLAGS) -pedantic" FCFLAGS="$(FCFLAGS) $(FPICFLAGS) -pedantic" AR="$(AR)" RANLIB="$(RANLIB)")
+diff --git a/src/lib/MUMPS_5.0.1/Makefile.inc b/src/lib/MUMPS_5.0.1/Makefile.inc
+index 7917e08..2ae0749 100644
+--- a/src/lib/MUMPS_5.0.1/Makefile.inc
++++ b/src/lib/MUMPS_5.0.1/Makefile.inc
+@@ -24,12 +24,12 @@
+ #
+ ################################################################################
+ 
+-	ifdef topdir
+-		include $(topdir)/../compiler_options.in
+-   else
+-      # called from libseq
+-		include ../../compiler_options.in
+-	endif
++#	ifdef topdir
++#		include $(topdir)/../compiler_options.in
++#   else
++#      # called from libseq
++#		include ../../compiler_options.in
++#	endif
+ 
+ ########################################################################
+ #Begin orderings
+diff --git a/src/lib/MUMPS_5.0.1/libseq/Makefile b/src/lib/MUMPS_5.0.1/libseq/Makefile
+index 8eac1e5..ffb8cfb 100644
+--- a/src/lib/MUMPS_5.0.1/libseq/Makefile
++++ b/src/lib/MUMPS_5.0.1/libseq/Makefile
+@@ -14,7 +14,7 @@ libmpiseq$(PLAT)$(LIBEXT): mpi.o mpic.o elapse.o
+ 	$(AR)$@ mpi.o mpic.o elapse.o
+ 	$(RANLIB) $@
+ .f.o:
+-	$(FC) $(OPTF) -w -c $*.f $(OUTF)$*.o
++	$(FC) $(OPTF) -w  -c $*.f $(OUTF)$*.o
+ .c.o:
+ 	$(CC) $(OPTC) $(CDEFS) -I. -c $*.c $(OUTC)$*.o
+ 
+diff --git a/src/lib/MUMPS_5.0.1/libseq/mpi.f b/src/lib/MUMPS_5.0.1/libseq/mpi.f
+index 0058735..d31ec4c 100644
+--- a/src/lib/MUMPS_5.0.1/libseq/mpi.f
++++ b/src/lib/MUMPS_5.0.1/libseq/mpi.f
+@@ -559,28 +559,43 @@ C***********************************************************************
+       IMPLICIT NONE
+       INCLUDE 'mpif.h'
+       INTEGER COUNT, DATATYPE, IERR
+-      INTEGER SENDBUF(*), RECVBUF(*)
++      INTEGER SENDBUF(*), RECVBUF(*), FACTOR
++      LOGICAL VL
++      REAL VR
++      DOUBLE PRECISION VD
++      COMPLEX VC
++      COMPLEX(kind=kind(0.0D0)) :: VCD
++      
+       IF ( DATATYPE .EQ. MPI_INTEGER ) THEN
+-        CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, COUNT )
++         FACTOR=1
+       ELSEIF ( DATATYPE .EQ. MPI_LOGICAL ) THEN
+-        CALL MUMPS_COPY_LOGICAL( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_LOGICAL( SENDBUF, RECVBUF, COUNT )
++         FACTOR=SIZEOF(VL)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_REAL ) THEN
+-        CALL MUMPS_COPY_REAL( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_REAL( SENDBUF, RECVBUF, COUNT )
++         FACTOR=SIZEOF(VR)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_DOUBLE_PRECISION .OR.
+      &          DATATYPE .EQ. MPI_REAL8 ) THEN
+-        CALL MUMPS_COPY_DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
++         FACTOR=SIZEOF(VD)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_COMPLEX ) THEN
+-        CALL MUMPS_COPY_COMPLEX( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_COMPLEX( SENDBUF, RECVBUF, COUNT )
++         FACTOR=SIZEOF(VC)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_DOUBLE_COMPLEX ) THEN
+-        CALL MUMPS_COPY_DOUBLE_COMPLEX( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_DOUBLE_COMPLEX( SENDBUF, RECVBUF, COUNT )
++         FACTOR=SIZEOF(VCD)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_2DOUBLE_PRECISION) THEN
+-        CALL MUMPS_COPY_2DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_2DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
++         FACTOR=2*SIZEOF(VD)/SIZEOF(SENDBUF(1))
+       ELSE IF ( DATATYPE .EQ. MPI_2INTEGER) THEN
+-        CALL MUMPS_COPY_2INTEGER( SENDBUF, RECVBUF, COUNT )
++C        CALL MUMPS_COPY_2INTEGER( SENDBUF, RECVBUF, COUNT )
++         FACTOR=2
+       ELSE
+         IERR=1
+         RETURN
+       END IF
++      CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, FACTOR*COUNT )
+       IERR=0
+       RETURN
+       END SUBROUTINE MUMPS_COPY
+diff --git a/src/lib/MUMPS_5.0.1/src/Makefile b/src/lib/MUMPS_5.0.1/src/Makefile
+index 722f066..f65695a 100644
+--- a/src/lib/MUMPS_5.0.1/src/Makefile
++++ b/src/lib/MUMPS_5.0.1/src/Makefile
+@@ -259,7 +259,7 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
+ 
+ .SUFFIXES: .c .F .o
+ .F.o:
+-	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -w -c $*.F $(OUTF)$*.o
++	$(FC) -pedantic $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -w -c $*.F $(OUTF)$*.o
+ .c.o:
+ 	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
+ 
+diff --git a/src/lib/MUMPS_5.0.1/src/dana_aux.F b/src/lib/MUMPS_5.0.1/src/dana_aux.F
+index 635c31d..68df55b 100644
+--- a/src/lib/MUMPS_5.0.1/src/dana_aux.F
++++ b/src/lib/MUMPS_5.0.1/src/dana_aux.F
+@@ -1885,10 +1885,10 @@ C
+       FLAG => id%IS1(3*N+1:4*N)
+       IF(MTRANSLOC.NE.1) THEN
+          CALL DMUMPS_SUPPRESS_DUPPLI_VAL(N,NZREAL,IW(IP),IW(IRNW),S2,
+-     &        PERM,FLAG(1))
++     &        PERM,FLAG(1:))
+       ELSE
+          CALL DMUMPS_SUPPRESS_DUPPLI_STR(N,NZREAL,IW(IP),IW(IRNW),
+-     &        PERM,FLAG(1))
++     &        PERM,FLAG(1:))
+       ENDIF
+       IF(NZREAL .NE. I) DUPPLI = .TRUE.
+       LS2 = NZTOT
+diff --git a/src/lib/MUMPS_5.0.1/src/dana_driver.F b/src/lib/MUMPS_5.0.1/src/dana_driver.F
+index fd7f3bd..aec8540 100644
+--- a/src/lib/MUMPS_5.0.1/src/dana_driver.F
++++ b/src/lib/MUMPS_5.0.1/src/dana_driver.F
+@@ -607,8 +607,8 @@ C     in the case of a distributed Schur complement (KEEP(60)=2 or 3).
+ C     In that case, PROCNODE should be set accordingly and KEEP(38) is
+ C     not modified.
+             IF (id%KEEP(60) .EQ. 2 .OR. id%KEEP(60).EQ.3) THEN
+-               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1),
+-     &              1+2*id%NSLAVES, id%IS1(FILS),id%N)
++               CALL DMUMPS_SET_PROCNODE(id%KEEP(38), id%PROCNODE(1:),
++     &              1+2*id%NSLAVES, id%IS1(FILS:),id%N)
+             ENDIF
+ C        *******************
+ C        END SEQUENTIAL CODE
+@@ -627,14 +627,14 @@ C     IKEEP(1:N,1) can be used as a work space since it is set
+ C     to its final state by the SORT_PERM subroutine below.
+             SSARBR => id%IS1(IKEEP:IKEEP+id%N-1)
+ C     Map nodes and assign candidates for dynamic scheduling
+-            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1),
+-     &           INFOG(1),
+-     &           id%IS1(NE),
+-     &           id%IS1(NFSIZ),
+-     &           id%IS1(FRERE),
+-     &           id%IS1(FILS),
+-     &           KEEP(1),KEEP8(1),id%PROCNODE(1),
+-     &           SSARBR(1),id%NBSA,PEAK,IERR
++            CALL DMUMPS_DIST_AVOID_COPIES(id%N,id%NSLAVES,ICNTL(1:),
++     &           INFOG(1:),
++     &           id%IS1(NE:),
++     &           id%IS1(NFSIZ:),
++     &           id%IS1(FRERE:),
++     &           id%IS1(FILS:),
++     &           KEEP(1:),KEEP8(1:),id%PROCNODE(1:),
++     &           SSARBR(1:),id%NBSA,PEAK,IERR
+      &           )
+             NULLIFY(SSARBR)
+             if(IERR.eq.-999) then 
+@@ -1667,7 +1667,7 @@ C     it always available in a keep(71)
+          END DO 
+          CALL DMUMPS_BUILD_I_AM_CAND( id%NSLAVES, KEEP(79),
+      &        NB_NIV2, id%MYID_NODES,
+-     &        id%CANDIDATES(1,1), id%I_AM_CAND(1) )
++     &        id%CANDIDATES(1:,1:), id%I_AM_CAND(1:) )
+       ENDIF
+ #if ! defined(OLD_LOAD_MECHANISM)
+       IF (associated(id%FUTURE_NIV2)) THEN
+@@ -2180,7 +2180,7 @@ C     -------------------------
+       SUBROUTINE DMUMPS_SET_PROCNODE(INODE, PROCNODE, VALUE, FILS, N)
+       INTEGER, intent(in) :: INODE, N, VALUE
+       INTEGER, intent(in) :: FILS(N)
+-      INTEGER, intent(inout) :: PROCNODE(N)
++      INTEGER, intent(inout) :: PROCNODE(*)
+ C     
+       INTEGER IN
+       IN=INODE
+diff --git a/src/lib/MUMPS_5.0.1/src/dfac_distrib_ELT.F b/src/lib/MUMPS_5.0.1/src/dfac_distrib_ELT.F
+index 66996f6..45b61e3 100644
+--- a/src/lib/MUMPS_5.0.1/src/dfac_distrib_ELT.F
++++ b/src/lib/MUMPS_5.0.1/src/dfac_distrib_ELT.F
+@@ -181,9 +181,9 @@ C
+           IF ( DEST .ge. 0 .and. KEEP(46) .eq. 0 ) DEST = DEST + 1
+           IF ( KEEP(52) .ne. 0 ) THEN
+             CALL DMUMPS_SCALE_ELEMENT( N, SIZEI, SIZER,
+-     &               id%ELTVAR( IELTPTR ), id%A_ELT( RELTPTR ),
++     &               id%ELTVAR( IELTPTR: ), id%A_ELT( RELTPTR: ),
+      &               TEMP_ELT_R(1), MAXELT_REAL_SIZE,
+-     &               id%ROWSCA(1), id%COLSCA(1), KEEP(50) )
++     &               id%ROWSCA(1:), id%COLSCA(1:), KEEP(50) )
+           END IF
+           IF ( DEST .eq. 0 .or. ( DEST .eq. -1 .and. KEEP(46) .ne. 0 ) )
+      &      THEN
+@@ -199,15 +199,15 @@ C
+           IF ( DEST .NE. 0 .AND. DEST. NE. -3 ) THEN
+             IF ( KEEP(52) .eq. 0 ) THEN
+               CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR),
+-     &           id%A_ELT (RELTPTR),
++     &           id%ELTVAR(IELTPTR:),
++     &           id%A_ELT (RELTPTR:),
+      &           SIZEI, SIZER,
+      &
+      &           DEST, NBUF, NBRECORDS,
+      &           BUFI, BUFR, COMM )
+             ELSE
+               CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR),
++     &           id%ELTVAR(IELTPTR:),
+      &           TEMP_ELT_R( 1 ),
+      &           SIZEI, SIZER,
+      &
+@@ -239,8 +239,8 @@ C
+         SIZEI   = 1
+         SIZER   = 1
+         CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR),
+-     &           id%A_ELT (RELTPTR),
++     &           id%ELTVAR(IELTPTR:),
++     &           id%A_ELT (RELTPTR:),
+      &           SIZEI, SIZER,
+      &
+      &           DEST, NBUF, NBRECORDS,
+diff --git a/src/lib/MUMPS_5.0.1/src/dfac_process_band.F b/src/lib/MUMPS_5.0.1/src/dfac_process_band.F
+index 717a121..4339503 100644
+--- a/src/lib/MUMPS_5.0.1/src/dfac_process_band.F
++++ b/src/lib/MUMPS_5.0.1/src/dfac_process_band.F
+@@ -228,7 +228,7 @@ C
+ #if ! defined(NO_FDM_DESCBAND)
+       IF (MUMPS_FDBD_IS_DESCBAND_STORED( INODE, IWHANDLER )) THEN 
+         CALL MUMPS_FDBD_RETRIEVE_DESCBAND(IWHANDLER, DESCBAND_STRUC)
+-        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1),
++        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1:),
+      &       DESCBAND_STRUC%LBUFR,
+      &       LBUFR_BYTES,
+      &       IWPOS, IWPOSCB,
+diff --git a/src/lib/MUMPS_5.0.1/src/dtype3_root.F b/src/lib/MUMPS_5.0.1/src/dtype3_root.F
+index ca5c9c2..e065187 100644
+--- a/src/lib/MUMPS_5.0.1/src/dtype3_root.F
++++ b/src/lib/MUMPS_5.0.1/src/dtype3_root.F
+@@ -400,7 +400,7 @@ C
+             NRLOCAL = PTRROW( IROW + 2 ) - PTRROW( IROW + 1 )
+             NCLOCAL = PTRCOL( JCOL + 2 ) - PTRCOL( JCOL + 1 )
+             CALL DMUMPS_ROOT_LOCAL_ASSEMBLY( N,
+-     &        root%SCHUR_POINTER(1),
++     &        root%SCHUR_POINTER(1:),
+      &        LOCAL_M, LOCAL_N,
+      &        root%NPCOL, root%NPROW, root%MBLOCK, root%NBLOCK,
+      &        NBCOL, NBROW,
+@@ -412,9 +412,9 @@ C
+      &        NRLOCAL,
+      &        NCLOCAL,
+      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
+-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
++     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+      &        KEEP,
+-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
++     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+        ELSE
+         IF ( PTRIST(STEP( IROOT )) .GE. 0 ) THEN
+           IF ( PTRIST(STEP( IROOT )) .EQ. 0 ) THEN
+@@ -440,9 +440,9 @@ C
+      &        NRLOCAL,
+      &        NCLOCAL,
+      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
+-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
++     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+      &        KEEP,
+-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
++     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+         END IF
+        ENDIF
+       END IF
+diff --git a/src/lib/Makefile.win b/src/lib/Makefile.win
+index 7939cb0..a1b0eb9 100644
+--- a/src/lib/Makefile.win
++++ b/src/lib/Makefile.win
+@@ -8,9 +8,10 @@ FLAGS.PORD=-I$(DMUMPS)/PORD/include
+ FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX -DMINGW
+ FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
+ 
+-PKG_CXXFLAGS=$(FLAGS.MUMPS) $(M3264)#-DINTSIZE64
+-PKG_CFLAGS= -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
+-PKG_FFLAGS = $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
++PKG_CXXFLAGS=$(FLAGS.MUMPS) -pedantic $(M3264)#-DINTSIZE64
++PKG_CFLAGS= -pedantic -DAdd_ -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.GKlib) $(FLAGS.metis) $(M3264) #-DINTSIZE64
++PKG_FFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
++PKG_FCFLAGS = -pedantic $(FLAGS.MUMPS) $(FLAGS.MPI) $(M3264) -w #-fcray-pointer -fdefault-integer-8 
+ 
+ SOURCES.c.metis=$(wildcard $(DMETIS)/libmetis/*.c)
+ SOURCES.c.gklib=$(wildcard $(DMETIS)/GKlib/*.c)
+diff --git a/src/rmumps_module.cpp b/src/rmumps_module.cpp
+index f079809..60a5200 100644
+--- a/src/rmumps_module.cpp
++++ b/src/rmumps_module.cpp
+@@ -21,7 +21,7 @@ void Rmumps::clean() {
+   param.job=JOB_END;
+   dmumps_c(&param);
+   //Rprintf("clean(): done\n");
+-};
++}
+ bool Rmumps::get_copy() {
+   return copy;
+ }
+@@ -83,13 +83,13 @@ void Rmumps::do_job(int job) { // later pass it to private scope
+     jobs.insert({1, 2, 3});
+     break;
+   }
+-};
++}
+ void Rmumps::symbolic() {
+   do_job(1);
+-};
++}
+ void Rmumps::numeric() {
+   do_job(4);
+-};
++}
+ SEXP Rmumps::solve(RObject b) {
+   /* wrapper for multiple type rhs */
+   switch(b.sexp_type()) {
+@@ -150,7 +150,7 @@ NumericVector Rmumps::solvev(NumericVector b) {
+   param.ICNTL(20)=0; // rhs is dense
+   do_job(6);
+   return(rhs);
+-};
++}
+ NumericMatrix Rmumps::solvem(NumericMatrix b) {
+   if (copy) {
+     mrhs=clone(b);
+@@ -163,7 +163,7 @@ NumericMatrix Rmumps::solvem(NumericMatrix b) {
+   param.ICNTL(20)=0; // rhs is dense
+   do_job(6);
+   return(mrhs);
+-};
++}
+ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
+   // in place solve
+   param.rhs=b;
+@@ -171,7 +171,7 @@ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
+   param.lrhs=lrhs;
+   param.ICNTL(20)=0; // rhs is dense
+   do_job(6);
+-};
++}
+ NumericMatrix Rmumps::inv() {
+   MUMPS_INT n=param.n;
+   MUMPS_INT nrhs=param.n;
+@@ -243,7 +243,7 @@ NumericMatrix Rmumps::solves(S4 mat) {
+   param.ICNTL(20)=1; // decide automaticaly about this sparsity exploit
+   do_job(6);
+   return(mrhs);
+-};
++}
+ NumericMatrix Rmumps::solvestm(List mat) {
+   // solve sparse rhs (may be multiple)
+   // mat is expected to be of type slam::simple_triplet_matrix
+@@ -310,7 +310,7 @@ NumericMatrix Rmumps::solvestm(List mat) {
+   param.ICNTL(20)=1; // decide automaticaly about this sparsity exploit
+   do_job(6);
+   return(mrhs);
+-};
++}
+ void Rmumps::set_rhs(NumericVector b) {
+   // one dense rhs
+   param.ICNTL(20)=0; // rhs is dense;
+@@ -389,7 +389,7 @@ List Rmumps::triplet() {
+   tr.attr("class")="simple_triplet_matrix";
+   return tr;
+ }
+-std::string Rmumps::mumps_version() { return MUMPS_VERSION; };
++std::string Rmumps::mumps_version() { return MUMPS_VERSION; }
+ 
+ /* constructors */
+ Rmumps::Rmumps(RObject mat, bool copy_) {
+-- 
+2.7.4
+

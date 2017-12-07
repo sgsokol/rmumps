@@ -1,0 +1,11 @@
+--- dana_driver.F
++++ dana_driver.F
+@@ -2180,7 +2180,7 @@ C     -------------------------
+       SUBROUTINE DMUMPS_SET_PROCNODE(INODE, PROCNODE, VALUE, FILS, N)
+       INTEGER, intent(in) :: INODE, N, VALUE
+       INTEGER, intent(in) :: FILS(N)
+-      INTEGER, intent(inout) :: PROCNODE(N)
++      INTEGER, intent(inout) :: PROCNODE(*)
+ C     
+       INTEGER IN
+       IN=INODE

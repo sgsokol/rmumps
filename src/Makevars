@@ -1,4 +1,4 @@
-DMUMPS=lib/MUMPS_5.1.1
+DMUMPS=lib/MUMPS_5.1.2
 RANLIB?=ranlib
 
 INC_OS := $(shell "$(R_HOME)/bin/Rscript" -e "cat(switch(Sys.info()[['sysname']], Windows='.win', Linux='', Darwin='.macos'))")
