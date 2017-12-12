@@ -12,3 +12,4 @@
  *  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
  *
  */
+typedef int make_iso_compilers_happy;

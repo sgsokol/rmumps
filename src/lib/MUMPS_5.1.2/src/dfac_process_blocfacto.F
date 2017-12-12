@@ -226,10 +226,10 @@ C
      &                 COMM, IERR )
             ALLOCATE(BLR_U(max(NB_BLR_U,1)))
             ALLOCATE(BEGS_BLR_U(NB_BLR_U+2))
-            CALL DMUMPS_MPI_UNPACK_LR(BUFR, LBUFR, LBUFR_BYTES, 
+            CALL DMUMPS_MPI_UNPACK_LR(BUFR, LBUFR, LBUFR_BYTES,
      &                             POSITION, NPIV, NELIM, 'H',
-     &                             BLR_U(1), NB_BLR_U, KEEP(470), 
-     &                             BEGS_BLR_U(1),
+     &                             BLR_U(1:), NB_BLR_U, KEEP(470),
+     &                             BEGS_BLR_U(1:),
      &                             KEEP8, COMM, IERR, IFLAG, IERROR)
             IF (IFLAG.LT.0) GOTO 700
         ELSE

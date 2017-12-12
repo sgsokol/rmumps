@@ -1,3 +1,10 @@
+Version 5.1.2-1
+===============
+
+* 2017-12-12
+ - upgrade MUMPS from v5.1.1 to v5.1.2
+ - fixed a compilation error of metis library on windows/R-released
+ 
 Version 5.1.1-3
 ===============
 

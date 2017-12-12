@@ -1,0 +1,216 @@
+diff --git a/src/lib/MUMPS_5.1.2/libseq/mpi.f b/src/lib/MUMPS_5.1.2/libseq/mpi.f
+index ee0c204..ddbd644 100644
+--- a/src/lib/MUMPS_5.1.2/libseq/mpi.f
++++ b/src/lib/MUMPS_5.1.2/libseq/mpi.f
+@@ -559,43 +559,44 @@ C***********************************************************************
+       IMPLICIT NONE
+       INCLUDE 'mpif.h'
+       INTEGER COUNT, DATATYPE, IERR
+-      INTEGER SENDBUF(*), RECVBUF(*), FACTOR
++      INTEGER SENDBUF(*), RECVBUF(*), FACTOR, BASE
+       LOGICAL VL
+       REAL VR
+       DOUBLE PRECISION VD
+       COMPLEX VC
+       COMPLEX(kind=kind(0.0D0)) :: VCD
+       
++      BASE=INT(SIZEOF(SENDBUF(1)))
+       IF ( DATATYPE .EQ. MPI_INTEGER ) THEN
+ C        CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=1
++         FACTOR=BASE
+       ELSEIF ( DATATYPE .EQ. MPI_LOGICAL ) THEN
+ C        CALL MUMPS_COPY_LOGICAL( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=SIZEOF(VL)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(SIZEOF(VL))
+       ELSE IF ( DATATYPE .EQ. MPI_REAL ) THEN
+ C        CALL MUMPS_COPY_REAL( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=SIZEOF(VR)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(SIZEOF(VR))
+       ELSE IF ( DATATYPE .EQ. MPI_DOUBLE_PRECISION .OR.
+      &          DATATYPE .EQ. MPI_REAL8 ) THEN
+ C        CALL MUMPS_COPY_DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=SIZEOF(VD)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(SIZEOF(VD))
+       ELSE IF ( DATATYPE .EQ. MPI_COMPLEX ) THEN
+ C        CALL MUMPS_COPY_COMPLEX( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=SIZEOF(VC)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(SIZEOF(VC))
+       ELSE IF ( DATATYPE .EQ. MPI_DOUBLE_COMPLEX ) THEN
+ C        CALL MUMPS_COPY_DOUBLE_COMPLEX( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=SIZEOF(VCD)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(SIZEOF(VCD))
+       ELSE IF ( DATATYPE .EQ. MPI_2DOUBLE_PRECISION) THEN
+ C        CALL MUMPS_COPY_2DOUBLE_PRECISION( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=2*SIZEOF(VD)/SIZEOF(SENDBUF(1))
++         FACTOR=INT(2*SIZEOF(VD))
+       ELSE IF ( DATATYPE .EQ. MPI_2INTEGER) THEN
+ C        CALL MUMPS_COPY_2INTEGER( SENDBUF, RECVBUF, COUNT )
+-         FACTOR=2
++         FACTOR=2*BASE
+       ELSE
+         IERR=1
+         RETURN
+       END IF
+-      CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, FACTOR*COUNT )
++      CALL MUMPS_COPY_INTEGER( SENDBUF, RECVBUF, (FACTOR/BASE)*COUNT )
+       IERR=0
+       RETURN
+       END SUBROUTINE MUMPS_COPY
+diff --git a/src/lib/MUMPS_5.1.2/src/dana_driver.F b/src/lib/MUMPS_5.1.2/src/dana_driver.F
+index d1dedd9..e4e4ca8 100644
+--- a/src/lib/MUMPS_5.1.2/src/dana_driver.F
++++ b/src/lib/MUMPS_5.1.2/src/dana_driver.F
+@@ -1278,10 +1278,10 @@ C     clustering.
+             END IF
+             IF (KEEP(469).EQ.0) THEN
+               CALL DMUMPS_LR_GROUPING(id%N, id%KEEP8(28), id%KEEP(28),
+-     &           id%IRN(1),
+-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
+-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
+-     &           id%LNA, id%LRGROUPS(1),
++     &           id%IRN(1:),
++     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
++     &           id%DAD_STEPS(1:), id%NE_STEPS(1:), id%STEP(1:),
++     &           id%NA(1:), id%LNA, id%LRGROUPS(1:),
+      &           id%KEEP(50),
+      &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
+      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60),
+@@ -1290,10 +1290,10 @@ C     clustering.
+      &           id%KEEP(127), id%KEEP(10), LPOK, LP)
+             ELSE
+               CALL DMUMPS_LR_GROUPING_NEW(id%N, id%KEEP8(28), 
+-     &           id%KEEP(28), id%IRN(1),
+-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
+-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
+-     &           id%LNA, id%LRGROUPS(1), id%KEEP(50),
++     &           id%KEEP(28), id%IRN(1:),
++     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
++     &           id%DAD_STEPS(1:), id%NE_STEPS(1:), id%STEP(1:),
++     &           id%NA(1:), id%LNA, id%LRGROUPS(1:), id%KEEP(50),
+      &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
+      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60), 
+      &           id%INFO(1), id%INFO(2),
+@@ -1783,7 +1783,7 @@ C
+          END DO 
+          CALL DMUMPS_BUILD_I_AM_CAND( id%NSLAVES, KEEP(79),
+      &        NB_NIV2, id%MYID_NODES,
+-     &        id%CANDIDATES(1,1), id%I_AM_CAND(1) )
++     &        id%CANDIDATES(1:,1:), id%I_AM_CAND(1:) )
+       ENDIF
+       IF ( I_AM_SLAVE ) THEN
+ #if ! defined(OLD_LOAD_MECHANISM)
+diff --git a/src/lib/MUMPS_5.1.2/src/dfac_distrib_ELT.F b/src/lib/MUMPS_5.1.2/src/dfac_distrib_ELT.F
+index 1bf3f40..5426f72 100644
+--- a/src/lib/MUMPS_5.1.2/src/dfac_distrib_ELT.F
++++ b/src/lib/MUMPS_5.1.2/src/dfac_distrib_ELT.F
+@@ -190,9 +190,9 @@ C
+           IF ( DEST .ge. 0 .and. KEEP(46) .eq. 0 ) DEST = DEST + 1
+           IF ( KEEP(52) .ne. 0 ) THEN
+             CALL DMUMPS_SCALE_ELEMENT( N, SIZEI, SIZER,
+-     &               id%ELTVAR( IELTPTR8 ), id%A_ELT( RELTPTR8 ),
++     &               id%ELTVAR( IELTPTR8: ), id%A_ELT( RELTPTR8: ),
+      &               TEMP_ELT_R(1), MAXELT_REAL_SIZE,
+-     &               id%ROWSCA(1), id%COLSCA(1), KEEP(50) )
++     &               id%ROWSCA(1:), id%COLSCA(1:), KEEP(50) )
+           END IF
+           IF ( DEST .eq. 0 .or. ( DEST .eq. -1 .and. KEEP(46) .ne. 0 ) )
+      &      THEN
+@@ -208,15 +208,15 @@ C
+           IF ( DEST .NE. 0 .AND. DEST. NE. -3 ) THEN
+             IF ( KEEP(52) .eq. 0 ) THEN
+               CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR8),
+-     &           id%A_ELT (RELTPTR8),
++     &           id%ELTVAR(IELTPTR8:),
++     &           id%A_ELT (RELTPTR8:),
+      &           SIZEI, SIZER,
+      &
+      &           DEST, NBUF, NBRECORDS,
+      &           BUFI, BUFR, COMM )
+             ELSE
+               CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR8),
++     &           id%ELTVAR(IELTPTR8:),
+      &           TEMP_ELT_R( 1 ),
+      &           SIZEI, SIZER,
+      &
+@@ -248,8 +248,8 @@ C
+         SIZEI   = 1
+         SIZER   = 1
+         CALL DMUMPS_ELT_FILL_BUF(
+-     &           id%ELTVAR(IELTPTR8),
+-     &           id%A_ELT (RELTPTR8),
++     &           id%ELTVAR(IELTPTR8:),
++     &           id%A_ELT (RELTPTR8:),
+      &           SIZEI, SIZER,
+      &
+      &           DEST, NBUF, NBRECORDS,
+diff --git a/src/lib/MUMPS_5.1.2/src/dfac_process_band.F b/src/lib/MUMPS_5.1.2/src/dfac_process_band.F
+index 82b045e..f57a609 100644
+--- a/src/lib/MUMPS_5.1.2/src/dfac_process_band.F
++++ b/src/lib/MUMPS_5.1.2/src/dfac_process_band.F
+@@ -235,7 +235,7 @@ C
+ #     if ! defined(NO_FDM_DESCBAND)
+       IF (MUMPS_FDBD_IS_DESCBAND_STORED( INODE, IWHANDLER )) THEN 
+         CALL MUMPS_FDBD_RETRIEVE_DESCBAND(IWHANDLER, DESCBAND_STRUC)
+-        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1),
++        CALL DMUMPS_PROCESS_DESC_BANDE( MYID, DESCBAND_STRUC%BUFR(1:),
+      &       DESCBAND_STRUC%LBUFR,
+      &       LBUFR_BYTES,
+      &       IWPOS, IWPOSCB,
+diff --git a/src/lib/MUMPS_5.1.2/src/dfac_process_blocfacto.F b/src/lib/MUMPS_5.1.2/src/dfac_process_blocfacto.F
+index 069c82a..6690be9 100644
+--- a/src/lib/MUMPS_5.1.2/src/dfac_process_blocfacto.F
++++ b/src/lib/MUMPS_5.1.2/src/dfac_process_blocfacto.F
+@@ -226,10 +226,10 @@ C
+      &                 COMM, IERR )
+             ALLOCATE(BLR_U(max(NB_BLR_U,1)))
+             ALLOCATE(BEGS_BLR_U(NB_BLR_U+2))
+-            CALL DMUMPS_MPI_UNPACK_LR(BUFR, LBUFR, LBUFR_BYTES, 
++            CALL DMUMPS_MPI_UNPACK_LR(BUFR, LBUFR, LBUFR_BYTES,
+      &                             POSITION, NPIV, NELIM, 'H',
+-     &                             BLR_U(1), NB_BLR_U, KEEP(470), 
+-     &                             BEGS_BLR_U(1),
++     &                             BLR_U(1:), NB_BLR_U, KEEP(470),
++     &                             BEGS_BLR_U(1:),
+      &                             KEEP8, COMM, IERR, IFLAG, IERROR)
+             IF (IFLAG.LT.0) GOTO 700
+         ELSE
+diff --git a/src/lib/MUMPS_5.1.2/src/dtype3_root.F b/src/lib/MUMPS_5.1.2/src/dtype3_root.F
+index fc670bd..3ddf76b 100644
+--- a/src/lib/MUMPS_5.1.2/src/dtype3_root.F
++++ b/src/lib/MUMPS_5.1.2/src/dtype3_root.F
+@@ -402,7 +402,7 @@ C
+             NRLOCAL = PTRROW( IROW + 2 ) - PTRROW( IROW + 1 )
+             NCLOCAL = PTRCOL( JCOL + 2 ) - PTRCOL( JCOL + 1 )
+             CALL DMUMPS_ROOT_LOCAL_ASSEMBLY( N,
+-     &        root%SCHUR_POINTER(1),
++     &        root%SCHUR_POINTER(1:),
+      &        LOCAL_M, LOCAL_N,
+      &        root%NPCOL, root%NPROW, root%MBLOCK, root%NBLOCK,
+      &        NBCOL, NBROW,
+@@ -414,9 +414,9 @@ C
+      &        NRLOCAL,
+      &        NCLOCAL,
+      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
+-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
++     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+      &        KEEP,
+-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
++     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+        ELSE
+         IF ( PTRIST(STEP( IROOT )) .GE. 0 ) THEN
+           IF ( PTRIST(STEP( IROOT )) .EQ. 0 ) THEN
+@@ -442,9 +442,9 @@ C
+      &        NRLOCAL,
+      &        NCLOCAL,
+      &        NSUPROW(IROW+1), NSUPCOL(JCOL+1),
+-     &        root%RG2L_ROW(1), root%RG2L_COL(1), TRANSPOSE_ASM,
++     &        root%RG2L_ROW(1:), root%RG2L_COL(1:), TRANSPOSE_ASM,
+      &        KEEP,
+-     &        root%RHS_ROOT(1,1), root%RHS_NLOC )
++     &        root%RHS_ROOT(1:,1:), root%RHS_NLOC )
+         END IF
+        ENDIF
+       END IF

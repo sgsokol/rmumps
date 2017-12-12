@@ -190,9 +190,9 @@ C
           IF ( DEST .ge. 0 .and. KEEP(46) .eq. 0 ) DEST = DEST + 1
           IF ( KEEP(52) .ne. 0 ) THEN
             CALL DMUMPS_SCALE_ELEMENT( N, SIZEI, SIZER,
-     &               id%ELTVAR( IELTPTR8 ), id%A_ELT( RELTPTR8 ),
+     &               id%ELTVAR( IELTPTR8: ), id%A_ELT( RELTPTR8: ),
      &               TEMP_ELT_R(1), MAXELT_REAL_SIZE,
-     &               id%ROWSCA(1), id%COLSCA(1), KEEP(50) )
+     &               id%ROWSCA(1:), id%COLSCA(1:), KEEP(50) )
           END IF
           IF ( DEST .eq. 0 .or. ( DEST .eq. -1 .and. KEEP(46) .ne. 0 ) )
      &      THEN
@@ -208,15 +208,15 @@ C
           IF ( DEST .NE. 0 .AND. DEST. NE. -3 ) THEN
             IF ( KEEP(52) .eq. 0 ) THEN
               CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR8),
-     &           id%A_ELT (RELTPTR8),
+     &           id%ELTVAR(IELTPTR8:),
+     &           id%A_ELT (RELTPTR8:),
      &           SIZEI, SIZER,
      &
      &           DEST, NBUF, NBRECORDS,
      &           BUFI, BUFR, COMM )
             ELSE
               CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR8),
+     &           id%ELTVAR(IELTPTR8:),
      &           TEMP_ELT_R( 1 ),
      &           SIZEI, SIZER,
      &
@@ -248,8 +248,8 @@ C
         SIZEI   = 1
         SIZER   = 1
         CALL DMUMPS_ELT_FILL_BUF(
-     &           id%ELTVAR(IELTPTR8),
-     &           id%A_ELT (RELTPTR8),
+     &           id%ELTVAR(IELTPTR8:),
+     &           id%A_ELT (RELTPTR8:),
      &           SIZEI, SIZER,
      &
      &           DEST, NBUF, NBRECORDS,

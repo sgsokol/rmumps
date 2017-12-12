@@ -1278,10 +1278,10 @@ C     clustering.
             END IF
             IF (KEEP(469).EQ.0) THEN
               CALL DMUMPS_LR_GROUPING(id%N, id%KEEP8(28), id%KEEP(28),
-     &           id%IRN(1),
-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
-     &           id%LNA, id%LRGROUPS(1),
+     &           id%IRN(1:),
+     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
+     &           id%DAD_STEPS(1:), id%NE_STEPS(1:), id%STEP(1:),
+     &           id%NA(1:), id%LNA, id%LRGROUPS(1:),
      &           id%KEEP(50),
      &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60),
@@ -1290,10 +1290,10 @@ C     clustering.
      &           id%KEEP(127), id%KEEP(10), LPOK, LP)
             ELSE
               CALL DMUMPS_LR_GROUPING_NEW(id%N, id%KEEP8(28), 
-     &           id%KEEP(28), id%IRN(1),
-     &           id%JCN(1), id%FILS(1), id%FRERE_STEPS(1),
-     &           id%DAD_STEPS(1), id%NE_STEPS(1), id%STEP(1), id%NA(1),
-     &           id%LNA, id%LRGROUPS(1), id%KEEP(50),
+     &           id%KEEP(28), id%IRN(1:),
+     &           id%JCN(1:), id%FILS(1:), id%FRERE_STEPS(1:),
+     &           id%DAD_STEPS(1:), id%NE_STEPS(1:), id%STEP(1:),
+     &           id%NA(1:), id%LNA, id%LRGROUPS(1:), id%KEEP(50),
      &           id%ICNTL(1), id%KEEP(487), id%KEEP(488), id%KEEP(489), 
      &           id%KEEP(490), id%KEEP(38), id%KEEP(20), id%KEEP(60), 
      &           id%INFO(1), id%INFO(2),
@@ -1783,7 +1783,7 @@ C
          END DO 
          CALL DMUMPS_BUILD_I_AM_CAND( id%NSLAVES, KEEP(79),
      &        NB_NIV2, id%MYID_NODES,
-     &        id%CANDIDATES(1,1), id%I_AM_CAND(1) )
+     &        id%CANDIDATES(1:,1:), id%I_AM_CAND(1:) )
       ENDIF
       IF ( I_AM_SLAVE ) THEN
 #if ! defined(OLD_LOAD_MECHANISM)

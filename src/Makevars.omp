@@ -1,0 +1,13 @@
+DMUMPS=lib/MUMPS_5.1.2
+RANLIB?=ranlib
+
+INC_OS := $(shell "$(R_HOME)/bin/Rscript" ../R/inc_os.R)
+
+PKG_CXXFLAGS=-I$(DMUMPS)/include $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS= -L./lib -ldmumps -lmumps_common -lmpiseq -lpord -lmetis -lesmumps -lscotch -lscotcherr -pthread $(SHLIB_OPENMP_CFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+$(SHLIB): lib/libdmumps.a
+
+lib/libdmumps.a:
+	$(MAKE) -C lib \
+	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS) $(SHLIB_OPENMP_CFLAGS)"  PKG_FCFLAGS="$(FCFLAGS) $(FCPICFLAGS) $(SHLIB_OPENMP_FCFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"

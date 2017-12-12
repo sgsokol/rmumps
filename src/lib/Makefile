@@ -9,10 +9,11 @@ FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -I../include
 FLAGS.PORD=-I../PORD/include
 FLAGS.SCOTCH=-I../../$(DSCOTCH)/include
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX
+FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 ifeq "$(INC_OS)" ".win"
  FLAGS.GKlib += -DMINGW
+ FLAGS.metis += -DMINGW
 endif
-FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 
 #PKG_CXXFLAGS += $(FLAGS.MUMPS) #-DINTSIZE64
 #PKG_CFLAGS += -DAdd_ #-DINTSIZE64

@@ -1,7 +1,7 @@
 DMUMPS=lib/MUMPS_5.1.2
 RANLIB?=ranlib
 
-INC_OS := $(shell "$(R_HOME)/bin/Rscript" -e "cat(switch(Sys.info()[['sysname']], Windows='.win', Linux='', Darwin='.macos'))")
+INC_OS := $(shell "$(R_HOME)/bin/Rscript" ../R/inc_os.R)
 
 PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib -ldmumps -lmumps_common -lmpiseq -lpord -lmetis -lesmumps -lscotch -lscotcherr -pthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
