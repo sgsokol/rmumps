@@ -1,3 +1,9 @@
+Version 5.1.2-2
+===============
+
+* 2017-12-13
+ - added inst/COPYRIGHTS and contributors in DESCRIPTION:Autors@R
+
 Version 5.1.2-1
 ===============
 

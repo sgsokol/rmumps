@@ -1,9 +1,47 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.1.2-1
-Date: 2017-12-12
-Author: Serguei Sokol
+Version: 5.1.2-2
+Date: 2017-12-13
+Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
+         person("Emmanuel", "Agullo", role="ctb"),
+         person("Patrick", "Amestoy", role="ctb"),
+         person("Maurice", "Bremond", role="ctb"),
+         person("Alfredo", "Buttari", role="ctb"),
+         person("Philippe", "Combes", role="ctb"),
+         person("Marie", "Durand", role="ctb"),
+         person("Aurelia", "Fevre", role="ctb"),
+         person("Abdou", "Guermouche", role="ctb"),
+         person("Guillaume", "Joslin", role="ctb"),
+         person("Jacko", "Koster", role="ctb"),
+         person("Jean-Yves", "L'Excellent", role="ctb"),
+         person("Stephane", "Pralet", role="ctb"),
+         person("Chiara", "Puglisi", role="ctb"),
+         person("Francois-Henry", "Rouet", role="ctb"),
+         person("Wissam", "Sid-Lakhdar", role="ctb"),
+         person("Tzvetomila", "Slavova", role="ctb"),
+         person("Bora", "Ucar", role="ctb"),
+         person("Clement", "Weisbecker", role="ctb"),
+         person("Juergen", "Schulze", role="ctb"),
+         person("George", "Karypis", role="ctb"),
+         person("Douglas C.", "Schmidt", role="ctb"),
+         person("Isamu", "Hasegawa", role="ctb"),
+         person("Alexander", "Chemeris", role="ctb"),
+         person("Makoto", "Matsumoto", role="ctb"),
+         person("Takuji", "Nishimura", role="ctb"),
+         person("François", "Pellegrini", role="ctb"),
+         person("David", "Goudin", role="ctb"),
+         person("Pascal", "Henon", role="ctb"),
+         person("Pierre", "Ramet", role="ctb"),
+         person("Sebastien", "Fourestier", role="ctb"),
+         person("Jun-Ho", "Her", role="ctb"),
+         person("Cedric", "Chevalier", role="ctb"),
+         person("Timothy A.", "Davis", role="ctb"),
+         person("Iain S.", "Duff", role="ctb"),
+         person("John K.", "Reid", role="ctb"),
+         person("Richard", "Stallman", role="ctb"),
+         person("Samuel", "Thibault", role="ctb")
+         )
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Some basic features of MUMPS (Multifrontal Massively Parallel
 	sparse direct Solver) are wrapped in a class whose methods can be used
@@ -11,6 +49,7 @@ Description: Some basic features of MUMPS (Multifrontal Massively Parallel
 	with one or many right hand sides (dense or sparse).
 	There is a possibility to do separately symbolic analysis,
 	LU (or LDL^t) factorization and system solving.
+         Third part ordering libraries are included and can be used: PORD, METIS, SCOTCH.
 License: GPL (>= 2)
 Imports: methods, Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
