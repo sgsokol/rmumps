@@ -51,27 +51,30 @@ test_that("testing a from i,j,v", {
 })
 rm(ai)
 
-# test matrix creation from slam::simple_triplet_matrix
-asl=as.simple_triplet_matrix(a)
-ai=Rmumps$new(asl)
-xi=solve(ai, b)
-test_that("testing a from slam::simple_triplet_matrix", {
-  expect_equal(xi, 1:n)
-})
-rm(asl)
+if (getRversion() >= "3.4.0") {
+  # test matrix creation from slam::simple_triplet_matrix (which requires R-3.4.0+)
+  asl=as.simple_triplet_matrix(a)
+  ai=Rmumps$new(asl)
+  xi=solve(ai, b)
+  test_that("testing a from slam::simple_triplet_matrix", {
+    expect_equal(xi, 1:n)
+  })
+  rm(asl)
 
-# test sparse rhs as slam::simple_triplet_matrix
-asl=slam::as.simple_triplet_matrix(a)
-eye=solve(ai, asl)
-test_that("testing solve() on slam::simple_triplet_matrix", {
-  expect_equal(eye, diag(n), tol=1e-14)
-})
-rm(ai, asl)
+  # test sparse rhs as slam::simple_triplet_matrix
+  asl=slam::as.simple_triplet_matrix(a)
+  eye=solve(ai, asl)
+  test_that("testing solve() on slam::simple_triplet_matrix", {
+    expect_equal(eye, diag(n), tol=1e-14)
+  })
+  rm(ai, asl)
+}
 
 
 # test error signaling on singular matrix
 rm(am)
-a=Matrix::Matrix(diag(n)); a[1,1]=0; a[1,2]=1
+a=as(diag(n), "dgCMatrix")
+a@p[2L]=0L
 am=Rmumps$new(a)
 test_that("singular matrix", {
   expect_error(solve(am, b), "*rmumps: info\\[1\\]=-10*")

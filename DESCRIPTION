@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.1.2-2
-Date: 2017-12-13
+Version: 5.1.2-3
+Date: 2018-01-03
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role="ctb"),
@@ -44,12 +44,14 @@ Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-
          )
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
 Description: Some basic features of MUMPS (Multifrontal Massively Parallel
-	sparse direct Solver) are wrapped in a class whose methods can be used
-	for sequentially solving a sparse linear system (symmetric or not)
-	with one or many right hand sides (dense or sparse).
-	There is a possibility to do separately symbolic analysis,
-	LU (or LDL^t) factorization and system solving.
+         sparse direct Solver) are wrapped in a class whose methods can be used
+         for sequentially solving a sparse linear system (symmetric or not)
+         with one or many right hand sides (dense or sparse).
+         There is a possibility to do separately symbolic analysis,
+         LU (or LDL^t) factorization and system solving.
          Third part ordering libraries are included and can be used: PORD, METIS, SCOTCH.
+         MUMPS method was first described in Amestoy et al. (2001) <doi:10.1137/S0895479899358194>
+         and Amestoy et al. (2006) <doi:10.1016/j.parco.2005.07.004>.
 License: GPL (>= 2)
 Imports: methods, Rcpp (>= 0.12.0)
 LinkingTo: Rcpp

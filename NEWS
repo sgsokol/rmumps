@@ -1,3 +1,10 @@
+Version 5.1.2-3
+===============
+
+* 2018-01-03
+ - added doi refs in DESCRIPTION:Description field
+ - fixed errors in tests for older R releases
+
 Version 5.1.2-2
 ===============
 
