@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.1.2-3
-Date: 2018-01-03
+Version: 5.1.2-4
+Date: 2018-01-05
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role="ctb"),
@@ -29,7 +29,7 @@ Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-
          person("Alexander", "Chemeris", role="ctb"),
          person("Makoto", "Matsumoto", role="ctb"),
          person("Takuji", "Nishimura", role="ctb"),
-         person("François", "Pellegrini", role="ctb"),
+         person("Francois", "Pellegrini", role="ctb"),
          person("David", "Goudin", role="ctb"),
          person("Pascal", "Henon", role="ctb"),
          person("Pierre", "Ramet", role="ctb"),
