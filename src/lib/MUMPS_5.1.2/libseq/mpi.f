@@ -27,7 +27,7 @@ C******************************************************************
       INTEGER COUNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
       WRITE(*,*) 'Error. MPI_BSEND should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_BSEND
@@ -57,12 +57,12 @@ C***********************************************************************
       INTEGER SENDBUF(*), RECVBUF(*)
       IF ( RECCOUNT .NE. COUNT ) THEN
         WRITE(*,*) 'ERROR in MPI_GATHER, RECCOUNT != COUNT'
-        STOP
+C        STOP
       ELSE
         CALL MUMPS_COPY( COUNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) 'ERROR in MPI_GATHER, DATATYPE=',DATATYPE
-          STOP
+C          STOP
         END IF
       END IF
       IERR = 0
@@ -85,12 +85,12 @@ C     "MUMPS_COPY_DATATYPE" routines.
 C
       IF ( RECCOUNT(1) .NE. COUNT ) THEN
         WRITE(*,*) 'ERROR in MPI_GATHERV, RECCOUNT(1) != COUNT'
-        STOP
+C        STOP
       ELSE
         CALL MUMPS_COPY( COUNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) 'ERROR in MPI_GATHERV, DATATYPE=',DATATYPE
-          STOP
+C          STOP
         END IF
       END IF
       IERR = 0
@@ -105,7 +105,7 @@ C***********************************************************************
       CALL MUMPS_COPY( COUNT, SENDBUF, RECVBUF, DATATYPE, IERR )
       IF ( IERR .NE. 0 ) THEN
         WRITE(*,*) 'ERROR in MPI_ALLREDUCE, DATATYPE=',DATATYPE
-        STOP
+C        STOP
       END IF
       IERR = 0
       RETURN
@@ -119,7 +119,7 @@ C***********************************************************************
       CALL MUMPS_COPY( COUNT, SENDBUF, RECVBUF, DATATYPE, IERR )
       IF ( IERR .NE. 0 ) THEN
         WRITE(*,*) 'ERROR in MPI_REDUCE, DATATYPE=',DATATYPE
-        STOP
+C        STOP
       END IF
       IERR = 0
       RETURN
@@ -133,7 +133,7 @@ C***********************************************************************
       CALL MUMPS_COPY( RCVCOUNT, SENDBUF, RECVBUF, DATATYPE, IERR )
       IF ( IERR .NE. 0 ) THEN
         WRITE(*,*) 'ERROR in MPI_REDUCE_SCATTER, DATATYPE=',DATATYPE
-        STOP
+C        STOP
       END IF
       IERR = 0
       RETURN
@@ -153,15 +153,15 @@ C***********************************************************************
       INTEGER SENDBUF(*), RECVBUF(*)
       IF ( RECVCNT .NE. SENDCNT ) THEN
         WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVCOUNT != SENDCOUNT'
-        STOP
+C        STOP
       ELSE IF ( RECVTYPE .NE. SENDTYPE ) THEN
         WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVTYPE != SENDTYPE'
-        STOP
+C        STOP
       ELSE
         CALL MUMPS_COPY( SENDCNT, SENDBUF, RECVBUF, SENDTYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
           WRITE(*,*) 'ERROR in MPI_ALLTOALL, SENDTYPE=',SENDTYPE
-          STOP
+C          STOP
         END IF
       END IF
       IERR = 0
@@ -288,7 +288,7 @@ C***********************************************************************
       INTEGER DATATYPE, COUNT, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
       WRITE(*,*) 'Error. MPI_GET_COUNT should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_GET_COUNT
@@ -365,7 +365,7 @@ C***********************************************************************
       INTEGER COUNT, DATATYPE, DEST, TAG, COMM, IERR, IREQ
       INTEGER BUF(*)
       WRITE(*,*) 'Error. MPI_ISEND should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_ISEND
@@ -411,7 +411,7 @@ C***********************************************************************
       INTEGER INCOUNT, DATATYPE, OUTCOUNT, POSITION, COMM, IERR
       INTEGER INBUF(*), OUTBUF(*)
       WRITE(*,*) 'Error. MPI_PACKED should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PACK
@@ -421,7 +421,7 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER INCOUNT, DATATYPE, COMM, SIZE, IERR
       WRITE(*,*) 'Error. MPI_PACK_SIZE should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PACK_SIZE
@@ -432,7 +432,7 @@ C***********************************************************************
       INTEGER SOURCE, TAG, COMM, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
       WRITE(*,*) 'Error. MPI_PROBE should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PROBE
@@ -444,7 +444,7 @@ C***********************************************************************
       INTEGER COUNT, DATATYPE, SOURCE, TAG, COMM, IERR
       INTEGER BUF(*), STATUS(MPI_STATUS_SIZE)
       WRITE(*,*) 'Error. MPI_RECV should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_RECV
@@ -463,7 +463,7 @@ C***********************************************************************
       INTEGER COUNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
       WRITE(*,*) 'Error. MPI_SEND should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_SEND
@@ -474,7 +474,7 @@ C***********************************************************************
       INTEGER COUNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
       WRITE(*,*) 'Error. MPI_SSEND should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_SSEND
@@ -497,7 +497,7 @@ C***********************************************************************
       INTEGER INSIZE, POSITION, OUTCOUNT, DATATYPE, COMM, IERR
       INTEGER INBUF(*), OUTBUF(*)
       WRITE(*,*) 'Error. MPI_UNPACK should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_UNPACK
@@ -508,7 +508,7 @@ C***********************************************************************
       INTEGER IREQ, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
       WRITE(*,*) 'Error. MPI_WAIT should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_WAIT
@@ -520,7 +520,7 @@ C***********************************************************************
       INTEGER STATUS( MPI_STATUS_SIZE )
       INTEGER ARRAY_OF_REQUESTS( COUNT )
       WRITE(*,*) 'Error. MPI_WAITALL should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_WAITALL
@@ -533,7 +533,7 @@ C***********************************************************************
       INTEGER STATUS( MPI_STATUS_SIZE )
       INTEGER ARRAY_OF_REQUESTS( COUNT )
       WRITE(*,*) 'Error. MPI_WAITANY should not be called.'
-      STOP
+C      STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_WAITANY
@@ -704,7 +704,7 @@ C***********************************************************************
       INTEGER CNTXT, NPROW, NPCOL
       CHARACTER C
         WRITE(*,*) 'Error. BLACS_GRIDINIT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE blacs_gridinit
 C***********************************************************************
@@ -712,7 +712,7 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER CNTXT, NPROW, NPCOL, MYROW, MYCOL
         WRITE(*,*) 'Error. BLACS_GRIDINFO should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE blacs_gridinfo
 C***********************************************************************
@@ -720,7 +720,7 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER CNTXT
         WRITE(*,*) 'Error. BLACS_GRIDEXIT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE blacs_gridexit
 
@@ -736,7 +736,7 @@ C***********************************************************************
       INTEGER ICSRC, ICTXT, INFO, IRSRC, LLD, M, MB, N, NB
       INTEGER DESC( * )
         WRITE(*,*) 'Error. DESCINIT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE DESCINIT
 C***********************************************************************
@@ -745,11 +745,11 @@ C***********************************************************************
 C     Can be called
       IF ( NPROCS .ne. 1 ) THEN
         WRITE(*,*) 'Error. Last parameter from NUMROC should be 1'
-        STOP
+C        STOP
       ENDIF
       IF ( IPROC .ne. 0 ) THEN
         WRITE(*,*) 'Error. IPROC should be 0 in NUMROC.'
-        STOP
+C        STOP
       ENDIF
       NUMROC = N
       RETURN
@@ -762,7 +762,7 @@ C***********************************************************************
       INTEGER            DESCA( * )
       COMPLEX            A( * )
         WRITE(*,*) 'Error. PCPOTRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcpotrf
 C***********************************************************************
@@ -772,7 +772,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), IPIV( * )
       COMPLEX            A( * )
         WRITE(*,*) 'Error. PCGETRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcgetrf
 C***********************************************************************
@@ -784,7 +784,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       COMPLEX            A( * ), B( * )
         WRITE(*,*) 'Error. PCTRTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pctrtrs
 C***********************************************************************
@@ -796,7 +796,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX     A( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * )
         WRITE(*,*) 'Error. PZPOTRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzpotrf
 C***********************************************************************
@@ -807,7 +807,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX     A( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * )
         WRITE(*,*) 'Error. PZGETRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzgetrf
 C***********************************************************************
@@ -820,7 +820,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
         WRITE(*,*) 'Error. PZTRTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pztrtrs
 C***********************************************************************
@@ -831,7 +831,7 @@ C***********************************************************************
       INTEGER            DESCA( * )
       REAL               A( * )
         WRITE(*,*) 'Error. PSPOTRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pspotrf
 C***********************************************************************
@@ -841,7 +841,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), IPIV( * )
       REAL               A( * )
         WRITE(*,*) 'Error. PSGETRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psgetrf
 C***********************************************************************
@@ -853,7 +853,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       REAL               A( * ), B( * )
         WRITE(*,*) 'Error. PSTRTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pstrtrs
 C***********************************************************************
@@ -864,7 +864,7 @@ C***********************************************************************
       INTEGER            DESCA( * )
       DOUBLE PRECISION   A( * )
         WRITE(*,*) 'Error. PDPOTRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdpotrf
 C***********************************************************************
@@ -874,7 +874,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), IPIV( * )
       DOUBLE PRECISION   A( * )
         WRITE(*,*) 'Error. PDGETRF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdgetrf
 C***********************************************************************
@@ -886,7 +886,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       DOUBLE PRECISION   A( * ), B( * )
         WRITE(*,*) 'Error. PDTRTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdtrtrs
 C***********************************************************************
@@ -897,7 +897,7 @@ C***********************************************************************
      &                   MYROW, NPCOL, NPROW, RSRC
       INTEGER            DESC( * )
         WRITE(*,*) 'Error. INFOG2L should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE INFOG2L
 C***********************************************************************
@@ -905,7 +905,7 @@ C***********************************************************************
       INTEGER            INDXGLOB, IPROC, ISRCPROC, NB, NPROCS
         INDXG2P = 0
         WRITE(*,*) 'Error. INFOG2L should not be called.'
-        STOP
+C        STOP
       RETURN
       END FUNCTION INDXG2P
 C***********************************************************************
@@ -916,7 +916,7 @@ C***********************************************************************
       COMPLEX            X( * )
       INTEGER            DESCX( * )
         WRITE(*,*) 'Error. PCSCAL should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcscal
 C***********************************************************************
@@ -928,7 +928,7 @@ C     DOUBLE COMPLEX     X( * )
       COMPLEX(kind=kind(0.0D0)) :: ALPHA, X( * )
       INTEGER            DESCX( * )
         WRITE(*,*) 'Error. PZSCAL should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzscal
 C***********************************************************************
@@ -939,7 +939,7 @@ C***********************************************************************
       DOUBLE PRECISION   X( * )
       INTEGER            DESCX( * )
         WRITE(*,*) 'Error. PDSCAL should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdscal
 C***********************************************************************
@@ -950,7 +950,7 @@ C***********************************************************************
       REAL               X( * )
       INTEGER            DESCX( * )
         WRITE(*,*) 'Error. PSSCAL should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psscal
 C***********************************************************************
@@ -964,7 +964,7 @@ C     DOUBLE COMPLEX X(*), Y(*)
       DOUBLE PRECISION DOT
         DOT = 0.0d0
         WRITE(*,*) 'Error. PZDOT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzdot
 C***********************************************************************
@@ -977,7 +977,7 @@ C***********************************************************************
       REAL DOT
         DOT = 0.0e0
         WRITE(*,*) 'Error. PCDOT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcdot
 C***********************************************************************
@@ -989,7 +989,7 @@ C***********************************************************************
       DOUBLE PRECISION X(*), Y(*), DOT
         DOT = 0.0d0
         WRITE(*,*) 'Error. PDDOT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pddot
 C***********************************************************************
@@ -1001,7 +1001,7 @@ C***********************************************************************
       REAL X(*), Y(*), DOT
         DOT = 0.0e0
         WRITE(*,*) 'Error. PSDOT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psdot
 C***********************************************************************
@@ -1012,7 +1012,7 @@ C     DOUBLE COMPLEX A(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. ZGEBS2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE zgebs2d
 C***********************************************************************
@@ -1022,7 +1022,7 @@ C***********************************************************************
       COMPLEX A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. CGEBS2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE cgebs2d
 C***********************************************************************
@@ -1032,7 +1032,7 @@ C***********************************************************************
       REAL A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. SGEBS2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE sgebs2d
 C***********************************************************************
@@ -1042,7 +1042,7 @@ C***********************************************************************
       DOUBLE PRECISION A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. DGEBS2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE dgebs2d
 C***********************************************************************
@@ -1053,7 +1053,7 @@ C     DOUBLE COMPLEX A(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. ZGEBR2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE zgebr2d
 C***********************************************************************
@@ -1063,7 +1063,7 @@ C***********************************************************************
       COMPLEX A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. CGEBR2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE cgebr2d
 C***********************************************************************
@@ -1073,7 +1073,7 @@ C***********************************************************************
       REAL A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. SGEBR2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE sgebr2d
 C***********************************************************************
@@ -1083,7 +1083,7 @@ C***********************************************************************
       DOUBLE PRECISION A(*)
       CHARACTER SCOPE, TOP
         WRITE(*,*) 'Error. DGEBR2D should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE dgebr2d
 C***********************************************************************
@@ -1095,7 +1095,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       COMPLEX            A( * ), B( * )
         WRITE(*,*) 'Error. PCGETRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcgetrs
 C***********************************************************************
@@ -1108,7 +1108,7 @@ C***********************************************************************
 c     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
         WRITE(*,*) 'Error. PZGETRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzgetrs
 C***********************************************************************
@@ -1120,7 +1120,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       REAL               A( * ), B( * )
         WRITE(*,*) 'Error. PSGETRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psgetrs
 C***********************************************************************
@@ -1132,7 +1132,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       DOUBLE PRECISION   A( * ), B( * )
         WRITE(*,*) 'Error. PDGETRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdgetrs
 C***********************************************************************
@@ -1144,7 +1144,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), DESCB( * )
       COMPLEX         A( * ), B( * )
         WRITE(*,*) 'Error. PCPOTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcpotrs
 C***********************************************************************
@@ -1157,7 +1157,7 @@ C***********************************************************************
 c     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
         WRITE(*,*) 'Error. PZPOTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzpotrs
 C***********************************************************************
@@ -1169,7 +1169,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), DESCB( * )
       REAL            A( * ), B( * )
         WRITE(*,*) 'Error. PSPOTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pspotrs
 C***********************************************************************
@@ -1181,7 +1181,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), DESCB( * )
       DOUBLE          PRECISION A( * ), B( * )
         WRITE(*,*) 'Error. PDPOTRS should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdpotrs
 C***********************************************************************
@@ -1192,7 +1192,7 @@ C***********************************************************************
       REAL NORM2
       COMPLEX X( * )
         WRITE(*,*) 'Error. PCNRM2 should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pscnrm2
 C***********************************************************************
@@ -1204,7 +1204,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX X( * )
       COMPLEX(kind=kind(0.0D0)) :: X( * )
         WRITE(*,*) 'Error. PZNRM2 should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdznrm2
 C***********************************************************************
@@ -1214,7 +1214,7 @@ C***********************************************************************
       INTEGER DESCX(*)
       REAL    NORM2, X( * )
         WRITE(*,*) 'Error. PSNRM2 should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psnrm2
 C***********************************************************************
@@ -1224,7 +1224,7 @@ C***********************************************************************
       INTEGER DESCX(*)
       DOUBLE PRECISION NORM2, X( * )
         WRITE(*,*) 'Error. PDNRM2 should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdnrm2
 C***********************************************************************
@@ -1236,7 +1236,7 @@ C***********************************************************************
       COMPLEX      A( * ), WORK( * )
       PCLANGE = 0.0e0
         WRITE(*,*) 'Error. PCLANGE should not be called.'
-        STOP
+C        STOP
       RETURN
       END FUNCTION pclange
 C***********************************************************************
@@ -1248,7 +1248,7 @@ C***********************************************************************
       REAL         A( * ), WORK( * )
       PZLANGE = 0.0d0
         WRITE(*,*) 'Error. PZLANGE should not be called.'
-        STOP
+C        STOP
       RETURN
       END FUNCTION pzlange
 C***********************************************************************
@@ -1260,7 +1260,7 @@ C***********************************************************************
       REAL         A( * ), WORK( * )
       PSLANGE = 0.0e0
         WRITE(*,*) 'Error. PSLANGE should not be called.'
-        STOP
+C        STOP
       RETURN
       END FUNCTION pslange
 C***********************************************************************
@@ -1272,7 +1272,7 @@ C***********************************************************************
       DOUBLE       PRECISION A( * ), WORK( * )
       PDLANGE = 0.0d0
         WRITE(*,*) 'Error. PDLANGE should not be called.'
-        STOP
+C        STOP
       RETURN
       END FUNCTION pdlange
 C***********************************************************************
@@ -1286,7 +1286,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), IWORK( * )
       COMPLEX         A( * ), WORK( * )
         WRITE(*,*) 'Error. PCGECON should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcgecon
 C***********************************************************************
@@ -1301,7 +1301,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX  A( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A( * ), WORK( * )
         WRITE(*,*) 'Error. PZGECON should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzgecon
 C***********************************************************************
@@ -1315,7 +1315,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), IWORK( * )
       REAL            A( * ), WORK( * )
         WRITE(*,*) 'Error. PSGECON should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psgecon
 C***********************************************************************
@@ -1329,7 +1329,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), IWORK( * )
       DOUBLE          PRECISION A( * ), WORK( * )
         WRITE(*,*) 'Error. PDGECON should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdgecon
 C***********************************************************************
@@ -1340,7 +1340,7 @@ C***********************************************************************
       INTEGER    DESCA( * ), IPIV( * )
       COMPLEX    A( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PCGEQPF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcgeqpf
 C***********************************************************************
@@ -1352,7 +1352,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX A( * ), TAU( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PZGEQPF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzgeqpf
 C***********************************************************************
@@ -1363,7 +1363,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), IPIV( * )
       REAL       A( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PSGEQPF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psgeqpf
 C***********************************************************************
@@ -1374,7 +1374,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), IPIV( * )
       DOUBLE PRECISION A( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PDGEQPF should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdgeqpf
 C***********************************************************************
@@ -1385,7 +1385,7 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
       COMPLEX A(*),X(*),Y(*)
         WRITE(*,*) 'Error. PCAXPY should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcaxpy
 C***********************************************************************
@@ -1397,7 +1397,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX A(*),X(*),Y(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*),X(*),Y(*)
         WRITE(*,*) 'Error. PZAXPY should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzaxpy
 C***********************************************************************
@@ -1408,7 +1408,7 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
       REAL A(*),X(*),Y(*)
         WRITE(*,*) 'Error. PSAXPY should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psaxpy
 C***********************************************************************
@@ -1419,7 +1419,7 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
       DOUBLE PRECISION A(*),X(*),Y(*)
         WRITE(*,*) 'Error. PDAXPY should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdaxpy
 C***********************************************************************
@@ -1432,7 +1432,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       COMPLEX            A( * ), B( * )
         WRITE(*,*) 'Error. PCTRSM should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pctrsm 
 C***********************************************************************
@@ -1447,7 +1447,7 @@ C     DOUBLE COMPLEX     ALPHA
 C     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
         WRITE(*,*) 'Error. PZTRSM should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pztrsm 
 C***********************************************************************
@@ -1460,7 +1460,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       REAL               A( * ), B( * )
         WRITE(*,*) 'Error. PSTRSM should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pstrsm 
 C***********************************************************************
@@ -1473,7 +1473,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
       DOUBLE PRECISION   A( * ), B( * )
         WRITE(*,*) 'Error. PDTRSM should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdtrsm 
 C***********************************************************************
@@ -1486,7 +1486,7 @@ C***********************************************************************
       INTEGER   DESCA( * ), DESCC( * )
       COMPLEX   A(  *  ), C( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PCUNMQR should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pcunmqr
 C***********************************************************************
@@ -1500,7 +1500,7 @@ C***********************************************************************
 C     DOUBLE COMPLEX A(  *  ), C( * ), TAU( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A(  *  ), C( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PZUNMQR should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pzunmqr
 C***********************************************************************
@@ -1513,7 +1513,7 @@ C***********************************************************************
       INTEGER   DESCA( * ), DESCC( * )
       REAL      A(  *  ), C( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PSORMQR should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE psormqr
 C***********************************************************************
@@ -1526,7 +1526,7 @@ C***********************************************************************
       INTEGER         DESCA( * ), DESCC( * )
       DOUBLE PRECISION  A(  *  ), C( * ), TAU( * ), WORK( * )
         WRITE(*,*) 'Error. PDORMQR should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pdormqr
 C***********************************************************************
@@ -1536,7 +1536,7 @@ C***********************************************************************
       INTEGER            DESCAPOS0, IA, INFO, JA, MA, MAPOS0, NA, NAPOS0
       INTEGER            DESCA( * )
         WRITE(*,*) 'Error. CHK1MAT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE chk1mat
 C***********************************************************************
@@ -1550,7 +1550,7 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * ), EX( NEXTRA ),
      &                   EXPOS( NEXTRA )
         WRITE(*,*) 'Error. PCHK2MAT should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pchk2mat
 C***********************************************************************
@@ -1559,7 +1559,7 @@ C***********************************************************************
       INTEGER CONTXT, INFO
       CHARACTER SRNAME
         WRITE(*,*) 'Error. PXERBLA should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE pxerbla
 C***********************************************************************
@@ -1569,7 +1569,7 @@ C***********************************************************************
       INTEGER            ICSRC, ICTXT, IRSRC, LLD, M, MB, N, NB
       INTEGER            DESC( * )
         WRITE(*,*) 'Error. DESCSET should not be called.'
-        STOP
+C        STOP
       RETURN
       END SUBROUTINE descset
 
