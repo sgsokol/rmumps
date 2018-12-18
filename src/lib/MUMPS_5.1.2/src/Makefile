@@ -177,63 +177,63 @@ $(libdir)/lib$(ARITH)mumps$(PLAT)$(LIBEXT):    $(OBJS_MOD) $(OBJS_OTHER)
 
 # Dependencies between modules:
 $(ARITH)mumps_load.o:		$(ARITH)mumps_comm_buffer.o \
-				$(ARITH)mumps_struc_def.o \
-				fac_future_niv2_mod.o
+                                $(ARITH)mumps_struc_def.o \
+                                fac_future_niv2_mod.o
 $(ARITH)mumps_ooc.o: 		$(ARITH)mumps_struc_def.o \
-				$(ARITH)mumps_ooc_buffer.o \
-				mumps_ooc_common.o
+                                $(ARITH)mumps_ooc_buffer.o \
+                                mumps_ooc_common.o
 $(ARITH)mumps_ooc_buffer.o: 	mumps_ooc_common.o
 $(ARITH)ana_aux_par.o:          $(ARITH)mumps_struc_def.o \
-				mumps_memory_mod.o \
-				ana_orderings_wrappers_m.o
+                                mumps_memory_mod.o \
+                                ana_orderings_wrappers_m.o
 $(ARITH)mumps_comm_buffer.o:	mumps_comm_ibcast.o \
                               $(ARITH)mumps_lr_data_m.o
 $(ARITH)fac_asm_master_m.o:	omp_tps_common_m.o \
                                 fac_ibct_data_m.o \
-				$(ARITH)omp_tps_m.o \
-				fac_asm_build_sort_index_m.o \
-				$(ARITH)mumps_comm_buffer.o \
-				$(ARITH)mumps_load.o
+                                $(ARITH)omp_tps_m.o \
+                                fac_asm_build_sort_index_m.o \
+                                $(ARITH)mumps_comm_buffer.o \
+                                $(ARITH)mumps_load.o
 $(ARITH)fac_lastrtnelind.o:     $(ARITH)mumps_load.o
 $(ARITH)fac_asm_master_ELT_m.o:	omp_tps_common_m.o \
                                 fac_ibct_data_m.o \
-				$(ARITH)omp_tps_m.o \
-				fac_asm_build_sort_index_ELT_m.o \
-				$(ARITH)mumps_comm_buffer.o \
-				$(ARITH)mumps_load.o
+                                $(ARITH)omp_tps_m.o \
+                                fac_asm_build_sort_index_ELT_m.o \
+                                $(ARITH)mumps_comm_buffer.o \
+                                $(ARITH)mumps_load.o
 $(ARITH)fac_omp_m.o:		$(ARITH)fac_asm_master_m.o\
-				$(ARITH)fac_asm_master_ELT_m.o\
-				$(ARITH)fac_front_LU_type1.o\
-				$(ARITH)fac_front_LDLT_type1.o\
-				$(ARITH)mumps_load.o\
-				$(ARITH)omp_tps_m.o\
-				omp_tps_common_m.o\
-				mumps_l0_omp_m.o
+                                $(ARITH)fac_asm_master_ELT_m.o\
+                                $(ARITH)fac_front_LU_type1.o\
+                                $(ARITH)fac_front_LDLT_type1.o\
+                                $(ARITH)mumps_load.o\
+                                $(ARITH)omp_tps_m.o\
+                                omp_tps_common_m.o\
+                                mumps_l0_omp_m.o
 $(ARITH)lr_core.o:              $(ARITH)lr_type.o\
-				$(ARITH)mumps_lr_data_m.o\
-				$(ARITH)lr_stats.o lr_common.o
+                                $(ARITH)mumps_lr_data_m.o\
+                                $(ARITH)lr_stats.o lr_common.o
 $(ARITH)lr_stats.o:             $(ARITH)lr_type.o
 $(ARITH)ana_lr.o:		$(ARITH)lr_core.o lr_common.o\
                                 $(ARITH)lr_stats.o\
-				ana_orderings_wrappers_m.o
+                                ana_orderings_wrappers_m.o
 $(ARITH)mumps_lr_data_m.o:	$(ARITH)lr_type.o\
                                 $(ARITH)mumps_struc_def.o
 $(ARITH)fac_lr.o:		$(ARITH)lr_core.o\
-				$(ARITH)lr_type.o\
-				$(ARITH)lr_stats.o\
+                                $(ARITH)lr_type.o\
+                                $(ARITH)lr_stats.o\
                                 $(ARITH)ana_lr.o
 $(ARITH)fac_par_m.o:            $(ARITH)mumps_load.o\
-				$(ARITH)mumps_ooc.o\
-				$(ARITH)fac_lr.o\
-				$(ARITH)fac_asm_master_m.o\
-				$(ARITH)fac_asm_master_ELT_m.o\
+                                $(ARITH)mumps_ooc.o\
+                                $(ARITH)fac_lr.o\
+                                $(ARITH)fac_asm_master_m.o\
+                                $(ARITH)fac_asm_master_ELT_m.o\
                                 $(ARITH)omp_tps_m.o\
                                 $(ARITH)fac_front_LU_type1.o\
                                 $(ARITH)fac_front_LU_type2.o\
                                 $(ARITH)fac_front_LDLT_type1.o\
                                 $(ARITH)fac_front_LDLT_type2.o\
                                 omp_tps_common_m.o\
-				mumps_l0_omp_m.o
+                                mumps_l0_omp_m.o
 
 $(ARITH)fac_front_aux.o     : $(ARITH)mumps_comm_buffer.o\
                                  $(ARITH)mumps_load.o\
@@ -248,16 +248,16 @@ $(ARITH)fac_front_type2_aux.o : $(ARITH)mumps_ooc.o\
 $(ARITH)fac_front_LU_type1.o   : $(ARITH)fac_front_aux.o\
                                  $(ARITH)mumps_ooc.o\
                                  $(ARITH)lr_core.o\
-				 $(ARITH)lr_type.o\
-				 $(ARITH)lr_stats.o\
+                                 $(ARITH)lr_type.o\
+                                 $(ARITH)lr_stats.o\
                                  $(ARITH)ana_lr.o\
                                  $(ARITH)fac_lr.o
 $(ARITH)fac_front_LU_type2.o   : $(ARITH)fac_front_aux.o\
                                  $(ARITH)fac_front_type2_aux.o\
                                  $(ARITH)mumps_ooc.o\
                                  $(ARITH)lr_core.o\
-				 $(ARITH)lr_type.o\
-				 $(ARITH)lr_stats.o\
+                                 $(ARITH)lr_type.o\
+                                 $(ARITH)lr_stats.o\
                                  $(ARITH)ana_lr.o\
                                  $(ARITH)fac_lr.o\
                                  fac_ibct_data_m.o
@@ -288,9 +288,9 @@ fac_asm_build_sort_index_ELT_m.o:omp_tps_common_m.o
 $(OBJS_COMMON_OTHER):$(OBJS_COMMON_MOD)
 $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 
-.SUFFIXES: .c .F .o
-.F.o:
-	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F $(OUTF)$*.o
+.SUFFIXES: .c .F95 .o
+.F95.o:
+	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F95 $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
 

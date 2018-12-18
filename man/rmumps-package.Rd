@@ -3,12 +3,12 @@
 \alias{rmumps}
 \docType{package}
 \title{
-  Rcpp port of MUMPS library for LU factorization of sparse matrices
+  Rcpp port of MUMPS library for LU or LDL^t factorization of sparse matrices
 }
 \description{
   Creates a MUMPS compatible object storing a sparse matrix.
   Gives a possibility to do separately symbolic analysis,
-  LU factorization and system solving.
+  factorization and system solving.
 }
 \details{
 
@@ -24,7 +24,7 @@
 \references{
   MUMPS official site http://mumps.enseeiht.fr
 
-  Sokol S (2018). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.1.2-4, <URL: http://CRAN.R-project.org/package=rmumps>.
+  Sokol S (2018). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.1.2-5, <URL: http://CRAN.R-project.org/package=rmumps>.
 }
 \examples{
   \dontrun{

@@ -1,3 +1,10 @@
+Version 5.1.2-5
+===============
+
+* 2018-12-18
+ - renamed MUMPS *.F files to *.F95 to be comnformant with R conventions for file extensions
+ - removed STOP call in mpi.f
+
 Version 5.1.2-4
 ===============
 
