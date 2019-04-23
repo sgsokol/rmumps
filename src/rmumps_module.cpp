@@ -38,6 +38,16 @@ bool Rmumps::get_copy() {
 void Rmumps::set_copy(bool copy_) {
   copy=copy_;
 }
+void Rmumps::set_permutation(int perm) {
+  if (perm < RMUMPS_PERM_AMD || perm > RMUMPS_PERM_AUTO || perm == 1)
+    stop("Rmumps::set_permutation: invalid perm value %d", perm);
+  if (perm != param.ICNTL(7))
+    jobs.erase(1); // invalidate previous factorizations both symbolic and numeric
+  param.ICNTL(7)=perm;
+}
+int Rmumps::get_permutation() {
+  return param.ICNTL(7);
+}
 int Rmumps::get_ncore() {
   return ncore;
 }
@@ -77,7 +87,7 @@ void Rmumps::do_job(int job) {
     }
     break;
   case 3:
-    if (jobs.count(1) != 1) {
+    if (jobs.count(2) != 1) {
        do_job(2);
     }
     break;
@@ -95,14 +105,12 @@ void Rmumps::do_job(int job) {
 //#endif
   if (param.info[0] != 0) {
     //clean();
-    stop("rmumps: info[1]=%d, info[2]=%d", param.info[0], param.info[1]);
+    stop("rmumps: job=%d, info[1]=%d, info[2]=%d", job, param.info[0], param.info[1]);
   }
   /* combined jobs are split for the record */
   switch (job) {
   case 1:
   case 2:
-    jobs.insert({job});
-    break;
   case 3:
     jobs.insert({job});
     break;
@@ -241,7 +249,7 @@ void Rmumps::solveptr(double* b, int lrhs, int nrhs) {
   param.nrhs=nrhs;
   param.lrhs=lrhs;
   param.ICNTL(20)=0; // rhs is dense
-  do_job(6);
+  do_job(3);
 }
 NumericMatrix Rmumps::inv() {
   MUMPS_INT n=param.n;
@@ -382,17 +390,21 @@ NumericMatrix Rmumps::solvestm(List mat) {
   do_job(6);
   return(mrhs);
 }
-void Rmumps::set_rhs(NumericVector b) {
+void Rmumps::set_rhs_ptr(double *b) {
   // one dense rhs
   param.ICNTL(20)=0; // rhs is dense;
+  param.rhs=b;
+  param.nrhs=1;
+  param.lrhs=0;
+}
+
+void Rmumps::set_rhs(NumericVector b) {
   if (copy) {
     rhs=clone(b);
   } else {
     rhs=b;
   }
-  param.rhs=&*rhs.begin();
-  param.nrhs=1;
-  param.lrhs=0;
+  set_rhs_ptr(&*rhs.begin());
 }
 void Rmumps::set_mrhs(NumericMatrix b) {
   // many dense rhs
@@ -406,6 +418,13 @@ void Rmumps::set_mrhs(NumericMatrix b) {
   param.nrhs=mrhs.ncol();
   param.lrhs=mrhs.nrow();
 }
+void Rmumps::set_mat_ptr(double *x) {
+  // for the same matrix pattern, set new entry values
+  param.a=x;
+  // tell that previous numeric factorization is no more valid
+  jobs.erase(2);
+}
+
 void Rmumps::set_mat_data(NumericVector x) {
   // for the same matrix pattern, set new entry values
   if (copy) {
@@ -413,9 +432,7 @@ void Rmumps::set_mat_data(NumericVector x) {
   } else {
     anz=x;
   }
-  param.a=&*anz.begin();
-  // tell that previous numeric factorization is no more valid
-  jobs.erase(2);
+  set_mat_ptr(&*anz.begin());
 }
 NumericVector Rmumps::get_rhs() {
   return rhs;
@@ -525,9 +542,9 @@ List Rmumps::triplet() {
   // representing the stored matrix. Objects i, j, v are cloned so the
   // returned object can be manipulated without risk for the original matrix
   List tr=List::create(
-    _["i"]=IntegerVector(irn.begin(), irn.end()),
-    _["j"]=IntegerVector(jcn.begin(), jcn.end()),
-    _["v"]=NumericVector(anz.begin(), anz.end()),
+    _["i"]=IntegerVector(param.irn, param.irn+param.nz),
+    _["j"]=IntegerVector(param.jcn, param.jcn+param.nz),
+    _["v"]=NumericVector(param.a, param.a+param.nz),
     _["nrow"]=IntegerVector(1, param.n),
     _["ncol"]=IntegerVector(1, param.n),
     _["dimnames"]=R_NilValue
@@ -562,6 +579,16 @@ Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int s
 }
 Rmumps::Rmumps(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym, bool copy_) {
   new_ijv(i0, j0, x, n, sym, copy_);
+}
+Rmumps::Rmumps(MUMPS_INT *i, MUMPS_INT *j, double *a, MUMPS_INT n, MUMPS_INT nz, MUMPS_INT sym) {
+  irn.resize(nz);
+  jcn.resize(nz);
+  copy=false;
+  std::copy(i, i+nz, irn.begin());
+  std::copy(j, j+nz, jcn.begin());
+  tri_init(i, j, a, sym);
+  param.n=n;
+  param.nz=nz;
 }
 /* end of constructors */
 
@@ -660,6 +687,7 @@ void Rmumps::new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n_
   param.nz=nz;
 }
 
+// real initializer
 void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) {
   this->sym=sym;
   this->ncore=1;
@@ -678,7 +706,7 @@ void Rmumps::tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym) 
   param.ICNTL(1)=-1; param.ICNTL(2)=-1; param.ICNTL(3)=-1; param.ICNTL(4)=0;
   param.ICNTL(5)=0; param.ICNTL(18)=0; // matrix is centralized and assembled
   param.ICNTL(6)=0; // no column permutation
-  param.ICNTL(7)=7; // automatic choice for symmetric permutation
+  param.ICNTL(7)=RMUMPS_PERM_AUTO; // automatic choice for symmetric permutation
   param.ICNTL(8)=77; // automatic choice for scaling
   param.ICNTL(9)=1; // solve a x = b (not a^t x = b)
   param.ICNTL(10)=0; // no iterative refinement
@@ -728,6 +756,7 @@ RCPP_MODULE(mod_Rmumps){
   .method("solvet", &Rmumps::solvet, "Solve transpose of sparse system with one or many, sparse or dense rhs")
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Update matrix entries keeping the non zero pattern untouched")
+  .method("set_permutation", &Rmumps::set_permutation, "Set permutation method for matrix permutation")
   .method("set_icntl", &Rmumps::set_icntl, "Set ICNTL parameter vector")
   .method("get_icntl", &Rmumps::get_icntl, "Get ICNTL parameter vector")
   .method("set_cntl", &Rmumps::set_cntl, "Set CNTL parameter vector")

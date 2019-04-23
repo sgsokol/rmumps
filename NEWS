@@ -1,3 +1,12 @@
+Version 5.1.2-6
+===============
+
+* 2019-04-23
+ - added C++ methods set_mat_ptr(), set_rhs_ptr()
+ - added R and C++ methods set_permutation(), get_permutation()
+ - defined RMUMPS_PERM_<smth> constants for different permutations
+ - added C++ constructor from i,j,v pointers
+
 Version 5.1.2-5
 ===============
 

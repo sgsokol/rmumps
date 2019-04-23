@@ -56,9 +56,43 @@ if (getRversion() >= "3.4.0") {
   asl=as.simple_triplet_matrix(a)
   ai=Rmumps$new(asl)
   xi=solve(ai, b)
-  test_that("testing a from slam::simple_triplet_matrix", {
+  test_that("testing matrix from slam::simple_triplet_matrix", {
     expect_equal(xi, 1:n)
   })
+  # test pointers
+  code='
+// [[Rcpp::depends(rmumps)]]
+
+#include <Rcpp.h>
+#include <rmumps.h>
+
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+NumericVector solve_ptr(List a, NumericVector b) {
+  IntegerVector ir=a["i"], jc=a["j"];
+  NumericVector v=a["v"];
+  int n=a["nrow"], nz=v.size();
+  Rmumps rmu((int *) ir.begin(), (int *) jc.begin(), (double *) v.begin(), n, nz, 0);
+  rmu.set_permutation(perm_scotch);
+  rmu.solveptr((double *) b.begin(), n, 1);
+  return(b);
+}
+'
+  rso_path=file.path(path.package("rmumps"), "libs", "rmumps.so")
+  if (!file.exists(rso_path))
+    rso_path=file.path(path.package("rmumps"), "src", "rmumps.so") # devtool context
+#cat("rso='", rso_path, "'\n", sep="")
+  Sys.setenv(PKG_LIBS=rso_path)
+  cppFunction(code=code, depends="rmumps", verbose=TRUE)
+  sourceCpp(code=code, verbose=TRUE)
+  xe=as.double(1:n)
+  b0=slam::tcrossprod_simple_triplet_matrix(asl, t(xe))
+  x=solve_ptr(asl, b0)
+  test_that("testing solveptr() within Rcpp code", {
+    expect_lt(diff(range(x-xe)), 1e-14)
+  })
+
   rm(asl)
 
   # test sparse rhs as slam::simple_triplet_matrix
@@ -77,7 +111,9 @@ a=as(diag(n), "dgCMatrix")
 a@p[2L]=0L
 am=Rmumps$new(a)
 test_that("singular matrix", {
-  expect_error(solve(am, b), "*rmumps: info\\[1\\]=-10*")
+  expect_error(solve(am, b), "rmumps: job=6, info\\[1\\]=-10*")
 })
+
 rm(a, asy, am)
 gc()
+

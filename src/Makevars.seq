@@ -10,4 +10,4 @@ $(SHLIB): lib/libdmumps.a
 
 lib/libdmumps.a:
 	$(MAKE) -C lib \
-	  CC="$(CC)" FC="$(F77)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS)"  PKG_FCFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"
+	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS)"  PKG_FCFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"

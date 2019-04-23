@@ -1,6 +1,14 @@
 #ifndef __rmumps_h__
 #define __rmumps_h__
 
+#define RMUMPS_PERM_AMD 0
+#define RMUMPS_PERM_AMF 2
+#define RMUMPS_PERM_SCOTCH 3
+#define RMUMPS_PERM_PORD 4
+#define RMUMPS_PERM_METIS 5
+#define RMUMPS_PERM_QAMD 6
+#define RMUMPS_PERM_AUTO 7
+
 #include <dmumps_c.h>
 #include <Rcpp.h>
 using namespace Rcpp;
@@ -26,11 +34,14 @@ public:
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, int sym);
   Rmumps(IntegerVector i, IntegerVector j, NumericVector x, int n, int sym, bool copy_);
+  Rmumps(MUMPS_INT *i, MUMPS_INT *j, double *a, MUMPS_INT n, MUMPS_INT nz, MUMPS_INT sym);
   ~Rmumps();
   void clean();
   //Rmumps shallow_copy(Rmumps a);
   bool get_copy();
   void set_copy(bool copy_);
+  int get_permutation();
+  void set_permutation(int perm);
   int get_ncore();
   void set_ncore(int ncore_);
   int get_sym();
@@ -46,8 +57,10 @@ public:
   NumericMatrix inv();
   NumericMatrix solves(S4 mat);
   NumericMatrix solvestm(List mat);
+  void set_rhs_ptr(double *b);
   void set_rhs(NumericVector b);
   void set_mrhs(NumericMatrix b);
+  void set_mat_ptr(double *x);
   void set_mat_data(NumericVector x);
   void set_icntl(IntegerVector iv, IntegerVector ii);
   void set_cntl(NumericVector v, IntegerVector iv);
