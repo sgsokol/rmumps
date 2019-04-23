@@ -6,6 +6,8 @@ Version 5.1.2-6
  - added R and C++ methods set_permutation(), get_permutation()
  - defined RMUMPS_PERM_<smth> constants for different permutations
  - added C++ constructor from i,j,v pointers
+ - added tests for C++ code;
+ - changed F77 for FC in Makevars;
 
 Version 5.1.2-5
 ===============

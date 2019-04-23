@@ -74,7 +74,7 @@ NumericVector solve_ptr(List a, NumericVector b) {
   NumericVector v=a["v"];
   int n=a["nrow"], nz=v.size();
   Rmumps rmu((int *) ir.begin(), (int *) jc.begin(), (double *) v.begin(), n, nz, 0);
-  rmu.set_permutation(perm_scotch);
+  rmu.set_permutation(RMUMPS_PERM_SCOTCH);
   rmu.solveptr((double *) b.begin(), n, 1);
   return(b);
 }
