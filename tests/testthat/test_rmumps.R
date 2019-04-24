@@ -79,11 +79,13 @@ NumericVector solve_ptr(List a, NumericVector b) {
   return(b);
 }
 '
+#cat("ls -R rmumps_path", list.files(path.package("rmumps"), recursive=TRUE), "", sep="\n")
   rso=paste0("rmumps", .Platform$dynlib.ext)
-  rso_path=file.path(path.package("rmumps"), "libs", rso)
+  rso_path=file.path(path.package("rmumps"), "libs", .Platform$r_arch, rso)
+  cat("rso_path=", rso_path)
   if (!file.exists(rso_path))
     rso_path=file.path(path.package("rmumps"), "src", rso) # devtool context
-#cat("rso='", rso_path, "'\n", sep="")
+#cat("rso_path='", rso_path, "'\n", sep="")
   Sys.setenv(PKG_LIBS=rso_path)
   cppFunction(code=code, depends="rmumps", verbose=TRUE)
   sourceCpp(code=code, verbose=TRUE)
