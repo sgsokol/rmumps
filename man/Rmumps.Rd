@@ -127,10 +127,8 @@ Rcpp Exported Class Wrapping MUMPS library
     \item{\code{print()}:}{Print summary information on the matrix}
     \item{\code{show()}:}{Print summary information on the matrix}
     \item{\code{set_keep()}:}{Set KEEP array elements (undocumented feature of MUMPS)}
-    \item{\code{set_permutation(perm)}:}{Set permutation type which can impact storage and factorization performances. Parameter perm can take one of the following values RMUMPS_PERM_AMD, RMUMPS_PERM_AMF, RMUMPS_PERM_SCOTCH, RMUMPS_PERM_PORD, RMUMPS_PERM_METIS, RMUMPS_PERM_QAMD. This method should be called once and before symbolic analysis of the matrix. If it is called afterward, a new symbolic and numeric factorization will be performed when one of other methods (e.g. solve()) will request them. In other words, previous symbolic and numeric factorizations are canceled by this method.}
+    \item{\code{set_permutation(perm)}:}{Set permutation type which can impact storage and factorization performances. Parameter perm can take one of the following predefined integer values RMUMPS_PERM_AMD, RMUMPS_PERM_AMF, RMUMPS_PERM_SCOTCH, RMUMPS_PERM_PORD, RMUMPS_PERM_METIS, RMUMPS_PERM_QAMD. This method should be called once and before symbolic analysis of the matrix. If it is called afterward, a new symbolic and numeric factorization will be performed when one of other methods (e.g. solve()) will request them. In other words, previous symbolic and numeric factorizations are canceled by this method.}
     \item{\code{get_permutation()}:}{get permutation type currently set in the object}
-    #define RMUMPS_PERM_AUTO 7
-}
     \item{\code{mumps_version()}:}{Return a string with MUMPS version used in rmumps}
   }
 }

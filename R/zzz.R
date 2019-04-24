@@ -12,8 +12,8 @@
 #loadModule("NumEx", TRUE)
 #loadModule("yada", TRUE)
 #loadModule("stdVector", TRUE)
+loadModule("mod_Rmumps", TRUE)
 .onLoad <- function(libname, pkgname){
   for (cc in cnsts)
      assign(cc, get_cnst(cc), envir = parent.env(environment()))
 }
-loadModule("mod_Rmumps", TRUE)

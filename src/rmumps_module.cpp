@@ -42,7 +42,7 @@ void Rmumps::set_permutation(int perm) {
   if (perm < RMUMPS_PERM_AMD || perm > RMUMPS_PERM_AUTO || perm == 1)
     stop("Rmumps::set_permutation: invalid perm value %d", perm);
   if (perm != param.ICNTL(7))
-    jobs.erase(1); // invalidate previous factorizations both symbolic and numeric
+    jobs.erase(jobs.begin(), jobs.end()); // invalidate previous factorizations both symbolic and numeric
   param.ICNTL(7)=perm;
 }
 int Rmumps::get_permutation() {
@@ -757,6 +757,7 @@ RCPP_MODULE(mod_Rmumps){
   .method("inv", &Rmumps::inv, "Calculate the inverse of a sparse matrix")
   .method("set_mat_data", &Rmumps::set_mat_data, "Update matrix entries keeping the non zero pattern untouched")
   .method("set_permutation", &Rmumps::set_permutation, "Set permutation method for matrix permutation")
+  .method("get_permutation", &Rmumps::get_permutation, "Get permutation method for matrix permutation")
   .method("set_icntl", &Rmumps::set_icntl, "Set ICNTL parameter vector")
   .method("get_icntl", &Rmumps::get_icntl, "Get ICNTL parameter vector")
   .method("set_cntl", &Rmumps::set_cntl, "Set CNTL parameter vector")
@@ -774,22 +775,3 @@ RCPP_MODULE(mod_Rmumps){
   ;
 }
 
-#define cnst_pair(c) {#c, c}
-
-// [[Rcpp::export]]
-int get_cnst(std::string s) {
-  static std::map<std::string, int> dict={
-    cnst_pair(RMUMPS_PERM_AMD),
-    cnst_pair(RMUMPS_PERM_AMF),
-    cnst_pair(RMUMPS_PERM_SCOTCH),
-    cnst_pair(RMUMPS_PERM_PORD),
-    cnst_pair(RMUMPS_PERM_METIS),
-    cnst_pair(RMUMPS_PERM_QAMD),
-    cnst_pair(RMUMPS_PERM_AUTO),
-  };
-  if (dict.count(s))
-    return(dict[s]);
-  else
-    stop("get_cnst: constant '%s' is not in dictionary", s);
-  return(NA_INTEGER);
-}
