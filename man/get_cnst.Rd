@@ -9,6 +9,7 @@
 \alias{RMUMPS_PERM_METIS}
 \alias{RMUMPS_PERM_QAMD}
 \alias{RMUMPS_PERM_AUTO}
+\alias{cnsts}
 \title{get value of a c++ macro constant}
 \usage{
 get_cnst(s)
