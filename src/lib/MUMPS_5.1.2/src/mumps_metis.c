@@ -89,22 +89,22 @@ MUMPS_METIS_KWAY(MUMPS_INT *n,     MUMPS_INT *iptr,
                       options, &edgecut,
                       part);
 #else /* METIS >= 5 */
-  int ierr;
+  /*int ierr;*/
 #  if (IDXTYPEWIDTH == 32)
   MUMPS_INT ncon, edgecut, options[40];
-  ierr=METIS_SetDefaultOptions(options);
+  /*ierr=*/METIS_SetDefaultOptions(options);
   options[0]  = 0;
   /* Use 1-based fortran numbering */
   options[17] = 1;
   ncon        = 1;
-  ierr = METIS_PartGraphKway(n, &ncon, iptr, jcn,
+  /*ierr =*/ METIS_PartGraphKway(n, &ncon, iptr, jcn,
                              NULL, NULL, NULL,
                              k, NULL, NULL, options,
                              &edgecut, part);
 #  else
   /* SHOULD NEVER BE CALLED */
   printf("** Error: METIS version >= 4, IDXTYPE WIDTH !=32, but MUMPS_METIS_KWAY was called\n");
-  ierr=1;
+  /*ierr=1;*/
 #  endif
 #endif
   return;

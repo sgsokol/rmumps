@@ -85,7 +85,7 @@ const char * const          dataptr)              /* Tag value        */
   char                          habmattype[3];    /* Matrix type                     */
   Gnum                          habcrdnbr;        /* Total number of data lines      */
   Gnum                          habrhsnbr;        /* Number of right hand side lines */
-  Gnum                          habrownbr;        /* Number of rows                  */
+  /*Gnum                          habrownbr;*/        /* Number of rows                  */
   GraphGeomHaboLine             habcolfmt;        /* Format of column line           */
   int                           habvalnum;        /* Number of value in line         */
   Gnum                          habcolnbr;        /* Number of columns               */
@@ -136,7 +136,7 @@ const char * const          dataptr)              /* Tag value        */
     habmatbuf[2][42] = '\0';
     habcolnbr = (Gnum) atol (&habmatbuf[2][29]);
     habmatbuf[2][28] = '\0';
-    habrownbr = (Gnum) atol (&habmatbuf[2][14]);
+    /*habrownbr = (Gnum) atol (&habmatbuf[2][14]);*/
 
     habmatbuf[3][32] = '\0';
     if (graphGeomLoadHaboFormat (&habnzrfmt, &habmatbuf[3][16]) != 0) {

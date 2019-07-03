@@ -384,9 +384,9 @@ const BgraphBipartBdParam * const paraptr)        /*+ Method parameters +*/
   bndgrafdat.s.edgenbr = bndedgetmp - orggrafptr->s.baseval;
   bndgrafdat.s.verttax[bndvertnnd + 2] = bndedgetmp; /* Mark end of edge array with anchor vertices  */
   for (bndvertnum = bndvlvlnum; bndvertnum < bndvertnnd; bndvertnum ++) { /* Fill anchor edge arrays */
-    Gnum                orgvertnum;
+    /*Gnum                orgvertnum;*/
 
-    orgvertnum = bndvnumtax[bndvertnum];
+    /*orgvertnum = bndvnumtax[bndvertnum];*/
     if (bndgrafdat.s.verttax[bndvertnum + 1] > bndgrafdat.s.verttax[bndvertnum]) { /* If vertex is not isolated */
       Gnum                bndedgelst;             /* Number of last edge */
       Gnum                bndvertend;

@@ -173,9 +173,9 @@ const VgraphSeparateDfParam * const paraptr)      /*+ Method parameters +*/
     for (movenum = 0; movenum < paraptr->movenbr; movenum ++) { /* For all moves */
       Gnum                vertnum;
       Gnum                vertnnd;
-      float               vancval;                /* Value to load vertex with if anchor */
+      /*float               vancval;*/                /* Value to load vertex with if anchor */
 
-      vancval = 0.0F;                             /* At first vertices are not anchors */
+      /*vancval = 0.0F;*/                             /* At first vertices are not anchors */
       vertnum = grafptr->s.baseval;
       vertnnd = grafptr->s.vertnnd - 2;
       while (1) {
@@ -217,7 +217,7 @@ const VgraphSeparateDfParam * const paraptr)      /*+ Method parameters +*/
           break;
 
         vertnnd ++;                               /* Prepare to go only for one more run        */
-        vancval = vanctab[vertnum - grafptr->s.vertnnd + 2]; /* Load variable with anchor value */
+        /*vancval = vanctab[vertnum - grafptr->s.vertnnd + 2];*/ /* Load variable with anchor value */
       }
 
       difttax = difntax;                          /* Swap old and new diffusion arrays */

@@ -240,15 +240,18 @@ Anum * restrict const                   treeptr,
 const ArchDom * restrict const          domnptr)  /*+ Pointer to subdomain to consider for this node +*/
 {
   Anum                treenum;
+#ifdef SCOTCH_DEBUG_KGRAPH2
   int                 o;
+#endif /* SCOTCH_DEBUG_KGRAPH2 */
 
   if (archDomSize (archptr, domnptr) > 1) {       /* If not variable-sized architecture and can bipartition */
     ArchDom             domntab[2];               /* Temporary area to store subdomains                     */
     Anum                sonstab[2];
     int                 i, j;
 
-    o = archDomBipart (archptr, domnptr, &domntab[0], &domntab[1]);
+    archDomBipart (archptr, domnptr, &domntab[0], &domntab[1]);
 #ifdef SCOTCH_DEBUG_KGRAPH2
+    o = archDomBipart (archptr, domnptr, &domntab[0], &domntab[1]);
     if (o != 0) {
       errorPrint ("kgraphMapExTree: internal error");
       return     (-1);

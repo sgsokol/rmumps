@@ -117,7 +117,9 @@ const HgraphOrderCpParam * const  paraptr)
   int * restrict                finehasptab;      /* Pre-hashing table                                                     */
   Gnum                          finehaspmsk;      /* Mask for access to pre-hashing table                                  */
   Gnum * restrict               finehsumtax;      /* Array of hash values for each original vertex                         */
+#ifdef SCOTCH_DEBUG_ORDER2
   Gnum                          finevertnbr;      /* Number of fine vertices in compressed elimination tree                */
+#endif
   Gnum                          finevertnum;      /* Number of current original vertex                                     */
   Gnum                          finevsizsum;      /* Sum of compressed vertex sizes to build fine inverse permutation      */
   void *                        dataptr;          /* Flag of memory allocation success                                     */
@@ -446,9 +448,11 @@ loop_failed: ;
 
   *cblkptr = coarordedat.cblktre;                 /* Link sub-tree to ordering         */
   coarordedat.cblktre.cblktab = NULL;             /* Unlink sub-tree from sub-ordering */
-  finevertnbr = hgraphOrderCpTree (coarordedat.peritab, /* Expand sub-tree             */
+  hgraphOrderCpTree (coarordedat.peritab, /* Expand sub-tree             */
                                    coarvsiztax, cblkptr, 0);
 #ifdef SCOTCH_DEBUG_ORDER2
+  finevertnbr = hgraphOrderCpTree (coarordedat.peritab, /* Expand sub-tree             */
+                                   coarvsiztax, cblkptr, 0);
   if (finevertnbr != finegrafptr->vnohnbr) {
     errorPrint ("hgraphOrderCp: internal error (4)");
     return     (1);

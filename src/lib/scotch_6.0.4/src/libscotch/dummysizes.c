@@ -249,9 +249,9 @@ char *                      argv[])
 
       while ((charptr = strstr (chartab, substab[subsnum][0])) != NULL) { /* As long as substitution can be performed */
         int                 charnbr;
-        int                 charnum;
+        /*int                 charnum;*/
 
-        charnum = charptr - chartab;              /* Position where token found */
+        /*charnum = charptr - chartab;*/              /* Position where token found */
         charnbr = strlen (substab[subsnum][0]);   /* Length of token            */
 
         strcpy (chartmp, charptr + charnbr);      /* Save end of line */

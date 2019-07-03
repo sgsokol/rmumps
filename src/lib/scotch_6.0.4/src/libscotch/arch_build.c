@@ -123,7 +123,7 @@ const Graph * const         tgtgrafptr,           /*+ Source graph modeling the 
 const VertList * const      tgtlistptr,           /*+ Subset of source graph vertices        +*/
 const Strat * const         mapstrat)             /*+ Bipartitioning strategy                +*/
 {
-  Gnum * restrict               mapparttax;       /* Based access to mapping part array             */
+  /*Gnum * restrict               mapparttax;*/       /* Based access to mapping part array             */
   Arch                          archdat;          /* Variable-sized architecture for bipartitioning */
   ArchDom                       domsub0;          /* Temporary space for subdomain 0                */
   Gnum                          termdomnbr;       /* Number of terminal domains                     */
@@ -263,7 +263,7 @@ const Strat * const         mapstrat)             /*+ Bipartitioning strategy   
     jobtab[0].grafdat.edlotax = invedlotax;       /* Replace potentially induced edge array with inversed one */
   }                                               /* Edge array will be freed along with jobtab group leader  */
 
-  mapparttax = mappdat.parttax;
+  /*mapparttax = mappdat.parttax;*/
 
   actgrafdat.veextax = NULL;                      /* No external gain array      */
   actgrafdat.parttax = actparttax;                /* Set global auxiliary arrays */

@@ -594,10 +594,10 @@ const ArchDeco * const      archptr,
 const ArchDecoDom * const   dom0ptr,
 const ArchDecoDom * const   dom1ptr)
 {
-  Anum          dom0num;
+  /*Anum          dom0num;*/
   Anum          dom1num;
 
-  for (dom1num = dom1ptr->num, dom0num = dom0ptr->num; dom1num != 0; dom1num >>= 1)
+  for (dom1num = dom1ptr->num/*, dom0num = dom0ptr->num*/; dom1num != 0; dom1num >>= 1)
     if (dom1num == dom0ptr->num)
       return (1);
 

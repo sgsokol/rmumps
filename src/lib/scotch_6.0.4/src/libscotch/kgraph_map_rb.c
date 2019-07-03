@@ -444,7 +444,7 @@ const Anum * restrict const pfixtax,              /*+ Array of fixed vertex term
 const Anum                  vflonbr)              /*+ Number of fixed vertex load slots      +*/
 {
   ArchDom                         domndat;
-  Anum                            domnmax;
+  /*Anum                            domnmax;*/
   Anum                            domnnum;
   Gnum                            vertnum;
   Gnum                            vertnnd;
@@ -483,7 +483,7 @@ const Anum                  vflonbr)              /*+ Number of fixed vertex loa
     }
   }
 
-  domnmax = mappptr->domnmax;
+  /*domnmax = mappptr->domnmax;*/
   for (vertnum = mappptr->grafptr->baseval, vertnnd = mappptr->grafptr->vertnnd; vertnum < vertnnd; vertnum ++) {
     Anum                pfixval;
 

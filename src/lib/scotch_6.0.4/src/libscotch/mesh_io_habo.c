@@ -79,7 +79,7 @@ const char * const          dataptr)              /* No use           */
   long              habrhsnbr;                    /* Number of right hand side lines            */
   int               habcolsiz;                    /* Size of column type                        */
   int               habnzrsiz;                    /* Size of non-zero type                      */
-  Gnum              habevlnbr;                    /* Number of element matrix values (not uesd) */
+  /*Gnum              habevlnbr;*/                    /* Number of element matrix values (not uesd) */
   Gnum              habvixnbr;                    /* Number of element matrix variable indices  */
   Gnum              habeltnbr;                    /* Number of elements                         */
   Gnum              habvarnbr;                    /* Number of variables, that is, nodes        */
@@ -113,7 +113,7 @@ const char * const          dataptr)              /* No use           */
     habmattype[1] = toupper (habmatbuf[2][1]);
     habmattype[2] = toupper (habmatbuf[2][2]);
     habmatbuf[2][70] = '\0';
-    habevlnbr = (Gnum) atol (&habmatbuf[2][57]);  /* NELTVL */
+    /*habevlnbr = (Gnum) atol (&habmatbuf[2][57]);*/  /* NELTVL */
     habmatbuf[2][56] = '\0';
     habvixnbr = (Gnum) atol (&habmatbuf[2][43]);  /* VARIX */
     habmatbuf[2][42] = '\0';

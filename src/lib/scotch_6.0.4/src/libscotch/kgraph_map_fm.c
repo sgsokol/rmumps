@@ -1332,7 +1332,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
       Gnum                edxxidx;
       Gnum *              edxpptr;
       Gnum *              vpexptr;
-      Gnum                vexdflg;
+      /*Gnum                vexdflg;*/
 
       vexxidx = edxxptr->vexxidx;                 /* Get relevant information */
       vertnum = vexxtab[vexxidx].vertnum;
@@ -1421,7 +1421,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
       edxxptr->commgain = - edxxptr->commgain;
       edxxptr->cmiggain = - edxxptr->cmiggain;
 
-      vexdflg = 0;
+      /*vexdflg = 0;*/
       if (edgenbr == 0) {
         Gnum              edxxidx;  
  
@@ -1462,7 +1462,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
         edloval = (edlotax != NULL) ? edlotax[edgenum] : 1;
 
         if (parttax[edgetax[edgenum]] == domnnum)
-          vexdflg = 1;
+          /*vexdflg = 1;*/;
 
         if ((pfixtax != NULL) && (pfixtax[vertend] != -1)) /* Do not link fixed vertices */
           continue;

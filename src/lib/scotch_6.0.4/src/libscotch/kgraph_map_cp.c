@@ -77,7 +77,7 @@ int
 kgraphMapCp (
 Kgraph * restrict const     grafptr)              /*+ Graph +*/
 {
-  Gnum                          baseval;
+  /*Gnum                          baseval;*/
   Anum                          domnnbr;
 
   const Anum * restrict const pfixtax = grafptr->pfixtax;
@@ -86,7 +86,7 @@ Kgraph * restrict const     grafptr)              /*+ Graph +*/
     errorPrint ("kgraphMapCp: inconsistent old mapping data");
     return     (1);
   }
-  baseval = grafptr->s.baseval;
+  /*baseval = grafptr->s.baseval;*/
 
   if (mapCopy (&grafptr->m, &grafptr->r.m) != 0) {
     errorPrint ("kgraphMapCp: cannot copy old mapping");

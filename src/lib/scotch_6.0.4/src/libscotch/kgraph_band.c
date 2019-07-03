@@ -109,7 +109,7 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
   Gnum                      bandedlonbr;          /* Size of local band edge load array                                                     */
   Gnum                      bandedlosum;
   Gnum * restrict           bandcompload;
-  Gnum                      bandcommload;
+  /*Gnum                      bandcommload;*/
   Gnum * restrict         compload;               /* Load of parts in original graph                                                        */
   Gnum                    fronnum;
   Anum                    domnnbr;
@@ -334,7 +334,7 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
   bandverttax  = bandgrafptr->s.verttax;
   bandvelotax  = bandgrafptr->s.velotax;
   banddegrmax  = 0;
-  bandcommload = 0;
+  /*bandcommload = 0;*/
   bandcompload = bandgrafptr->comploaddlt;        /* TRICK: use delta array to compute load sums */
   memSet (bandcompload, 0, domnnbr * sizeof (Gnum));
   bandedlosum = 0;
@@ -635,9 +635,9 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
     for (bandvertnum = bandvertlvlnum; bandvertnum < bandvertnnd; /* We do not have fixed vertices */
          bandvertnum ++) {                        /* Link anchors to vertices of last level        */
       Anum              partval;
-      Gnum              vertnum;
+      /*Gnum              vertnum;*/
 
-      vertnum = bandvnumtax[bandvertnum];
+      /*vertnum = bandvnumtax[bandvertnum];*/
       partval = bandparttax[bandvertnum];
       bandedgetax[bandedgetab[partval] ++] = bandvertnum;
 

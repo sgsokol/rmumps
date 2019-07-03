@@ -82,7 +82,7 @@ int
 wgraphCheck (
 const Wgraph * const        grafptr)
 {
-  Gnum                      vertnbr;              /* number of vertex                     */
+  /*Gnum                      vertnbr;*/              /* number of vertex                     */
   Gnum                      vertnum;              /* Number of current vertex             */
   const Gnum * restrict     velobax;              /* Data for handling of optional arrays */
   Gnum                      velomsk;
@@ -94,7 +94,7 @@ const Wgraph * const        grafptr)
   Gnum * restrict           compsize;
   Gnum * restrict           flagtab;
 
-  vertnbr = grafptr->s.vertnbr;
+  /*vertnbr = grafptr->s.vertnbr;*/
 
   if (memAllocGroup ((void **) (void *)
                      &flagtab,  (size_t) (grafptr->partnbr * sizeof (Gnum)),

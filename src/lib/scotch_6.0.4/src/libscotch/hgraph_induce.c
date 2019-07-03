@@ -91,7 +91,7 @@ Hgraph * restrict const           indgrafptr)     /* Pointer to induced subgraph
   Gnum * restrict     indedgetab;                 /* Origin of induced graph edge arrays             */
   Gnum                indvertnbr;                 /* Number of vertices in induced graph             */
   Gnum                indvertnum;                 /* Number of current vertex in induced graph       */
-  Gnum                indvelosiz;
+  /*Gnum                indvelosiz;*/
   Gnum                indedgenbr;                 /* (Approximate) number of edges in induced graph  */
   Gnum                indedgesiz;                 /* (Approximate) size of edge and edge load arrays */
 
@@ -101,7 +101,7 @@ Hgraph * restrict const           indgrafptr)     /* Pointer to induced subgraph
   indgrafptr->s.baseval = orggrafptr->s.baseval;
 
   indvertnbr = orglistptr->vnumnbr + orghalonbr;  /* Compute upper bound on number of vertices */
-  indvelosiz = (orggrafptr->s.velotax != NULL) ? indvertnbr : 0;
+  /*indvelosiz = (orggrafptr->s.velotax != NULL) ? indvertnbr : 0;*/
   if (memAllocGroup ((void **) (void *)
                      &indgrafptr->s.verttax, (size_t) ((indvertnbr + 1)     * sizeof (Gnum)),
                      &indgrafptr->vnhdtax,   (size_t) ( orglistptr->vnumnbr * sizeof (Gnum)), /* Put closest to beginning of array because no padding after */
