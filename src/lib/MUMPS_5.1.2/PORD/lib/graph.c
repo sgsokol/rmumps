@@ -438,22 +438,22 @@ indNodes(graph_t *G, PORD_INT *vtxmap)
       for (i = istart; i < istop; i++)
         tmp[adjncy[i]] = u;
 
-        /* scan adjacency list of vertex u for indistinguishable vertices */
-        for (i = istart; i < istop; i++)
-         { v = adjncy[i];
-           if ((v > u) && (checksum[v] == checksum[u]) && (deg[v] == deg[u])
-              && (vtxmap[v] == v))
-            { jstart = xadj[v];
-              jstop = xadj[v+1];
-              for (j = jstart; j < jstop; j++)
-                if (tmp[adjncy[j]] != u) goto FAILURE;
+      /* scan adjacency list of vertex u for indistinguishable vertices */
+      for (i = istart; i < istop; i++)
+       { v = adjncy[i];
+         if ((v > u) && (checksum[v] == checksum[u]) && (deg[v] == deg[u])
+            && (vtxmap[v] == v))
+          { jstart = xadj[v];
+            jstop = xadj[v+1];
+            for (j = jstart; j < jstop; j++)
+              if (tmp[adjncy[j]] != u) goto FAILURE;
 
-              /* found it!!! map v onto u */
-              vtxmap[v] = u;
-              cnvtx--;
+            /* found it!!! map v onto u */
+            vtxmap[v] = u;
+            cnvtx--;
 FAILURE:      ;
-            }
-         }
+          }
+       }
     }
 
   /* ----------------------

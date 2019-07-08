@@ -426,12 +426,14 @@ C
      &              PTRAR(1,2), IW(1), IWL1, IKEEP, 
      &              IKEEP(1,2), NCMPA, INFO, LP, LPOK)
                 ENDIF
+#if defined(scotch64) || defined(ptscotch64)
                ELSE IF (SCOTCH_INT_SIZE.EQ.64) THEN
                  CALL MUMPS_SCOTCH_MIXEDto64(NCMP, 
      &              IWFR8-1_8, IPE,
      &              PARENT, IWFR8,
      &              PTRAR(1,2), IW(1), IWL1, IKEEP,
      &              IKEEP(1,2), NCMPA, INFO, LP, LPOK, KEEP(10))
+#endif
                ELSE
                  WRITE(*,*)
      &           "Internal error in SCOTCH wrappers, SCOTCH_INT_SIZE=",

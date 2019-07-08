@@ -81,21 +81,23 @@ NumericVector solve_ptr(List a, NumericVector b) {
 }
 '
 #cat("ls -R rmumps_path", list.files(path.package("rmumps"), recursive=TRUE), "", sep="\n")
-  rso=paste0("rmumps", .Platform$dynlib.ext)
-  rso_path=file.path(path.package("rmumps"), "libs", .Platform$r_arch, rso)
-  cat("rso_path=", rso_path)
-  if (!file.exists(rso_path))
-    rso_path=file.path(path.package("rmumps"), "src", rso) # devtool context
+  if (Sys.info()[["sysname"]] != "Darwin") {
+    rso=paste0("rmumps", .Platform$dynlib.ext)
+    rso_path=file.path(path.package("rmumps"), "libs", .Platform$r_arch, rso)
+    cat("rso_path=", rso_path)
+    if (!file.exists(rso_path))
+      rso_path=file.path(path.package("rmumps"), "src", rso) # devtool context
 #cat("rso_path='", rso_path, "'\n", sep="")
-  Sys.setenv(PKG_LIBS=rso_path)
-  cppFunction(code=code, depends="rmumps", verbose=TRUE)
-  sourceCpp(code=code, verbose=TRUE)
-  xe=as.double(1:n)
-  b0=slam::tcrossprod_simple_triplet_matrix(asl, t(xe))
-  x=solve_ptr(asl, b0)
-  test_that("testing solveptr() within Rcpp code", {
-    expect_lt(diff(range(x-xe)), 1e-14)
-  })
+    Sys.setenv(PKG_LIBS=rso_path)
+    cppFunction(code=code, depends="rmumps", verbose=TRUE)
+    sourceCpp(code=code, verbose=TRUE)
+    xe=as.double(1:n)
+    b0=slam::tcrossprod_simple_triplet_matrix(asl, t(xe))
+    x=solve_ptr(asl, b0)
+    test_that("testing solveptr() within Rcpp code", {
+      expect_lt(diff(range(x-xe)), 1e-14)
+    })
+  }
 
   rm(asl)
 

@@ -15,7 +15,7 @@
 #ifndef MUMPS_SCOTCH64_H
 #define MUMPS_SCOTCH64_H
 #include "mumps_common.h"
-#if defined(scotch) || defined(ptscotch)
+#if defined(scotch64) || defined(ptscotch64)
 /* esmumps prototype with 64-bit integers */
 MUMPS_INT esmumps( const MUMPS_INT8 n, const MUMPS_INT8 iwlen, MUMPS_INT8 * const pe, const MUMPS_INT8 pfree,
              MUMPS_INT8 * const len, MUMPS_INT8 * const iw, MUMPS_INT8 * const nv, MUMPS_INT8 * const elen,

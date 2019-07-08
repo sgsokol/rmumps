@@ -148,6 +148,11 @@ void mumps_update_current_file_position(mumps_file_struct* file_arg){
   file_arg->current_pos=file_arg->write_pos;
 /*   mumps_io_current_file_position=mumps_io_write_pos; */
 }
+MUMPS_INLINE MUMPS_INT mumps_gen_file_info(long long vaddr, MUMPS_INT * pos, MUMPS_INT * file){
+  *file=(MUMPS_INT)(vaddr/(long long)mumps_io_max_file_size);
+  *pos=(MUMPS_INT)(vaddr%(long long)mumps_io_max_file_size);
+  return 0;
+}
 MUMPS_INT mumps_compute_where_to_write(const double to_be_written,const MUMPS_INT type,long long vaddr,size_t already_written){
   /* Check if the current file has enough memory to receive the whole block*/
   MUMPS_INT ret_code;
@@ -176,11 +181,6 @@ MUMPS_INT mumps_prepare_pointers_for_write(double to_be_written,MUMPS_INT * pos_
   *pos_in_file=((mumps_files+type)->mumps_io_current_file)->current_pos;
   /* should be modified to take into account the file arg */
   *file_number=(mumps_files+type)->mumps_io_current_file_number;
-  return 0;
-}
-MUMPS_INLINE MUMPS_INT mumps_gen_file_info(long long vaddr, MUMPS_INT * pos, MUMPS_INT * file){
-  *file=(MUMPS_INT)(vaddr/(long long)mumps_io_max_file_size);
-  *pos=(MUMPS_INT)(vaddr%(long long)mumps_io_max_file_size);
   return 0;
 }
 MUMPS_INT mumps_compute_nb_concerned_files(long long block_size, MUMPS_INT * nb_concerned_files,long long vaddr){

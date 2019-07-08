@@ -108,8 +108,10 @@ qsortUpInts(PORD_INT n, PORD_INT *array, PORD_INT *stack)
       if (array[r] > array[m]) swap(array[m], array[r], t);
       m = array[r]; i = l-1; j = r;
       for (;;)
-       { while (array[++i] < m);
-         while (array[--j] > m);
+       { while (array[++i] < m)
+           ;
+         while (array[--j] > m)
+           ;
          if (i >= j) break;
          swap(array[i], array[j], t);
        }
@@ -129,7 +131,7 @@ qsortUpInts(PORD_INT n, PORD_INT *array, PORD_INT *stack)
     { r = stack[--p];
       l = stack[--p];
     }
-   if (THRES > 0) insertUpInts(n, array);
+  if (THRES > 0) insertUpInts(n, array);
 }
 
 
@@ -154,8 +156,10 @@ qsortUpFloatsWithIntKeys(PORD_INT n, FLOAT *array, PORD_INT *key, PORD_INT *stac
        { swap(array[m], array[r], e); swap(key[m], key[r], t); }
       m = key[r]; i = l-1; j = r;
       for (;;)
-       { while (key[++i] < m);
-         while (key[--j] > m);
+       { while (key[++i] < m)
+           ;
+         while (key[--j] > m)
+           ;
          if (i >= j) break;
          swap(array[i], array[j], e); swap(key[i], key[j], t);
        }
@@ -175,7 +179,7 @@ qsortUpFloatsWithIntKeys(PORD_INT n, FLOAT *array, PORD_INT *key, PORD_INT *stac
     { r = stack[--p];
       l = stack[--p];
     }
-   if (THRES > 0) insertUpFloatsWithIntKeys(n, array, key);
+  if (THRES > 0) insertUpFloatsWithIntKeys(n, array, key);
 }
 
 

@@ -294,6 +294,8 @@ C
       DEALLOCATE(IPE)
       RETURN
       END SUBROUTINE MUMPS_SCOTCH_MIXEDto32
+#endif
+#if defined(scotch64) || defined(ptscotch64)
       SUBROUTINE MUMPS_SCOTCH_MIXEDto64(
      &           NCMP, LIW8, IPE8, PARENT, IWFR8,
      &           PTRAR, IW, IWL1, IKEEP1,

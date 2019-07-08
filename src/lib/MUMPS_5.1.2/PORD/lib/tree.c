@@ -662,7 +662,8 @@ mergeFronts(elimtree_t *T, PORD_INT maxzeros)
     if (rep[K] == K)
       frontmap[K] = cnfronts++;
     else
-     { for (J = K; rep[J] != J; J = rep[J]);
+     { for (J = K; rep[J] != J; J = rep[J])
+          ;
        rep[K] = J;
      }
   for (K = 0; K < nfronts; K++)

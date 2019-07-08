@@ -65,8 +65,8 @@ OBJS_COMMON_OTHER = \
         mumps_scotch64.o\
         mumps_scotch_int.o\
         mumps_size.o\
-        mumps_io.o\
         mumps_io_basic.o\
+        mumps_io.o\
         mumps_io_thread.o\
         mumps_io_err.o\
         ana_set_ordering.o\
@@ -291,6 +291,8 @@ $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 .SUFFIXES: .c .F95 .o
 .F95.o:
 	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F95 $(OUTF)$*.o
+.F.o:
+	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
 

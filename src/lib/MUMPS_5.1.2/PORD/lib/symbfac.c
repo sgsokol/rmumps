@@ -554,7 +554,8 @@ initFactorMtx(factorMtx_t *L, inputMtx_t *PAP)
         hstart = xnzlsub[k];
         h = hstart;
         for (i = istart; i < istop; i++)
-         { for (; nzlsub[h] != nzasub[i]; h++);
+         { for (; nzlsub[h] != nzasub[i]; h++)
+            ;
            dis = h - hstart;
            nzl[kstart+dis] = nza[i];
          }

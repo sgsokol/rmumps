@@ -36,6 +36,6 @@ MUMPS_INT mumps_io_sys_error(MUMPS_INT mumps_errno, const char* desc);
 MUMPS_INT mumps_io_init_err_lock();
 MUMPS_INT mumps_io_destroy_err_lock();
 MUMPS_INT mumps_check_error_th();
-MUMPS_INLINE MUMPS_INT mumps_io_protect_err();
-MUMPS_INLINE MUMPS_INT mumps_io_unprotect_err();
+/*MUMPS_INLINE MUMPS_INT mumps_io_protect_err();*/ /* ssg */
+/*MUMPS_INLINE MUMPS_INT mumps_io_unprotect_err();*/ /* ssg */
 #endif /* ! ( MUMPS_WIN32 || WITHOUT_PTHREAD ) */

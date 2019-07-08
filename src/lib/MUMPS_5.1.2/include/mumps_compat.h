@@ -35,7 +35,7 @@
 # endif
 #endif
 
-#if (__STDC_VERSION__ >= 199901L)
+#if 0 && (__STDC_VERSION__ >= 199901L) /* ssg */
 # define MUMPS_INLINE static inline
 #else
 # define MUMPS_INLINE

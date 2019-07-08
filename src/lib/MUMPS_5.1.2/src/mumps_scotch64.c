@@ -14,7 +14,7 @@
  */
 /* Interfacing with 64-bit SCOTCH and pt-SCOTCH */
 #include "mumps_scotch64.h"
-#if defined(scotch) || defined(ptscotch)
+#if defined(scotch64) || defined(ptscotch64)
 void MUMPS_CALL
 MUMPS_SCOTCH_64( const MUMPS_INT8 * const  n,        /* in    */
                  const MUMPS_INT8 * const  iwlen,    /* in    */
