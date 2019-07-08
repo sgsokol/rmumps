@@ -673,7 +673,7 @@ extern int scotchyywrap (void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
+    /*static void yyunput (int c,char *buf_ptr  );*/ /* ssg */
     
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int );
@@ -683,8 +683,9 @@ static void yy_flex_strncpy (char *,yyconst char *,int );
 static int yy_flex_strlen (yyconst char * );
 #endif
 
-#ifndef YY_NO_INPUT
 
+/*#ifndef YY_NO_INPUT*/ /* ssg */
+#if 0 && !defined(YY_NO_INPUT)
 #ifdef __cplusplus
 static int yyinput (void );
 #else
@@ -1356,7 +1357,7 @@ static int yy_get_next_buffer (void)
 	(yy_c_buf_p) = yy_cp;
 }
 
-#ifndef YY_NO_INPUT
+#if 0 && !defined(YY_NO_INPUT) /* ssg */
 #ifdef __cplusplus
     static int yyinput (void)
 #else

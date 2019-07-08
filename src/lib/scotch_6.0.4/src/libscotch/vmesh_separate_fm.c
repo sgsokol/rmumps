@@ -356,7 +356,8 @@ const VmeshSeparateFmParam * restrict const paraptr) /*+ Method parameters    +*
   hashnbr = 2 * ((meshptr->fronnbr + paraptr->movenbr) * (1 + (Gnum) ((float) meshptr->m.edgenbr / (float) vertnbr)));
   if (hashnbr > vertnbr)                          /* Set bound on hash table */
     hashnbr = vertnbr;
-  for (hashmax = 256; hashmax < hashnbr; hashmax <<= 1) ; /* Get upper power of two */
+  for (hashmax = 256; hashmax < hashnbr; hashmax <<= 1)
+    ; /* Get upper power of two */
 /* TODO */ hashmax *= 4;
   hashsiz = 4 * hashmax;
   hashmsk = hashsiz - 1;
