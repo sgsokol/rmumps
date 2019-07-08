@@ -396,6 +396,9 @@ KgraphMapRbMapJob * const       jobptr)           /* Job to be added */
       jobptr->prioval = 0;
       jobptr->priolvl = 0;
       return;
+#else
+    default :
+      return;
 #endif /* SCOTCH_DEBUG_KGRAPH2 */
   }
 
@@ -446,6 +449,9 @@ const GraphPart                 partval)
       errorPrint ("kgraphMapRbMapPoolUpdt1: unknown job selection policy");
       jobnewptr->prioval = 0;
       jobnewptr->priolvl = 0;
+      return;
+#else
+    default :
       return;
 #endif /* SCOTCH_DEBUG_KGRAPH2 */
   }
@@ -613,6 +619,9 @@ KgraphMapRbMapJob * const       jobnewptr1)
         jobnewptr->prioval = 0;
         jobnewptr->priolvl = 0;
         return;
+#else
+      default :
+        return;
 #endif /* SCOTCH_DEBUG_KGRAPH2 */
     }
 
@@ -694,14 +703,14 @@ kgraphMapRbMapPoolRemv (
 KgraphMapRbMapPoolData * const  poolptr,
 const KgraphMapRbMapJob * const joboldptr)        /* Job to be removed */
 {
-  KgraphMapRbMapJob * restrict  jobtab;
-  const Anum * restrict         mapparttax;       /* Based pointer to mapping part array */
-  const Gnum * restrict         jobvnumtax;
-  const Gnum * restrict         jobverttax;
-  const Gnum * restrict         jobvendtax;
-  const Gnum * restrict         topverttax;
-  const Gnum * restrict         topvendtax;
-  const Gnum * restrict         topedgetax;
+/*  KgraphMapRbMapJob * restrict  jobtab;*/
+/*  const Anum * restrict         mapparttax;       *//* Based pointer to mapping part array */
+/*  const Gnum * restrict         jobvnumtax;*/
+/*  const Gnum * restrict         jobverttax;*/
+/*  const Gnum * restrict         jobvendtax;*/
+/*  const Gnum * restrict         topverttax;*/
+/*  const Gnum * restrict         topvendtax;*/
+/*  const Gnum * restrict         topedgetax;*/
 
   if (poolptr->polival >= KGRAPHMAPRBPOLINEIGHBOR) { /* If neighbors have to be modified */
     Gnum                jobvertnnd;

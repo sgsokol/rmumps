@@ -79,13 +79,13 @@ BgraphBipartDfThread * restrict thrdptr)          /* Thread-dependent data */
   float * restrict      difntax;                  /* New diffusion value array        */
   Gnum                  vertnum;
   Gnum                  fronnum;
-  Gnum                  compload0;
+/*  Gnum                  compload0;*/
   Gnum                  compload1;
   Gnum                  compsize1;
   Gnum                  commloadintn;
   Gnum                  commloadextn;
   Gnum                  commgainextn;
-  Gnum                  veexnbr;
+/*  Gnum                  veexnbr;*/
   Gnum                  veexval;
   Gnum                  veexval1;                 /* Negative external gain to part 1 */
   Gnum                  veexsum;
@@ -314,7 +314,9 @@ BgraphBipartDfThread * restrict thrdptr)          /* Thread-dependent data */
     }
 #endif /* BGRAPHBIPARTDFLOOPTHREAD */
   }
+#ifndef BGRAPHBIPARTDFLOOPTHREAD
 abort : ;
+#endif
 
   for (vertnum = vertbas; vertnum < vertnnd; vertnum ++) /* Update part according to diffusion state */
     parttax[vertnum] = (difotax[vertnum] <= 0.0F) ? 0 : 1;

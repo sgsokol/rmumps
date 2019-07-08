@@ -71,7 +71,7 @@ int * const                 revaptr),       \
 {
   FILE *              stream;                     /* Stream to build from handle */
   int                 filenum;                    /* Duplicated handle           */
-  int                 filegeonum;
+/*  int                 filegeonum;*/
   int                 o;
 
   if ((filenum = dup (*fileptr)) < 0) {           /* If cannot duplicate file descriptor */

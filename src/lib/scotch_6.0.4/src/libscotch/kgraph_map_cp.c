@@ -78,7 +78,7 @@ kgraphMapCp (
 Kgraph * restrict const     grafptr)              /*+ Graph +*/
 {
   /*Gnum                          baseval;*/
-  Anum                          domnnbr;
+/*  Anum                          domnnbr;*/
 
   const Anum * restrict const pfixtax = grafptr->pfixtax;
 

@@ -1,5 +1,6 @@
 DMUMPS=lib/MUMPS_5.1.2
 RANLIB?=ranlib
+AR?=ar
 
 INC_OS := $(shell "$(R_HOME)/bin/Rscript" ../R/inc_os.R)
 
@@ -10,4 +11,4 @@ $(SHLIB): lib/libdmumps.a
 
 lib/libdmumps.a:
 	$(MAKE) -C lib \
-	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS)"  PKG_FCFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"
+	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS)"  PKG_FCFLAGS="$(FFLAGS) $(FPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"

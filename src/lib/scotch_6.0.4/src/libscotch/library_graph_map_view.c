@@ -104,7 +104,7 @@ FILE * const                  stream)             /*+ Output stream             
   const Arch * restrict     archptr;
   LibMapping * restrict     lmapptr;
   LibMapping * restrict     lmaoptr;
-  Mapping                   mappdat;
+/*  Mapping                   mappdat;*/
   Anum * restrict           parttax;              /* Part array                                   */
   Anum * restrict           parotax;              /* Old part array                               */
   MappingSort * restrict    domntab;              /* Pointer to domain sort array                 */

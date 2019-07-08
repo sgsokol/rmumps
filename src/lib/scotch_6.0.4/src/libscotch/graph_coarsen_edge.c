@@ -68,11 +68,11 @@ GraphCoarsenThread *                      thrdptr)
   const Graph * restrict const              finegrafptr = coarptr->finegrafptr;
   const Gnum * restrict const               fineverttax = finegrafptr->verttax;
   const Gnum * restrict const               finevendtax = finegrafptr->vendtax;
-  const Gnum * restrict const               finevelotax = finegrafptr->velotax;
   const Gnum * restrict const               fineedgetax = finegrafptr->edgetax;
   Gnum * restrict const                     finecoartax = coarptr->finematetax;
-  const Graph * restrict const              coargrafptr = coarptr->coargrafptr;
 #ifndef GRAPHCOARSENEDGECOUNT
+  const Graph * restrict const              coargrafptr = coarptr->coargrafptr;
+  const Gnum * restrict const               finevelotax = finegrafptr->velotax;
   Gnum * restrict const                     coarverttax = coargrafptr->verttax;
   Gnum * restrict const                     coarvelotax = coargrafptr->velotax;
   Gnum * restrict const                     coaredgetax = coargrafptr->edgetax;

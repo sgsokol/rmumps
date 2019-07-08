@@ -95,6 +95,7 @@
 
 #define YY_NO_UNPUT                               /* No prototype for yyunput as not defined     */
 #define YY_SKIP_YYWRAP                            /* No prototype for yywrap as defined as macro */
+#undef yywrap
 #define yywrap()                    (1)           /* Always return end-of-file on end-of-string  */
 
 /*

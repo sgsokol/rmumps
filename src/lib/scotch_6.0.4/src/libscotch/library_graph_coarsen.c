@@ -90,7 +90,7 @@ const SCOTCH_Num                    coarnbr,      /* Minimum number of coarse ve
 const double                        coarval)      /* Maximum contraction ratio         */
 {
   GraphCoarsenMulti * restrict  coarmultptr;      /* Un-based pointer to created, grouped multinode array */
-  int                           o;
+/*  int                           o;*/
 
   intRandInit ();                                 /* Check that random number generator is initialized */
   coarmultptr = (GraphCoarsenMulti *) coarmulttab; /* Indicate multinode array is user-provided        */
@@ -115,7 +115,7 @@ const SCOTCH_Num                    coarvertnbr,  /* Number of coarse vertices  
 SCOTCH_Num * restrict const         finematetab)  /* Mating array                             */
 {
   GraphCoarsenMulti * restrict  coarmultptr;      /* Un-based pointer to created, grouped multinode array */
-  int                           o;
+/*  int                           o;*/
 
   intRandInit ();                                 /* Check that random number generator is initialized */
   coarmultptr = (GraphCoarsenMulti *) coarmulttab; /* Indicate multinode array is user-provided        */

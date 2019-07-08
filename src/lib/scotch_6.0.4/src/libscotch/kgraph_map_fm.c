@@ -70,8 +70,8 @@
 **  The static variables.
 */
 
-static const Gnum           kgraphloadone  = 1;
-static const Gnum           kgraphnotfixed = -1;
+/*static const Gnum           kgraphloadone  = 1;*/ /* ssg */
+/*static const Gnum           kgraphnotfixed = -1;*/ /* ssg */
 
 /*********************************/
 /*                               */
@@ -570,9 +570,9 @@ KgraphMapFmTabl * restrict const    tablptr)
 {
   KgraphMapFmEdge * restrict    edxxtab;
   Gnum                          edxxidx;
-  Gnum                          edgenum;
-  Gnum                          edlosum;
-  Gnum                          edgenbr;
+/*  Gnum                          edgenum;*/
+/*  Gnum                          edlosum;*/
+/*  Gnum                          edgenbr;*/
   Gnum                          edxxtmp;
   Gnum                          commgain;
 
@@ -807,7 +807,7 @@ KgraphMapFmEdge *                 edxxtab,        /*+ Extended edge array       
 KgraphMapFmVertex ** const        lockptr)        /*+ Pointer to locked list     +*/
 {
   KgraphMapFmVertex * restrict    vexxtab;        /* Extended vertex array                */
-  KgraphMapFmSave * restrict      saveold;        /* Pointer to translated old save array */
+/*  KgraphMapFmSave * restrict      saveold;        *//* Pointer to translated old save array */
   Gnum                            savenum;
   Gnum                            hashold;        /* Size of old hash table (half of new) */
   Gnum                            hashsiz;
@@ -1451,9 +1451,9 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
         Gnum                edxnidx;              /* index of extended edge to new domain                    */
         Gnum                vertend;              /* Number of current end neighbor vertex                   */
         Gnum                edxfidx;              /* Index of first extended edge to update                  */ 
-        Gnum                edgeend;
-        Gnum                edodnbr;
-        Gnum                edndnbr;
+/*        Gnum                edgeend;*/
+/*        Gnum                edodnbr;*/
+/*        Gnum                edndnbr;*/
         Anum                divoval;              /* Distance between current neighbor domain and old domain */
         Anum                divnval;              /* Distance between current neighbor domain and new domain */
         Gnum                edloval;
@@ -1625,7 +1625,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
         }
 
         if ((edxnidx == -1) && (vexxtab[vexxend].domnnum != domnend)) { /* If was first vertex linked to this domain, add edge to new domain */
-          Gnum        edxxidx;
+/*          Gnum        edxxidx;*/
 
           kgraphMapFmPartAdd2 (grafptr, vexxtab, vexxend, &edxxtab, &edxxsiz, &edxxnbr, vexxtab[vexxend].domnnum, domnend, edloval, tablptr); /* Add new extended edge */
 #ifdef SCOTCH_DEBUG_KGRAPH2 

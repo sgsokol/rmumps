@@ -438,11 +438,11 @@ GraphCoarsenThread * restrict thrdptr)            /*+ Pointer to incomplete matc
 #endif /* SCOTCH_DEBUG_GRAPH2 */
 
   GraphCoarsenData * restrict const coarptr     = (GraphCoarsenData *) (thrdptr->thrddat.grouptr);
-  const Graph * restrict const      finegrafptr = coarptr->finegrafptr;
+/*  const Graph * restrict const      finegrafptr = coarptr->finegrafptr;*/
   const Gnum                        finevertbas = thrdptr->finevertbas; /* Get fine vertex range */
   const Gnum                        finevertnnd = thrdptr->finevertnnd;
   Gnum * restrict const             finematetax = coarptr->finematetax;
-  const Gnum                        baseval     = finegrafptr->baseval;
+/*  const Gnum                        baseval     = finegrafptr->baseval;*/
 
   if (coarptr->fbegptr == NULL)                   /* If user-provided mating, nothing to do */
     return;

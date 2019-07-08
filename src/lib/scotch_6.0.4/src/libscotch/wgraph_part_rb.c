@@ -248,7 +248,7 @@ Wgraph * restrict const                   grafptr,
 const WgraphPartRbParam * restrict const  paraptr)
 {
   const Anum * restrict         parttax;
-  Anum				partval;
+/*  Anum				partval;*/
   Gnum                          vertnum;
   Gnum                          velomsk;
   const Gnum * restrict         velobax;              /* Data for handling of optional arrays  */

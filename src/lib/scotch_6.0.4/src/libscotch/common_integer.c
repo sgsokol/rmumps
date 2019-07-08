@@ -239,7 +239,7 @@ UINT32                      randval)
   randtmp    = (UINT32) randval;
   randtab[0] = randtmp;                           /* Reset array contents */
   for (i = 1; i < 623; i ++) {
-    randtmp = 0x6c078965 * randtmp ^ (randtmp >> 30) + i;
+    randtmp = (0x6c078965 * randtmp) ^ ((randtmp >> 30) + i);
     randtab[i] = randtmp;
   }
   randptr->randnum = 0;                           /* Reset array index */

@@ -162,6 +162,9 @@ Strat * const               strat)
       errorPrint ("stratExit: invalid strategy node");
       o = 1;
       break;
+#else
+    default :
+      break;
 #endif /* SCOTCH_DEBUG_PARSER2 */
   }
 
@@ -270,6 +273,9 @@ FILE * const                stream)
     default :
       errorPrint ("stratSave: invalid strategy node");
       return     (1);
+#else
+    default :
+      break;
 #endif /* SCOTCH_DEBUG_PARSER2 */
   }
   if (o != 0) {
@@ -447,6 +453,9 @@ const void * restrict const       data)           /*+ Pointer to data structure 
           errorPrint ("stratTestEval: internal error (7)");
           o = 1;
           break;
+#else
+        default :
+          break;
 #endif /* SCOTCH_DEBUG_PARSER1 */
       }
       eval->typenode = test->typenode;
@@ -455,6 +464,9 @@ const void * restrict const       data)           /*+ Pointer to data structure 
     default :
       errorPrint ("stratTestEval: invalid condition type (%u)", test->typetest);
       o = 1;
+      break;
+#else
+    default :
       break;
 #endif /* SCOTCH_DEBUG_PARSER1 */
   }
@@ -542,6 +554,9 @@ StratTest * const           test)
     default :
       errorPrint ("stratTestExit: invalid condition type (%u)", test->typetest);
       o = 1;
+      break;
+#else
+    default :
       break;
 #endif /* SCOTCH_DEBUG_PARSER1 */
   }
@@ -635,6 +650,9 @@ FILE * const                stream)
     default :
       errorPrint ("stratTestSave: invalid condition type (%u)", test->typetest);
       o = 1;
+#else
+    default :
+      break;
 #endif /* SCOTCH_DEBUG_PARSER2 */
   }
 

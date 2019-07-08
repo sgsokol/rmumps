@@ -411,9 +411,9 @@ const SCOTCH_Num * const    linktab,              /*+ Link cost array, by increa
 const SCOTCH_Num            permnbr,              /*+ Number of permutation indices               +*/
 const SCOTCH_Num * const    permtab)              /*+ Permutation array                           +*/
 {
-  Anum                levlnum;
+/*  Anum                levlnum;*/
   Anum                permnum;
-  Anum                sizeval;
+/*  Anum                sizeval;*/
   Arch *              tgtarchptr;
   ArchTleaf *         tgtarchdatptr;
 

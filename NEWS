@@ -1,11 +1,18 @@
-Version 5.1.2-7
+Version 5.1.2-8
+===============
+
+* 2019-07-04
+ - fixed LTO issues signaled by CRAN team;
+ - removed compile test on Mac OS;
+ 
+VVersion 5.1.2-7
 ===============
 
 * 2019-07-02
  - fixed NAMESPACE corrupted by roxygen2
  - fixed manual entries for constants RMUMPS_PERM_<smth>
  
-Version 5.1.2-6
+ersion 5.1.2-6
 ===============
 
 * 2019-04-23

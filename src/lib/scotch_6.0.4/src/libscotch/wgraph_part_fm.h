@@ -152,6 +152,6 @@ typedef struct WgraphPartFmSave_ {
 int                         wgraphPartFm        (Wgraph * const, const WgraphPartFmParam * const);
 
 static int                  wgraphPartFmResize  ();
-static int                  wgraphPartFmCheck   (const Wgraph * restrict const, const WgraphPartFmVertex * restrict const, Gnum, const Gnum, const Gnum);
+/*static int                  wgraphPartFmCheck   (const Wgraph * restrict const, const WgraphPartFmVertex * restrict const, Gnum, const Gnum, const Gnum);*/ /* ssg */
 
 #undef static

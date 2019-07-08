@@ -95,7 +95,7 @@ const Gnum                      cmloval,          /*+ Coefficient load for migra
 const Gnum * restrict const     vmlotax)          /*+ Vertex migration cost array          +*/
 {
   ArchDom                   domndat;              /* First, largest domain */
-  const ArchDom * restrict  domntmp;
+/*  const ArchDom * restrict  domntmp;*/
 
 #ifdef SCOTCH_DEBUG_KGRAPH2
   if ((crloval < 1) || (cmloval < 0)) {

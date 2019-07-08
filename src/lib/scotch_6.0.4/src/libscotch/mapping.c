@@ -280,7 +280,7 @@ mapCopy (
 Mapping * restrict const       mappptr,           /*+ Mapping to set +*/
 const Mapping * restrict const mapoptr)           /*+ Old mapping    +*/
 {
-  ArchDom *           domntab;
+/*  ArchDom *           domntab;*/
   Anum                domnnbr;
   Gnum                baseval;
 

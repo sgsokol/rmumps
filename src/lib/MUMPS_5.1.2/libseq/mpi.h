@@ -49,7 +49,7 @@ extern "C" {
  * standards, we may add them. But it is not worth doing it until then. */
 
 typedef LIBSEQ_INT MPI_Comm; /* Simple type for MPI communicator */
-static MPI_Comm MPI_COMM_WORLD=(MPI_Comm)0;
+/*static MPI_Comm MPI_COMM_WORLD=(MPI_Comm)0;*/ /* ssg */
 
 LIBSEQ_INT LIBSEQ_CALL MPI_Init(LIBSEQ_INT *pargc, char ***pargv);
 LIBSEQ_INT LIBSEQ_CALL MPI_Comm_rank(LIBSEQ_INT  comm, LIBSEQ_INT  *rank);

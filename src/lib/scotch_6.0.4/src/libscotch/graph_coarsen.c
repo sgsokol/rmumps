@@ -133,9 +133,9 @@ graphCoarsen2 (
 void *                      dataptr)
 {
   Gnum                          baseval;
-  Gnum                          finevertbas;
+/*  Gnum                          finevertbas;*/
   Gnum                          finevertnnd;
-  Gnum                          finevertnbr;
+/*  Gnum                          finevertnbr;*/
   Gnum                          finevertnum;
   Gnum                          coarvertnbr;
   Gnum                          coarvertnum;
@@ -321,12 +321,12 @@ GraphCoarsenData * restrict const     coarptr,
 GraphCoarsenMulti * restrict * const  coarmultptr) /*+ Pointer to un-based multinode table to build +*/
 {
   Gnum                          coarvertnbr;      /* Number of coarse vertices                */
-  Gnum                          coarvertnum;      /* Number of current multinode vertex       */
+/*  Gnum                          coarvertnum;      *//* Number of current multinode vertex       */
   Gnum                          coarvfixnbr;      /* Coarse number of fixed vertices          */
-  GraphCoarsenMulti * restrict  coarmulttax;      /* Multinode array                          */
+/*  GraphCoarsenMulti * restrict  coarmulttax;      *//* Multinode array                          */
   Gnum                          coarmultsiz;      /* Size of embedded multinode array         */
   Gnum *                        finecoartab;      /* Fine vertex mating / indexing array      */
-  Gnum                          finevertnum;      /* Number of currently selected fine vertex */
+/*  Gnum                          finevertnum;      *//* Number of currently selected fine vertex */
   Gnum                          coarhashmsk;      /* Mask for access to hash table            */
   size_t                        coarmultoftval;
   size_t                        coarvelooftval;

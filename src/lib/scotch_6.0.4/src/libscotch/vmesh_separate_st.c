@@ -84,10 +84,10 @@ static union {
   StratNodeMethodData       padding;
 } vmeshseparatedefaultgg = { { 5 } };
 
-static union {
+/*static union {
   VmeshSeparateGrParam      param;
   StratNodeMethodData       padding;
-} vmeshseparatedefaultgr = { { &stratdummy } };
+} vmeshseparatedefaultgr = { { &stratdummy } };*/ /* ssg */
 
 static union {
   VmeshSeparateMlParam      param;

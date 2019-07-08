@@ -94,7 +94,7 @@ KgraphMapDfThread * restrict  thrdptr)            /* Thread-dependent data */
   const Anum                        domnnnd = thrdptr->domnnnd;
   const Anum                        domnnbr = grafptr->m.domnnbr;
   const Gnum                        crloval = grafptr->r.crloval;
-  const Gnum                        cmloval = grafptr->r.cmloval;
+/*  const Gnum                        cmloval = grafptr->r.cmloval;*/
   Anum * restrict const             parttax = grafptr->m.parttax;
   const Anum * restrict const       parotax = grafptr->r.m.parttax;
   const Gnum * restrict const       verttax = grafptr->s.verttax;
@@ -129,7 +129,7 @@ KgraphMapDfThread * restrict  thrdptr)            /* Thread-dependent data */
   }
   if (velsmsk == 0) {                             /* If graph is too small to have any usable anchors */
 #ifdef KGRAPHMAPDFLOOPTHREAD
-    loopptr->abrtval == 1;                        /* We will leave during the first iteration */
+    loopptr->abrtval = 1;                        /* We will leave during the first iteration */ /* ssg */
 #else /* KGRAPHMAPDFLOOPTHREAD */
     return (1);
 #endif /* KGRAPHMAPDFLOOPTHREAD */
@@ -273,8 +273,8 @@ KgraphMapDfThread * restrict  thrdptr)            /* Thread-dependent data */
       Anum                partnbr;                /* Number of active parts */
       Anum                partnum;
       float               diffval;
-      float               signval;
-      Anum                paronum;
+/*      float               signval;*/
+/*      Anum                paronum;*/
       Anum                partcur;
 
       partnbr = 1;                                /* Keep vertex in first place to preserve its part */
@@ -294,7 +294,7 @@ KgraphMapDfThread * restrict  thrdptr)            /* Thread-dependent data */
         Anum                partval;
         Anum                partnum;
         Gnum                edloval;
-        Anum                distval;
+/*        Anum                distval;*/
 
         vertend = edgetax[edgenum];
         edloval = (float) ((edlotax != NULL) ? edlotax[edgenum] : 1);
@@ -423,9 +423,9 @@ endloop1 : ;
       Gnum                edgenum;
       Gnum                edgennd;
       Anum                partnbr;                /* Number of active parts */
-      Anum                partnum;
+/*      Anum                partnum;*/
       float               diffval;
-      float               signval;
+/*      float               signval;*/
 
       partnbr = 1;                                /* Keep vertex in first place to preserve its part */
       sorttab[0].partval = domnnum;               /* Always keep initial part value                  */
@@ -495,15 +495,17 @@ endloop2 : ;
     difttax = (KgraphMapDfVertex *) difntax;      /* Swap old and new diffusion arrays          */
     difntax = (KgraphMapDfVertex *) difotax;      /* Casts to prevent IBM compiler from yelling */
     difotax = (KgraphMapDfVertex *) difttax;
-abort1 : ;                                        /* If overflow occured, resume here */
 #ifdef KGRAPHMAPDFLOOPTHREAD
+abort1 : ;                                        /* If overflow occured, resume here */
     threadBarrier (thrdptr);
 
     if (loopptr->abrtval == 1)                    /* If all threads need to abort */
       break;
 #endif /* KGRAPHMAPDFLOOPTHREAD */
   }
+#ifndef KGRAPHMAPDFLOOPTHREAD
 abort2 : ;
+#endif /* KGRAPHMAPDFLOOPTHREAD */
 
   for (vertnum = vertbas; vertnum < vertnnd; vertnum ++) /* Set new part distribution of local vertices */
     parttax[vertnum] = difntax[vertnum].partval;

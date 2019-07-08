@@ -106,9 +106,9 @@ const VgraphSeparateGgParam * const paraptr)      /*+ Method parameters +*/
 
   const Gnum * restrict const verttax = grafptr->s.verttax;
   const Gnum * restrict const vendtax = grafptr->s.vendtax;
-  const Gnum * restrict const velotax = grafptr->s.velotax;
+/*  const Gnum * restrict const velotax = grafptr->s.velotax;*/
   const Gnum * restrict const edgetax = grafptr->s.edgetax;
-  const Gnum * restrict const edlotax = grafptr->s.edlotax;
+/*  const Gnum * restrict const edlotax = grafptr->s.edlotax;*/
   GraphPart * restrict const  parttax = grafptr->parttax;
   Gnum * restrict const       frontab = grafptr->frontab;
 

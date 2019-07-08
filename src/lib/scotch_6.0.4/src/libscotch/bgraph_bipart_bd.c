@@ -146,8 +146,8 @@ const BgraphBipartBdParam * const paraptr)        /*+ Method parameters +*/
   queutailval  = 0;
   bndvlvlnum   = 0;                               /* Assume first layer is last layer   */
   while (distmax -- > 0) {                        /* For all passes except the last one */
-    Gnum                orgvertnum;
-    Gnum                orgdistval;
+/*    Gnum                orgvertnum;*/
+/*    Gnum                orgdistval;*/
 
     bndvlvlnum = queuheadval;                     /* Record start of last layer */
     while (queutailval < bndvlvlnum) {            /* For all vertices in queue  */

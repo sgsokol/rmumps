@@ -71,8 +71,8 @@ GraphCoarsenThread * restrict thrdptr)            /* Thread-dependent data */
 {
   GraphCoarsenData * restrict const coarptr = (GraphCoarsenData *) (thrdptr->thrddat.grouptr);
   const Graph * restrict const      finegrafptr = coarptr->finegrafptr;
-  Gnum                              finevertnum;  /* Current vertex index        */
-  Gnum                              finevertnnd;  /* Current end of vertex array */
+  Gnum                              finevertnum=0;  /* Current vertex index        */
+  /*Gnum                              finevertnnd;*/  /* Current end of vertex array */
 #ifdef GRAPHMATCHSCANVELOTAB
   Gnum                    finevelomin = (1 * finegrafptr->velosum) / (4 * finegrafptr->vertnbr); /* Minimum load of neighbor */
   Gnum                    coarvelomax = (4 * finegrafptr->velosum) / (1 * (coarptr->coarvertmax - coarptr->finevfixnbr)) + 1;
@@ -85,10 +85,15 @@ GraphCoarsenThread * restrict thrdptr)            /* Thread-dependent data */
   Gnum                    pertnbr;
   Gunum                   randval = thrdptr->randval; /* Unsigned to avoid negative random numbers */
 #endif /* ((defined GRAPHMATCHSCANP1INPERT) || defined (GRAPHMATCHSCANP2INPERT)) */
-#if ((defined GRAPHMATCHSCANP1INQUEUE) || defined (GRAPHMATCHSCANP2INQUEUE) || defined (GRAPHMATCHSCANP2OUTQUEUE))
+#if (defined GRAPHMATCHSCANP1INQUEUE || defined GRAPHMATCHSCANP2INQUEUE || defined GRAPHMATCHSCANP1OUTQUEUE || defined GRAPHMATCHSCANP2OUTQUEUE)
   Gnum * const            queutab = coarptr->finequeutab;
+#endif /* (defined GRAPHMATCHSCANP1INQUEUE || defined GRAPHMATCHSCANP2INQUEUE || defined GRAPHMATCHSCANP1OUTQUEUE || defined GRAPHMATCHSCANP2OUTQUEUE) */
+
+/*#if ((defined GRAPHMATCHSCANP1INQUEUE) || defined (GRAPHMATCHSCANP2INQUEUE) || defined (GRAPHMATCHSCANP2OUTQUEUE))*/
+#if (defined (GRAPHMATCHSCANP2OUTQUEUE))
   volatile int * const    locktax = coarptr->finelocktax;
-#endif /* ((defined GRAPHMATCHSCANP1INQUEUE) || defined (GRAPHMATCHSCANP2INQUEUE) || defined (GRAPHMATCHSCANP2OUTQUEUE)) */
+/*#endif *//* ((defined GRAPHMATCHSCANP1INQUEUE) || defined (GRAPHMATCHSCANP2INQUEUE) || defined (GRAPHMATCHSCANP2OUTQUEUE)) */
+#endif /* (defined (GRAPHMATCHSCANP2OUTQUEUE)) */
 #if ((defined GRAPHMATCHSCANP1INQUEUE) || defined (GRAPHMATCHSCANP2INQUEUE))
   Gnum                    queunnd;
   Gnum                    queunum;
@@ -112,8 +117,8 @@ GraphCoarsenThread * restrict thrdptr)            /* Thread-dependent data */
   const Gnum * restrict const     finepfixtax = coarptr->finepfixtax;
 #endif /* GRAPHMATCHSCANPFIXTAB */
 
-#ifdef GRAPHMATCHSCANP1INPERT                     /* First pass is only for start or sequential routines */
-#ifdef GRAPHMATCHSCANVELOTAB
+/*#ifdef GRAPHMATCHSCANP1INPERT*/                     /* First pass is only for start or sequential routines */
+/*#ifdef GRAPHMATCHSCANVELOTAB*/
 #ifdef GRAPHMATCHSCANP1OUTQUEUE
   queunew = thrdptr->queubas;
 #endif /* GRAPHMATCHSCANP1OUTQUEUE */
@@ -149,6 +154,7 @@ GraphCoarsenThread * restrict thrdptr)            /* Thread-dependent data */
 
     finevertbst = finevertnum;                    /* Assume we match with ourselves */
 
+#ifdef GRAPHMATCHSCANVELOTAB
     if ((finevelotax[finevertnum] >= finevelomin) || /* If vertex is not too light, skip it and record it  */
         (fineverttax[finevertnum] == finevendtax[finevertnum])) /* Same for isolated vertex: process later */
 #ifdef GRAPHMATCHSCANP1OUTQUEUE
@@ -156,6 +162,7 @@ GraphCoarsenThread * restrict thrdptr)            /* Thread-dependent data */
 #else /* GRAPHMATCHSCANP1OUTQUEUE */
       goto loop1;
 #endif /* GRAPHMATCHSCANP1OUTQUEUE */
+#endif /* GRAPHMATCHSCANVELOTAB */
 
     for (fineedgenum = fineverttax[finevertnum];
          fineedgenum < finevendtax[finevertnum]; fineedgenum ++) {
@@ -215,8 +222,8 @@ loop1: ;
 #ifdef GRAPHMATCHSCANP1OUTQUEUE
   thrdptr->queunnd = queunew;                     /* Record queue index for next pass */
 #endif /* GRAPHMATCHSCANP1OUTQUEUE */
-#endif /* GRAPHMATCHSCANVELOTAB    */
-#endif /* GRAPHMATCHSCANP1INPERT   */
+/*#endif*/ /* GRAPHMATCHSCANVELOTAB    */
+/*#endif*/ /* GRAPHMATCHSCANP1INPERT   */
 
 #ifdef GRAPHMATCHSCANP2OUTQUEUE
   queunew = thrdptr->finequeubas;
@@ -242,7 +249,7 @@ loop1: ;
       finevertnum = pertbas + pertval;            /* Compute corresponding vertex number  */
 #endif /* GRAPHMATCHSCANP2INPERT */
   {
-    Gnum                fineedgenum;
+/*    Gnum                fineedgenum;*/
     Gnum                finevertbst;
 
     if (finematetax[finevertnum] >= 0)            /* If vertex already mated, skip it without remembering it */

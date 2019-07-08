@@ -77,7 +77,7 @@
 **  The static and global variables.
 */
 
-static Wgraph               wgraphdummy;          /* Dummy overlap graph for offset computations */
+/*static Wgraph               wgraphdummy;*/          /* Dummy overlap graph for offset computations */ /* ssg */
 
 static union {
   WgraphPartFmParam         param;

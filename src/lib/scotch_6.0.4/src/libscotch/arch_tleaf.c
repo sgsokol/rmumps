@@ -529,8 +529,8 @@ archLtleafArchLoad (
 ArchTleaf * restrict const  archptr,
 FILE * restrict const       stream)
 {
-  Anum                sizeval;
-  Anum                levlnum;
+/*  Anum                sizeval;*/
+/*  Anum                levlnum;*/
   Anum                permnum;
 
   if (archTleafArchLoad (archptr, stream) != 0)   /* Read tree part */

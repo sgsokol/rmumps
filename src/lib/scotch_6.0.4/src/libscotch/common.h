@@ -119,11 +119,13 @@
 #ifdef COMMON_MEMORY_TRACE
 #define memAlloc(size)              memAllocRecord ((size) | 8)
 #define memRealloc(ptr,size)        memReallocRecord ((ptr), ((size) | 8))
-#define memFree(ptr)                (memFreeRecord ((void *) (ptr)), 0)
+/*#define memFree(ptr)                (memFreeRecord ((void *) (ptr)), 0)*/
+#define memFree(ptr)                (memFreeRecord ((void *) (ptr)))
 #else /* COMMON_MEMORY_TRACE */
 #define memAlloc(size)              malloc ((size) | 8) /* For platforms which return NULL for malloc(0) */
 #define memRealloc(ptr,size)        realloc ((ptr),((size) | 8))
-#define memFree(ptr)                (free ((char *) (ptr)), 0)
+/*#define memFree(ptr)                (free ((char *) (ptr)), 0)*/
+#define memFree(ptr)                (free ((char *) (ptr)))
 #endif /* COMMON_MEMORY_TRACE */
 
 #define memSet(ptr,val,siz)         memset ((void *) (ptr), (val), (siz))

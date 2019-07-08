@@ -90,7 +90,7 @@ const KgraphMapMlParam * const        paraptr)    /*+ Method parameters         
 {
   GraphCoarsenMulti * restrict  coarmulttab;
   Gnum                          coarvertnum;      /* Number of current multinode vertex */
-  Gnum                          coarflagval;
+/*  Gnum                          coarflagval;*/
 
   const Anum * restrict const finepfixtax = finegrafptr->pfixtax;
 

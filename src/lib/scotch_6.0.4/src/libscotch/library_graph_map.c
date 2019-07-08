@@ -162,13 +162,13 @@ SCOTCH_Strat * const        straptr)              /*+ Mapping strategy          
   LibMapping * restrict lmapptr;
   Anum *                pfixtax;
   Gnum                  baseval;
-  Anum *                parttax;                  /* Partition array                      */
+/*  Anum *                parttax;                  *//* Partition array                      */
   Anum *                parotax;                  /* Old partition array                  */
   Gnum                  crloval;                  /* Coefficient load for regular edges   */
   Gnum                  cmloval;                  /* Coefficient load for migration edges */
   const Gnum *          vmlotax;                  /* Vertex migration cost array          */
-  Gnum                  vertnum;
-  Gnum                  vertnnd;
+/*  Gnum                  vertnum;*/
+/*  Gnum                  vertnnd;*/
 #ifdef SCOTCH_DEBUG_LIBRARY1
   Gnum                  vertnbr;
 #endif /* SCOTCH_DEBUG_LIBRARY1 */
@@ -644,7 +644,7 @@ const double                kbalval)              /*+ Desired imbalance ratio   
   char                kbaltab[64];
   char                kmovtab[64];
   char                mvrttab[64];
-  Gunum               parttmp;                    /* "Unsigned" so that ">>" will always insert "0"s */
+/*  Gunum               parttmp;                    *//* "Unsigned" so that ">>" will always insert "0"s */
   const char *        difkptr;
   const char *        difsptr;
   const char *        exasptr;

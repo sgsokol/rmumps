@@ -90,7 +90,7 @@ FILE * const                  stream)             /*+ Input stream  +*/
   Gnum *                mappfiletab;              /* Pointer to mapping data read from file   */
   Graph *               grafptr;
   Gnum                  vertnum;
-  Gnum                  i, j;
+/*  Gnum                  i, j;*/
 
   grafptr = (Graph *) actgrafptr;
   memSet (parttab, ~0, grafptr->vertnbr * sizeof (Anum)); /* Pre-initialize the partition array */

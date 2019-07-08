@@ -75,7 +75,7 @@ Hgraph * restrict const       indgrafptr)         /* Pointer to induced halo gra
   const Gnum * restrict const orgverttax = orggrafptr->s.verttax;
   const Gnum * restrict const orgvendtax = orggrafptr->s.vendtax;
   const Gnum * restrict const orgvelotax = orggrafptr->s.velotax;
-  const Gnum * restrict const orgvnumtax = orggrafptr->s.vnumtax;
+/*  const Gnum * restrict const orgvnumtax = orggrafptr->s.vnumtax;*/
   const Gnum * restrict const orgedgetax = orggrafptr->s.edgetax;
   Gnum * restrict const       indvnhdtax = indgrafptr->vnhdtax;
   Gnum * restrict const       indverttax = indgrafptr->s.verttax;

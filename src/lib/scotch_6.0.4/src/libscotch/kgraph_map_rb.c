@@ -115,13 +115,13 @@ const KgraphMapRbParam * restrict const paraptr)
   Graph * restrict              indgrafptr;       /* Pointer to top-level graph without fixed vertices */
   KgraphMapRbVflo * restrict    vflotab;          /* Array of fixed vertex load slots                  */
   Anum                          vflonbr;          /* Number of fixed vertex load slots                 */
-  Gnum                          vertnum;
+/*  Gnum                          vertnum;*/
   int                           o;
 
-  Gnum * const                frontab = grafptr->frontab;
-  const Gnum * restrict const verttax = grafptr->s.verttax;
-  const Gnum * restrict const vendtax = grafptr->s.vendtax;
-  const Gnum * restrict const edgetax = grafptr->s.edgetax;
+/*  Gnum * const                frontab = grafptr->frontab;*/
+/*  const Gnum * restrict const verttax = grafptr->s.verttax;*/
+/*  const Gnum * restrict const vendtax = grafptr->s.vendtax;*/
+/*  const Gnum * restrict const edgetax = grafptr->s.edgetax;*/
 
   grafptr->kbalval = paraptr->kbalval;            /* Store last k-way imbalance ratio */
 
@@ -443,7 +443,7 @@ const Gnum                  vfixnbr,              /*+ Number of fixed vertices i
 const Anum * restrict const pfixtax,              /*+ Array of fixed vertex terminal domains +*/
 const Anum                  vflonbr)              /*+ Number of fixed vertex load slots      +*/
 {
-  ArchDom                         domndat;
+/*  ArchDom                         domndat;*/
   /*Anum                            domnmax;*/
   Anum                            domnnum;
   Gnum                            vertnum;
@@ -568,7 +568,7 @@ const Gnum * restrict const             vflowgttab) /*+ Array of vertex weight b
   const Arch * restrict const     archptr    = dataptr->mappptr->archptr;
   const Gnum * restrict const     orgverttax = dataptr->grafptr->verttax;
   const Gnum * restrict const     orgvendtax = dataptr->grafptr->vendtax;
-  const Gnum * restrict const     orgvelotax = dataptr->grafptr->velotax;
+/*  const Gnum * restrict const     orgvelotax = dataptr->grafptr->velotax;*/
   const Gnum * restrict const     orgedgetax = dataptr->grafptr->edgetax;
   const Gnum * restrict const     orgedlotax = dataptr->grafptr->edlotax;
   const Mapping * restrict const  oldmappptr = dataptr->r.mappptr;
