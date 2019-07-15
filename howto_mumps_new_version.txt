@@ -1,0 +1,49 @@
+# 2019-07-10 sokol@insa-toulouse.fr
+# steps to pass from an old version of MUMPS in rmumps top a new version
+
+# preliminary definitions in sh
+vo=5.1.2
+vn=5.2.1
+psrc=/usr/local/src # prefix source
+dsrc=$psrc/MUMPS_"$vn"
+pdst=~/dev/R/rcpp-pkgs/rmumps/src/lib # prefix destination
+ddst=$pdst/MUMPS_"$vn"
+
+# get original mumps
+(cd $psrc && wget http://mumps.enseeiht.fr/MUMPS_"$vn".tar.gz && tar -zxf MUMPS_"$vn".tar.gz)
+
+# transfer needed files to rmumps
+mkdir -p $pdst/MUMPS_"$vn"
+for f in $pdst/MUMPS_"$vo"/*; do
+   fb=$(basename $f)
+   cp -a $psrc/MUMPS_"$vn"/$fb $pdst/MUMPS_"$vn"/
+done
+cp -a $pdst/MUMPS_"$vo"/Makefile.inc $pdst/MUMPS_"$vn"/
+
+# remove s, c, z files (leave only d)
+wd=$pdst/MUMPS_"$vn"/src
+for f in $wd/s*.F; do
+   fb=$(basename $f) # base
+   fs="${fb:1}" # short name without first letter
+   if [ -e $wd/"d$fs" -a -e $wd/"c$fs" -a -e $wd/"z$fs" ]; then
+      echo $fb
+      echo rm -f $wd/{s,c,z}"$fs"
+      rm -f $wd/{s,c,z}"$fs"
+   fi
+done
+
+# patch files that were modified between orig and rmumps versions
+cd $pdst/MUMPS_"$vo"
+mkdir -p /tmp/patch/
+find -type f | while read f; do
+   fb=$(basename $f)
+   echo $f
+   [ -e $psrc/MUMPS_"$vo"/$f -a -e $pdst/MUMPS_"$vn"/$f ] && ! cmp -s $psrc/MUMPS_"$vo"/$f $f || continue
+   # original version exists and different
+   diff -u $psrc/MUMPS_"$vo"/$f $f > /tmp/patch/$fb.patch
+   # apply the patch to the new version of $f
+   patch $pdst/MUMPS_"$vn"/$f /tmp/patch/$fb.patch
+done
+
+# see rejected patches and edit by hand
+find $pdst/MUMPS_"$vn" -name '*'.rej > /tmp/rej.txt
