@@ -60,7 +60,7 @@
 /*
 **  The defines and includes.
 */
-
+#define YY_NO_INPUT /* ssg */
 #define PARSER_LL
 
 #include "module.h"

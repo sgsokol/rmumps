@@ -14,10 +14,10 @@
 #include "metislib.h"
 
 #define FRENAME(name, dargs, cargs, name1, name2, name3, name4)   \
-  int name1 dargs { return name cargs; }                          \
-  int name2 dargs { return name cargs; }                          \
-  int name3 dargs { return name cargs; }                          \
-  int name4 dargs { return name cargs; }
+  void name1 dargs { return name cargs; }                          \
+  void name2 dargs { return name cargs; }                          \
+  void name3 dargs { return name cargs; }                          \
+  void name4 dargs { return name cargs; }
 
 
 FRENAME(

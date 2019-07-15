@@ -14,3 +14,4 @@
 get_cnst <- function(s) {
     .Call("_rmumps_get_cnst", s)
 }
+

@@ -1,8 +1,8 @@
-Version 5.1.2-8
+Version 5.2.1-1
 ===============
 
-* 2019-07-04
- - fixed LTO issues signaled by CRAN team;
+* 2019-07-15
+ - upgrade to MUMPS-5.2.1
  - removed compile test on Mac OS;
  
 VVersion 5.1.2-7
