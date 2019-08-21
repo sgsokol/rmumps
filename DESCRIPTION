@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.2.1-1
-Date: 2019-07-15
+Version: 5.2.1-4
+Date: 2019-08-21
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role="ctb"),
@@ -53,7 +53,8 @@ Description: Some basic features of MUMPS (Multifrontal Massively Parallel
          MUMPS method was first described in Amestoy et al. (2001) <doi:10.1137/S0895479899358194>
          and Amestoy et al. (2006) <doi:10.1016/j.parco.2005.07.004>.
 License: GPL (>= 2)
-Imports: methods, Rcpp (>= 0.12.0)
+Depends: methods
+Imports: Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
 SystemRequirements: C++11, GNU Make
 NeedsCompilation: yes

@@ -68,11 +68,11 @@
 
 FORTRAN (                                       \
 SCOTCHFSTRATINIT, scotchfstratinit, (           \
-SCOTCH_Strat * const        stratptr,           \
+double * const        stratptr,           \
 int * const                 revaptr),           \
 (stratptr, revaptr))
 {
-  *revaptr = SCOTCH_stratInit (stratptr);
+  *revaptr = SCOTCH_stratInit ((SCOTCH_Strat *) stratptr); /* ssg */
 }
 
 /*
@@ -81,10 +81,10 @@ int * const                 revaptr),           \
 
 FORTRAN (                                       \
 SCOTCHFSTRATEXIT, scotchfstratexit, (           \
-SCOTCH_Strat * const        stratptr),          \
+double * const        stratptr),          \
 (stratptr))
 {
-  SCOTCH_stratExit (stratptr);
+  SCOTCH_stratExit ((SCOTCH_Strat *) stratptr); /* ssg */
 }
 
 /*

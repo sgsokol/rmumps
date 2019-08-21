@@ -2330,9 +2330,6 @@ C
      &     NbRecords_LRB_TYPE
       INTEGER:: size_array1,size_array2,dummy,allocok
       INTEGER:: err,i1,NbSubRecords,Local_NbRecords
-      IF (.FALSE.) THEN ! ssg !
-            Local_SIZE_GEST=MYID
-      ENDIF
       VARIABLES_LRB_TYPE(1)="Q"
       VARIABLES_LRB_TYPE(2)="R"
       VARIABLES_LRB_TYPE(3)="LRFORM"
@@ -2932,9 +2929,6 @@ C
      &     NbRecords_DIAG_BLOCK_TYPE
       INTEGER:: size_array1,dummy,allocok
       INTEGER:: err,i1,NbSubRecords,Local_NbRecords
-      IF (.FALSE.) THEN ! ssg !
-            Local_SIZE_GEST=MYID
-      ENDIF
       VARIABLES_DIAG_BLOCK_TYPE(1)="DIAG_BLOCK"
       SIZE_VARIABLES_DIAG_BLOCK_TYPE(:)=0_8
       SIZE_GEST_DIAG_BLOCK_TYPE(:)=0

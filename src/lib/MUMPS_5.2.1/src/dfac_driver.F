@@ -282,8 +282,9 @@ C     --  KEEP8(24) can now then be reset safely
       ENDIF
 C     Compute sum of LWK_USER provided by user 
       LWK_USER_SUM8 = 0_8
-      CALL MPI_REDUCE ( id%KEEP8(24), LWK_USER_SUM8, 1, MPI_INTEGER8,
-     &                  MPI_SUM, MASTER, id%COMM, IERR )
+!      CALL MPI_REDUCE ( id%KEEP8(24), LWK_USER_SUM8, 1, MPI_INTEGER8,
+!     &                  MPI_SUM, MASTER, id%COMM, IERR )
+      LWK_USER_SUM8=id%KEEP8(24) ! ssg !
 C
 C     KEEP8(26) might be modified
 C       (element entry format) 
@@ -1853,8 +1854,9 @@ C       and pass id instead
 C       NZ_locMAX8 gives as a maximum buffer size (send/recv) used
 C        an upper bound to limit buffers on small matrices
 C       ---------------------------------------------------
-       CALL MPI_ALLREDUCE(id%KEEP8(29), NZ_locMAX8, 1, MPI_INTEGER8,
-     &                   MPI_MAX, id%COMM_NODES, IERR)
+!       CALL MPI_ALLREDUCE(id%KEEP8(29), NZ_locMAX8, 1, MPI_INTEGER8,
+!     &                   MPI_MAX, id%COMM_NODES, IERR)
+       NZ_locMAX8 = id%KEEP8(29) ! ssg !
        NBRECORDS = KEEP(39)
        IF (NZ_locMAX8 .LT. int(NBRECORDS,8)) THEN
             NBRECORDS = int(NZ_locMAX8)
@@ -1929,10 +1931,12 @@ C       ------------------------------
 C     --------------------------
 C     Put into some info/infog ?
 C     --------------------------
-      CALL MPI_REDUCE( NSEND8, NSEND_TOT8, 1, MPI_INTEGER8,
-     &                 MPI_SUM, MASTER, id%COMM, IERR )
-      CALL MPI_REDUCE( NLOCAL8, NLOCAL_TOT8, 1, MPI_INTEGER8,
-     &                 MPI_SUM, MASTER, id%COMM, IERR )
+!      CALL MPI_REDUCE( NSEND8, NSEND_TOT8, 1, MPI_INTEGER8,
+!     &                 MPI_SUM, MASTER, id%COMM, IERR )
+!      CALL MPI_REDUCE( NLOCAL8, NLOCAL_TOT8, 1, MPI_INTEGER8,
+!     &                 MPI_SUM, MASTER, id%COMM, IERR )
+      NSEND_TOT8=NSEND8 ! ssg !
+      NLOCAL_TOT8=NLOCAL8 ! ssg !
       IF ( PROKG ) THEN
         WRITE(MPG,125) NLOCAL_TOT8, NSEND_TOT8
       END IF
@@ -2611,9 +2615,10 @@ C     Initialize RINFO(4) in case BLR was not activated
 C 
 C  Should work even if the master does some work
 C
-      CALL MPI_REDUCE( RINFO(2), RINFOG(2), 2,
-     &                 MPI_DOUBLE_PRECISION,
-     &                 MPI_SUM, MASTER, id%COMM, IERR)
+!      CALL MPI_REDUCE( RINFO(2), RINFOG(2), 2,
+!     &                 MPI_DOUBLE_PRECISION,
+!     &                 MPI_SUM, MASTER, id%COMM, IERR)
+      CALL MUMPS_COPY_DOUBLE_PRECISION( RINFO(2), RINFOG(2), 2) ! ssg !
 C     Reduce needed to dimension small working array
 C     on all procs during DMUMPS_GATHER_SOLUTION
       KEEP(247) = 0
@@ -3323,8 +3328,9 @@ C  Local
 C
       CALL MUMPS_REDUCEI8( VAL, MAX_VAL, MPI_MAX, MASTER, COMM)
       LOC_VAL = dble(VAL)/dble(NSLAVES)
-      CALL MPI_REDUCE( LOC_VAL, AVG_VAL, 1, MPI_DOUBLE_PRECISION,
-     &                 MPI_SUM, MASTER, COMM, IERR )
+!      CALL MPI_REDUCE( LOC_VAL, AVG_VAL, 1, MPI_DOUBLE_PRECISION,
+!     &                 MPI_SUM, MASTER, COMM, IERR )
+      AVG_VAL=LOC_VAL ! ssg !
       IF (PROKG) THEN
         IF (PRINT_MAXAVG) THEN
           WRITE(MPG,100) " Average", MSG, int(AVG_VAL,8)
@@ -3423,18 +3429,18 @@ C     =================================
             ELSE
               IF (id%MYID.EQ.ID_SCHUR) THEN
 C               Send
-                CALL MPI_SEND(
-     &             id%root%RHS_CNTR_MASTER_ROOT((I-1)*SIZE_SCHUR+1),
-     &             SIZE_SCHUR,
-     &             MPI_DOUBLE_PRECISION,
-     &             MASTER, TAG_SCHUR,
-     &             id%COMM, IERR )
+!                CALL MPI_SEND(
+!     &             id%root%RHS_CNTR_MASTER_ROOT((I-1)*SIZE_SCHUR+1),
+!     &             SIZE_SCHUR,
+!     &             MPI_DOUBLE_PRECISION,
+!     &             MASTER, TAG_SCHUR,
+!     &             id%COMM, IERR ) ! ssg !
               ELSE ! MYID.EQ.MASTER
 C               Receive
-                CALL MPI_RECV( id%REDRHS((I-1)*id%LREDRHS+1),
-     &             SIZE_SCHUR,
-     &             MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
-     &             id%COMM, STATUS, IERR )
+!                CALL MPI_RECV( id%REDRHS((I-1)*id%LREDRHS+1),
+!     &             SIZE_SCHUR,
+!     &             MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
+!     &             id%COMM, STATUS, IERR ) ! ssg !
               ENDIF
             ENDIF
           ENDDO
@@ -3478,19 +3484,19 @@ C         -----------------------------------------
             BL4    = int(min(BL8,SURFSCHUR8-SHIFT8)) ! Size of block
             IF ( id%MYID .eq. ID_SCHUR ) THEN
 C             Send Schur complement
-              CALL MPI_SEND( id%S( SHIFT8 +
-     &          id%PTRFAC(id%IS(id%PTLUST_S(id%STEP(id%KEEP(20)))
-     &                    +4+id%KEEP(IXSZ)))),
-     &          BL4,
-     &          MPI_DOUBLE_PRECISION,
-     &          MASTER, TAG_SCHUR,
-     &          id%COMM, IERR )
+!              CALL MPI_SEND( id%S( SHIFT8 +
+!     &          id%PTRFAC(id%IS(id%PTLUST_S(id%STEP(id%KEEP(20)))
+!     &                    +4+id%KEEP(IXSZ)))),
+!     &          BL4,
+!     &          MPI_DOUBLE_PRECISION,
+!     &          MASTER, TAG_SCHUR,
+!     &          id%COMM, IERR ) ! ssg !
             ELSE IF ( id%MYID .eq. MASTER ) THEN
 C             Receive Schur complement
-              CALL MPI_RECV( id%SCHUR(1_8 + SHIFT8),
-     &                     BL4,
-     &                     MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
-     &                     id%COMM, STATUS, IERR )
+!              CALL MPI_RECV( id%SCHUR(1_8 + SHIFT8),
+!     &                     BL4,
+!     &                     MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
+!     &                     id%COMM, STATUS, IERR ) ! ssg !
             END IF
           ENDDO
         END IF
@@ -3510,16 +3516,16 @@ C       2.1: We first centralize Schur complement into id%SCHUR
           ELSE
             IF (id%MYID.EQ.ID_SCHUR) THEN
 C             Send
-              CALL MPI_SEND( id%S(ISCHUR_SRC), ROW_LENGTH,
-     &        MPI_DOUBLE_PRECISION,
-     &        MASTER, TAG_SCHUR,
-     &        id%COMM, IERR )
+!              CALL MPI_SEND( id%S(ISCHUR_SRC), ROW_LENGTH,
+!     &        MPI_DOUBLE_PRECISION,
+!     &        MASTER, TAG_SCHUR,
+!     &        id%COMM, IERR ) ! ssg !
             ELSE
 C             Recv
-              CALL MPI_RECV( id%SCHUR(ISCHUR_DEST),
-     &                   ROW_LENGTH,
-     &                   MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
-     &                   id%COMM, STATUS, IERR )
+!              CALL MPI_RECV( id%SCHUR(ISCHUR_DEST),
+!     &                   ROW_LENGTH,
+!     &                   MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
+!     &                   id%COMM, STATUS, IERR ) ! ssg !
             ENDIF
           ENDIF
           ISCHUR_SRC = ISCHUR_SRC+int(LD_SCHUR,8)
@@ -3555,13 +3561,13 @@ C                 of size SIZE_SCHUR.
                   CALL dcopy(SIZE_SCHUR, id%S(ISCHUR_UNS), LD_SCHUR,
      &            id%S(ISCHUR_SYM), 1)
                 ENDIF
-                CALL MPI_SEND(id%S(ISCHUR_SYM), SIZE_SCHUR,
-     &          MPI_DOUBLE_PRECISION, MASTER, TAG_SCHUR,
-     &          id%COMM, IERR )
+!                CALL MPI_SEND(id%S(ISCHUR_SYM), SIZE_SCHUR,
+!     &          MPI_DOUBLE_PRECISION, MASTER, TAG_SCHUR,
+!     &          id%COMM, IERR ) ! ssg !
               ELSE
-                CALL MPI_RECV(id%REDRHS(ISCHUR_DEST),
-     &          SIZE_SCHUR, MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
-     &          id%COMM, STATUS, IERR )
+!                CALL MPI_RECV(id%REDRHS(ISCHUR_DEST),
+!     &          SIZE_SCHUR, MPI_DOUBLE_PRECISION, ID_SCHUR, TAG_SCHUR,
+!     &          id%COMM, STATUS, IERR ) ! ssg !
               ENDIF
             ENDIF
             IF (id%KEEP(50).EQ.0) THEN

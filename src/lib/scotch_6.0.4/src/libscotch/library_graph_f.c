@@ -86,10 +86,10 @@ int * const                 revaptr),           \
 
 FORTRAN (                                       \
 SCOTCHFGRAPHEXIT, scotchfgraphexit, (           \
-SCOTCH_Graph * const        grafptr),           \
+double * const        grafptr),           \
 (grafptr))
 {
-  SCOTCH_graphExit (grafptr);
+  SCOTCH_graphExit ((SCOTCH_Graph *) grafptr); /* ssg */
 }
 
 /*
@@ -186,7 +186,7 @@ int * const                 revaptr),           \
 
 FORTRAN (                                       \
 SCOTCHFGRAPHBUILD, scotchfgraphbuild, (         \
-SCOTCH_Graph * const        grafptr,            \
+double * const        grafptr,            \
 const SCOTCH_Num * const    baseptr,            \
 const SCOTCH_Num * const    vertptr,            \
 const SCOTCH_Num * const    verttab,            \
@@ -201,7 +201,7 @@ int * const                 revaptr),           \
  velotab, vlbltab, edgeptr, edgetab, edlotab,   \
  revaptr))
 {
-  *revaptr = SCOTCH_graphBuild (grafptr, *baseptr, *vertptr, verttab, vendtab,
+  *revaptr = SCOTCH_graphBuild ((SCOTCH_Graph *) grafptr, *baseptr, *vertptr, verttab, vendtab, /* ssg */
                                 velotab, vlbltab, *edgeptr, edgetab, edlotab);
 }
 

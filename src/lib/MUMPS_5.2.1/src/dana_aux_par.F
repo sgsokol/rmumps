@@ -230,9 +230,6 @@ C
      &           '("Parallel ordering tool set to PT-SCOTCH.")')
          RETURN
 #else
-         IF (.FALSE.) THEN ! ssg !
-               ord%ORDTOOL=0
-         ENDIF
 #endif
 #if defined(parmetis) || defined(parmetis3)
          IF(id%N.LE.100) THEN
@@ -350,9 +347,6 @@ C
 #if defined(parmetis) || defined(parmetis3)
       INTEGER                       :: IERR
 #endif
-      IF (.FALSE.) THEN ! ssg !
-            WORK=0
-      ENDIF
       IF (ord%ORDTOOL .EQ. 1) THEN
 #if defined(ptscotch)
          CALL DMUMPS_PTSCOTCH_ORD(id, ord, WORK)
@@ -974,12 +968,14 @@ C
             MYNCLIQUES = MYNCLIQUES+1
          END IF
       END DO
-      CALL MPI_REDUCE(MYNVARS, TOTNVARS, 1, MPI_INTEGER8,
-     &     MPI_SUM, 0, id%COMM, IERR)
+!      CALL MPI_REDUCE(MYNVARS, TOTNVARS, 1, MPI_INTEGER8, ! ssg !
+!     &     MPI_SUM, 0, id%COMM, IERR)
+      TOTNVARS=MYNVARS ! ssg !
       CALL MUMPS_REALLOC(NCLIQUES, NPROCS, id%INFO,
      &     LP, STRING='NCLIQUES', MEMCNT=MEMCNT, ERRCODE=-7)
-      CALL MPI_GATHER(MYNCLIQUES, 1, MPI_INTEGER, NCLIQUES(1), 1, 
-     &     MPI_INTEGER, 0, id%COMM, IERR)
+!      CALL MPI_GATHER(MYNCLIQUES, 1, MPI_INTEGER, NCLIQUES(1), 1, 
+!     &     MPI_INTEGER, 0, id%COMM, IERR)
+      NCLIQUES(1) = MYNCLIQUES ! ssg !
       IF(id%MYID.EQ.0) THEN
          TOTNCLIQUES = sum(NCLIQUES)
          CALL MUMPS_I8REALLOC(LVARPT, TOTNCLIQUES+1, id%INFO,
@@ -1107,12 +1103,13 @@ C
          BUF_PE1 => IPE
          BUF_NV1 => NV
          DO PROC=0, NPROCS-2
-            CALL MPI_IRECV(BUF_PE2(1), ord%LAST(PROC+2)-
-     &           ord%FIRST(PROC+2)+1, MPI_INTEGER8, PROC+1, PROC+1,
-     &           id%COMM, RHANDPE, IERR)
-            CALL MPI_IRECV(BUF_NV2(1), ord%LAST(PROC+2)-
-     &           ord%FIRST(PROC+2)+1, MPI_INTEGER, PROC+1, PROC+1,
-     &           id%COMM, RHANDNV, IERR)
+            ! ssg !
+!            CALL MPI_IRECV(BUF_PE2(1), ord%LAST(PROC+2)-
+!     &           ord%FIRST(PROC+2)+1, MPI_INTEGER8, PROC+1, PROC+1,
+!     &           id%COMM, RHANDPE, IERR)
+!            CALL MPI_IRECV(BUF_NV2(1), ord%LAST(PROC+2)-
+!     &           ord%FIRST(PROC+2)+1, MPI_INTEGER, PROC+1, PROC+1,
+!     &           id%COMM, RHANDNV, IERR)
             DO I=1, ord%LAST(PROC+1)-ord%FIRST(PROC+1)+1
                GLOB_IDX = ord%PERITAB(I+ord%FIRST(PROC+1)-1)
                IF(BUF_PE1(I) .GT. 0) THEN
@@ -1458,8 +1455,9 @@ C
      &     MPI_SUM, id%COMM, IERR)
       id%KEEP8(127) = id%KEEP8(127)+3*id%N
       id%KEEP8(126) = id%KEEP8(127)-2*id%N
-      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
-     &     MPI_INTEGER8, id%COMM, IERR)
+!      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
+!     &     MPI_INTEGER8, id%COMM, IERR)
+      RCVCNT(1)=SNDCNT(1) ! ssg !
       CALL MUMPS_I8DEALLOC(SNDCNT, MEMCNT=MEMCNT)
       RDISPL(:) = MAXS
       CALL MPI_REDUCE_SCATTER ( SIPES(1,1), LENG(1), RDISPL(1), 
@@ -1671,8 +1669,9 @@ C
             END IF
          END IF
       END DO
-      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
-     &     MPI_INTEGER8, id%COMM, IERR)
+!      CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER8, RCVCNT(1), 1,
+!     &     MPI_INTEGER8, id%COMM, IERR)
+      RCVCNT(1)=SNDCNT(1) ! ssg !
       I = ceiling(dble(MAXS)*1.20D0)
       CALL MUMPS_REALLOC(LENG, max(I,1), id%INFO,
      &        LP, STRING='B_L_G:LENG', MEMCNT=MEMCNT, ERRCODE=-7)
@@ -1832,8 +1831,9 @@ C
       IF(MEMCNT .GT. MAXMEM) MAXMEM=MEMCNT
       IPE(NROWS_LOC+2:NROWS_LOC+HALO_SIZE+1) = IPE(NROWS_LOC+1)
       GSIZE = NROWS_LOC + HALO_SIZE
-      CALL MPI_GATHER(TOP_CNT, 1, MPI_INTEGER8, RCVCNT(1), 1, 
-     & MPI_INTEGER8, 0, id%COMM, IERR)
+!      CALL MPI_GATHER(TOP_CNT, 1, MPI_INTEGER8, RCVCNT(1), 1, 
+!     & MPI_INTEGER8, 0, id%COMM, IERR)
+      RCVCNT(1)=TOP_CNT ! ssg !
       IF(MYID.EQ.0) THEN
          NEW_LOCNNZ = sum(RCVCNT)
          top_graph%NZ_LOC = NEW_LOCNNZ
@@ -1959,8 +1959,9 @@ C
             write(*,*) "Allocation error of RCVCNT in DMUMPS_SEND_BUF"
             return
          ENDIF
-         CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER, RCVCNT(1), 1,
-     &        MPI_INTEGER, COMM, IERR)
+!         CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER, RCVCNT(1), 1,
+!     &        MPI_INTEGER, COMM, IERR) ! ssg !
+         RCVCNT(1)=SNDCNT(1)
          DO I=1, NPROCS
             IF(SNDCNT(I) .GT. 0) THEN
                TMPI => APNT(I)%BUF(:)

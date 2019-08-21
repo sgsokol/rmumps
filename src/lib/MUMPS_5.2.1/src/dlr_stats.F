@@ -160,9 +160,6 @@ C
      &            LOC_CB_DEMOTING_TIME, LOC_FRPANELS_TIME,
      &            LOC_FRFRONTS_TIME, LOC_TRSM_TIME, LOC_LR_MODULE_TIME,
      &            LOC_FAC_I_TIME, LOC_FAC_MQ_TIME, LOC_FAC_SQ_TIME
-        IF (.FALSE.) THEN ! ssg !
-          ACC_UPDT_TIME = dble(INODE)
-        ENDIF
         ACC_UPDT_TIME = ACC_UPDT_TIME + LOC_FACTO_TIME
         ACC_PROMOTING_TIME = ACC_PROMOTING_TIME + LOC_PROMOTING_TIME
         ACC_DEMOTING_TIME = ACC_DEMOTING_TIME + LOC_DEMOTING_TIME
@@ -179,18 +176,12 @@ C
       SUBROUTINE UPDATE_CB_DEMOTING_TIME(INODE, LOC_CB_DEMOTING_TIME)
           INTEGER, INTENT(IN) :: INODE
           DOUBLE PRECISION, INTENT(IN) :: LOC_CB_DEMOTING_TIME
-          IF (.FALSE.) THEN ! ssg !
-            ACC_CB_DEMOTING_TIME = dble(INODE)
-          ENDIF
           ACC_CB_DEMOTING_TIME = ACC_CB_DEMOTING_TIME + 
      &      LOC_CB_DEMOTING_TIME
       END SUBROUTINE UPDATE_CB_DEMOTING_TIME
       SUBROUTINE UPDATE_UPDT_TIME(INODE, LOC_UPDT_TIME)
           INTEGER, INTENT(IN) :: INODE
           DOUBLE PRECISION, INTENT(IN) :: LOC_UPDT_TIME
-          IF (.FALSE.) THEN ! ssg !
-            ACC_UPDT_TIME = dble(INODE)
-          ENDIF
           ACC_UPDT_TIME = ACC_UPDT_TIME + LOC_UPDT_TIME
       END SUBROUTINE UPDATE_UPDT_TIME
       SUBROUTINE UPDATE_UPDT_TIME_OUT(LOC_UPDT_TIME_OUT)
@@ -204,9 +195,6 @@ C
       SUBROUTINE UPDATE_PROMOTING_TIME(INODE, LOC_PROMOTING_TIME)
           INTEGER, INTENT(IN) :: INODE
           DOUBLE PRECISION, INTENT(IN) :: LOC_PROMOTING_TIME
-          IF (.FALSE.) THEN ! ssg !
-            ACC_PROMOTING_TIME = dble(INODE)
-          ENDIF
           ACC_PROMOTING_TIME = ACC_PROMOTING_TIME + 
      &      LOC_PROMOTING_TIME
       END SUBROUTINE UPDATE_PROMOTING_TIME
@@ -671,9 +659,6 @@ C
      &           NPROW, NPCOL, MYID
         DOUBLE PRECISION :: COST, COST_PER_PROC
         INTEGER, PARAMETER :: LEVEL3 = 3
-        IF (.FALSE.) THEN ! ssg !
-          COST = dble(MYID)
-        ENDIF
         CALL MUMPS_GET_FLOPS_COST(NFRONT, NPIV, NFRONT, KEEP50, LEVEL3, 
      &                          COST)
         COST_PER_PROC = dble(int( COST,8) / int(NPROW * NPCOL,8))
@@ -682,9 +667,6 @@ C
       END SUBROUTINE UPDATE_FLOPS_STATS_ROOT
       SUBROUTINE INIT_STATS_FRONT(NFRONT,INODE,NASS,NCB) 
         INTEGER,INTENT(IN) :: NFRONT,INODE,NASS,NCB
-        IF (.FALSE.) THEN ! ssg !
-          FRONT_L11_BLR_SAVINGS = dble(INODE+NFRONT+NASS+NCB)
-        ENDIF
         FRONT_L11_BLR_SAVINGS = 0.D0 
         FRONT_U11_BLR_SAVINGS = 0.D0 
         FRONT_L21_BLR_SAVINGS = 0.D0 
@@ -770,9 +752,6 @@ C
      &                       SYM, INODE, NELIM)
         INTEGER,INTENT(IN) :: NASS, NCB, SYM, INODE, NELIM
         DOUBLE PRECISION :: FRONT_BLR_SAVINGS, FRONT_FR_MRY
-        IF (.FALSE.) THEN ! ssg !
-          FRONT_BLR_SAVINGS = dble(INODE)
-        ENDIF
         IF (SYM .GT. 0) THEN
            FRONT_BLR_SAVINGS  = FRONT_L11_BLR_SAVINGS 
      &                        + FRONT_L21_BLR_SAVINGS
@@ -793,9 +772,6 @@ C
       SUBROUTINE STATS_COMPUTE_MRY_FRONT_TYPE2(NASS, NFRONT,
      &                       SYM, INODE, NELIM)
         INTEGER,INTENT(IN) :: NASS, NFRONT, SYM, INODE, NELIM
-        IF (.FALSE.) THEN ! ssg !
-          ACC_FR_MRY = dble(INODE)
-        ENDIF
         IF (SYM .GT. 0) THEN
           ACC_FR_MRY   = ACC_FR_MRY +
      &                       dble(NASS-NELIM) *
@@ -813,9 +789,6 @@ C
         INTEGER,INTENT(IN) :: NROWS, NCOLS, SYM, NIV, INODE,
      &                        FRONT_CB_BLR_SAVINGS
         DOUBLE PRECISION :: MRY_CB_FR
-        IF (.FALSE.) THEN ! ssg !
-          MRY_CB_FR = dble(INODE+NIV)
-        ENDIF
         IF (SYM.EQ.0) THEN
           MRY_CB_FR = dble(NCOLS)*dble(NROWS)
         ELSE
@@ -934,9 +907,6 @@ C
      &                  KEEP50, INODE)
           INTEGER,INTENT(IN) :: NFRONT, KEEP50, NASS, NPIV, INODE
           DOUBLE PRECISION   :: FLOP_FR_FACTO
-          IF (.FALSE.) THEN ! ssg !
-            FLOP_FR_FACTO = dble(INODE)
-          ENDIF
           CALL MUMPS_GET_FLOPS_COST(NFRONT, NPIV, NASS, 
      &                              KEEP50, 1, FLOP_FR_FACTO)
           ACC_FLOP_FR_FACTO   = ACC_FLOP_FR_FACTO   + FLOP_FR_FACTO
@@ -961,9 +931,6 @@ C
      &                KEEP50, INODE, NELIM)
           INTEGER,INTENT(IN) :: NFRONT, KEEP50, NASS, INODE, NELIM
           DOUBLE PRECISION   :: FLOP_FR_FACTO
-          IF (.FALSE.) THEN ! ssg !
-            FLOP_FR_FACTO = dble(INODE)
-          ENDIF
           CALL MUMPS_GET_FLOPS_COST(NFRONT, NASS-NELIM, NASS, 
      &                              KEEP50, 2, FLOP_FR_FACTO)
           ACC_FLOP_FR_FACTO = ACC_FLOP_FR_FACTO + FLOP_FR_FACTO
@@ -973,9 +940,6 @@ C
           INTEGER,INTENT(IN) :: NROW1, NCOL1, KEEP50, NASS1, INODE
           DOUBLE PRECISION   :: NROW2, NCOL2, NASS2
           DOUBLE PRECISION   :: FLOP_FR_FACTO
-          IF (.FALSE.) THEN ! ssg !
-            NROW2 = dble(INODE)
-          ENDIF
           NROW2 = dble(NROW1)
           NCOL2 = dble(NCOL1)
           NASS2 = dble(NASS1)
@@ -1007,9 +971,6 @@ C
           INTEGER,INTENT(IN) :: NROW1, NCOL1, KEEP50, NASS1, INODE
           DOUBLE PRECISION   :: NROW2, NCOL2, NASS2
           DOUBLE PRECISION   :: FLOP_FRFRONTS
-          IF (.FALSE.) THEN ! ssg !
-            NROW2 = dble(INODE)
-          ENDIF
           NROW2 = dble(NROW1)
           NCOL2 = dble(NCOL1)
           NASS2 = dble(NASS1)
@@ -1079,10 +1040,6 @@ C
         LOGICAL, INTENT(IN) :: PROKG
         DOUBLE PRECISION :: DKEEP(230)
         LOGICAL PROK
-        IF (.FALSE.) THEN ! ssg !
-              DKEEP(1)=dble(BCKSZ+DEPTH+K472+K475+K478+K480+K481+K483+
-     &    K484+K486+K489+LOCAL+N+NASSMIN+NFRONTMIN+NPROCS+SYM)
-        ENDIF
         PROK = (PROKG.AND.(MPG.GE.0))
         IF (PROK) THEN
         WRITE(MPG,'(/A,A)') 

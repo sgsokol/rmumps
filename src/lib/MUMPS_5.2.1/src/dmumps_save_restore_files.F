@@ -150,7 +150,7 @@ C
       if(id%MYID.EQ.0) THEN
          HASH_MASTER=READ_HASH
       ENDIF
-      call MPI_BCAST(HASH_MASTER,23,MPI_CHARACTER,0,id%COMM,IERR)
+!      call MPI_BCAST(HASH_MASTER,23,MPI_CHARACTER,0,id%COMM,IERR) ! ssg !
       if(HASH_MASTER.ne.READ_HASH) THEN
          id%INFO(1) = -73
          id%INFO(2) = 3

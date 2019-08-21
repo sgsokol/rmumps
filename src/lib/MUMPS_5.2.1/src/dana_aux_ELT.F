@@ -262,6 +262,7 @@ C
 #endif
      &          METIS_OPTIONS(1), OPT_METIS_SIZE,
      &          IKEEP(1:N,2), IKEEP(1:N,1), INFO(1), LP, LPOK)
+#if defined(metis64) /* ssg */
          ELSE IF (METIS_IDX_SIZE .EQ. 64) THEN
            CALL MUMPS_METIS_NODEND_MIXEDto64(N, IPE8, IW2(1),
 #if defined(metis4) || defined(parmetis3)
@@ -273,6 +274,7 @@ C
      &          IKEEP(1:N,2), IKEEP(1:N,1), INFO(1), 
      &          LP, LPOK, KEEP(10), 
      &          LLIW8, .FALSE., .TRUE. )
+#endif
          ELSE
             WRITE(*,*)
      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",

@@ -103,8 +103,9 @@ C
      &                   IERR_MPI)
       INV(1)=DETER_IN
       INV(2)=dble(NEXP_IN)
-      CALL MPI_ALLREDUCE( INV, OUTV, 1, TWO_SCALARS_TYPE,
-     &                    DETERREDUCE_OP, COMM, IERR_MPI)
+!      CALL MPI_ALLREDUCE( INV, OUTV, 1, TWO_SCALARS_TYPE,
+!     &                    DETERREDUCE_OP, COMM, IERR_MPI)
+      OUTV=INV ! ssg !
       CALL MPI_OP_FREE(DETERREDUCE_OP, IERR_MPI)
       CALL MPI_TYPE_FREE(TWO_SCALARS_TYPE, IERR_MPI)
       DETER_OUT = OUTV(1)

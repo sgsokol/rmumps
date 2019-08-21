@@ -190,6 +190,7 @@ C
       ENDIF
       RETURN
       END SUBROUTINE MUMPS_METIS_NODEWND_MIXEDto64
+#if defined(metis64) /* ssg */
       SUBROUTINE MUMPS_METIS_NODEND_MIXEDto64( NCMP, IPE8, IW, NUMFLAG,
      & OPTIONS_METIS, LOPTIONS_METIS, IKEEP2, IKEEP1, INFO,
      & LP, LPOK, KEEP10,
@@ -259,7 +260,8 @@ C
       ENDIF
       RETURN
       END SUBROUTINE MUMPS_METIS_NODEND_MIXEDto64
-#else
+#endif
+#elif defined(metis64) /* ssg */
       SUBROUTINE MUMPS_METIS_NODEND_MIXEDto64( NCMP, IPE8, IW, FRERE,
      & OPTIONS_METIS, LOPTIONS_METIS, IKEEP2, IKEEP1, INFO,
      & LP, LPOK, KEEP10,
@@ -523,6 +525,7 @@ C
       DEALLOCATE(IPTRHALO_I4)
       RETURN
       END SUBROUTINE MUMPS_SCOTCH_KWAY_MIXEDto32
+#if defined(scotch64) /* ssg */
       SUBROUTINE MUMPS_SCOTCH_KWAY_MIXEDto64(NHALO, HALOEDGENBR,
      &     IPTRHALO, JCNHALO,
      &     NBGROUPS, PARTS, LP, LPOK, KEEP10,
@@ -574,6 +577,7 @@ C
       PARTS(1:NHALO) = PARTS(1:NHALO)+1
       RETURN
       END SUBROUTINE MUMPS_SCOTCH_KWAY_MIXEDto64
+#endif
 #endif
 #if defined (metis) || defined (parmetis) || defined (metis4) || defined (parmetis3)
       SUBROUTINE MUMPS_METIS_KWAY_MIXEDto32(NHALO, HALOEDGENBR,
@@ -688,6 +692,7 @@ C
       DEALLOCATE(XADJ)
       RETURN
       END SUBROUTINE MUMPS_PORDF_MIXEDto32
+#if defined(pord64) /* ssg */
       SUBROUTINE MUMPS_PORDF_MIXEDto64( NVTX, NEDGES8, XADJ8, IW,
      &                                  NV, NCMPA, PARENT,
      &                                  INFO, LP, LPOK, KEEP10,
@@ -749,6 +754,7 @@ C
       ENDIF
       RETURN
       END SUBROUTINE MUMPS_PORDF_MIXEDto64
+#endif
       SUBROUTINE MUMPS_PORDF_WND_MIXEDto32( NVTX, NEDGES8,
      &                                      XADJ8, IW,
      &                                      NV, NCMPA, N, PARENT, 
@@ -790,6 +796,7 @@ C
       DEALLOCATE(XADJ)
       RETURN
       END SUBROUTINE MUMPS_PORDF_WND_MIXEDto32
+#if defined(pord64) /* ssg */
       SUBROUTINE MUMPS_PORDF_WND_MIXEDto64( NVTX, NEDGES8,
      &                                      XADJ8, IW,
      &                                      NV, NCMPA, N, PARENT, 
@@ -854,6 +861,7 @@ C
       ENDIF
       RETURN
       END SUBROUTINE MUMPS_PORDF_WND_MIXEDto64
+#endif
 #endif
       SUBROUTINE MUMPS_ANA_WRAP_RETURN()
       RETURN

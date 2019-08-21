@@ -114,8 +114,8 @@ C
         END DO
         IBUF = IBUF + M
       END DO
-      CALL MPI_SEND( BUF, M * N, MPI_DOUBLE_PRECISION,
-     &     DEST, SYMMETRIZE, COMM, IERR )
+!      CALL MPI_SEND( BUF, M * N, MPI_DOUBLE_PRECISION,
+!     &     DEST, SYMMETRIZE, COMM, IERR ) ! ssg !
       RETURN
       END SUBROUTINE DMUMPS_SEND_BLOCK
       SUBROUTINE DMUMPS_RECV_BLOCK( BUF, A, LDA, M, N, COMM, SOURCE )
@@ -126,8 +126,8 @@ C
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
       INTEGER :: STATUS(MPI_STATUS_SIZE)
-      CALL MPI_RECV( BUF(1), M * N, MPI_DOUBLE_PRECISION, SOURCE,
-     &               SYMMETRIZE, COMM, STATUS, IERR )
+!      CALL MPI_RECV( BUF(1), M * N, MPI_DOUBLE_PRECISION, SOURCE,
+!     &               SYMMETRIZE, COMM, STATUS, IERR ) ! ssg !
       IBUF = 1
       DO I = 1, M
         CALL dcopy( N, BUF(IBUF), 1, A(I,1), LDA )

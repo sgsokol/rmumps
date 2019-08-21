@@ -357,13 +357,15 @@ C
            SUMR_LOC = ZERO
           ENDIF
           IF ( id%MYID .eq. MASTER ) THEN
-              CALL MPI_REDUCE( SUMR_LOC, SUMR,
-     &        id%N, MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MASTER,id%COMM, IERR)
+!              CALL MPI_REDUCE( SUMR_LOC, SUMR,
+!     &        id%N, MPI_DOUBLE_PRECISION,
+!     &        MPI_SUM,MASTER,id%COMM, IERR)
+               CALL MUMPS_COPY_DOUBLE_PRECISION( SUMR_LOC, SUMR, id%N ) ! ssg !
           ELSE
-              CALL MPI_REDUCE( SUMR_LOC, DUMMY,
-     &        id%N, MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MASTER,id%COMM, IERR)
+!              CALL MPI_REDUCE( SUMR_LOC, DUMMY,
+!     &        id%N, MPI_DOUBLE_PRECISION,
+!     &        MPI_SUM,MASTER,id%COMM, IERR)
+               CALL MUMPS_COPY_DOUBLE_PRECISION( SUMR_LOC, DUMMY, id%N ) ! ssg !
           END IF
         DEALLOCATE (SUMR_LOC)
       ENDIF
@@ -381,9 +383,9 @@ C
          ENDDO
         ENDIF
       ENDIF
-      CALL MPI_BCAST(ANORMINF, 1,
-     &              MPI_DOUBLE_PRECISION, MASTER,
-     &              id%COMM, IERR )
+!      CALL MPI_BCAST(ANORMINF, 1,
+!     &              MPI_DOUBLE_PRECISION, MASTER,
+!     &              id%COMM, IERR ) ! ssg !
       IF (id%MYID .eq. MASTER) DEALLOCATE (SUMR)
       RETURN
       END SUBROUTINE DMUMPS_ANORMINF

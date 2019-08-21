@@ -321,10 +321,6 @@ C
       INTEGER MAX_ACTIVE_NODES
       INTEGER KEEP(500)
       INTEGER(8) KEEP8(150)
-      IF (.FALSE.) THEN ! ssg !
-            KEEP=0
-            KEEP8=0
-      ENDIF
       MUMPS_GET_POOL_LENGTH = MAX_ACTIVE_NODES + 1 + 3
       RETURN
       END FUNCTION MUMPS_GET_POOL_LENGTH
@@ -353,10 +349,6 @@ C
            LEAF        = LEAF + 1
           ENDIF
       ENDDO
-      IF (.FALSE.) THEN ! ssg !
-            SLAVEF=0
-            KEEP8=0
-      ENDIF
       RETURN
       END SUBROUTINE MUMPS_INIT_POOL_DIST
       SUBROUTINE MUMPS_INIT_NROOT_DIST(N, NBROOT,
@@ -466,9 +458,6 @@ C
       IMPLICIT NONE
       INTEGER, intent(out)::KEEP12
       INTEGER, intent(in)::ICNTL14,KEEP50,KEEP54,ICNTL6,ICNTL8
-      IF (.FALSE.) THEN ! ssg !
-            KEEP12=ICNTL6+ICNTL8+KEEP50+KEEP54
-      ENDIF
       KEEP12 = ICNTL14 
 
       RETURN
@@ -482,8 +471,8 @@ C
       IF (MYID .EQ. ROOT) THEN
         DBLE_VALUE = dble(I8_VALUE)
       ENDIF
-      CALL MPI_BCAST( DBLE_VALUE, 1, MPI_DOUBLE_PRECISION,
-     &                ROOT,  COMM, IERR )
+!      CALL MPI_BCAST( DBLE_VALUE, 1, MPI_DOUBLE_PRECISION,
+!     &                ROOT,  COMM, IERR ) ! ssg !
       I8_VALUE = int( DBLE_VALUE,8)
       RETURN
       END SUBROUTINE MUMPS_BCAST_I8
@@ -496,8 +485,9 @@ C
       DOUBLE PRECISION DIN, DOUT
       DIN =dble(IN)
       DOUT=0.0D0
-      CALL MPI_REDUCE(DIN, DOUT, 1, MPI_DOUBLE_PRECISION,
-     &                   MPI_OP, ROOT, COMM, IERR)
+!      CALL MPI_REDUCE(DIN, DOUT, 1, MPI_DOUBLE_PRECISION,
+!     &                   MPI_OP, ROOT, COMM, IERR)
+      DOUT=DIN
       OUT=int(DOUT,kind=8)
       RETURN
       END SUBROUTINE MUMPS_REDUCEI8
@@ -510,8 +500,9 @@ C
       DOUBLE PRECISION DIN, DOUT
       DIN =dble(IN)
       DOUT=0.0D0
-      CALL MPI_ALLREDUCE(DIN, DOUT, 1, MPI_DOUBLE_PRECISION,
-     &                   MPI_OP, COMM, IERR)
+!      CALL MPI_ALLREDUCE(DIN, DOUT, 1, MPI_DOUBLE_PRECISION,
+!     &                   MPI_OP, COMM, IERR)
+      DOUT = DIN ! ssg !
       OUT=int(DOUT,kind=8)
       RETURN
       END SUBROUTINE MUMPS_ALLREDUCEI8
@@ -757,9 +748,6 @@ C
  116  CONTINUE
       DEALLOCATE(STEP_TO_NODE)
       DEALLOCATE(IPOOL,TNSTK)
-      IF (.FALSE.) THEN ! ssg !
-            SLAVEF=0
-      ENDIF
 
       RETURN
       END SUBROUTINE MUMPS_SORT_STEP
@@ -821,8 +809,8 @@ C
          if(MyID .eq. i) then
             MyNAME_TAB_RCV = MyNAME_TAB
          endif
-         call MPI_BCAST(MyNAME_TAB_RCV,MyNAME_length_RCV,MPI_CHARACTER,
-     &        i,COMM,ierr)
+!         call MPI_BCAST(MyNAME_TAB_RCV,MyNAME_length_RCV,MPI_CHARACTER,
+!     &        i,COMM,ierr) ! ssg !
          SAME_NAME=.FALSE.
          IF(MyNAME_length .EQ. MyNAME_length_RCV) THEN
             DO j=1, MyNAME_length

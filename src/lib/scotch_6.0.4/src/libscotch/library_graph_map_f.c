@@ -239,14 +239,14 @@ int * const                 revaptr),             \
 
 FORTRAN (                                       \
 SCOTCHFGRAPHPART, scotchfgraphpart, (           \
-SCOTCH_Graph * const        grafptr,            \
+double * const        grafptr,            \
 const SCOTCH_Num * const    partptr,            \
-SCOTCH_Strat * const        straptr,            \
+double * const        straptr,            \
 SCOTCH_Num * const          mapptab,            \
 int * const                 revaptr),           \
 (grafptr, partptr, straptr, mapptab, revaptr))
 {
-  *revaptr = SCOTCH_graphPart (grafptr, *partptr, straptr, mapptab);
+  *revaptr = SCOTCH_graphPart ((SCOTCH_Graph *)grafptr, *partptr, (SCOTCH_Strat *) straptr, mapptab); /* ssg */
 }
 
 /*

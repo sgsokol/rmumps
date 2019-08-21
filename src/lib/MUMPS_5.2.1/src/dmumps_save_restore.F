@@ -970,7 +970,7 @@ C
             call date_and_time(date,time,zone,values)
             hash=trim(date)//trim(time)//trim(zone)
          ENDIF
-         CALL MPI_BCAST( hash, 23, MPI_CHARACTER, 0, id%COMM, ierr )
+!         CALL MPI_BCAST( hash, 23, MPI_CHARACTER, 0, id%COMM, ierr ) ! ssg !
          write(unit,iostat=err) hash
          if(err.ne.0) THEN
             id%INFO(1) = -72

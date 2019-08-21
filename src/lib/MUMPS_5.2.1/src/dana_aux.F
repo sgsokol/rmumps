@@ -401,12 +401,14 @@ C
                      IWL1(I) = 1
                   ENDDO
                   IF (PORD_INT_SIZE .EQ. 64) THEN
+#if defined(pord64) /* ssg */
                     CALL MUMPS_PORDF_WND_MIXEDto64(NCMP, IWFR8-1_8,
      &                   IPE, IW,
      &                   IWL1, NCMPA, N, PARENT, 
      &                   INFO(1), LP, LPOK, KEEP(10),
      &                   INPLACE64_GRAPH_COPY
      &                   )
+#endif
                   ELSE IF (PORD_INT_SIZE .EQ. 32) THEN
                     CALL MUMPS_PORDF_WND_MIXEDto32(NCMP, IWFR8-1_8,
      &                   IPE, IW,
@@ -433,12 +435,14 @@ C
                   ENDDO
                ELSE  
                   IF (PORD_INT_SIZE.EQ.64) THEN
+#if defined(pord64) /* ssg */
                   CALL MUMPS_PORDF_MIXEDto64(NCMP, IWFR8-1_8, IPE,
      &                 IW(1), 
      &                 IWL1, NCMPA, PARENT, 
      &                 INFO(1), LP, LPOK, KEEP(10),
      &                 INPLACE64_GRAPH_COPY
      &                 )
+#endif
                   ELSE IF (PORD_INT_SIZE.EQ.32) THEN
                   CALL MUMPS_PORDF_MIXEDto32(NCMP, IWFR8-1_8, IPE,
      &                 IW(1), 
@@ -629,6 +633,7 @@ C
      &           NCMP, IPE, IW(1), NUMFLAG, 
      &           METIS_OPTIONS(1), OPT_METIS_SIZE,
      &           IKEEP2, IKEEP1, INFO(1), LP, LPOK )
+#if defined(metis64) /* ssg */
             ELSE IF (METIS_IDX_SIZE .EQ.64) THEN
               CALL MUMPS_METIS_NODEND_MIXEDto64(
      &           NCMP, IPE, IW(1), NUMFLAG, 
@@ -636,6 +641,7 @@ C
      &           IKEEP2, IKEEP1, INFO(1), LP,LPOK,KEEP(10), 
      &           LIW8, INPLACE64_GRAPH_COPY,
      &           INPLACE64_RESTORE_GRAPH)
+#endif
            ELSE
               WRITE(*,*)
      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
@@ -654,6 +660,7 @@ C
      &        NCMP, IPE, IW(1), FRERE,
      &        METIS_OPTIONS(1), OPT_METIS_SIZE,
      &        IKEEP2, IKEEP1, INFO(1), LP, LPOK )
+#if defined(metis64) /* ssg */
          ELSE IF (METIS_IDX_SIZE .EQ. 64) THEN
            CALL MUMPS_METIS_NODEND_MIXEDto64(
      &        NCMP, IPE, IW(1),FRERE,
@@ -661,6 +668,7 @@ C
      &        IKEEP2, IKEEP1, INFO(1), LP,LPOK,KEEP(10),
      &        LIW8, INPLACE64_GRAPH_COPY,
      &        INPLACE64_RESTORE_GRAPH)
+#endif
         ELSE
               IF (LPOK) WRITE(LP,*)
      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
@@ -1428,9 +1436,6 @@ C
       INTEGER DADI
       LOGICAL AMALG_TO_father_OK
 #endif
-      IF (.FALSE.) THEN ! ssg !
-            NAMALGMAX=0
-      ENDIF
       AMALG_COUNT = 0
       DO 10 I=1,N
         CUMUL(I)= 0
@@ -2487,10 +2492,6 @@ C
       INCLUDE 'mpif.h'
       INTEGER MASTER, MPG
       PARAMETER( MASTER = 0 )
-      IF (.FALSE.) THEN ! ssg !
-            COMM=0
-            RINFO=0
-      ENDIF
       MPG = ICNTL(3)
       IF ( MYID.eq.MASTER.and.MPG.GT.0.AND.ICNTL(4).GE.2) THEN
        WRITE(MPG, 99992) INFO(1), INFO(2),
@@ -3128,9 +3129,6 @@ C
       INTEGER NSLAVES, KEEP2, KEEP48, KEEP50
       INTEGER (8) :: KEEP821
       INTEGER(8) KEEP2_SQUARE, NSLAVES8
-      IF (.FALSE.) THEN ! ssg !
-            KEEP48=0
-      ENDIF
       NSLAVES8= int(NSLAVES,8)
       KEEP2_SQUARE = int(KEEP2,8) * int(KEEP2,8)
       KEEP821 = max(KEEP821*int(KEEP2,8),1_8)
@@ -3715,14 +3713,16 @@ C
  70      CONTINUE
       END IF
       IF (id%KEEP(54) .EQ. 3) THEN
-         CALL MPI_ALLREDUCE(IWORK1(1), PTRAR(1,1), id%N, MPI_INTEGER8,
-     &        MPI_SUM, id%COMM, IERR )
-         CALL MPI_ALLREDUCE(IWORK2(1), PTRAR(1,2), id%N, MPI_INTEGER8,
-     &        MPI_SUM, id%COMM, IERR )
+!         CALL MPI_ALLREDUCE(IWORK1(1), PTRAR(1,1), id%N, MPI_INTEGER8,
+!     &        MPI_SUM, id%COMM, IERR )
+         CALL MUMPS_COPY_INTEGER8(IWORK1(1), PTRAR(1,1), id%N) ! ssg !
+!         CALL MPI_ALLREDUCE(IWORK2(1), PTRAR(1,2), id%N, MPI_INTEGER8,
+!     &        MPI_SUM, id%COMM, IERR )
+         CALL MUMPS_COPY_INTEGER8(IWORK2(1), PTRAR(1,2), id%N)
          deallocate(IWORK2)
       ELSE
-         CALL MPI_BCAST( PTRAR, 2*id%N, MPI_INTEGER8,
-     &        0, id%COMM, IERR )
+!         CALL MPI_BCAST( PTRAR, 2*id%N, MPI_INTEGER8,
+!     &        0, id%COMM, IERR ) ! ssg !
       END IF
       RETURN
       END SUBROUTINE DMUMPS_ANA_N_PAR

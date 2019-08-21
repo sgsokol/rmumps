@@ -1,5 +1,6 @@
-import(methods, Rcpp)
-importFrom(Rcpp,sourceCpp)
+import(methods)
+#importFrom(Rcpp,loadModule)
+import(Rcpp)
 useDynLib(rmumps, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 S3method(solve, Rcpp_Rmumps)

@@ -46,7 +46,8 @@ typedef struct {double r,i;} mumps_double_complex;
 #ifndef mumps_ftnlen
 /* When passing a string, what is the type of the extra argument
  * passed by value ? */
-# define mumps_ftnlen MUMPS_INT
+/* # define mumps_ftnlen MUMPS_INT */ /* ssg */
+# define mumps_ftnlen long int
 #endif
 
 

@@ -11,8 +11,6 @@
   factorization and system solving.
 }
 \details{
-
-  The DESCRIPTION file:
   Create a new Rmumps object with \code{A <- Rmumps$new(asparse)} then solve a
   linear system with one or many right hand sides \code{x <- solve(A, b)}
 }
@@ -24,7 +22,7 @@
 \references{
   MUMPS official site http://mumps.enseeiht.fr
 
-  Sokol S (2019). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.1.2-7, <URL: http://CRAN.R-project.org/package=rmumps>.
+  Sokol S (2019). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.2.1-4, <URL: http://CRAN.R-project.org/package=rmumps>.
 }
 \examples{
   \dontrun{

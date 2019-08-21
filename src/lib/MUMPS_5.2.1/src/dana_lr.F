@@ -171,10 +171,12 @@ C
      &               IFLAG, IERROR)
                ENDIF
              ELSE
+#if defined(scotch64) /* ssg */
                 CALL MUMPS_SCOTCH_KWAY_MIXEDto64(
      &               NHALO, HALOEDGENBR, IPTRHALO, JCNHALO,
      &               NBGROUPS_KWAY, PARTS, LP, LPOK, KEEP10,
      &               IFLAG, IERROR)
+#endif
              END IF
 #endif
           ELSE

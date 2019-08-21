@@ -802,7 +802,8 @@ C
      &      CB_LRB(1,1),
      &      WORK, TAU, JPVT, LWORK, RWORK, BLOCK,
      &      MAXI_CLUSTER, KEEP8, OMP_NUM,
-     &      -9999, -9999, KEEP(1)
+     &      -9999, -9999, KEEP(1),
+     &      [0.d0], 0, 0 ! ssg !
      &       )
 #if defined(BLR_MT)
 !$OMP BARRIER

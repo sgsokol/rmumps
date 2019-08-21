@@ -1541,8 +1541,8 @@ C
       CALL MUMPS_PROPINFO( ICNTL(1), INFO(1),
      &                         COMM, MYID )
       IF (INFO(1) .LT. 0) GOTO 90
-      CALL MPI_BCAST( SCALING(1), N, MPI_DOUBLE_PRECISION,
-     &                MASTER, COMM, IERR_MPI)
+!      CALL MPI_BCAST( SCALING(1), N, MPI_DOUBLE_PRECISION,
+!     &                MASTER, COMM, IERR_MPI) ! ssg !
       IF ( I_AM_SLAVE ) THEN
         DO I = 1, LILOC
           IF (ILOC(I) .GE. 1 .AND. ILOC(I) .LE. N) THEN

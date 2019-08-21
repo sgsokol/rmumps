@@ -18,8 +18,8 @@
 #include "mumps_c_types.h"
 #define MUMPS_SIZE_C \
         F_SYMBOL(size_c, SIZE_C)
-void  MUMPS_CALL MUMPS_SIZE_C(char *a, char *b, MUMPS_INT8 *diff);
+void  MUMPS_CALL MUMPS_SIZE_C(void *a, void *b, MUMPS_INT8 *diff);
 #define MUMPS_ADDR_C \
         F_SYMBOL(addr_c, ADDR_C)
-void  MUMPS_CALL MUMPS_ADDR_C(char *a, MUMPS_INT8 *addr);
+void  MUMPS_CALL MUMPS_ADDR_C(void *a, MUMPS_INT8 *addr);
 #endif

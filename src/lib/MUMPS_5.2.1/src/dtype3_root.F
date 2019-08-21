@@ -956,14 +956,14 @@ C
                   KK=KK+1
                 END DO
                 END DO
-                CALL MPI_SSEND( WK, SIZE_IBLOCK*SIZE_JBLOCK,
-     &                         MPI_DOUBLE_PRECISION,
-     &                         IDEST, 128, COMM, IERR )
+!                CALL MPI_SSEND( WK, SIZE_IBLOCK*SIZE_JBLOCK,
+!     &                         MPI_DOUBLE_PRECISION,
+!     &                         IDEST, 128, COMM, IERR ) ! ssg !
               ELSE IF ( MYID .EQ. IDEST ) THEN
-                CALL MPI_RECV( WK(1),
-     &                         SIZE_IBLOCK*SIZE_JBLOCK,
-     &                         MPI_DOUBLE_PRECISION,
-     &                         MASTER_ROOT,128,COMM,STATUS,IERR)
+!                CALL MPI_RECV( WK(1),
+!     &                         SIZE_IBLOCK*SIZE_JBLOCK,
+!     &                         MPI_DOUBLE_PRECISION,
+!     &                         MASTER_ROOT,128,COMM,STATUS,IERR) ! ssg !
                 KK=1
                 DO JJ=JAPAR,JAPAR+SIZE_JBLOCK-1
                 DO II=IAPAR,IAPAR+SIZE_IBLOCK-1
@@ -1038,9 +1038,9 @@ C
             ISOUR = IROW * NPCOL + ICOL
             IF ( ISOUR .NE. MASTER_ROOT ) THEN
               IF ( MYID .EQ. MASTER_ROOT ) THEN
-                CALL MPI_RECV( WK(1), SIZE_IBLOCK*SIZE_JBLOCK,
-     &                         MPI_DOUBLE_PRECISION,
-     &                         ISOUR, 128, COMM, STATUS, IERR )
+!                CALL MPI_RECV( WK(1), SIZE_IBLOCK*SIZE_JBLOCK,
+!     &                         MPI_DOUBLE_PRECISION,
+!     &                         ISOUR, 128, COMM, STATUS, IERR ) ! ssg !
                 KK=1
                 DO JJ=J,J+SIZE_JBLOCK-1
                 DO II=I,I+SIZE_IBLOCK-1
@@ -1056,10 +1056,10 @@ C
                   KK=KK+1
                 END DO
                 END DO
-                CALL MPI_SSEND( WK( 1 ),
-     &                         SIZE_IBLOCK*SIZE_JBLOCK,
-     &                         MPI_DOUBLE_PRECISION,
-     &                         MASTER_ROOT,128,COMM,IERR)
+!                CALL MPI_SSEND( WK( 1 ),
+!     &                         SIZE_IBLOCK*SIZE_JBLOCK,
+!     &                         MPI_DOUBLE_PRECISION,
+!     &                         MASTER_ROOT,128,COMM,IERR) ! ssg !
                 JUPDATE = .TRUE.
                 IAPAR = IAPAR + SIZE_IBLOCK
               END IF

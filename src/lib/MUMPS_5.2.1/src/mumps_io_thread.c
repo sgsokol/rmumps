@@ -127,7 +127,11 @@ void*  mumps_async_thread_function_with_sem (void* arg){
  end:
    /* The main thread ordered the end of the IO thread (it changed sem_stop).
     We exit. */
-   pthread_exit(NULL);
+   if (1 == 1) { /* ssg */
+     pthread_exit(NULL);
+     return NULL;
+   }
+   return NULL;
 /* FIXME Not reached */
 /*   return NULL; */
 }

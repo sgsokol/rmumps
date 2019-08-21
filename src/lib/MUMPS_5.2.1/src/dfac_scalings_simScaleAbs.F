@@ -528,9 +528,10 @@ C     get max of those two errors
                         INFERRL = INFERRROW                   
                      ENDIF
 C     
-                     CALL MPI_ALLREDUCE(INFERRL, INFERRG, 
-     &                    1, MPI_DOUBLE_PRECISION,
-     &                    MPI_MAX, COMM, IERROR)   
+!                     CALL MPI_ALLREDUCE(INFERRL, INFERRG, 
+!     &                    1, MPI_DOUBLE_PRECISION,
+!     &                    MPI_MAX, COMM, IERROR)   
+                     INFERRG=INFERRL ! ssg !
                      IF(INFERRG.LE.EPS) THEN
                         CALL DMUMPS_UPDATESCALE(COLSCA,  
      &                       WRKRC(ITDCPTR),N,
@@ -638,9 +639,10 @@ C     get max of those two errors
                         ONEERRL = ONEERRROW                   
                      ENDIF
 C     
-                     CALL MPI_ALLREDUCE(ONEERRL, ONEERRG, 
-     &                    1, MPI_DOUBLE_PRECISION,
-     &                    MPI_MAX, COMM, IERROR)   
+!                     CALL MPI_ALLREDUCE(ONEERRL, ONEERRG, 
+!     &                    1, MPI_DOUBLE_PRECISION,
+!     &                    MPI_MAX, COMM, IERROR)   
+                     ONEERRG=ONEERRL ! ssg !
                      IF(ONEERRG.LE.EPS) THEN
                         CALL DMUMPS_UPDATESCALE(COLSCA,
      &                       WRKRC(ITDCPTR),N,
@@ -693,9 +695,10 @@ C     SINGLE PROCESSOR CASE: Conv check and update of sca arrays
          ONENORMERR = ONEERRG 
          INFNORMERR = INFERRG 
          IF(NUMPROCS > 1) THEN
-            CALL MPI_REDUCE(ROWSCA, WRKRC(1), M, MPI_DOUBLE_PRECISION,
-     &           MPI_MAX, 0, 
-     &           COMM, IERROR)
+!            CALL MPI_REDUCE(ROWSCA, WRKRC(1), M, MPI_DOUBLE_PRECISION,
+!     &           MPI_MAX, 0, 
+!     &           COMM, IERROR)
+            CALL MUMPS_COPY_DOUBLE_PRECISION(ROWSCA, WRKRC(1), M) ! ssg !
             IF(MYID.EQ.0) THEN
                DO I=1, M
                   ROWSCA(I) = WRKRC(I)
@@ -706,9 +709,10 @@ C     WRITE (6,*) MYID, 'ROWSCA=',ROWSCA
 C     WRITE (6,*) MYID, 'COLSCA=',COLSCA
 C     CALL FLUSH(6)
 c     REduce the whole scaling factors to processor 0 of COMM
-            CALL MPI_REDUCE(COLSCA, WRKRC(1+M), N, MPI_DOUBLE_PRECISION,
-     &           MPI_MAX, 0, 
-     &           COMM, IERROR)
+!            CALL MPI_REDUCE(COLSCA, WRKRC(1+M), N, MPI_DOUBLE_PRECISION,
+!     &           MPI_MAX, 0, 
+!     &           COMM, IERROR)
+            CALL MUMPS_COPY_DOUBLE_PRECISION(COLSCA, WRKRC(1+M), N) ! ssg !
             If(MYID.EQ.0) THEN
                DO I=1, N
                   COLSCA(I) = WRKRC(I+M)
@@ -1055,9 +1059,10 @@ C     INF-NORM ITERATION
                      INFERRL = DMUMPS_ERRSCALOC(SCA,  
      &                    WRKRC(ITDRPTR), N,
      &                    IWRK(IMYRPTR),INUMMYR)                  
-                     CALL MPI_ALLREDUCE(INFERRL, INFERRG, 
-     &                    1, MPI_DOUBLE_PRECISION,
-     &                    MPI_MAX, COMM, IERROR)   
+!                     CALL MPI_ALLREDUCE(INFERRL, INFERRG, 
+!     &                    1, MPI_DOUBLE_PRECISION,
+!     &                    MPI_MAX, COMM, IERROR)  
+                     INFERRG=INFERRL ! ssg !
                      IF(INFERRG.LE.EPS) THEN
                         CALL DMUMPS_UPDATESCALE(SCA,  WRKRC(ITDRPTR), N,
      &                       IWRK(IMYRPTR),INUMMYR)
@@ -1137,9 +1142,10 @@ C     ONE-NORM ITERATION
      &                    WRKRC(ITDRPTR), N,
      &                    IWRK(IMYRPTR),INUMMYR) 
 C     mpi allreduce.
-                     CALL MPI_ALLREDUCE(ONEERRL, ONEERRG, 
-     &                    1, MPI_DOUBLE_PRECISION,
-     &                    MPI_MAX, COMM, IERROR)
+!                     CALL MPI_ALLREDUCE(ONEERRL, ONEERRG, 
+!     &                    1, MPI_DOUBLE_PRECISION,
+!     &                    MPI_MAX, COMM, IERROR)
+                     ONEERRG=ONEERRL ! ssg !
                      IF(ONEERRG.LE.EPS) THEN
                         CALL DMUMPS_UPDATESCALE(SCA,  WRKRC(ITDRPTR), N,
      &                       IWRK(IMYRPTR),INUMMYR)
@@ -1174,9 +1180,10 @@ C     SINGLE-PROCESSOR CASE: ONE-NORM ERROR COMPUTATION
          ONENORMERR = ONEERRG 
          INFNORMERR = INFERRG 
          IF(NUMPROCS > 1) THEN
-            CALL MPI_REDUCE(SCA, WRKRC(1), N, MPI_DOUBLE_PRECISION,
-     &           MPI_MAX, 0, 
-     &           COMM, IERROR)
+!            CALL MPI_REDUCE(SCA, WRKRC(1), N, MPI_DOUBLE_PRECISION, ! ssg !
+!     &           MPI_MAX, 0, 
+!     &           COMM, IERROR)
+            CALL MUMPS_COPY_DOUBLE_PRECISION(SCA, WRKRC(1), N) ! ssg !
             IF(MYID.EQ.0) THEN
                DO I=1, N
                   SCA(I) = WRKRC(I)

@@ -14,14 +14,14 @@
  */
 /* Utility to automatically get the sizes of Fortran types */
 #include "mumps_size.h"
-void  MUMPS_CALL MUMPS_SIZE_C(char *a, char *b, MUMPS_INT8 *diff)
+void  MUMPS_CALL MUMPS_SIZE_C(void *a, void *b, MUMPS_INT8 *diff)
 {
-    *diff = (MUMPS_INT8) (b - a);
+    *diff = (MUMPS_INT8) ((intptr_t)b - (intptr_t)a);
 }
-void MUMPS_CALL MUMPS_ADDR_C(char *a, MUMPS_INT8 *addr)
+void MUMPS_CALL MUMPS_ADDR_C(void *a, MUMPS_INT8 *addr)
 {
 union {
-    char ** aa;
+    void ** aa;
     MUMPS_INT8* a8;
 } x;
 x.aa=&a;

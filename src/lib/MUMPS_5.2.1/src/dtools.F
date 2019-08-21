@@ -1346,7 +1346,7 @@ C
       INTEGER(8) :: SHIFT8, HUG8
       INTEGER    :: I, I4SIZE
       IF(int(huge(I4SIZE),8) .EQ. int(huge(HUG8),8)) THEN
-         CALL dcopy(N8, SRC(1), 1, DEST(1), 1)
+         CALL dcopy(int(N8, 4), SRC(1), 1, DEST(1), 1) ! ssg !
       ELSE
          HUG8=int(huge(I4SIZE),8)
          DO I = 1, int(( N8 + HUG8 - 1_8 ) / HUG8)
@@ -1494,9 +1494,9 @@ C
       INTEGER(8) :: KEEP8(150)
       DOUBLE PRECISION,intent(in) :: TOLEPS
       INTEGER, INTENT(in) :: NFS4FATHER, NPIV, KEEP(500)
-      DOUBLE PRECISION :: M_ARRAY(max(NFS4FATHER,1))
-      INTEGER, intent(in)         :: NELIM
-      INTEGER, intent(in)         :: NBROWSinF
+      DOUBLE PRECISION, OPTIONAL :: M_ARRAY(max(NFS4FATHER,1))
+      INTEGER, intent(in), OPTIONAL         :: NELIM
+      INTEGER, intent(in), OPTIONAL         :: NBROWSinF
       CALL DMUMPS_COMPRESS_CB(A_PTR, LA_PTR, POSELT, LDA,
      &        BEGS_BLR, BEGS_BLR_U, 
      &        NB_ROWS, NB_COLS, NB_INASM,

@@ -337,9 +337,10 @@ C     ----------------------------------------------
       IF ( KEEP(55) .EQ. 0) THEN
          IF ( KEEP(54) .eq. 3 ) THEN
 C     Compute total number of non-zeros
-          CALL MPI_ALLREDUCE( id%KEEP8(29), id%KEEP8(28), 1,
-     &       MPI_INTEGER8, 
-     &       MPI_SUM, id%COMM, IERR )
+!          CALL MPI_ALLREDUCE( id%KEEP8(29), id%KEEP8(28), 1,
+!     &       MPI_INTEGER8, 
+!     &       MPI_SUM, id%COMM, IERR )
+          id%KEEP8(28) = id%KEEP8(29) ! ssg !
          ELSE
 C     Broadcast NZ from the master node
             CALL MPI_BCAST( id%KEEP8(28), 1, MPI_INTEGER8, MASTER,
@@ -1661,8 +1662,8 @@ C     of the sequential subtree.
                IF (IDEST .NE. MASTER) THEN
                   CALL MPI_SEND(J,1,MPI_INTEGER,IDEST,0,
      &                 id%COMM,IERR)
-                  CALL MPI_SEND(TEMP_MEM(1,K),J,MPI_DOUBLE_PRECISION,
-     &                 IDEST, 0, id%COMM,IERR)
+!                  CALL MPI_SEND(TEMP_MEM(1,K),J,MPI_DOUBLE_PRECISION,
+!     &                 IDEST, 0, id%COMM,IERR) ! ssg !
                   CALL MPI_SEND(TEMP_LEAF(1,K),J,MPI_INTEGER,
      &                 IDEST, 0, id%COMM,IERR)
                   CALL MPI_SEND(TEMP_SIZE(1,K),J,MPI_INTEGER,
@@ -1776,9 +1777,9 @@ C     of the sequential subtree.
                INFO(2)= id%NBSA_LOCAL
                GOTO 87
             END IF
-            CALL MPI_RECV(id%MEM_SUBTREE(1),id%NBSA_LOCAL,
-     &           MPI_DOUBLE_PRECISION,MASTER,0,
-     &           id%COMM,STATUS,IERR)
+!            CALL MPI_RECV(id%MEM_SUBTREE(1),id%NBSA_LOCAL,
+!     &           MPI_DOUBLE_PRECISION,MASTER,0,
+!     &           id%COMM,STATUS,IERR) ! ssg !
             CALL MPI_RECV(id%MY_FIRST_LEAF(1),id%NBSA_LOCAL,
      &           MPI_INTEGER,MASTER,0,
      &           id%COMM,STATUS,IERR)
@@ -2294,9 +2295,10 @@ C     in Megabytes
 C     --------------
 C     Flops estimate
 C     --------------
-      CALL MPI_ALLREDUCE( RINFO(1), RINFOG(1), 1,
-     &     MPI_DOUBLE_PRECISION, MPI_SUM,
-     &     id%COMM, IERR)
+!      CALL MPI_ALLREDUCE( RINFO(1), RINFOG(1), 1,
+!     &     MPI_DOUBLE_PRECISION, MPI_SUM,
+!     &     id%COMM, IERR)
+      RINFOG(1) = RINFO(1) ! ssg !
       CALL MUMPS_SETI8TOI4( KEEP8(11), INFO(3) )
       INFO ( 4 ) = KEEP(  26 )
       INFO ( 5 ) = KEEP(  27 )
@@ -3274,9 +3276,9 @@ C        each block will correspond to 2 messages (IRN_LOC,JCN_LOC)
          NB_BLOCK_SENT = 0
          MAX_NBBLOCK_loc  = 0
          DO I = 1, id%NPROCS - 1
-            CALL MPI_RECV( MATPTR( I+1 ), 1, 
-     &           MPI_INTEGER8, I,
-     &           COLLECT_NZ, id%COMM, STATUS, IERR )
+!            CALL MPI_RECV( MATPTR( I+1 ), 1, 
+!     &           MPI_INTEGER8, I,
+!     &           COLLECT_NZ, id%COMM, STATUS, IERR ) ! ssg !
             NBBLOCK_loc = ceiling(dble(MATPTR(I+1))/dble(BLOCKSIZE))
             MAX_NBBLOCK_loc = max(MAX_NBBLOCK_loc, NBBLOCK_loc)
             NB_BLOCK_SENT = NB_BLOCK_SENT + NBBLOCK_loc
@@ -3295,8 +3297,8 @@ C     --------------
          END DO
       ELSE
          NZ_loc8=id%KEEP8(29)
-         CALL MPI_SEND( NZ_loc8, 1, MPI_INTEGER8, MASTER,
-     &        COLLECT_NZ, id%COMM, IERR )
+!         CALL MPI_SEND( NZ_loc8, 1, MPI_INTEGER8, MASTER,
+!     &        COLLECT_NZ, id%COMM, IERR ) ! ssg !
       END IF
       IF ( id%MYID .eq. MASTER  ) THEN
 C     -----------------------------------------------

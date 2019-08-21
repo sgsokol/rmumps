@@ -236,7 +236,7 @@ MUMPS_NULLIFY_C_ROWSCA()
     F_SYM_ARITH(set_tmp_ptr,SET_TMP_PTR) /* Fortran routine <arith>MUMPS_SET_TMP_PTR called from C */
 #define MUMPS_SET_TMP_PTR_C \
     F_SYM_ARITH(set_tmp_ptr_c,SET_TMP_PTR_C) /* C routine <arith>MUMPS_SET_TMP_PTR_C called from Fortran */
-void MUMPS_SET_TMP_PTR(void *x, MUMPS_INT8 * size);
+void MUMPS_SET_TMP_PTR(void *x, int *size);
 void MUMPS_CALL MUMPS_SET_TMP_PTR_C(MUMPS_INT8 *addr_ptr, MUMPS_INT8 *size) /* called from Fortran */
 {
 /*
@@ -247,7 +247,8 @@ void MUMPS_CALL MUMPS_SET_TMP_PTR_C(MUMPS_INT8 *addr_ptr, MUMPS_INT8 *size) /* c
     We cast addr_ptr to a pointer to an address before taking the content
      *(void *)addr_ptr)
 */
-    MUMPS_SET_TMP_PTR(*(void**)addr_ptr, size);  /* calls Fortran */
+    int size4=(int) *size;
+    MUMPS_SET_TMP_PTR(*(void**)addr_ptr, &size4);  /* calls Fortran */
 }
 #if MUMPS_ARITH == MUMPS_ARITH_s
 # define mumps_c       smumps_c
