@@ -1,14 +1,21 @@
-Version 5.2.1-4
+Version 5.2.1-5
+===============
+
+* 2019-08-26
+ - fixed clang issues
+ 
+VVersion 5.2.1-4
 ===============
 
 * 2019-08-21
  - fixed some more LTO warnings
  
-Version 5.2.1-3
+ersion 5.2.1-3
 ===============
 
 * 2019-07-19
  - removed compile test on all platforms
+
 Version 5.2.1-2
 ===============
 
