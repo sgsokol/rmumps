@@ -10,6 +10,7 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+#include "mpi_noop.h"
       RECURSIVE SUBROUTINE DMUMPS_BACKSLV_RECV_AND_TREAT(
      &     BLOQ, FLAG,
      &     BUFR, LBUFR, LBUFR_BYTES,

@@ -146,6 +146,7 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
   termhashtab = NULL;
   bandanlotab = NULL;
   bandeeextab = NULL;
+  termhashmsk = 0;
   if (pfixtax != NULL) {                          /* Fixed vertices may be neighbors of band graph vertices and may not belong to the band graph */
     Anum                termhashsiz;
 
@@ -232,6 +233,7 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
     errorPrint ("kgraphBand: out of memory (3)");
     return     (1);
   }
+  bandvmlotax = NULL;
   if (vmlotax != NULL) {
     if ((bandvmlotax = memAlloc (bandvertnbr * sizeof (Gnum))) == NULL) {
       errorPrint ("kgraphBand: out of memory (4)");
@@ -242,6 +244,7 @@ Gnum * restrict * restrict const  bandvnumptr)    /*+ Pointer to bandvnumtax    
     bandgrafptr->r.vmlotax  = bandvmlotax;
     bandgrafptr->s.flagval |= KGRAPHFREEVMLO;
   }
+  bandparotax = NULL;
   if (parotax != NULL) {
     if ((bandparotax = memAlloc (bandvertnbr * sizeof (Gnum))) == NULL) {
       errorPrint ("kgraphBand: out of memory (5)");

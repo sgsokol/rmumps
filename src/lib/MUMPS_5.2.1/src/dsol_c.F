@@ -10,6 +10,7 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+#include "mpi_noop.h"
       SUBROUTINE DMUMPS_SOL_C(root, N, A, LA, IW, LIW, W, LWC, 
      & IWCB, LIWW, NRHS, NA, LNA, NE_STEPS, W2,
      & MTYPE, ICNTL, FROM_PP, STEP, FRERE, DAD, FILS, PTRIST, PTRFAC,

@@ -880,7 +880,7 @@ const ArchTorusXDom * const dom1ptr)
 
   for (dimnum = 0; dimnum < archptr->dimmax; dimnum ++) {
     if ((dom1ptr->c[dimnum][0] < dom0ptr->c[dimnum][0]) ||
-        (dom1ptr->c[dimnum][1] > dom1ptr->c[dimnum][1]))
+        (dom1ptr->c[dimnum][1] > dom0ptr->c[dimnum][1]))
       return (0);
   }
 

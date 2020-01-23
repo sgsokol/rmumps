@@ -746,7 +746,8 @@ C
      &                     LRHS_CNTR_MASTER_ROOT), stat=IERR )
                   IF (IERR.gt.0) THEN
                     INFO(1) = -13
-                    CALL MUMPS_SET_IERROR(LRHS_CNTR_MASTER_ROOT,INFO(2))
+                    CALL MUMPS_SET_IERROR(int(LRHS_CNTR_MASTER_ROOT, 8),
+     &                   INFO(2))
                     IF (LP > 0 )
      &              write(LP,*) ' Error allocating, real array ',
      &              'of size before DMUMPS_FACTO_ROOT',

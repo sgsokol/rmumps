@@ -775,3 +775,107 @@ RCPP_MODULE(mod_Rmumps){
   ;
 }
 
+// wrappers to be exposed via rmumps namespace (ccallable behind the stage)
+// [[Rcpp::interfaces(r, cpp)]]
+//' Solve via Pointer
+//'
+//' This is a C wrapper to \code{Rmumps::solveptr()} method. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__solveptr(pobj, pb, lrhs, nrhs)}
+//'
+//' @param pobj pointer of type XPtr<Rmumps>, object having sparse matrix
+//' @param pb pointer of type XPtr<double>, vector or dense matrix of rhs
+//' @param lrhs integer, leading dimension in pb
+//' @param nrhs integer, number of rhs to solve.
+//' @export
+// [[Rcpp::export]]
+void Rmumps__solveptr(XPtr<Rmumps> pobj, XPtr<double> pb, int lrhs, int nrhs) {
+  XPtr<Rmumps> p(pobj);
+  XPtr<double> b(pb);
+  p->solveptr(b, lrhs, nrhs);
+}
+//' Construct via Triplet Pointers
+//'
+//' This is a C wrapper to \code{Rmumps::Rmumps(i, j, v, n, nz, sym)} constructor. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__ptr_ijv(pi, pj, pa, n, nz, sym)}
+//'
+//' @param pi pointer of type XPtr<int>, vector of i-indeces for sparse triplet
+//' @param pj pointer of type XPtr<int>, vector of j-indeces for sparse triplet
+//' @param pa pointer of type XPtr<double>, vector or values for sparse triplet
+//' @param n integer, size of the matrix (n x n)
+//' @param nz integer, number of non zeros in the matrix
+//' @param sym integer, 0 means general (non symmetric) matrix, 1 - symmetric with pivotes on the main diagonal, 2 - general symmetric (pivotes may be anywhere)
+//' @return pointer of type XPtr<Rmumps> pointing to newly created object. To avoid memory leakage, it is user's responsibility to call \code{Rmumps__del_ptr(pm)} in a due moment (where \code{pm} is the returned pointer).
+//' @export
+// [[Rcpp::export]]
+XPtr<Rmumps> Rmumps__ptr_ijv(XPtr<int> pi, XPtr<int> pj, XPtr<double> pa, int n, int nz, int sym) {
+  XPtr<int> i(pi);
+  XPtr<int> j(pj);
+  XPtr<double> a(pa);
+  XPtr<Rmumps> p(new Rmumps((MUMPS_INT *)i, (MUMPS_INT *)j, (double *)a, (MUMPS_INT) n, (MUMPS_INT) nz, (MUMPS_INT) sym), false);
+  return(p);
+}
+//' Delete via Pointer
+//'
+//' This is a C wrapper to \code{Rmumps::~Rmumps()} destructor. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__del_ptr(pm)}
+//'
+//' @param pm pointer of type XPtr<Rmumps>, object to be deleted
+//' @export
+// [[Rcpp::export]]
+void Rmumps__del_ptr(XPtr<Rmumps> pm) {
+  Rmumps *p=XPtr<Rmumps>(pm);
+  delete p;
+}
+//' Explore via Triplet
+//'
+//' This is a C wrapper to \code{Rmumps::triplet()} method. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__triplet(pm)}
+//'
+//' @param pm pointer of type XPtr<Rmumps>, object having sparse matrix to be explored
+//' @return a list with sparse triplet described with fields i, j, v
+//' @export
+// [[Rcpp::export]]
+List Rmumps__triplet(XPtr<Rmumps> pm) {
+  XPtr<Rmumps> p(pm);
+  return(p->triplet());
+}
+//' Set Matrix via Pointer
+//'
+//' This is a C wrapper to \code{Rmumps::set_mat_ptr(a)} method. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__set_mat_ptr(pm)}. Using this method invalidates previous numeric decomposition (but not symbolic one).
+//'
+//' @param pm pointer of type XPtr<Rmumps>, object having sparse matrix to be replaced with second parameter
+//' @param pa pointer of type XPtr<double>, value vector from sparse triplet providing a new matrix. Structure of the new matrix must be identical to the old one. That's why there is no need to provide i and j for the new triplet.
+//' @export
+// [[Rcpp::export]]
+void Rmumps__set_mat_ptr(XPtr<Rmumps> pm, XPtr<double> pa) {
+  XPtr<Rmumps> p(pm);
+  XPtr<double> a(pa);
+  p->set_mat_ptr(a);
+}
+//' Set Permutation Parameter
+//'
+//' This is a C wrapper to \code{Rmumps::set_permutation(permutation)} method. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__set_permutation(pm, permutation)}
+//'
+//' @param pm pointer of type XPtr<Rmumps>, object having sparse matrix permuted according to a chosen method.
+//' @param permutation integer one of predefined constants (cf. \code{\link{get_cnst}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.
+//' @export
+// [[Rcpp::export]]
+void Rmumps__set_permutation(XPtr<Rmumps> pm, int permutation) {
+  XPtr<Rmumps> p(pm);
+  p->set_permutation(permutation);
+}
+//' Get Permutation Parameter
+//'
+//' This is a C wrapper to \code{Rmumps::get_permutation()} method. Available in R too.
+//' In C++ code can be used as \code{rmumps::Rmumps__get_permutation(pm)}
+//'
+//' @param pm pointer of type XPtr<Rmumps>, object having sparse matrix permuted according to some method.
+//' @return integer defining permutation method used before matrix decomposition.
+//' @export
+// [[Rcpp::export]]
+int Rmumps__get_permutation(XPtr<Rmumps> pm) {
+  XPtr<Rmumps> p(pm);
+  return(p->get_permutation());
+}

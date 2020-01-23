@@ -646,7 +646,7 @@ C
         INTEGER, INTENT(IN) :: NPIV, NFRONT, SYM, K471, K472, K475, K488
         DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
         INTEGER :: IBCKSZ
-        DOUBLE PRECISION :: B,R,M,N
+        DOUBLE PRECISION :: B,R=0.,M,N
         M = DBLE(NPIV)
         N = DBLE(NFRONT)
         CALL COMPUTE_BLR_VCS(K472, IBCKSZ, K488, NPIV) 
@@ -704,7 +704,9 @@ C
         INTEGER, INTENT(IN) :: NPIV, NFRONT, SYM, K471, K472, K475, K488
         DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
         INTEGER :: IBCKSZ
-        DOUBLE PRECISION :: B,R,M,N
+C ssg
+        DOUBLE PRECISION :: R=0.
+        DOUBLE PRECISION :: B,M,N
         M = DBLE(NPIV)
         N = DBLE(NFRONT)
         CALL COMPUTE_BLR_VCS(K472, IBCKSZ, K488, NPIV) 
@@ -764,7 +766,9 @@ C
         DOUBLE PRECISION, INTENT(IN) :: NROW
         DOUBLE PRECISION, INTENT(OUT) :: COSTW, COSTM
         INTEGER :: IBCKSZ
-        DOUBLE PRECISION :: B,R,M,N,P
+C ssg
+        DOUBLE PRECISION :: R=0.
+        DOUBLE PRECISION :: B,M,N,P
         M = NROW
         N = DBLE(NFRONT)
         P = DBLE(NPIV)
@@ -953,8 +957,10 @@ C
      &        total_nmb_cand,nmb_type2_thislayer,
      &        total_cand_layer,npropmap,min_needed,
      &        keep48_loc
+C ssg
+      DOUBLE PRECISION :: nrow=0.d0
       DOUBLE PRECISION flop1,work_type2_thislayer,
-     &        relative_weight,workmaster,nrow
+     &        relative_weight,workmaster
       DOUBLE PRECISION save_ncostw, save_ncostm
       LOGICAL SPLITNODE, BLRNODE
       intrinsic count,max
@@ -1208,9 +1214,10 @@ C
         end do
         IF (keep(376) .EQ.1) THEN
            err_rep='GET_SPLIT_4_PERF'
+C ssg
            CALL MUMPS_GET_SPLIT_4_PERF(inode, nfront, npiv,
      &     dble(npropmap),
-     &     k1, lnpivsplit, npivsplit, n, cv_frere(1), cv_keep(1), istat)
+     &     k1, lnpivsplit, npivsplit, n, cv_frere, cv_keep, istat)
            k3=k1
            doit = .true.
            GOTO 200
@@ -1247,11 +1254,12 @@ C
         endif
          if ( ( k1.le.1).or.(k3.le.1).or.(.NOT.doit) ) cycle
          err_rep='SPLITNODE_INKPART'
+C ssg
          call MUMPS_SPLITNODE_INTREE( inode, nfront, npiv, k1,
-     &        lnpivsplit, npivsplit, cv_keep(1), n, cv_fils(1),
-     &        cv_frere(1),
-     &        cv_nfsiz(1), cv_ne(1), cv_info(5), 
-     &        cv_nsteps, cv_nodetype(1), ierr)
+     &        lnpivsplit, npivsplit, cv_keep, n, cv_fils,
+     &        cv_frere,
+     &        cv_nfsiz, cv_ne, cv_info(5), 
+     &        cv_nsteps, cv_nodetype, ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
      &      write(cv_lp,*)'Error reported by ',err_rep,
@@ -2739,6 +2747,8 @@ C
       logical swapthem,cand_better_master_arch,cand_better_swapper_arch
       intrinsic maxval,minval
       maxmem=maxval(cv_proc_memused(:))
+C ssg
+      node_of_master=0
       totalnmb=0
       do layernmb=cv_maxlayer,1,-1
          do i=1,cv_layer_p2node(layernmb)%nmb_t2s
@@ -3740,8 +3750,9 @@ C
       integer,intent(out)::istat
       character (len=48):: subname
       subname='SELECT_TYPE3'
+C ssg
       CALL MUMPS_SELECT_K38K20(cv_n, slavef, cv_mp, cv_icntl(13),
-     &     cv_keep(1), cv_frere(1), cv_nfsiz(1), istat)
+     &     cv_keep, cv_frere, cv_nfsiz, istat)
       IF (istat .NE. 0) THEN
             if(cv_lp.gt.0)
      &           write(cv_lp,*)
@@ -3792,9 +3803,10 @@ C
                cv_cand(dummy,:)=cv_layer_p2node(layernmb)%t2_cand(i,:)
                montype= cv_nodetype(inode)
                if (montype.eq.tsplit_beg) then 
+C ssg
                   CALL MUMPS_SETUP_CAND_CHAIN(cv_n, cv_nb_niv2, 
-     &                 cv_frere(1), cv_nodetype(1),
-     &                 cv_par2_nodes(1), cv_procnode(1), cv_cand(1,1),
+     &                 cv_frere, cv_nodetype,
+     &                 cv_par2_nodes, cv_procnode, cv_cand,
      &                 inode,
      &                 slavef, dummy, nbcand, istat)
                endif
@@ -4344,6 +4356,8 @@ C
       end subroutine MUMPS_FIX_NODE_MASTER
       subroutine MUMPS_COMPUTE_DISTRIB(ierr,myrank,working_comm,
      &     mem_distrib)
+C ssg
+      use iso_c_binding
       implicit none
       include 'mpif.h'
       integer ierr,resultlen,myrank,i,working_comm
@@ -4373,7 +4387,8 @@ C
          else
             lenrcv = 0
          endif
-         call MPI_BCAST(lenrcv,1,MPI_INTEGER,i,
+C ssg
+         call MPI_BCAST([lenrcv],1,MPI_INTEGER,i,
      &           working_comm,ierr)
          allocate(namercv(lenrcv),stat=allocok)
          if ( allocok .gt. 0 ) then
@@ -4865,7 +4880,9 @@ C
       double precision, intent(in):: nproc
       integer,intent(out)::k, npivsplit(lnpivsplit), istat
       logical :: nosplit
-      integer :: kk, optimization_strategy, nass, npiv2
+C ssg
+      integer :: npiv2=0
+      integer :: kk, optimization_strategy, nass
       double precision :: nproc2
       integer :: npivOld, npivNew
       double precision :: timeFacOld, timeFacNew, timeAss

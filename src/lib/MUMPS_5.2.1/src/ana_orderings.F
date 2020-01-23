@@ -1456,9 +1456,11 @@ C       overflow).
 C-----------------------------------------------------------------------
 C LOCAL INTEGERS:
 C-----------------------------------------------------------------------
+C ssg
+      INTEGER :: ME=0
       INTEGER :: DEG, DEGME, DEXT, DMAX, E, ELENME, ELN, I,
      &        ILAST, INEXT, J, JLAST, JNEXT, K, KNT1, KNT2, KNT3,
-     &        LENJ, LN, ME, MINDEG, NEL, 
+     &        LENJ, LN, MINDEG, NEL, 
      &        NLEFT, NVI, NVJ, NVPIV, SLENME, WE, WFLG, WNVI, X, 
      &        NPRINC
       INTEGER KNT1_UPDATED, KNT2_UPDATED
@@ -8324,7 +8326,9 @@ C Additionnal parameters/variables due to dense row manipulation:
 C          
 C Local variables:
 C ---------------
-      INTEGER THRESM, NDME, PERMeqN
+C ssg
+      INTEGER :: PERMeqN=0
+      INTEGER THRESM, NDME
       INTEGER NBD,NBED, NBDM, LASTD, NELME
       LOGICAL IDENSE
 C THRESM : Local Integer holding a 

@@ -292,7 +292,7 @@ MUMPS_INT mumps_clean_request_th(MUMPS_INT* request_id){
   return 0;
 }
 MUMPS_INT mumps_low_level_init_ooc_c_th(MUMPS_INT* async, MUMPS_INT* ierr){
-  MUMPS_INT i, ret_code;    
+  MUMPS_INT i, ret_code=0 /* ssg */;    
   char buf[128];
   /* Computes the number of files needed. Uses ceil value. */
   *ierr=0;

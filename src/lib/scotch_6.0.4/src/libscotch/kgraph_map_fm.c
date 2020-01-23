@@ -1331,7 +1331,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
       Anum                domnend;
       Gnum                edxxidx;
       Gnum *              edxpptr;
-      Gnum *              vpexptr;
+      Gnum *              vpexptr=NULL; /* ssg */
       /*Gnum                vexdflg;*/
 
       vexxidx = edxxptr->vexxidx;                 /* Get relevant information */
@@ -1584,6 +1584,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
             edxxtab[edxxidx].edlosum += edloval;
             edxxtab[edxxidx].edgenbr ++;
             divnval = edxxtab[edxxidx].distval;
+            edxoptr = NULL; /* ssg */
           }
         }
 #ifdef SCOTCH_DEBUG_KGRAPH2 
@@ -1622,6 +1623,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
             edxxtab[edxoidx].edxxidx = -2;        /* Set extended edge slot as unused      */
             edxunbr ++;                           /* One more unused edge slot             */
           }
+          divoval = 0; /* ssg */
         }
 
         if ((edxnidx == -1) && (vexxtab[vexxend].domnnum != domnend)) { /* If was first vertex linked to this domain, add edge to new domain */
@@ -1656,8 +1658,10 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
           divnval = edxxtab[edxxnbr - 1].distval;
           edxfidx = edxxtab[edxxnbr - 1].edxxidx; /* Skip update of the newly added extended edge */
         }
-        else
+        else {
           edxfidx = vexxtab[vexxend].edxxidx;
+          divnval = 0; /* ssg */
+        }
 
         edloval *= grafptr->r.crloval;
         for (edxxend = edxfidx; edxxend != -1; edxxend = edxxtab[edxxend].edxxidx) /* Update vertex links */
@@ -1755,7 +1759,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
     Gnum                edgenum;
     Anum                domnnum;
     Anum                domnlst;                  /* Domain of last vertex for which a distance was computed */
-    Anum                distlst;                  /* Last distance computed                                  */
+    Anum                distlst=-1;                  /* Last distance computed                                  */ /* ssg */
     Gnum                commcut;
 
     vertnum = vexxtab[vexxidx].vertnum;           /* Get vertex data from slot */
@@ -1803,7 +1807,7 @@ const KgraphMapFmParam * const    paraptr)        /*+ Method parameters +*/
         Anum                domnnum;
         Gnum                commcut;
         Anum                domnlst;              /* Domain of last vertex for which a distance was computed */
-        Anum                distlst;              /* Last distance computed                                  */
+        Anum                distlst=-1;              /* Last distance computed                                  */ /* ssg */
 
         commcut = 0;
         domnnum = parttax[vertnum];

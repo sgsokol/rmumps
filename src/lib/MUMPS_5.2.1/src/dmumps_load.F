@@ -10,6 +10,7 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+#define MPI_UNPACK(a, b, c, d, e, f, g, h) MPI_NOOP()
       MODULE DMUMPS_LOAD
       implicit none
       PUBLIC :: DMUMPS_LOAD_SET_INICOST, DMUMPS_LOAD_INIT,
@@ -1352,7 +1353,9 @@ C
       INTEGER MSGSOU, LBUFR, LBUFR_BYTES
       INTEGER BUFR( LBUFR )
       INCLUDE 'mpif.h'
-      INTEGER POSITION, IERR, WHAT, NSLAVES, i
+C ssg
+      INTEGER :: WHAT=0
+      INTEGER POSITION, IERR, NSLAVES, i
       DOUBLE PRECISION LOAD_RECEIVED
       INTEGER INODE_RECEIVED,NCB_RECEIVED
       DOUBLE PRECISION SURF
@@ -5535,7 +5538,9 @@ C
       DOUBLE PRECISION MIN_COST
       LOGICAL SBTR
       INTEGER i
-      DOUBLE PRECISION TMP_COST,TMP_MIN
+C ssg
+      DOUBLE PRECISION :: TMP_COST=0.d0
+      DOUBLE PRECISION TMP_MIN
       TMP_MIN=huge(TMP_MIN)
       DO i=0,NPROCS-1
          IF(i.NE.MYID)THEN

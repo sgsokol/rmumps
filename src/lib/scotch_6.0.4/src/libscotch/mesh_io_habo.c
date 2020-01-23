@@ -74,15 +74,15 @@ const char * const          dataptr)              /* No use           */
   long              habmattag;                    /* Matrix tag number in file                  */
   long              habmatnum;                    /* Current matrix number                      */
   char              habmatbuf[4][84];             /* Matrix header line buffers                 */
-  char              habmattype[4];                /* Matrix type                                */
+  char              habmattype[4]="";                /* Matrix type                                */ /* ssg */
   long              habcrdnbr;                    /* Total number of data lines                 */
   long              habrhsnbr;                    /* Number of right hand side lines            */
   int               habcolsiz;                    /* Size of column type                        */
   int               habnzrsiz;                    /* Size of non-zero type                      */
   /*Gnum              habevlnbr;*/                    /* Number of element matrix values (not uesd) */
-  Gnum              habvixnbr;                    /* Number of element matrix variable indices  */
+  Gnum              habvixnbr=0;                    /* Number of element matrix variable indices  */ /* ssg */
   Gnum              habeltnbr;                    /* Number of elements                         */
-  Gnum              habvarnbr;                    /* Number of variables, that is, nodes        */
+  Gnum              habvarnbr=0;                    /* Number of variables, that is, nodes        */ /* ssg */
   Gnum              velmnum;                      /* Number of current element vertex           */
   Gnum              vnodnum;                      /* Number of current node vertex              */
   Gnum              edgenum;                      /* Number of current edge (arc)               */

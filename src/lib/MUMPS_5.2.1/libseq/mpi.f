@@ -20,6 +20,11 @@ C
 C MPI
 C
 C******************************************************************
+C ssg
+      SUBROUTINE MPI_NOOP()
+      RETURN
+      END SUBROUTINE MPI_NOOP
+
       SUBROUTINE MPI_BSEND( BUF, CNT, DATATYPE, DEST, TAG, COMM,
      &            IERR )
       IMPLICIT NONE
@@ -130,6 +135,18 @@ C          STOP
       IERR = 0
       RETURN
       END SUBROUTINE MPI_REDUCE
+C***********************************************************************
+C ssg
+      SUBROUTINE MPI_REDUCE_D( SENDBUF, RECVBUF, CNT, DATATYPE, OP,
+     &           ROOT, COMM, IERR )
+      IMPLICIT NONE
+      INTEGER CNT, DATATYPE, OP, ROOT, COMM, IERR
+      DOUBLE PRECISION SENDBUF(*), RECVBUF(*)
+      LOGICAL, EXTERNAL :: MUMPS_IS_IN_PLACE
+      CALL MUMPS_COPY_DOUBLE_PRECISION(SENDBUF, RECVBUF, CNT)
+      IERR = 0
+      RETURN
+      END SUBROUTINE MPI_REDUCE_D
 C***********************************************************************
       SUBROUTINE MPI_REDUCE_SCATTER( SENDBUF, RECVBUF, RCVCNT, 
      &           DATATYPE, OP, COMM, IERR )

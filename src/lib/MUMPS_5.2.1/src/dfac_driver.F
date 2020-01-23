@@ -10,6 +10,9 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+
+C ssg
+#define MPI_BCAST(BUFFER, CNT, DATATYPE, ROOT, COMM, IERR) MPI_NOOP()
       SUBROUTINE DMUMPS_FAC_DRIVER( id)
       USE DMUMPS_BUF
       USE DMUMPS_LOAD
@@ -2626,13 +2629,15 @@ C     on all procs during DMUMPS_GATHER_SOLUTION
      &                 MPI_MAX, MASTER, id%COMM, IERR)
 C
 C     Reduce compression times: get max compression times
-      CALL MPI_REDUCE( id%DKEEP(97), id%DKEEP(98), 1,
-     &     MPI_DOUBLE_PRECISION,
-     &     MPI_MAX, MASTER, id%COMM, IERR)
+C      CALL MPI_REDUCE( id%DKEEP(97), id%DKEEP(98), 1,
+C     &     MPI_DOUBLE_PRECISION,
+C     &     MPI_MAX, MASTER, id%COMM, IERR)
+      id%DKEEP(98)=id%DKEEP(97) ! ssg !
 C
-      CALL MPI_REDUCE( RINFO(2), RINFOG(2), 2,
-     &                 MPI_DOUBLE_PRECISION,
-     &                 MPI_SUM, MASTER, id%COMM, IERR)
+c      CALL MPI_REDUCE( RINFO(2), RINFOG(2), 2,
+c     &                 MPI_DOUBLE_PRECISION,
+c     &                 MPI_SUM, MASTER, id%COMM, IERR)
+      RINFOG(2:3)=RINFO(2:3) ! ssg !
       CALL MUMPS_REDUCEI8( id%KEEP8(31),id%KEEP8(6), MPI_SUM,
      &                     MASTER, id%COMM )
 C
@@ -2693,65 +2698,65 @@ C
             ITMP8 =  id%KEEP8(10) - int(GLOBAL_BLR_SAVINGS,8)
             CALL MUMPS_SETI8TOI4( ITMP8, id%INFO(28))
 C
-            CALL MPI_REDUCE( GLOBAL_BLR_SAVINGS, TMP_GLOBAL_BLR_SAVINGS
+            CALL MPI_REDUCE_D( GLOBAL_BLR_SAVINGS,TMP_GLOBAL_BLR_SAVINGS
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FR_MRY, TMP_ACC_FR_MRY
+            CALL MPI_REDUCE_D( ACC_FR_MRY, TMP_ACC_FR_MRY
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_MRY_CB_FR, TMP_ACC_MRY_CB_FR
+            CALL MPI_REDUCE_D( ACC_MRY_CB_FR, TMP_ACC_MRY_CB_FR
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_MRY_CB_GAIN, TMP_ACC_MRY_CB_GAIN
+            CALL MPI_REDUCE_D( ACC_MRY_CB_GAIN, TMP_ACC_MRY_CB_GAIN
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_LR_FLOP_GAIN, TMP_ACC_LR_FLOP_GAIN
+            CALL MPI_REDUCE_D( ACC_LR_FLOP_GAIN, TMP_ACC_LR_FLOP_GAIN
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_FR_TRSM, TMP_ACC_FLOP_FR_TRSM
+            CALL MPI_REDUCE_D( ACC_FLOP_FR_TRSM, TMP_ACC_FLOP_FR_TRSM
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_LR_TRSM, TMP_ACC_FLOP_LR_TRSM
+            CALL MPI_REDUCE_D( ACC_FLOP_LR_TRSM, TMP_ACC_FLOP_LR_TRSM
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_FR_UPDT, TMP_ACC_FLOP_FR_UPDT
+            CALL MPI_REDUCE_D( ACC_FLOP_FR_UPDT, TMP_ACC_FLOP_FR_UPDT
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_LR_UPDT, TMP_ACC_FLOP_LR_UPDT
+            CALL MPI_REDUCE_D( ACC_FLOP_LR_UPDT, TMP_ACC_FLOP_LR_UPDT
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_RMB, TMP_ACC_FLOP_RMB
+            CALL MPI_REDUCE_D( ACC_FLOP_RMB, TMP_ACC_FLOP_RMB
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE(     ACC_FLOP_LR_UPDT_OUT, 
+            CALL MPI_REDUCE_D(     ACC_FLOP_LR_UPDT_OUT, 
      &                       TMP_ACC_FLOP_LR_UPDT_OUT
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_DEC_ACC, TMP_ACC_FLOP_DEC_ACC
+            CALL MPI_REDUCE_D( ACC_FLOP_DEC_ACC, TMP_ACC_FLOP_DEC_ACC
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_REC_ACC, TMP_ACC_FLOP_REC_ACC
+            CALL MPI_REDUCE_D( ACC_FLOP_REC_ACC, TMP_ACC_FLOP_REC_ACC
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_TRSM, TMP_ACC_FLOP_TRSM
+            CALL MPI_REDUCE_D( ACC_FLOP_TRSM, TMP_ACC_FLOP_TRSM
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_PANEL, TMP_ACC_FLOP_PANEL
+            CALL MPI_REDUCE_D( ACC_FLOP_PANEL, TMP_ACC_FLOP_PANEL
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_FRFRONTS, TMP_ACC_FLOP_FRFRONTS
+            CALL MPI_REDUCE_D( ACC_FLOP_FRFRONTS, TMP_ACC_FLOP_FRFRONTS
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_DEMOTE, TMP_ACC_FLOP_DEMOTE
+            CALL MPI_REDUCE_D( ACC_FLOP_DEMOTE, TMP_ACC_FLOP_DEMOTE
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_CB_DEMOTE, TMP_ACC_FLOP_CB_DEMOTE
+            CALL MPI_REDUCE_D( ACC_FLOP_CB_DEMOTE,TMP_ACC_FLOP_CB_DEMOTE
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_CB_PROMOTE,TMP_ACC_FLOP_CB_PROMOTE
+          CALL MPI_REDUCE_D(ACC_FLOP_CB_PROMOTE,TMP_ACC_FLOP_CB_PROMOTE
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_FR_FACTO,TMP_ACC_FLOP_FR_FACTO
+            CALL MPI_REDUCE_D( ACC_FLOP_FR_FACTO,TMP_ACC_FLOP_FR_FACTO
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
             CALL MPI_REDUCE( CNT_NODES,TMP_CNT_NODES
@@ -2760,51 +2765,51 @@ C
             IF (id%NPROCS.GT.1) THEN
             ACC_FLOP_LR_FACTO = ACC_FLOP_FR_FACTO - ACC_LR_FLOP_GAIN
      &                        + ACC_FLOP_DEMOTE   + ACC_FLOP_FRFRONTS
-            CALL MPI_REDUCE( ACC_FLOP_LR_FACTO,AVG_ACC_FLOP_LR_FACTO
+            CALL MPI_REDUCE_D( ACC_FLOP_LR_FACTO,AVG_ACC_FLOP_LR_FACTO
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
             IF (id%MYID.EQ.MASTER) THEN
               AVG_ACC_FLOP_LR_FACTO = AVG_ACC_FLOP_LR_FACTO/id%NPROCS
             ENDIF
-            CALL MPI_REDUCE( ACC_FLOP_LR_FACTO,MIN_ACC_FLOP_LR_FACTO
+            CALL MPI_REDUCE_D( ACC_FLOP_LR_FACTO,MIN_ACC_FLOP_LR_FACTO
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_MIN, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FLOP_LR_FACTO,MAX_ACC_FLOP_LR_FACTO
+            CALL MPI_REDUCE_D( ACC_FLOP_LR_FACTO,MAX_ACC_FLOP_LR_FACTO
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_MAX, MASTER, id%COMM, IERR)
             ENDIF ! NPROCS > 1
-            CALL MPI_REDUCE( ACC_UPDT_TIME,TMP_ACC_UPDT_TIME
+            CALL MPI_REDUCE_D( ACC_UPDT_TIME,TMP_ACC_UPDT_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_DEMOTING_TIME,TMP_ACC_DEMOTING_TIME
+            CALL MPI_REDUCE_D( ACC_DEMOTING_TIME,TMP_ACC_DEMOTING_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_CB_DEMOTING_TIME,
+            CALL MPI_REDUCE_D( ACC_CB_DEMOTING_TIME,
      &                       TMP_ACC_CB_DEMOTING_TIME, 1,
      &                       MPI_DOUBLE_PRECISION, MPI_SUM, MASTER,
      &                       id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_PROMOTING_TIME,TMP_ACC_PROMOTING_TIME
+            CALL MPI_REDUCE_D( ACC_PROMOTING_TIME,TMP_ACC_PROMOTING_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FRPANELS_TIME,TMP_ACC_FRPANELS_TIME
+            CALL MPI_REDUCE_D( ACC_FRPANELS_TIME,TMP_ACC_FRPANELS_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FAC_I_TIME,TMP_ACC_FAC_I_TIME
+            CALL MPI_REDUCE_D( ACC_FAC_I_TIME,TMP_ACC_FAC_I_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FAC_MQ_TIME,TMP_ACC_FAC_MQ_TIME
+            CALL MPI_REDUCE_D( ACC_FAC_MQ_TIME,TMP_ACC_FAC_MQ_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FAC_SQ_TIME,TMP_ACC_FAC_SQ_TIME
+            CALL MPI_REDUCE_D( ACC_FAC_SQ_TIME,TMP_ACC_FAC_SQ_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_TRSM_TIME,TMP_ACC_TRSM_TIME
+            CALL MPI_REDUCE_D( ACC_TRSM_TIME,TMP_ACC_TRSM_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_FRFRONTS_TIME,TMP_ACC_FRFRONTS_TIME
+            CALL MPI_REDUCE_D( ACC_FRFRONTS_TIME,TMP_ACC_FRFRONTS_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
-            CALL MPI_REDUCE( ACC_LR_MODULE_TIME,TMP_ACC_LR_MODULE_TIME
+            CALL MPI_REDUCE_D( ACC_LR_MODULE_TIME,TMP_ACC_LR_MODULE_TIME
      &                      , 1, MPI_DOUBLE_PRECISION,
      &                       MPI_SUM, MASTER, id%COMM, IERR)
         IF (id%MYID.EQ.MASTER) THEN

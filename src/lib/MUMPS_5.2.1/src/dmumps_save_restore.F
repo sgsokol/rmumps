@@ -1327,7 +1327,7 @@ C
      &                 stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%OOC_FILE_NAMES
@@ -4738,7 +4738,7 @@ C
      &                 , stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%CANDIDATES
@@ -4983,7 +4983,7 @@ C
      &                 , stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%TAB_POS_IN_PERE
@@ -6268,7 +6268,7 @@ C
      &                 ,size_array2), stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%OOC_INODE_SEQUENCE
@@ -6351,7 +6351,7 @@ C
      &                 ,size_array2), stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%OOC_SIZE_OF_BLOCK
@@ -6434,7 +6434,7 @@ C
      &                 stat=allocok)
                   if (allocok .GT. 0) THEN
                      id%INFO(1) = -78
-                     CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                     CALL MUMPS_SETI8TOI4(int(size_array1*size_array2,8)
      &                    ,id%INFO(2))
                   endif
                   read(unit,iostat=err) id%OOC_VADDR
@@ -7422,7 +7422,8 @@ C
      &                    stat=allocok)
                      if (allocok .GT. 0) THEN
                         id%INFO(1) = -78
-                        CALL MUMPS_SETI8TOI4(size_array1*size_array2
+                        CALL MUMPS_SETI8TOI4(int(size_array1*
+     &                       size_array2,8)
      &                       ,id%INFO(2))
                      endif
                      read(unit,iostat=err) id%root%RHS_ROOT

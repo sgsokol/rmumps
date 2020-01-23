@@ -10,6 +10,10 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+C ssg
+#define MPI_BCAST(BUFFER, CNT, DATATYPE, ROOT, COMM, IERR) MPI_NOOP()
+#define MPI_SEND(BUF, CNT, DATATYPE, DEST, TAG, COMM, IERR) MPI_NOOP()
+#define MPI_RECV(BUF,CNT,DTYPE,SOURCE,TAG,COMM,STATUS,IERR) MPI_NOOP()
       SUBROUTINE DMUMPS_ANA_DIST_ARROWHEADS( MYID, SLAVEF, N,
      &           PROCNODE, STEP, PTRAIW, PTRARW, ISTEP_TO_INIV2,
      &           I_AM_CAND,

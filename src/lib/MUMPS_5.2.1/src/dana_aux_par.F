@@ -872,9 +872,10 @@ C
      &     TOTNCLIQUES
       INTEGER(8)           :: MYNVARS, TOTNVARS
       INTEGER(8), POINTER  :: LVARPT(:)
+C ssg
       INTEGER              :: HIDX, NCMPA, I, J, SIZE_SCHUR, MYID,
      &     NPROCS, IERR, NROWS_LOC, GLOB_IDX, TMP,
-     &     NTVAR, TGSIZE, MAXS, RHANDPE,
+     &     NTVAR=0, TGSIZE, MAXS, RHANDPE,
      &     RHANDNV, RIDX, PROC, JOB, K
       INTEGER(8)           :: PFREES, PFS_SAVE, PELEN, PFREET, PFT_SAVE
       INTEGER              :: STATUSPE(MPI_STATUS_SIZE)
@@ -1168,10 +1169,10 @@ C
             GPE(GLOB_IDX) = -LIPERM(-IPET(NTVAR+I))
          END DO
       ELSE
-         CALL MPI_SEND(IPE(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
-     &        MPI_INTEGER8, 0, MYID, id%COMM, IERR)
-         CALL MPI_SEND(NV(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
-     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
+C ssg         CALL MPI_SEND(IPE(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
+C     &        MPI_INTEGER8, 0, MYID, id%COMM, IERR)
+C         CALL MPI_SEND(NV(1), ord%LAST(MYID+1)-ord%FIRST(MYID+1)+1,
+C     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
       END IF
       CALL MUMPS_DEALLOC(BUF_NV1, BUF_NV2, MEMCNT=MEMCNT)
       CALL MUMPS_I8DEALLOC(BUF_PE1, BUF_PE2, IPE, IPET,
@@ -1870,14 +1871,14 @@ C
             END DO
          END DO
       ELSE
-         DO WHILE (TOP_CNT .GT. 0)
-            I = int(MIN(int(BUFSIZE,8), TOP_CNT))
-            CALL MPI_SEND(TSENDI(TOP_CNT-I+1), I,
-     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
-            CALL MPI_SEND(TSENDJ(TOP_CNT-I+1), I,
-     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
-            TOP_CNT = TOP_CNT-I
-         END DO
+C ssg         DO WHILE (TOP_CNT .GT. 0)
+C            I = int(MIN(int(BUFSIZE,8), TOP_CNT))
+C            CALL MPI_SEND(TSENDI(TOP_CNT-I+1), I,
+C     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
+C            CALL MPI_SEND(TSENDJ(TOP_CNT-I+1), I,
+C     &           MPI_INTEGER, 0, ITAG, id%COMM, IERR)
+C            TOP_CNT = TOP_CNT-I
+C         END DO
       END IF
       CALL MUMPS_DEALLOC(BUFLEVEL, RDISPL, TSENDI,
      &     TSENDJ, MEMCNT=MEMCNT)

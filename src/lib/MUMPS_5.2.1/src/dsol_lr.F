@@ -521,7 +521,7 @@ C
          ENDIF
          IF (IFLAG.LT.0) RETURN
          CALL DMUMPS_SOLVE_BWD_LR_TRSOLVE  (
-     &         DIAG(1), size(DIAG), DIAGSIZ_DYN, NELIM_PANEL, LIELL,
+     &         DIAG, size(DIAG), DIAGSIZ_DYN, NELIM_PANEL, LIELL,
      &         NRHS_B, WCB, LWCB, 
      &         RHSCOMP, LRHSCOMP, NRHS,
      &         IPIV_PANEL, JBDEB, 

@@ -138,7 +138,7 @@ FILE * const                  stream)             /*+ Output stream             
   Gnum                      diammin;
   Gnum                      diammax;
   Gnum                      diamsum;
-  Gnum                      migrnbr;
+  Gnum                      migrnbr=0;  /* ssg */
   double                    migrloadavg;
   double                    migrdistavg;
   double                    migrcostsum;

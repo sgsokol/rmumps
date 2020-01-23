@@ -91,7 +91,7 @@ GainTabl * const            tablptr,          /*+ Gain table        +*/
 Gnum * restrict             diffload)
 {
   Gnum                        gainbest;       /* Separator gain of best link       */
-  Gnum                        bestdiffload;
+  Gnum                        bestdiffload=0; /* ssg */
   const GainEntr *            tablbest;       /* Gain table entry of best link     */
   WgraphPartFmLink *          linkptr;        /* Pointer to current gain link      */
   WgraphPartFmLink *          linkbest;       /* Pointer to best link found        */
@@ -240,7 +240,7 @@ const WgraphPartFmParam * const paraptr)    /*+ Method parameters +*/
     Gnum                        edgenum;
     Gnum                        compgain;
     Gnum                        minloadpartval;
-    Gnum                        minloadpartload;
+    Gnum                        minloadpartload=0; /* ssg */
     Gnum                        secondloadpartval;
     WgraphPartFmLink * restrict linklist;
     WgraphPartFmLink * restrict linkptr;

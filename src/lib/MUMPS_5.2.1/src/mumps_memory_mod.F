@@ -22,18 +22,20 @@ C
       INTEGER(8), PRIVATE :: ISIZE, I8SIZE, SSIZE, DSIZE, CSIZE, ZSIZE
       CONTAINS
       SUBROUTINE MUMPS_MEMORY_SET_DATA_SIZES()
-      INTEGER             :: I(2)
-      INTEGER(8)          :: I8(2)
-      REAL(kind(1.e0))    :: S(2)
-      REAL(kind(1.d0))    :: D(2)
-      COMPLEX(kind(1.e0)) :: C(2)
-      COMPLEX(kind(1.d0)) :: Z(2)
-      CALL MUMPS_SIZE_C(I (1), I (2), ISIZE) 
-      CALL MUMPS_SIZE_C(S (1), S (2), SSIZE) 
-      CALL MUMPS_SIZE_C(D (1), D (2), DSIZE) 
-      CALL MUMPS_SIZE_C(C (1), C (2), CSIZE) 
-      CALL MUMPS_SIZE_C(Z (1), Z (2), ZSIZE) 
-      CALL MUMPS_SIZE_C(I8(1), I8(2), I8SIZE) 
+C ssg
+      USE ISO_C_BINDING
+      INTEGER, TARGET             :: I(2)
+      INTEGER(8), TARGET          :: I8(2)
+      REAL(kind(1.e0)), TARGET    :: S(2)
+      REAL(kind(1.d0)), TARGET    :: D(2)
+      COMPLEX(kind(1.e0)), TARGET :: C(2)
+      COMPLEX(kind(1.d0)), TARGET :: Z(2)
+      CALL MUMPS_SIZE_C(C_LOC(I (1)), C_LOC(I (2)), ISIZE) 
+      CALL MUMPS_SIZE_C(C_LOC(S (1)), C_LOC(S (2)), SSIZE) 
+      CALL MUMPS_SIZE_C(C_LOC(D (1)), C_LOC(D (2)), DSIZE) 
+      CALL MUMPS_SIZE_C(C_LOC(C (1)), C_LOC(C (2)), CSIZE) 
+      CALL MUMPS_SIZE_C(C_LOC(Z (1)), C_LOC(Z (2)), ZSIZE) 
+      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE) 
       RETURN
       END SUBROUTINE MUMPS_MEMORY_SET_DATA_SIZES
       SUBROUTINE MUMPS_IREALLOC(ARRAY, MINSIZE, INFO, LP, FORCE, COPY,

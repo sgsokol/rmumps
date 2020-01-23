@@ -10,6 +10,12 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
+C ssg
+#define MPI_BCAST(BUFFER, CNT, DATATYPE, ROOT, COMM, IERR) MPI_NOOP()
+#define MPI_SEND(BUF, CNT, DATATYPE, DEST, TAG, COMM, IERR) MPI_NOOP()
+#define MPI_RECV(BUF,CNT,DTYPE,SOURCE,TAG,COMM,STATUS,IERR) MPI_NOOP()
+#define MPI_ISEND(BUF,CNT,DATATYPE,DEST,TAG,COMM,IREQ,IERR) MPI_NOOP()
+#define MPI_UNPACK(INBUF,INSIZE,POSITION,OUTBUF,OUTCNT,DATATYPE,COMM,IERR) MPI_NOOP()
 C  ===========================
 C  FORTRAN 90 Driver for DMUMPS
 C       (MPI based code) 
@@ -640,10 +646,13 @@ C     -------------------------
 C     Check if value of JOB is
 C     the same on all processes
 C     -------------------------
-      CALL MPI_ALLREDUCE(JOB,JOBMIN,1,MPI_INTEGER,MPI_MAX,
-     &                   id%COMM,IERR)
-      CALL MPI_ALLREDUCE(JOB,JOBMAX,1,MPI_INTEGER,MPI_MIN,
-     &                   id%COMM,IERR)
+C      CALL MPI_ALLREDUCE(JOB,JOBMIN,1,MPI_INTEGER,MPI_MAX,
+C     &                   id%COMM,IERR)
+C      CALL MPI_ALLREDUCE(JOB,JOBMAX,1,MPI_INTEGER,MPI_MIN,
+C     &                   id%COMM,IERR)
+C ssg
+      JOBMIN=JOB
+      JOBMAX=JOB
       IF ( JOBMIN .NE. JOBMAX ) THEN
         id%INFO(1) = -3 
         id%INFO(2) = JOB
@@ -2069,11 +2078,15 @@ C     --------------------------------
       IF (id%INFOG(1).GE.0) THEN
          CALL DMUMPS_COMPUTE_MEMORY_SAVE(id,FILE_SIZE,STRUC_SIZE)
          id%KEEP8(55)=FILE_SIZE
-         call MPI_ALLREDUCE(id%KEEP8(55),id%KEEP8(57),1,
-     &        MPI_INTEGER8, MPI_SUM,id%COMM,IERR)
+C         call MPI_ALLREDUCE(id%KEEP8(55),id%KEEP8(57),1,
+C     &        MPI_INTEGER8, MPI_SUM,id%COMM,IERR)
+C ssg
+         id%KEEP8(57)=id%KEEP8(55)
          id%KEEP8(56)=STRUC_SIZE
-         call MPI_ALLREDUCE(id%KEEP8(56),id%KEEP8(58),1,
-     &        MPI_INTEGER8, MPI_SUM,id%COMM,IERR)
+C         call MPI_ALLREDUCE(id%KEEP8(56),id%KEEP8(58),1,
+C     &        MPI_INTEGER8, MPI_SUM,id%COMM,IERR)
+C ssg
+         id%KEEP8(58)=id%KEEP8(56)
          id%RINFO(7)=dble(id%KEEP8(55))/1D6
          id%RINFO(8)=dble(id%KEEP8(56))/1D6
          id%RINFOG(17)=dble(id%KEEP8(57))/1D6

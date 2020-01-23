@@ -38,9 +38,11 @@ C
       INTEGER :: FDEG, ThresMin, ThresPrev, IBEGSchur, 
      &        ThresMinINIT
       LOGICAL :: SchurON
+C ssg
+      INTEGER :: ME=0
       INTEGER :: DEG, DEGME, DEXT, DMAX, E, ELENME, ELN, I,
      &        ILAST, INEXT, J, JLAST, JNEXT, K, KNT1, KNT2, KNT3,
-     &        LENJ, LN, ME, MINDEG, NEL, 
+     &        LENJ, LN, MINDEG, NEL, 
      &        NLEFT, NVI, NVJ, NVPIV, SLENME, WE, WFLG, WNVI, X
       INTEGER KNT1_UPDATED, KNT2_UPDATED
       INTEGER(8) MAXMEM, MEM, NEWMEM

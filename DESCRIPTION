@@ -1,11 +1,11 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.2.1-5
-Date: 2019-08-26
+Version: 5.2.1-8
+Date: 2020-01-23
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
-         person("Patrick", "Amestoy", role="ctb"),
+         person("Patrick", "Amestoy", role=c("ctb", "cph")),
          person("Maurice", "Bremond", role="ctb"),
          person("Alfredo", "Buttari", role="ctb"),
          person("Philippe", "Combes", role="ctb"),
@@ -36,21 +36,35 @@ Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-
          person("Sebastien", "Fourestier", role="ctb"),
          person("Jun-Ho", "Her", role="ctb"),
          person("Cedric", "Chevalier", role="ctb"),
-         person("Timothy A.", "Davis", role="ctb"),
-         person("Iain S.", "Duff", role="ctb"),
-         person("John K.", "Reid", role="ctb"),
+         person("Timothy A.", "Davis", role=c("ctb", "cph")),
+         person("Iain S.", "Duff", role=c("ctb", "cph")),
+         person("John K.", "Reid", role=c("ctb", "cph")),
          person("Richard", "Stallman", role="ctb"),
-         person("Samuel", "Thibault", role="ctb")
+         person("Samuel", "Thibault", role=c("ctb", "cph")),
+         person("CERFACS", role="cph"),
+         person("CNRS", role="cph"),
+         person("ENS Lyon", role="cph"),
+         person("INP Toulouse", role="cph"),
+         person("INRIA", role="cph"),
+         person("University of Bordeaux", role="cph"),
+         person("Regents of the University of Minnesota", role="cph"),
+         person("Free Software Foundation, Inc", role="cph"),
+         person("Alexander Chemeris", role="cph"),
+         person("Makoto Matsumoto", role="cph"),
+         person("Takuji Nishimura", role="cph"),
+         person("Universite de Bordeaux", role="cph"),
+         person("CNRS", role="cph"),
+         person("INRAE", role="cph")
          )
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
-Description: Some basic features of MUMPS (Multifrontal Massively Parallel
+Description: Some basic features of 'MUMPS' (Multifrontal Massively Parallel
          sparse direct Solver) are wrapped in a class whose methods can be used
          for sequentially solving a sparse linear system (symmetric or not)
          with one or many right hand sides (dense or sparse).
          There is a possibility to do separately symbolic analysis,
          LU (or LDL^t) factorization and system solving.
-         Third part ordering libraries are included and can be used: PORD, METIS, SCOTCH.
-         MUMPS method was first described in Amestoy et al. (2001) <doi:10.1137/S0895479899358194>
+         Third part ordering libraries are included and can be used: 'PORD', 'METIS', 'SCOTCH'.
+         'MUMPS' method was first described in Amestoy et al. (2001) <doi:10.1137/S0895479899358194>
          and Amestoy et al. (2006) <doi:10.1016/j.parco.2005.07.004>.
 License: GPL (>= 2)
 Depends: methods

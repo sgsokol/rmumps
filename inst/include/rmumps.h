@@ -84,6 +84,6 @@ private:
   void new_ijv(IntegerVector i0, IntegerVector j0, NumericVector x, int n, int sym, bool copy_);
   void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym);
 };
-//#include "rmumps_RcppExports.h"
+#include "rmumps_RcppExports.h"
 
 #endif // __rmumps_h__

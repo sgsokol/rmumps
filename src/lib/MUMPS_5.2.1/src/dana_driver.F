@@ -11,6 +11,9 @@ C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
 C
+
+C ssg
+#define MPI_BCAST(BUFFER, CNT, DATATYPE, ROOT, COMM, IERR) MPI_NOOP()
       SUBROUTINE DMUMPS_ANA_DRIVER(id)
       USE DMUMPS_LOAD
       USE MUMPS_STATIC_MAPPING

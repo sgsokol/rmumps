@@ -208,7 +208,8 @@ C        "ceinture et bretelles"
         INTEGER, POINTER, DIMENSION(:) :: CUT
         INTEGER, POINTER, DIMENSION(:) :: NEW_CUT
         INTEGER :: I, INEW, MINSIZE, NEW_NPARTSASS, allocok
-        LOGICAL :: ONLYCB, TRACE
+C ssg
+        LOGICAL :: ONLYCB, TRACE=.FALSE.
         INTEGER, INTENT(IN) :: K472
 C FIXME: return IFLAG and IERROR 
         INTEGER :: IBCKSZ2,IFLAG,IERROR
@@ -841,7 +842,8 @@ CC
         DOUBLE PRECISION, POINTER, DIMENSION(:,:) :: XY_YZ
         DOUBLE PRECISION, ALLOCATABLE, TARGET, DIMENSION(:,:) :: XQ, R_Y
         DOUBLE PRECISION, POINTER, DIMENSION(:,:) :: X, Y, Y1, Y2, Z
-        CHARACTER(len=1) :: SIDE, TRANSX, TRANSY, TRANSZ
+C ssg
+        CHARACTER(len=1) :: SIDE='Z', TRANSX, TRANSY, TRANSZ
         INTEGER :: M_X, K_XY, K_YZ, N_Z, LDX, LDY, LDY1, LDY2, LDZ, K_Y
         INTEGER :: LDXY_YZ, SAVE_K
         INTEGER :: I, J, RANK, MAXRANK, INFO, LWORK
@@ -1352,10 +1354,10 @@ C       Alloc ok!!
      &            POSELTT+int(I-1,8)*int(NFRONT,8) + int(M-1,8) )
                 END DO  
               JPVT_RRQR = 0
-              CALL DMUMPS_TRUNCATED_RRQR(M, N, ACC_LRB%Q(1,1),
-     &               MAXI_CLUSTER, JPVT_RRQR(1), TAU_RRQR(1), 
-     &               WORK_RRQR(1),
-     &               N, RWORK_RRQR(1), TOLEPS, TOL_OPT, 
+              CALL DMUMPS_TRUNCATED_RRQR(M, N, ACC_LRB%Q,
+     &               MAXI_CLUSTER, JPVT_RRQR, TAU_RRQR, 
+     &               WORK_RRQR,
+     &               N, RWORK_RRQR, TOLEPS, TOL_OPT, 
      &               RANK, MAXRANK, INFO)
               BUILDQ = (RANK.LE.MAXRANK)
               IF (BUILDQ) THEN
@@ -2198,11 +2200,13 @@ C        ||B_{I(k+1:end),J{k+1:end}}||_X <= TOLEPS*sqrt(||B_{I,I}||_2*||B_{J,J}|
       DOUBLE PRECISION               ::  RWORK(*)
       DOUBLE PRECISION            ::  A(LDA,*), TAU(*)
       DOUBLE PRECISION            ::  WORK(LDW,*)
-      DOUBLE PRECISION               ::  TOLEPS_EFF, TRUNC_ERR
+C ssg
+      DOUBLE PRECISION               ::  TOLEPS_EFF, TRUNC_ERR=0.
       INTEGER, PARAMETER ::  INB=1, INBMIN=2
       INTEGER            :: J, JB, MINMN, NB
       INTEGER            :: OFFSET, ITEMP
-      INTEGER            :: LSTICC, PVT, K, RK
+C ssg
+      INTEGER            :: LSTICC, PVT, K, RK=0
       DOUBLE PRECISION               :: TEMP, TEMP2, TOL3Z
       DOUBLE PRECISION            :: AKK
       DOUBLE PRECISION, PARAMETER    :: RZERO=0.0D+0, RONE=1.0D+0

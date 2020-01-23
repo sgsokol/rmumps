@@ -54,7 +54,9 @@ C
       INTEGER I, K, NCMPA, IN, IFSON
       INTEGER(8) :: J8, I8
       INTEGER(8) IWFR8
-      INTEGER NEMIN, LP, MP, LDIAG, ITEMP, symmetry
+C ssg
+      INTEGER :: LP=0
+      INTEGER NEMIN, MP, LDIAG, ITEMP, symmetry
       INTEGER NBQD, AvgDens
       LOGICAL PROK, COMPRESS_SCHUR, LPOK
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
@@ -181,7 +183,7 @@ C
            INFO( 1 ) = -7
            INFO( 2 ) = N*KEEP(10)
          ENDIF
-         CALL DMUMPS_ANA_GNEW(N,NZ8,IRN(1), ICN(1), IW(1), LIW8,
+         CALL DMUMPS_ANA_GNEW(N,NZ8,IRN, ICN, IW(1), LIW8,
      &        IPE, PTRAR(1,2),
      &        IPQ8, IWL1, IWFR8, KEEP8(126), KEEP8(127),
      &        INFO(1), INFO(2), ICNTL, symmetry, 
@@ -318,7 +320,7 @@ C
                      INFO( 2 ) = N*KEEP(10)
                   ENDIF
                   CALL DMUMPS_ANA_GNEW
-     &                 (N,NZ8,IRN(1), ICN(1), IW(1), LIW8, 
+     &                 (N,NZ8,IRN, ICN, IW(1), LIW8, 
      &                  IPE, PTRAR(1,2), 
      &                 IPQ8, IWL1, IWFR8, KEEP8(126), KEEP8(127), 
      &                 INFO(1), INFO(2), ICNTL, symmetry, KEEP(50),
@@ -724,7 +726,7 @@ C
                      INFO( 1 ) = -7
                      INFO( 2 ) = N*KEEP(10)
                ENDIF
-               CALL DMUMPS_ANA_GNEW(N,NZ8,IRN(1),ICN(1),IW(1),LIW8,
+               CALL DMUMPS_ANA_GNEW(N,NZ8,IRN,ICN,IW(1),LIW8,
      &              IPE, PTRAR(1,2),
      &              IPQ8, IWL1, IWFR8, KEEP8(126), KEEP8(127),
      &              INFO(1), INFO(2), ICNTL, symmetry, KEEP(50),
@@ -762,7 +764,7 @@ C
             DEALLOCATE(WTEMP)
            ENDIF  
          ELSE
-            CALL DMUMPS_ANA_J(N, NZ8, IRN(1), ICN(1), IKEEP1(1), IW(1),
+            CALL DMUMPS_ANA_J(N, NZ8, IRN, ICN, IKEEP1, IW,
      &           LIW8, IPE,
      &           PTRAR(1,2), IWL1, IWFR8,
      &           INFO(1),INFO(2), MP)
@@ -771,8 +773,8 @@ C
             ELSE 
                ITEMP = SIZE_SCHUR
             ENDIF
-            CALL DMUMPS_ANA_K(N, IPE, IW, LIW8, IWFR8, IKEEP1(1),
-     &              IKEEP2(1), IWL1,
+            CALL DMUMPS_ANA_K(N, IPE, IW, LIW8, IWFR8, IKEEP1,
+     &              IKEEP2, IWL1,
      &              PTRAR, NCMPA, ITEMP, PARENT)
             IF (KEEP(60) .EQ. 0) THEN
                IF (KEEP(60) .EQ. 1) THEN
@@ -785,7 +787,7 @@ C
       ENDIF                     
 #if defined(OLDDFS)
       CALL DMUMPS_ANA_L
-     &     (N, PARENT, IWL1, IKEEP1(1), IKEEP2(1), IKEEP3(1),
+     &     (N, PARENT, IWL1, IKEEP1, IKEEP2, IKEEP3,
      &     NFSIZ, INFO(6), FILS(1), FRERE(1), PTRAR(1,3),
      &     NEMIN, KEEP(60))
 #else
@@ -797,8 +799,8 @@ C
          GOTO 90                
       ENDIF
       CALL DMUMPS_ANA_LNEW
-     &     (N, PARENT, IWL1, IKEEP1(1), IKEEP2(1), IKEEP3(1),
-     &     NFSIZ(1), PTRAR, INFO(6), FILS(1), FRERE(1), 
+     &     (N, PARENT, IWL1, IKEEP1, IKEEP2, IKEEP3,
+     &     NFSIZ, PTRAR, INFO(6), FILS, FRERE, 
      &     PTRAR(1,3), NEMIN, WTEMP, KEEP(60),
      &     KEEP(20),KEEP(38),PTRAR(1,2),KEEP(104),IW(1),KEEP(50), 
      &     ICNTL(13), KEEP(37), NSLAVES, KEEP(250).EQ.1)
@@ -826,7 +828,7 @@ C
          ENDDO
          FILS(IN) = -IFSON
       ENDIF
-      CALL DMUMPS_ANA_M(IKEEP2(1),
+      CALL DMUMPS_ANA_M(IKEEP2,
      &     PTRAR(1,3), INFO(6),
      &     INFO(5), KEEP(2), KEEP(50),
      &     KEEP(101),KEEP(108),KEEP(5),
@@ -865,7 +867,7 @@ C
        IF (KEEP(210).EQ.1) THEN
         SPLITROOT = .FALSE. 
         IF ( KEEP(62).GE.1) THEN
-          CALL DMUMPS_CUTNODES(N, FRERE(1), FILS(1), NFSIZ(1), INFO(6),
+          CALL DMUMPS_CUTNODES(N, FRERE, FILS, NFSIZ, INFO(6),
      &                       NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                       MP, LDIAG, INFO(1), INFO(2))
           IF (INFO(1).LT.0) GOTO 90 
@@ -883,7 +885,7 @@ C
       ENDIF
       SPLITROOT = (SPLITROOT.AND.( (KEEP(60).EQ.0) ))
       IF (SPLITROOT) THEN
-         CALL DMUMPS_CUTNODES(N, FRERE(1), FILS(1), NFSIZ(1), INFO(6),
+         CALL DMUMPS_CUTNODES(N, FRERE, FILS, NFSIZ, INFO(6),
      &                    NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                    MP, LDIAG, INFO(1), INFO(2))
          IF (INFO(1).LT.0) GOTO 90 
@@ -1854,13 +1856,19 @@ C
       INTEGER JPERM
       INTEGER NUMNZ, I, J, JPOS
       LOGICAL PROK, IDENT, DUPPLI
-      INTEGER K50, KER_SIZE, NZER_DIAG, MTRANSLOC,RZ_DIAG
+C ssg
+      INTEGER :: NZER_DIAG=0
+      INTEGER :: RZ_DIAG=0
+      INTEGER K50, KER_SIZE, MTRANSLOC
       INTEGER(8) :: LIWG
       INTEGER(8), DIMENSION(:), ALLOCATABLE :: IPE
       INTEGER(8), DIMENSION(:), ALLOCATABLE :: IPQ8
       INTEGER    :: LSC
-      INTEGER(8) :: NZTOT, NZREAL, IPIW, LIW, LIWMIN, NZsave, 
-     &              K, KPOS, LDW, LDWMIN, IRNW, RSPOS, CSPOS,
+C ssg
+      INTEGER(8) :: LIWMIN=0
+      INTEGER(8) :: LDWMIN=0
+      INTEGER(8) :: NZTOT, NZREAL, IPIW, LIW, NZsave, 
+     &              K, KPOS, LDW, IRNW, RSPOS, CSPOS,
      &              LS2,J8, N8
       LOGICAL SCALINGLOC
       INTEGER,POINTER,DIMENSION(:) :: ZERODIAG

@@ -238,16 +238,16 @@ C
                  GOTO 100
                ENDIF
                CALL dgemm('N', 'N', LRB%K, NELIM, LRB%N, ONE,
-     &              LRB%R(1,1), LRB%K, A(LPOS), NFRONT,
+     &              LRB%R, LRB%K, A(LPOS), NFRONT,
      &              ZERO, TEMP_BLOCK, LRB%K) 
                CALL dgemm('N', 'N', LRB%M, NELIM, LRB%K, MONE,
-     &              LRB%Q(1,1), LRB%M, TEMP_BLOCK, LRB%K,
+     &              LRB%Q, LRB%M, TEMP_BLOCK, LRB%K,
      &              ONE, A(UPOS), NFRONT) 
                deallocate(TEMP_BLOCK)
              ENDIF
           ELSE
             CALL dgemm('N', 'N', LRB%M, NELIM, LRB%N, MONE,
-     &              LRB%Q(1,1), LRB%M, A(LPOS), NFRONT,
+     &              LRB%Q, LRB%M, A(LPOS), NFRONT,
      &              ONE, A(UPOS), NFRONT) 
           ENDIF
         ENDDO
@@ -301,16 +301,16 @@ C
                  GOTO 100
                ENDIF
                CALL dgemm(UTRANS , 'T' , NELIM, KL, NL , ONE ,
-     &              A_U(UPOS) , LDU , BLR_L(I)%R(1,1) , KL ,
+     &              A_U(UPOS) , LDU , BLR_L(I)%R , KL ,
      &              ZERO , TEMP_BLOCK , NELIM) 
                CALL dgemm('N' , 'T' , NELIM , ML , KL , MONE ,
-     &              TEMP_BLOCK , NELIM , BLR_L(I)%Q(1,1) , ML ,
+     &              TEMP_BLOCK , NELIM , BLR_L(I)%Q , ML ,
      &              ONE , A_L(IPOS) , LDL) 
                deallocate(TEMP_BLOCK)
              ENDIF
           ELSE
             CALL dgemm(UTRANS , 'T' , NELIM, ML, NL , MONE ,
-     &              A_U(UPOS) , LDU , BLR_L(I)%Q(1,1) , ML ,
+     &              A_U(UPOS) , LDU , BLR_L(I)%Q , ML ,
      &              ONE , A_L(IPOS) , LDL) 
           ENDIF
         ENDDO
@@ -388,10 +388,10 @@ C
      &           + int(NFRONT,8) * int((BEGS_BLR_L(CURRENT_BLR+I)-1),8)
      &           + int(BEGS_BLR_U(CURRENT_BLR+1)+IS-NELIM-1,8)
                CALL dgemm('N' , 'T' , NELIM, KL, NL , ONE ,
-     &                A(POSELT_TOP) , NFRONT , BLR_L(I)%R(1,1) , KL ,
+     &                A(POSELT_TOP) , NFRONT , BLR_L(I)%R , KL ,
      &                ZERO , TEMP_BLOCK , NELIM) 
                CALL dgemm('N' , 'T' , NELIM , ML , KL , MONE ,
-     &                TEMP_BLOCK , NELIM , BLR_L(I)%Q(1,1) , ML ,
+     &                TEMP_BLOCK , NELIM , BLR_L(I)%Q , ML ,
      &                ONE , A(POSELT_INCB) , NFRONT) 
                deallocate(TEMP_BLOCK)
                ENDIF
@@ -403,7 +403,7 @@ C
      &           + int(NFRONT,8) * int((BEGS_BLR_L(CURRENT_BLR+I)-1),8)
      &           + int(BEGS_BLR_U(CURRENT_BLR+1) + IS - NELIM - 1, 8)
                CALL dgemm('N' , 'T' , NELIM, ML, NL , MONE ,
-     &                A(POSELT_TOP) , NFRONT , BLR_L(I)%Q(1,1) , ML ,
+     &                A(POSELT_TOP) , NFRONT , BLR_L(I)%Q , ML ,
      &                ONE , A(POSELT_INCB) , NFRONT) 
             ENDIF
          ENDDO
@@ -1472,7 +1472,9 @@ C
       INTEGER,intent(in) :: COMPRESS_MID_PRODUCT, KPERCENT_RMB, TOL_OPT
       DOUBLE PRECISION,intent(in) :: TOLEPS
       LOGICAL, intent(in) :: LBANDSLAVE
-      INTEGER :: M, N, allocok
+C ssg
+      INTEGER :: N=0
+      INTEGER :: M, allocok
       INTEGER :: I, II, J, K, KK, IND_L, IND_U, IBIS,
      &           K_ORDER(NB_INASM), K_RANK(NB_INASM)
       INTEGER, ALLOCATABLE :: POS_LIST(:), RANK_LIST(:)
@@ -1898,25 +1900,25 @@ C
      &               .AND. BIP + M - 1 .GT. LDA21
      &               .AND..NOT.CBASM_TOFIX) THEN
             CALL dgemm('T', 'T', N, LDA21-BIP+1, K, ONE ,
-     &          BLR_PANEL(IP-CURRENT_BLR)%R(1,1) , K, 
-     &          BLR_PANEL(IP-CURRENT_BLR)%Q(1,1) , M, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%R , K, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%Q , M, 
      &          ZERO, A(POSELT_BLOCK), int(LD_BLK_IN_FRONT))
             CALL dgemm('T', 'T', N, BIP+M-LDA21-1, K, ONE ,
-     &          BLR_PANEL(IP-CURRENT_BLR)%R(1,1) , K, 
-     &          BLR_PANEL(IP-CURRENT_BLR)%Q(LDA21-BIP+2,1) , M, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%R , K, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%Q((LDA21-BIP+2):,1:) , M, 
      &          ZERO, A(POSELT_BLOCK+int(LDA21-BIP,8)*int(LDA11,8)),
      &          LDA21)
           ELSE
             CALL dgemm('T', 'T', N, M, K, ONE ,
-     &          BLR_PANEL(IP-CURRENT_BLR)%R(1,1) , K, 
-     &          BLR_PANEL(IP-CURRENT_BLR)%Q(1,1) , M, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%R , K, 
+     &          BLR_PANEL(IP-CURRENT_BLR)%Q , M, 
      &          ZERO, A(POSELT_BLOCK), int(LD_BLK_IN_FRONT))
           ENDIF
         ELSE 
            CALL dgemm('N', 'N', M, ONLY_NELIM, K, ONE ,
-     &          BLR_PANEL(IP-CURRENT_BLR)%Q(1,1) , M, 
-     &          BLR_PANEL(IP-CURRENT_BLR)%R(1,N-ONLY_NELIM+1) , K, ZERO,
-     &          A(POSELT_BLOCK+int(N-ONLY_NELIM,8)*int(LDA11,8)), LDA11)
+     &         BLR_PANEL(IP-CURRENT_BLR)%Q , M, 
+     &         BLR_PANEL(IP-CURRENT_BLR)%R(1:,(N-ONLY_NELIM+1):),K,ZERO,
+     &         A(POSELT_BLOCK+int(N-ONLY_NELIM,8)*int(LDA11,8)), LDA11)
         ENDIF
         IF (COUNT_FLOPS) THEN
           PROMOTE_COST = 2.0D0*M*K*ONLY_NELIM
@@ -2156,10 +2158,10 @@ C
                END DO
                CALL dormqr 
      &           ('L', 'N', M, RANK, RANK,
-     &           BLOCK_THR(1,1), 
-     &           MAXI_CLUSTER, TAU_THR(1), 
-     &           LRB%Q(1,1),
-     &           M, WORK_THR(1), LWORK, INFO )
+     &           BLOCK_THR, 
+     &           MAXI_CLUSTER, TAU_THR, 
+     &           LRB%Q,
+     &           M, WORK_THR, LWORK, INFO )
                IF (INFO < 0) THEN
                  WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
      &                     " OF CUNMQR WHILE COMPRESSING A CB BLOCK"
@@ -2400,10 +2402,10 @@ C
                END DO
                CALL dormqr 
      &           ('L', 'N', M, RANK, RANK,
-     &           BLOCK_THR(1,1), 
-     &           MAXI_CLUSTER, TAU_THR(1), 
-     &           BLR_PANEL(IP-CURRENT_BLR)%Q(1,1),
-     &           M, WORK_THR(1), LWORK, INFO )
+     &           BLOCK_THR, 
+     &           MAXI_CLUSTER, TAU_THR, 
+     &           BLR_PANEL(IP-CURRENT_BLR)%Q,
+     &           M, WORK_THR, LWORK, INFO )
                IF (INFO < 0) THEN
                  WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
      &                     " OF CUNMQR WHILE COMPRESSING A BLOCK "
