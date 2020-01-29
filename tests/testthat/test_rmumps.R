@@ -45,7 +45,7 @@ test_that("solving symmetric-2 system", {
 # test matrix creation from ijv triade
 a=as(a, "dgTMatrix")
 ai=Rmumps$new(a@i, a@j, a@x, ncol(a))
-#ai$set_permutation(RMUMPS_PERM_SCOTCH)
+ai$set_permutation(RMUMPS_PERM_SCOTCH)
 xi=solve(ai, b)
 test_that("testing a from i,j,v", {
   expect_equal(xi, 1:n)
@@ -111,6 +111,15 @@ am=Rmumps$new(a)
 test_that("singular matrix", {
   expect_error(solve(am, b), "rmumps: job=6, info\\[1\\]=-10*")
 })
+
+# test int size in KEEP
+vkeep=am$get_keep()
+sizeint=Rcpp::evalCpp("sizeof(int)")
+test_that("int size", {
+  expect_equal(vkeep[34], sizeint)
+  expect_equal(vkeep[10], 8/sizeint)
+})
+
 
 rm(a, asy, am)
 gc()

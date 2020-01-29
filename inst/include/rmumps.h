@@ -67,6 +67,7 @@ public:
   IntegerVector get_icntl();
   NumericVector get_cntl();
   void set_keep(IntegerVector iv, IntegerVector ii);
+  IntegerVector get_keep();
   List get_infos();
   NumericVector get_rhs();
   NumericMatrix get_mrhs();

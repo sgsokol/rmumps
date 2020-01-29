@@ -514,6 +514,13 @@ void Rmumps::set_keep(IntegerVector iv, IntegerVector ii) {
     param.keep[ii[i]-1]=iv[i];
   }
 }
+IntegerVector Rmumps::get_keep() {
+  // get a copy of control vector KEEP of length 500
+  IntegerVector res(500);
+  for (auto i=0; i < res.size(); i++)
+    res[i]=param.keep[i];
+  return res;
+}
 
 IntegerVector Rmumps::dim() {
   return IntegerVector::create(param.n, param.n);
@@ -763,7 +770,8 @@ RCPP_MODULE(mod_Rmumps){
   .method("set_cntl", &Rmumps::set_cntl, "Set CNTL parameter vector")
   .method("get_cntl", &Rmumps::get_cntl, "Get CNTL parameter vector")
   .method("get_infos", &Rmumps::get_infos, "Get a named list of information vectors")
-  .method("set_keep", &Rmumps::set_icntl, "Set KEEP parameter vector")
+  .method("set_keep", &Rmumps::set_keep, "Set KEEP parameter vector")
+  .method("get_keep", &Rmumps::get_keep, "Get a copy of KEEP parameter vector (length=500)")
   .method("dim", &Rmumps::dim, "Return a vector with matrix dimensions")
   .method("nrow", &Rmumps::nrow, "Return an integer with matrix row number")
   .method("ncol", &Rmumps::ncol, "Return an integer with matrix column number")

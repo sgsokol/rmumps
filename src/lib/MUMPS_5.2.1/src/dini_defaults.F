@@ -48,8 +48,10 @@ C
       INTEGER(8) :: SIZE_INT, SIZE_REAL_OR_DOUBLE ! matches MUMPS_INT8
       INTEGER, TARGET :: I(2)
       DOUBLE PRECISION, TARGET :: R(2) ! Will be DOUBLE PRECISION if 1
-      CALL MUMPS_SIZE_C(c_loc(I(1)),c_loc(I(2)),SIZE_INT)
-      CALL MUMPS_SIZE_C(c_loc(R(1)),c_loc(R(2)),SIZE_REAL_OR_DOUBLE)
+C      CALL MUMPS_SIZE_C(c_loc(I(1)),c_loc(I(2)),SIZE_INT)
+C      CALL MUMPS_SIZE_C(c_loc(R(1)),c_loc(R(2)),SIZE_REAL_OR_DOUBLE)
+      SIZE_INT=SIZEOF(I(1))
+      SIZE_REAL_OR_DOUBLE=SIZEOF(R(1))
       K34 = int(SIZE_INT)
       K10 = 8 / K34
       K16 = int(SIZE_REAL_OR_DOUBLE)

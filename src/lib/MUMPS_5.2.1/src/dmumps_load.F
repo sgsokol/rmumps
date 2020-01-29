@@ -10,7 +10,7 @@ C  This version of MUMPS is provided to you free of charge. It is
 C  released under the CeCILL-C license:
 C  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
 C
-#define MPI_UNPACK(a, b, c, d, e, f, g, h) MPI_NOOP()
+#include "mpi_noop.h"
       MODULE DMUMPS_LOAD
       implicit none
       PUBLIC :: DMUMPS_LOAD_SET_INICOST, DMUMPS_LOAD_INIT,
@@ -769,7 +769,8 @@ C
         SBTR_MEM = dble(0) 
       END IF
       K34_LOC=id%KEEP(34)
-      CALL MUMPS_SIZE_C(SIZE_DBLE(1),SIZE_DBLE(2),I8SIZE)
+C      CALL MUMPS_SIZE_C(SIZE_DBLE(1),SIZE_DBLE(2),I8SIZE)
+      I8SIZE=SIZEOF(SIZE_DBLE(1))
       K35  = int(I8SIZE)
       BUF_LOAD_SIZE = K34_LOC * 2 * ( NPROCS - 1 ) +
      &                NPROCS * ( K35 + K34_LOC )
