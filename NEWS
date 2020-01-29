@@ -1,8 +1,20 @@
+Version 5.2.1-10
+================
+
+* 2020-01-27
+ - fixed gcc-9 warning about uninitialized variables
+
+Version 5.2.1-9
+===============
+
+* 2020-01-27
+ - fixed gcc-10 warning about uninitialized variables
+
 Version 5.2.1-8
 ===============
 
 * 2020-01-23
- - fixed gcc-10 warning signaled by CRAN team
+ - fixed gcc-10 warning about type mismatches signaled by CRAN team
  - added Copyright holders to DESCRIPTION file
 
 Version 5.2.1-7

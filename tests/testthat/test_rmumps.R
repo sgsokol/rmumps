@@ -45,7 +45,7 @@ test_that("solving symmetric-2 system", {
 # test matrix creation from ijv triade
 a=as(a, "dgTMatrix")
 ai=Rmumps$new(a@i, a@j, a@x, ncol(a))
-ai$set_permutation(RMUMPS_PERM_SCOTCH)
+#ai$set_permutation(RMUMPS_PERM_SCOTCH)
 xi=solve(ai, b)
 test_that("testing a from i,j,v", {
   expect_equal(xi, 1:n)
