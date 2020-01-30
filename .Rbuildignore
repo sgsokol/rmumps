@@ -2,4 +2,4 @@ fix_lto.awk
 lto_rmumps.out.txt
 howto_mumps_new_version.txt
 rmumps-2019-07-09.log
-scotch_6.0.9
+scotch_6.0.4

@@ -50,7 +50,7 @@
 #
 
 #SCOTCHDIR  = ${HOME}/scotch_6.0
-SCOTCHDIR  = ${topdir}/../scotch_6.0.4/
+SCOTCHDIR  = ${topdir}/../$(DSCOTCH)/
 #LSCOTCHDIR  = ${topdir}/../scotch_6.0.4/lib
 ISCOTCH    = -I$(SCOTCHDIR)/include 
 # You have to choose one among the following two lines depending on
@@ -67,8 +67,8 @@ LPORDDIR = $(topdir)/PORD/lib/
 IPORD    = -I$(topdir)/PORD/include/
 LPORD    = -L$(LPORDDIR) -lpord
 
-LMETISDIR = $(topdir)/../metis-5.1.0/build/`gcc -dumpmachine`/libmetis/
-IMETIS    = -I$(topdir)/../metis-5.1.0/include # should be set to include directory for (par)metis.h
+LMETISDIR = $(topdir)/../$(DMETIS)/build/`gcc -dumpmachine`/libmetis/
+IMETIS    = -I$(topdir)/../$(DMETIS)/include # should be set to include directory for (par)metis.h
 
 
 # You have to choose one among the following two lines depending on
