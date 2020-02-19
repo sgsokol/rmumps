@@ -9,7 +9,7 @@ Rmumps__set_permutation(pm, permutation)
 \arguments{
 \item{pm}{pointer of type XPtr<Rmumps>, object having sparse matrix permuted according to a chosen method.}
 
-\item{permutation}{integer one of predefined constants (cf. \code{\link{get_cnst}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.}
+\item{permutation}{integer one of predefined constants (cf. \code{\link{RMUMPS_PERM}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.}
 }
 \description{
 This is a C wrapper to \code{Rmumps::set_permutation(permutation)} method. Available in R too.

@@ -867,7 +867,7 @@ void Rmumps__set_mat_ptr(XPtr<Rmumps> pm, XPtr<double> pa) {
 //' In C++ code can be used as \code{rmumps::Rmumps__set_permutation(pm, permutation)}
 //'
 //' @param pm pointer of type XPtr<Rmumps>, object having sparse matrix permuted according to a chosen method.
-//' @param permutation integer one of predefined constants (cf. \code{\link{get_cnst}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.
+//' @param permutation integer one of predefined constants (cf. \code{\link{RMUMPS_PERM}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.
 //' @export
 // [[Rcpp::export]]
 void Rmumps__set_permutation(XPtr<Rmumps> pm, int permutation) {

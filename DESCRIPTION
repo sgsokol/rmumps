@@ -2,7 +2,7 @@ Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
 Version: 5.2.1-11
-Date: 2020-01-??
+Date: 2020-02-19
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role=c("ctb", "cph")),
@@ -76,5 +76,5 @@ Biarch: yes
 Suggests: testthat, Matrix, slam
 BugReports: https://github.com/sgsokol/rmumps/issues
 URL: http://mumps.enseeiht.fr/, https://github.com/sgsokol/rmumps/
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Encoding: UTF-8
