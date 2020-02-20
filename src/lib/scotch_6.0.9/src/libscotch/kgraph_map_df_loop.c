@@ -129,7 +129,7 @@ KgraphMapDfThread * restrict  thrdptr)            /* Thread-dependent data */
   }
   if (velsmsk == 0) {                             /* If graph is too small to have any usable anchors */
 #ifdef KGRAPHMAPDFLOOPTHREAD
-    loopptr->abrtval == 1;                        /* We will leave during the first iteration */
+    loopptr->abrtval = 1;                        /* We will leave during the first iteration */
 #else /* KGRAPHMAPDFLOOPTHREAD */
     return (1);
 #endif /* KGRAPHMAPDFLOOPTHREAD */
