@@ -103,7 +103,8 @@ const char * const          dataptr)              /* No use           */
   do {                                            /* Skip comment lines   */
     chabuffcar = getc (filesrcptr);               /* Read first character */
     if (chabuffcar == '%') {                      /* If comment line      */
-      fscanf (filesrcptr, "%*[^\n]");             /* Purge line           */
+      int ntmp;
+      ntmp=fscanf (filesrcptr, "%*[^\n]");             /* Purge line           */
       getc   (filesrcptr);                        /* Purge newline        */
     }
   } while (chabuffcar == '%');
@@ -176,7 +177,8 @@ const char * const          dataptr)              /* No use           */
     do {                                          /* Skip comment lines   */
       chabuffcar = getc (filesrcptr);             /* Read first character */
       if (chabuffcar == '%') {                    /* If comment line      */
-        fscanf (filesrcptr, "%*[^\n]");           /* Purge line           */
+        int ntmp;
+        ntmp=fscanf (filesrcptr, "%*[^\n]");           /* Purge line           */
         getc   (filesrcptr);                      /* Purge newline        */
       }
     } while (chabuffcar == '%');
@@ -205,7 +207,8 @@ const char * const          dataptr)              /* No use           */
     grafptr->verttax[vertnum] = edgenum;          /* Set based edge array index */
 
     while (1) {                                   /* Read graph edges              */
-      fscanf (filesrcptr, "%*[ \t\r]");           /* Skip white spaces except '\n' */
+      int ntmp;
+      ntmp=fscanf (filesrcptr, "%*[ \t\r]");           /* Skip white spaces except '\n' */
       chabuffcar = getc (filesrcptr);             /* Read next char                */
       if (chabuffcar == EOF)                      /* If end of file reached        */
         chabuffcar = '\n';                        /* Indicate line as complete     */

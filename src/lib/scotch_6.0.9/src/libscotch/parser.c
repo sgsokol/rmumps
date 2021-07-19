@@ -178,6 +178,9 @@ Strat * const               strat)
         }
       }
       break;
+    case STRATNODENBR :                        /* ssg */
+      break;
+
 #ifdef SCOTCH_DEBUG_PARSER2
     default :
       errorPrint ("stratExit: invalid strategy node");
@@ -286,6 +289,8 @@ FILE * const                stream)
       }
       if ((o == 0) && (paraflag != 0))            /* If there is a parameter list */
         o |= (fprintf (stream, "}") == EOF);      /* Close it                     */
+      break;
+    case STRATNODENBR :                        /* ssg */
       break;
 #ifdef SCOTCH_DEBUG_PARSER2
     default :
@@ -472,6 +477,8 @@ const void * restrict const       data)           /*+ Pointer to data structure 
       }
       eval->typenode = test->typenode;
       break;
+    case STRATTESTNBR :                        /* ssg */
+      break;
 #ifdef SCOTCH_DEBUG_PARSER1
     default :
       errorPrint ("stratTestEval: invalid condition type (%u)", test->typetest);
@@ -558,6 +565,8 @@ StratTest * const           test)
       break;
     case STRATTESTVAL :                           /* Constant value */
     case STRATTESTVAR :                           /* Variable       */
+      break;
+    case STRATTESTNBR :                        /* ssg */
       break;
 #ifdef SCOTCH_DEBUG_PARSER1
     default :
@@ -651,6 +660,8 @@ FILE * const                stream)
         return     (1);
       }
       o = (fprintf (stream, "%s", test->data.var.datatab->condtab[i].name) == EOF);
+      break;
+    case STRATTESTNBR :                        /* ssg */
       break;
 #ifdef SCOTCH_DEBUG_PARSER2
     default :
