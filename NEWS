@@ -1,9 +1,14 @@
+Version 5.2.1-14
+================
+
+* 2021-08-11
+ - fixed -Wunneeded-internal-declaration signaled by CRAM team
+
 Version 5.2.1-13
 ================
 
 * 2021-07-19
  - fixed -Wswitch signaled by CRAM team
-
 Version 5.2.1-12
 ================
 
