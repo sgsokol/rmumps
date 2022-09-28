@@ -2,7 +2,7 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 .get_cnst <- function(s) {
-    .Call('_rmumps_get_cnst', s)
+    .Call("_rmumps_get_cnst", s)
 }
 
 #' Solve via Pointer
@@ -16,7 +16,7 @@
 #' @param nrhs integer, number of rhs to solve.
 #' @export
 Rmumps__solveptr <- function(pobj, pb, lrhs, nrhs) {
-    invisible(.Call('_rmumps_Rmumps__solveptr', pobj, pb, lrhs, nrhs))
+    invisible(.Call("_rmumps_Rmumps__solveptr", pobj, pb, lrhs, nrhs))
 }
 
 #' Construct via Triplet Pointers
@@ -33,7 +33,7 @@ Rmumps__solveptr <- function(pobj, pb, lrhs, nrhs) {
 #' @return pointer of type XPtr<Rmumps> pointing to newly created object. To avoid memory leakage, it is user's responsibility to call \code{Rmumps__del_ptr(pm)} in a due moment (where \code{pm} is the returned pointer).
 #' @export
 Rmumps__ptr_ijv <- function(pi, pj, pa, n, nz, sym) {
-    .Call('_rmumps_Rmumps__ptr_ijv', pi, pj, pa, n, nz, sym)
+    .Call("_rmumps_Rmumps__ptr_ijv", pi, pj, pa, n, nz, sym)
 }
 
 #' Delete via Pointer
@@ -44,7 +44,7 @@ Rmumps__ptr_ijv <- function(pi, pj, pa, n, nz, sym) {
 #' @param pm pointer of type XPtr<Rmumps>, object to be deleted
 #' @export
 Rmumps__del_ptr <- function(pm) {
-    invisible(.Call('_rmumps_Rmumps__del_ptr', pm))
+    invisible(.Call("_rmumps_Rmumps__del_ptr", pm))
 }
 
 #' Explore via Triplet
@@ -56,7 +56,7 @@ Rmumps__del_ptr <- function(pm) {
 #' @return a list with sparse triplet described with fields i, j, v
 #' @export
 Rmumps__triplet <- function(pm) {
-    .Call('_rmumps_Rmumps__triplet', pm)
+    .Call("_rmumps_Rmumps__triplet", pm)
 }
 
 #' Set Matrix via Pointer
@@ -68,7 +68,7 @@ Rmumps__triplet <- function(pm) {
 #' @param pa pointer of type XPtr<double>, value vector from sparse triplet providing a new matrix. Structure of the new matrix must be identical to the old one. That's why there is no need to provide i and j for the new triplet.
 #' @export
 Rmumps__set_mat_ptr <- function(pm, pa) {
-    invisible(.Call('_rmumps_Rmumps__set_mat_ptr', pm, pa))
+    invisible(.Call("_rmumps_Rmumps__set_mat_ptr", pm, pa))
 }
 
 #' Set Permutation Parameter
@@ -80,7 +80,7 @@ Rmumps__set_mat_ptr <- function(pm, pa) {
 #' @param permutation integer one of predefined constants (cf. \code{\link{RMUMPS_PERM}}). Setting a new permutation invalidates current symbolic and numeric matrix decompositions.
 #' @export
 Rmumps__set_permutation <- function(pm, permutation) {
-    invisible(.Call('_rmumps_Rmumps__set_permutation', pm, permutation))
+    invisible(.Call("_rmumps_Rmumps__set_permutation", pm, permutation))
 }
 
 #' Get Permutation Parameter
@@ -92,7 +92,7 @@ Rmumps__set_permutation <- function(pm, permutation) {
 #' @return integer defining permutation method used before matrix decomposition.
 #' @export
 Rmumps__get_permutation <- function(pm) {
-    .Call('_rmumps_Rmumps__get_permutation', pm)
+    .Call("_rmumps_Rmumps__get_permutation", pm)
 }
 
 # Register entry points for exported C++ functions

@@ -3465,9 +3465,9 @@ C               -- Master not working
      &          id%POSINRHSCOMP_ROW, NB_FS_IN_RHSCOMP_F,
 C
      &          id%PTLUST_S, id%KEEP, id%KEEP8,
-     &          id%PROCNODE_STEPS,
+     &          id%PROCNODE_STEPS(1),
      &          IS, LIW_PASSED,
-     &          id%STEP,
+     &          id%STEP(1),
      &          id%ICNTL,id%INFO)
               ENDIF
               IF (INFO(1).LT.0) GOTO 90
@@ -4172,13 +4172,13 @@ C             compilers would do otherwise
                 CALL DMUMPS_GATHER_SOLUTION_AM1(id%NSLAVES,id%N,
      &          id%MYID, id%COMM, NBRHS_EFF,
      &          id%RHSCOMP(IBEG_RHSCOMP:), LD_RHSCOMP, NBRHS_EFF,
-     &          id%KEEP, id%BUFR, id%LBUFR, id%LBUFR_BYTES,
-     &          LSCAL, PT_SCALING, size(PT_SCALING)
+     &          id%KEEP(1), id%BUFR(1), id%LBUFR, id%LBUFR_BYTES,
+     &          LSCAL, PT_SCALING(1), size(PT_SCALING)
 C               --- A-1 related entries
-     &          , IRHS_PTR_COPY, size(IRHS_PTR_COPY),
-     &          IRHS_SPARSE_COPY, size(IRHS_SPARSE_COPY),
-     &          RHS_SPARSE_COPY, size(RHS_SPARSE_COPY),
-     &          UNS_PERM_INV, size(UNS_PERM_INV),
+     &          , IRHS_PTR_COPY(1), size(IRHS_PTR_COPY),
+     &          IRHS_SPARSE_COPY(1), size(IRHS_SPARSE_COPY),
+     &          RHS_SPARSE_COPY(1), size(RHS_SPARSE_COPY),
+     &          UNS_PERM_INV(1), size(UNS_PERM_INV),
      &          id%POSINRHSCOMP_COL, id%N, NB_FS_IN_RHSCOMP_TOT
      &          )
               ENDIF
@@ -5500,9 +5500,9 @@ C           system (ie, col indices of A or A^T)
      &      PTR_POSINRHSCOMP_FWD, NB_FS_IN_RHSCOMP_F,
 C
      &      id%PTLUST_S, id%KEEP, id%KEEP8,
-     &      id%PROCNODE_STEPS,
+     &      id%PROCNODE_STEPS(1),
      &      IS, LIW_PASSED,
-     &      id%STEP,
+     &      id%STEP(1),
      &      id%ICNTL,id%INFO)
         ENDIF
         IF (INFO(1).LT.0) GOTO 89

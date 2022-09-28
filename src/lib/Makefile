@@ -9,7 +9,12 @@ FLAGS.MPI=-I../libseq
 FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -I../include
 FLAGS.PORD=-I../PORD/include
 FLAGS.SCOTCH=-I../../$(DSCOTCH)/include
-FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX
+ifeq "$(INC_OS)" ".sunos"
+ DSUNOS="-DSUNOS"
+else
+ DSUNOS=""
+endif
+FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS)
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 ifeq "$(INC_OS)" ".win"
  FLAGS.GKlib += -DMINGW

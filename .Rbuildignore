@@ -4,8 +4,7 @@ howto_mumps_new_version.txt
 rmumps-2019-07-09.log
 scotch_6.0.4
 ^.*\.toremove$
-^.*\.patch.*
 ^.*\.old$
-^.*\.yml$
-^.*\.orig$
-build_mumps_int_def
+^.*\.patch.*$
+^.*/MUMPS_5.3.5/.*$
+^.*/scotch_6.1.0/.*$
