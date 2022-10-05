@@ -10,9 +10,9 @@ FLAGS.MUMPS=-Dmetis -Dpord -Dscotch -I../include
 FLAGS.PORD=-I../PORD/include
 FLAGS.SCOTCH=-I../../$(DSCOTCH)/include
 ifeq "$(INC_OS)" ".sunos"
- DSUNOS="-DSUNOS"
+ DSUNOS=-DSUNOS
 else
- DSUNOS=""
+ DSUNOS=
 endif
 FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS)
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
