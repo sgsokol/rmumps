@@ -475,7 +475,7 @@ const Anum * const          vnumtab)              /* Ordered list of remaining t
     treetab[orgtermnum].vertnum = orgtermnum;     /* Vertex number in original architecture                    */
   }
 
-  rootptr = archSubArchBuild2 (&matcdat, orgarchptr->class->matchMate, treetab, vnumnbr);
+  rootptr = archSubArchBuild2 (&matcdat, ((Anum (*)(void *, ArchCoarsenMulti * restrict*)) (orgarchptr->class->matchMate)), treetab, vnumnbr);
 
   orgarchptr->class->matchExit (&matcdat);        /* Free matching structure */
 

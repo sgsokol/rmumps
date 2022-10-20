@@ -76,7 +76,7 @@
 +*/
 
 SCOTCH_Mesh *
-SCOTCH_meshAlloc ()
+SCOTCH_meshAlloc (void)
 {
   return ((SCOTCH_Mesh *) memAlloc (sizeof (SCOTCH_Mesh)));
 }

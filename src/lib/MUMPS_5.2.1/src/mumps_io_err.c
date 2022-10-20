@@ -42,7 +42,7 @@ MUMPS_LOW_LEVEL_INIT_ERR_STR(MUMPS_INT *dim, char* err_str, mumps_ftnlen l1){
 }
 #if ! defined(MUMPS_WIN32) && ! defined(WITHOUT_PTHREAD)
 MUMPS_INLINE MUMPS_INT
-mumps_io_protect_err()
+mumps_io_protect_err(void)
 {
   if(mumps_io_flag_async==IO_ASYNC_TH){
     pthread_mutex_lock(&err_mutex);
@@ -50,7 +50,7 @@ mumps_io_protect_err()
   return 0;
 }
 MUMPS_INLINE MUMPS_INT
-mumps_io_unprotect_err()
+mumps_io_unprotect_err(void)
 {
   if(mumps_io_flag_async==IO_ASYNC_TH){
     pthread_mutex_unlock(&err_mutex);
@@ -58,19 +58,19 @@ mumps_io_unprotect_err()
   return 0;
 }
 MUMPS_INT
-mumps_io_init_err_lock()
+mumps_io_init_err_lock(void)
 {
   pthread_mutex_init(&err_mutex,NULL);
   return 0;
 }
 MUMPS_INT
-mumps_io_destroy_err_lock()
+mumps_io_destroy_err_lock(void)
 {
   pthread_mutex_destroy(&err_mutex);
   return 0;
 }
 MUMPS_INT
-mumps_check_error_th()
+mumps_check_error_th(void)
 {
   /* If err_flag != 0, then error_str is set */
   return err_flag;

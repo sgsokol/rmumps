@@ -113,7 +113,7 @@ typedef enum StratTestType_ {
 typedef struct StratMethodTab_ {
   int                       meth;                 /*+ Method number in method table    +*/
   char *                    name;                 /*+ Method name                      +*/
-  int                    (* func) ();             /*+ Pointer to bipartitioning method +*/
+  int                    (* func) (void *, void*);             /*+ Pointer to bipartitioning method +*/
   void *                    data;                 /*+ Pointer to default parameters    +*/
 } StratMethodTab;
 

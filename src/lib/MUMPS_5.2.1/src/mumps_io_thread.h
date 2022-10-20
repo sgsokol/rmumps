@@ -69,6 +69,6 @@ MUMPS_INT mumps_clean_io_data_c_th(MUMPS_INT *myid);
 MUMPS_INT mumps_get_sem(void *arg,MUMPS_INT *value);
 MUMPS_INT mumps_wait_sem(void *arg,pthread_cond_t *cond);
 MUMPS_INT mumps_post_sem(void *arg,pthread_cond_t *cond);
-MUMPS_INT mumps_clean_finished_queue_th();
+MUMPS_INT mumps_clean_finished_queue_th(void);
 #endif /*_WIN32 && WITHOUT_PTHREAD*/
 #endif /* MUMPS_IO_THREAD_H */

@@ -15,9 +15,11 @@
 #' }
 #' They are all regrouped in a named vector \code{RMUMPS_PERM} where names are items above and values are corresponding constants.
 #' @examples
-#' am=rmumps::Rmumps$new(slam::as.simple_triplet_matrix(diag(1:3)))
-#' am$set_permutation(RMUMPS_PERM_SCOTCH)
-#' am$solve(1:3)
+#' if (requireNamespace("slam", quietly=TRUE)) {
+#'     am=rmumps::Rmumps$new(slam::as.simple_triplet_matrix(diag(1:3)))
+#'     am$set_permutation(RMUMPS_PERM_SCOTCH)
+#'     am$solve(1:3)
+#' }
 NULL
 
 # set useful constants

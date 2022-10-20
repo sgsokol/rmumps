@@ -111,7 +111,7 @@ int                         procnum)
 +*/
 
 void
-SCOTCH_randomReset ()
+SCOTCH_randomReset (void)
 {
   intRandReset ();
 }

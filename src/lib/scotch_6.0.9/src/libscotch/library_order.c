@@ -70,7 +70,7 @@
 +*/
 
 SCOTCH_Ordering *
-SCOTCH_orderAlloc ()
+SCOTCH_orderAlloc (void)
 {
   return ((SCOTCH_Ordering *) memAlloc (sizeof (SCOTCH_Ordering)));
 }

@@ -94,7 +94,7 @@
 +*/
 
 SCOTCH_Arch *
-SCOTCH_archAlloc ()
+SCOTCH_archAlloc (void)
 {
   return ((SCOTCH_Arch *) memAlloc (sizeof (SCOTCH_Arch)));
 }

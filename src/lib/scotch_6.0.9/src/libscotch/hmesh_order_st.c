@@ -71,6 +71,9 @@
 #include "vmesh.h"
 #include "vmesh_separate_st.h"
 
+typedef int arch_arg_2_t ( void *, void * );
+typedef int arch_arg_5_t ( void *, void *, int, void *, void * );
+
 /*
 **  The static and global variables.
 */
@@ -113,14 +116,14 @@ static union {                                    /* Default parameters for nest
 } hmeshorderstdefaultnd = { { &stratdummy, &stratdummy, &stratdummy } };
 
 static StratMethodTab       hmeshorderstmethtab[] = { /* Mesh ordering methods array */
-                              { HMESHORDERSTMETHBL, "b",  hmeshOrderBl, &hmeshorderstdefaultbl },
-                              { HMESHORDERSTMETHCP, "c",  hmeshOrderCp, &hmeshorderstdefaultcp },
-                              { HMESHORDERSTMETHGP, "g",  hmeshOrderGp, &hmeshorderstdefaultgp },
-                              { HMESHORDERSTMETHGR, "v",  hmeshOrderGr, &hmeshorderstdefaultgr },
-                              { HMESHORDERSTMETHHD, "d",  hmeshOrderHd, &hmeshorderstdefaulthd },
-                              { HMESHORDERSTMETHHF, "f",  hmeshOrderHf, &hmeshorderstdefaulthf },
-                              { HMESHORDERSTMETHND, "n",  hmeshOrderNd, &hmeshorderstdefaultnd },
-                              { HMESHORDERSTMETHSI, "s",  hmeshOrderSi, NULL },
+                              { HMESHORDERSTMETHBL, "b",  (arch_arg_2_t*) hmeshOrderBl, &hmeshorderstdefaultbl },
+                              { HMESHORDERSTMETHCP, "c",  (arch_arg_2_t*) hmeshOrderCp, &hmeshorderstdefaultcp },
+                              { HMESHORDERSTMETHGP, "g",  (arch_arg_2_t*) hmeshOrderGp, &hmeshorderstdefaultgp },
+                              { HMESHORDERSTMETHGR, "v",  (arch_arg_2_t*) hmeshOrderGr, &hmeshorderstdefaultgr },
+                              { HMESHORDERSTMETHHD, "d",  (arch_arg_2_t*) hmeshOrderHd, &hmeshorderstdefaulthd },
+                              { HMESHORDERSTMETHHF, "f",  (arch_arg_2_t*) hmeshOrderHf, &hmeshorderstdefaulthf },
+                              { HMESHORDERSTMETHND, "n",  (arch_arg_2_t*) hmeshOrderNd, &hmeshorderstdefaultnd },
+                              { HMESHORDERSTMETHSI, "s",  (arch_arg_2_t*) hmeshOrderSi, NULL },
                               { -1,                 NULL, NULL,         NULL } };
 
 static StratParamTab        hmeshorderstparatab[] = { /* The method parameter list */
@@ -287,7 +290,7 @@ const Strat * restrict const    strat)            /*+ Mesh ordering strategy    
 #else /* SCOTCH_DEBUG_HMESH2 */
     default :
 #endif /* SCOTCH_DEBUG_HMESH2 */
-      return (strat->tabl->methtab[strat->data.method.meth].func (meshptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
+      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) (meshptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
 #ifdef SCOTCH_DEBUG_HMESH2
     default :
       errorPrint ("hmeshOrderSt: invalid parameter");

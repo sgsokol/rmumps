@@ -80,7 +80,7 @@ void * const                dataptr)
 +*/
 
 int
-SCOTCH_numSizeof ()
+SCOTCH_numSizeof (void)
 {
   return (sizeof (SCOTCH_Num));
 }

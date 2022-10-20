@@ -67,8 +67,9 @@
 /*
 **  The static variables.
 */
+/* ssg: added prototype */
 
-static void              (* meshCoarFuncTab[MESHCOARSENNBR]) () = { /* Tables of matching routines */
+static void              (* meshCoarFuncTab[MESHCOARSENNBR]) (const Mesh * restrict const, MeshCoarsenMult * restrict const, Gnum * restrict const, Gnum * restrict const, Gnum * restrict const, Gnum * restrict const) = { /* Tables of matching routines */
                              meshCoarsenMatchNg };
 
 /***************************/
@@ -371,7 +372,6 @@ fprintf (stderr, "-------- EXITING COARSENING ---------\n"); /* TODO REMOVE */
 ** selecting the elements that share most nodes
 ** with the first element.
 */
-
 static
 void
 meshCoarsenMatchNg (

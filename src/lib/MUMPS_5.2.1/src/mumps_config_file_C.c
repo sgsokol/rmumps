@@ -18,7 +18,7 @@
 #include "mumps_config_file_C.h"
 #include "mumps_common.h"
 void MUMPS_CALL
-MUMPS_CONFIG_FILE_RETURN_C()
+MUMPS_CONFIG_FILE_RETURN_C(void)
 {
   /*
   This feature will be available in the future

@@ -128,15 +128,15 @@ static union {                                    /* Default parameters for nest
 } hgraphorderstdefaultnd = { { &stratdummy, &stratdummy, &stratdummy } };
 
 static StratMethodTab       hgraphorderstmethtab[] = { /* Graph ordering methods array */
-                              { HGRAPHORDERSTMETHBL, "b",  hgraphOrderBl, &hgraphorderstdefaultbl },
-                              { HGRAPHORDERSTMETHCC, "o",  hgraphOrderCc, &hgraphorderstdefaultcc },
-                              { HGRAPHORDERSTMETHCP, "c",  hgraphOrderCp, &hgraphorderstdefaultcp },
-                              { HGRAPHORDERSTMETHGP, "g",  hgraphOrderGp, &hgraphorderstdefaultgp },
-                              { HGRAPHORDERSTMETHHD, "d",  hgraphOrderHd, &hgraphorderstdefaulthd },
-                              { HGRAPHORDERSTMETHHF, "f",  hgraphOrderHf, &hgraphorderstdefaulthf },
-                              { HGRAPHORDERSTMETHKP, "k",  hgraphOrderKp, &hgraphorderstdefaultkp },
-                              { HGRAPHORDERSTMETHND, "n",  hgraphOrderNd, &hgraphorderstdefaultnd },
-                              { HGRAPHORDERSTMETHSI, "s",  hgraphOrderSi, NULL },
+                              { HGRAPHORDERSTMETHBL, "b",  (arch_arg_2_t*) hgraphOrderBl, &hgraphorderstdefaultbl },
+                              { HGRAPHORDERSTMETHCC, "o",  (arch_arg_2_t*) hgraphOrderCc, &hgraphorderstdefaultcc },
+                              { HGRAPHORDERSTMETHCP, "c",  (arch_arg_2_t*) hgraphOrderCp, &hgraphorderstdefaultcp },
+                              { HGRAPHORDERSTMETHGP, "g",  (arch_arg_2_t*) hgraphOrderGp, &hgraphorderstdefaultgp },
+                              { HGRAPHORDERSTMETHHD, "d",  (arch_arg_2_t*) hgraphOrderHd, &hgraphorderstdefaulthd },
+                              { HGRAPHORDERSTMETHHF, "f",  (arch_arg_2_t*) hgraphOrderHf, &hgraphorderstdefaulthf },
+                              { HGRAPHORDERSTMETHKP, "k",  (arch_arg_2_t*) hgraphOrderKp, &hgraphorderstdefaultkp },
+                              { HGRAPHORDERSTMETHND, "n",  (arch_arg_2_t*) hgraphOrderNd, &hgraphorderstdefaultnd },
+                              { HGRAPHORDERSTMETHSI, "s",  (arch_arg_2_t*) hgraphOrderSi, NULL },
                               { -1,                  NULL, NULL,          NULL } };
 
 static StratParamTab        hgraphorderstparatab[] = { /* The method parameter list */
@@ -307,7 +307,7 @@ const Strat * restrict const    strat)            /*+ Graph ordering strategy   
 #else /* SCOTCH_DEBUG_HGRAPH2 */
     default :
 #endif /* SCOTCH_DEBUG_HGRAPH2 */
-      return (strat->tabl->methtab[strat->data.method.meth].func (grafptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
+      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) (grafptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
 #ifdef SCOTCH_DEBUG_HGRAPH2
     default :
       errorPrint ("hgraphOrderSt: invalid parameter");

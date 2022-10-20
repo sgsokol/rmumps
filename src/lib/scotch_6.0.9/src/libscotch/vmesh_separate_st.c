@@ -70,6 +70,8 @@
 #include "vmesh_separate_zr.h"
 #include "vmesh_separate_st.h"
 
+typedef int arch_arg_2_t ( void *, void * ); /* ssg */
+
 /*
 **  The static and global variables.
 */
@@ -99,13 +101,13 @@ static union {
 } vmeshseparatedefaultml = { { 1000, 0.8L, MESHCOARSENNGB, &stratdummy, &stratdummy } };
 
 static StratMethodTab       vmeshseparatestmethtab[] = { /* Mesh separation methods array */
-                              { VMESHSEPASTMETHFM, "f",  vmeshSeparateFm, &vmeshseparatedefaultfm },
-                              { VMESHSEPASTMETHGG, "h",  vmeshSeparateGg, &vmeshseparatedefaultgg },
+                              { VMESHSEPASTMETHFM, "f",  (arch_arg_2_t*) vmeshSeparateFm, &vmeshseparatedefaultfm },
+                              { VMESHSEPASTMETHGG, "h",  (arch_arg_2_t*) vmeshSeparateGg, &vmeshseparatedefaultgg },
 #ifdef SCOTCH_DEBUG_VMESH2
-                              { VMESHSEPASTMETHGR, "v",  vmeshSeparateGr, &vmeshseparatedefaultgr },
+                              { VMESHSEPASTMETHGR, "v",  (arch_arg_2_t*) vmeshSeparateGr, &vmeshseparatedefaultgr },
 #endif /* SCOTCH_DEBUG_VMESH2 */
-                              { VMESHSEPASTMETHML, "m",  vmeshSeparateMl, &vmeshseparatedefaultml },
-                              { VMESHSEPASTMETHZR, "z",  vmeshSeparateZr, NULL },
+                              { VMESHSEPASTMETHML, "m",  (arch_arg_2_t*) vmeshSeparateMl, &vmeshseparatedefaultml },
+                              { VMESHSEPASTMETHZR, "z",  (arch_arg_2_t*) vmeshSeparateZr, NULL },
                               { -1,                NULL, NULL,            NULL } };
 
 static StratParamTab        vmeshseparatestparatab[] = { /* Mesh separation method parameter list */

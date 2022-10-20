@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "dmumps_gpu.h"
-void MUMPS_CALL dmumps_gpu_return()
+void MUMPS_CALL dmumps_gpu_return(void)
 {
   /*
     GPU feature will be available in the future

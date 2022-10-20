@@ -146,7 +146,7 @@ typedef struct WgraphPartFmSave_ {
 */
 
 #ifdef WGRAPH_PART_FM
-static int                  wgraphPartFmResize  ();
+static int                  wgraphPartFmResize  (void);
 #endif /* WGRAPH_PART_FM */
 
 int                         wgraphPartFm        (Wgraph * const, const WgraphPartFmParam * const);

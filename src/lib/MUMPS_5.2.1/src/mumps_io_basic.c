@@ -655,7 +655,7 @@ MUMPS_INT mumps_io_set_file_name(MUMPS_INT* indice,char* name,MUMPS_INT* length,
   strcpy((((mumps_files+*type)->mumps_io_pfile_pointer_array)+i)->name,name);
   return 0;  
 }
-MUMPS_INT mumps_io_open_files_for_read(){
+MUMPS_INT mumps_io_open_files_for_read(void){
   MUMPS_INT i,j;
   mumps_file_struct  *mumps_io_pfile_pointer_array;
 #if defined (sgi) || defined (__sgi)

@@ -449,13 +449,13 @@ memMax ()
 */
 
 IDX
-memCur ()
+memCur (void)
 {
   return ((IDX) -1);
 }
 
 IDX
-memMax ()
+memMax (void)
 {
   return ((IDX) -1);
 }

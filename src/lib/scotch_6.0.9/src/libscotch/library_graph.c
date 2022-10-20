@@ -82,7 +82,7 @@
 +*/
 
 SCOTCH_Graph *
-SCOTCH_graphAlloc ()
+SCOTCH_graphAlloc (void)
 {
   return ((SCOTCH_Graph *) memAlloc (sizeof (SCOTCH_Graph)));
 }

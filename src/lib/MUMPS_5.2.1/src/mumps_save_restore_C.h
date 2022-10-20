@@ -26,5 +26,5 @@ MUMPS_GET_SAVE_PREFIX_C(MUMPS_INT *len_save_prefix, char* save_prefix, mumps_ftn
 #define MUMPS_SAVE_RESTORE_RETURN_C \
     F_SYMBOL(save_restore_return_c,SAVE_RESTORE_RETURN_C)
 void MUMPS_CALL
-MUMPS_SAVE_RESTORE_RETURN_C();
+MUMPS_SAVE_RESTORE_RETURN_C(void);
 #endif /* MUMPS_SAVE_RESTORE_C_H */

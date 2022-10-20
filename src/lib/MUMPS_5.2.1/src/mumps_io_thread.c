@@ -240,7 +240,7 @@ MUMPS_INT mumps_is_there_finished_request_th(MUMPS_INT* flag){
   if(!mumps_owns_mutex) pthread_mutex_unlock(&io_mutex);
   return 0;
 }
-MUMPS_INT mumps_clean_finished_queue_th(){
+MUMPS_INT mumps_clean_finished_queue_th(void){
    /* Cleans the finished request queue. On exit, the queue is empty.*/
    MUMPS_INT local_flag;
    MUMPS_INT cur_req;

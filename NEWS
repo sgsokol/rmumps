@@ -1,3 +1,9 @@
+Version 5.2.1-20
+================
+
+* 2022-10-19
+ -fixed compilation errors about function prototypes signaled by CRAN team
+
 Version 5.2.1-18
 ================
 

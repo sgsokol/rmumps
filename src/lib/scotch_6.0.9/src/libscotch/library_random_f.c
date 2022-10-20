@@ -80,7 +80,7 @@ const int * const           procnum), \
 */
 
 SCOTCH_FORTRAN (              \
-RANDOMRESET, randomreset, (), \
+RANDOMRESET, randomreset, (void), \
 ())
 {
   SCOTCH_randomReset ();

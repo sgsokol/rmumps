@@ -15,5 +15,5 @@
 #ifndef DMUMPS_GPU_H
 #define DMUMPS_GPU_H
 #include "mumps_common.h"
-void MUMPS_CALL dmumps_gpu_return();
+void MUMPS_CALL dmumps_gpu_return(void);
 #endif /* DMUMPS_GPU_H */

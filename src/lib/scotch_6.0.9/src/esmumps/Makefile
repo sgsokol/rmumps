@@ -55,7 +55,7 @@ include ../Makefile.inc$(INC_OS)
 scotch				:	clean
 					$(MAKE) CC="$(CCS)" CCD="$(CCS)"	\
 					libesmumps$(LIB)			\
-					main_esmumps$(EXE)
+					#main_esmumps$(EXE)
 
 ptscotch			:	scotch
 

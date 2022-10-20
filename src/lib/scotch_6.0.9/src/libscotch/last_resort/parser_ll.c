@@ -2039,7 +2039,7 @@ const char * const          string)               /*+ Strategy string to parse +
 
 static
 int
-stratParserInput ()
+stratParserInput (void)
 {
   if (*stratparserstringptr == '\0')              /* If end-of-string reached  */
     return (0);                                   /* Return end-of-file token  */
@@ -2052,7 +2052,7 @@ stratParserInput ()
 */
 
 const char *
-stratParserRemain ()
+stratParserRemain (void)
 {
   return (stratparserstringptr);
 }

@@ -78,7 +78,7 @@
 +*/
 
 SCOTCH_Geom *
-SCOTCH_geomAlloc ()
+SCOTCH_geomAlloc (void)
 {
   return ((SCOTCH_Geom *) memAlloc (sizeof (SCOTCH_Geom)));
 }

@@ -70,7 +70,7 @@
 +*/
 
 SCOTCH_Strat *
-SCOTCH_stratAlloc ()
+SCOTCH_stratAlloc (void)
 {
   return ((SCOTCH_Strat *) memAlloc (sizeof (SCOTCH_Strat)));
 }

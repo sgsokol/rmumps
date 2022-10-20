@@ -65,6 +65,7 @@ void                        ESMUMPSF            (const INT * const, const INT * 
 /* This is the main function. */
 /*                            */
 /******************************/
+int main(int, char **);
 
 int
 main (argc, argv)

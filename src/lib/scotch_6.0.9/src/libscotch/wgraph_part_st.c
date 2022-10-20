@@ -107,12 +107,12 @@ static union {
 } wgraphpartdefaultrb = { { &stratdummy } };
 
 static StratMethodTab       wgraphpartstmethtab[] = { /* Graph overlap partitioning methods array */
-                              { WGRAPHSEPASTMETHGG, "h",  wgraphPartGg, &wgraphpartdefaultgg },
-                              { WGRAPHSEPASTMETHGP, "g",  wgraphPartGp, &wgraphpartdefaultgp },
-                              { WGRAPHSEPASTMETHFM, "f",  wgraphPartFm, &wgraphpartdefaultfm },
-                              { WGRAPHSEPASTMETHML, "m",  wgraphPartMl, &wgraphpartdefaultml },
-                              { WGRAPHSEPASTMETHRB, "r",  wgraphPartRb, &wgraphpartdefaultrb },
-                              { WGRAPHSEPASTMETHZR, "z",  wgraphPartZr, NULL },
+                              { WGRAPHSEPASTMETHGG, "h",  (arch_arg_2_t*) wgraphPartGg, &wgraphpartdefaultgg },
+                              { WGRAPHSEPASTMETHGP, "g",  (arch_arg_2_t*) wgraphPartGp, &wgraphpartdefaultgp },
+                              { WGRAPHSEPASTMETHFM, "f",  (arch_arg_2_t*) wgraphPartFm, &wgraphpartdefaultfm },
+                              { WGRAPHSEPASTMETHML, "m",  (arch_arg_2_t*) wgraphPartMl, &wgraphpartdefaultml },
+                              { WGRAPHSEPASTMETHRB, "r",  (arch_arg_2_t*) wgraphPartRb, &wgraphpartdefaultrb },
+                              { WGRAPHSEPASTMETHZR, "z",  (arch_arg_2_t*) wgraphPartZr, NULL },
                               { -1,                NULL,  NULL,         NULL } };
 
 static StratParamTab        wgraphpartstparatab[] = { /* Method parameter list */

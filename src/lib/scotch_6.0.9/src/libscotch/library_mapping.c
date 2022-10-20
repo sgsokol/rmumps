@@ -70,7 +70,7 @@
 +*/
 
 SCOTCH_Mapping *
-SCOTCH_mapAlloc ()
+SCOTCH_mapAlloc (void)
 {
   return ((SCOTCH_Mapping *) memAlloc (sizeof (SCOTCH_Mapping)));
 }

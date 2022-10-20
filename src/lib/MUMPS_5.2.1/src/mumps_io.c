@@ -430,7 +430,7 @@ MUMPS_CLEAN_IO_DATA_C(MUMPS_INT *myid,MUMPS_INT *step,MUMPS_INT *ierr)
   return;
 }
 void MUMPS_CALL
-MUMPS_OOC_PRINT_STATS()
+MUMPS_OOC_PRINT_STATS(void)
 {
 #if ! defined(MUMPS_WIN32)
   printf("%d: total time spent in i/o mode = %lf\n",mumps_io_myid,mumps_time_spent_in_sync);

@@ -119,14 +119,14 @@ static union {
 } vgraphseparatedefaultml = { { 100, 0.8L, GRAPHCOARHEM, &stratdummy, &stratdummy } };
 
 static StratMethodTab       vgraphseparatestmethtab[] = { /* Graph separation methods array */
-                              { VGRAPHSEPASTMETHBD, "b",  vgraphSeparateBd, &vgraphseparatedefaultbd },
-                              { VGRAPHSEPASTMETHES, "e",  vgraphSeparateEs, &vgraphseparatedefaultes },
-                              { VGRAPHSEPASTMETHFM, "f",  vgraphSeparateFm, &vgraphseparatedefaultfm },
-                              { VGRAPHSEPASTMETHGG, "h",  vgraphSeparateGg, &vgraphseparatedefaultgg },
-                              { VGRAPHSEPASTMETHGP, "g",  vgraphSeparateGp, &vgraphseparatedefaultgp },
-                              { VGRAPHSEPASTMETHML, "m",  vgraphSeparateMl, &vgraphseparatedefaultml },
-                              { VGRAPHSEPASTMETHVW, "v",  vgraphSeparateVw, NULL },
-                              { VGRAPHSEPASTMETHZR, "z",  vgraphSeparateZr, NULL },
+                              { VGRAPHSEPASTMETHBD, "b",  (arch_arg_2_t*) vgraphSeparateBd, &vgraphseparatedefaultbd },
+                              { VGRAPHSEPASTMETHES, "e",  (arch_arg_2_t*) vgraphSeparateEs, &vgraphseparatedefaultes },
+                              { VGRAPHSEPASTMETHFM, "f",  (arch_arg_2_t*) vgraphSeparateFm, &vgraphseparatedefaultfm },
+                              { VGRAPHSEPASTMETHGG, "h",  (arch_arg_2_t*) vgraphSeparateGg, &vgraphseparatedefaultgg },
+                              { VGRAPHSEPASTMETHGP, "g",  (arch_arg_2_t*) vgraphSeparateGp, &vgraphseparatedefaultgp },
+                              { VGRAPHSEPASTMETHML, "m",  (arch_arg_2_t*) vgraphSeparateMl, &vgraphseparatedefaultml },
+                              { VGRAPHSEPASTMETHVW, "v",  (arch_arg_2_t*) vgraphSeparateVw, NULL },
+                              { VGRAPHSEPASTMETHZR, "z",  (arch_arg_2_t*) vgraphSeparateZr, NULL },
                               { -1,                 NULL, NULL,             NULL } };
 
 static StratParamTab        vgraphseparatestparatab[] = { /* Graph separation method parameter list */

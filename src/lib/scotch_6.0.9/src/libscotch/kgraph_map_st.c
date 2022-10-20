@@ -123,13 +123,13 @@ static union {
 } kgraphmapstdefaultrb = { { 1, 1, KGRAPHMAPRBPOLINGSIZE, &stratdummy, 0.05 } };
 
 static StratMethodTab       kgraphmapstmethtab[] = { /* Mapping methods array */
-                              { KGRAPHMAPSTMETHBD, "b",  kgraphMapBd, &kgraphmapstdefaultbd },
-                              { KGRAPHMAPSTMETHCP, "c",  kgraphMapCp, &kgraphmapstdefaultcp },
-                              { KGRAPHMAPSTMETHDF, "d",  kgraphMapDf, &kgraphmapstdefaultdf },
-                              { KGRAPHMAPSTMETHEX, "x",  kgraphMapEx, &kgraphmapstdefaultex },
-                              { KGRAPHMAPSTMETHFM, "f",  kgraphMapFm, &kgraphmapstdefaultfm },
-                              { KGRAPHMAPSTMETHML, "m",  kgraphMapMl, &kgraphmapstdefaultml },
-                              { KGRAPHMAPSTMETHRB, "r",  kgraphMapRb, &kgraphmapstdefaultrb },
+                              { KGRAPHMAPSTMETHBD, "b",  (arch_arg_2_t*) kgraphMapBd, &kgraphmapstdefaultbd },
+                              { KGRAPHMAPSTMETHCP, "c",  (arch_arg_2_t*) kgraphMapCp, &kgraphmapstdefaultcp },
+                              { KGRAPHMAPSTMETHDF, "d",  (arch_arg_2_t*) kgraphMapDf, &kgraphmapstdefaultdf },
+                              { KGRAPHMAPSTMETHEX, "x",  (arch_arg_2_t*) kgraphMapEx, &kgraphmapstdefaultex },
+                              { KGRAPHMAPSTMETHFM, "f",  (arch_arg_2_t*) kgraphMapFm, &kgraphmapstdefaultfm },
+                              { KGRAPHMAPSTMETHML, "m",  (arch_arg_2_t*) kgraphMapMl, &kgraphmapstdefaultml },
+                              { KGRAPHMAPSTMETHRB, "r",  (arch_arg_2_t*) kgraphMapRb, &kgraphmapstdefaultrb },
                               { -1,                NULL, NULL,        NULL } };
 
 static StratParamTab        kgraphmapstparatab[] = { /* Method parameter list */

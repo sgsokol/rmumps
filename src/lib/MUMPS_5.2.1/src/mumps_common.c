@@ -20,7 +20,7 @@ static MUMPS_INT * MUMPS_PIVNUL_LIST;
 static MUMPS_INT * MUMPS_SYM_PERM;
 static MUMPS_INT * MUMPS_UNS_PERM;
 MUMPS_INT*
-mumps_get_mapping()
+mumps_get_mapping(void)
 {
     return MUMPS_MAPPING;
 }
@@ -30,12 +30,12 @@ MUMPS_ASSIGN_MAPPING(MUMPS_INT * f77mapping)
     MUMPS_MAPPING = f77mapping;
 }
 void MUMPS_CALL
-MUMPS_NULLIFY_C_MAPPING()
+MUMPS_NULLIFY_C_MAPPING(void)
 {
     MUMPS_MAPPING = 0;
 }
 MUMPS_INT*
-mumps_get_pivnul_list()
+mumps_get_pivnul_list(void)
 {
     return MUMPS_PIVNUL_LIST;
 }
@@ -45,12 +45,12 @@ MUMPS_ASSIGN_PIVNUL_LIST(MUMPS_INT * f77pivnul_list)
     MUMPS_PIVNUL_LIST = f77pivnul_list;
 }
 void MUMPS_CALL
-MUMPS_NULLIFY_C_PIVNUL_LIST()
+MUMPS_NULLIFY_C_PIVNUL_LIST(void)
 {
     MUMPS_PIVNUL_LIST = 0;
 }
 MUMPS_INT*
-mumps_get_sym_perm()
+mumps_get_sym_perm(void)
 {
     return MUMPS_SYM_PERM;
 }
@@ -60,12 +60,12 @@ MUMPS_ASSIGN_SYM_PERM(MUMPS_INT * f77sym_perm)
     MUMPS_SYM_PERM = f77sym_perm;
 }
 void MUMPS_CALL
-MUMPS_NULLIFY_C_SYM_PERM()
+MUMPS_NULLIFY_C_SYM_PERM(void)
 {
     MUMPS_SYM_PERM = 0;
 }
 MUMPS_INT*
-mumps_get_uns_perm()
+mumps_get_uns_perm(void)
 {
     return MUMPS_UNS_PERM;
 }
@@ -75,7 +75,7 @@ MUMPS_ASSIGN_UNS_PERM(MUMPS_INT * f77uns_perm)
     MUMPS_UNS_PERM = f77uns_perm;
 }
 void MUMPS_CALL
-MUMPS_NULLIFY_C_UNS_PERM()
+MUMPS_NULLIFY_C_UNS_PERM(void)
 {
     MUMPS_UNS_PERM = 0;
 }

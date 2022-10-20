@@ -151,7 +151,7 @@ MUMPS_INT mumps_io_get_file_name(MUMPS_INT* indice,char* name,MUMPS_INT* length,
 MUMPS_INT mumps_io_alloc_pointers(MUMPS_INT * nb_file_type, MUMPS_INT * dim);
 MUMPS_INT mumps_io_init_vars(MUMPS_INT* myid_arg,MUMPS_INT* size_element,MUMPS_INT* async_arg);
 MUMPS_INT mumps_io_set_file_name(MUMPS_INT* indice,char* name,MUMPS_INT* length,MUMPS_INT* type);
-MUMPS_INT mumps_io_open_files_for_read();
+MUMPS_INT mumps_io_open_files_for_read(void);
 MUMPS_INT mumps_io_set_last_file(MUMPS_INT* dim,MUMPS_INT* type);
 MUMPS_INT mumps_io_write__(void *file, void *loc_add, size_t write_size, MUMPS_INT where,MUMPS_INT type);
 #if ! defined (MUMPS_WIN32)

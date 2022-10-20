@@ -906,7 +906,7 @@ const WgraphPartFmParam * const paraptr)    /*+ Method parameters +*/
 
 static
 int
-wgraphPartFmResize ()
+wgraphPartFmResize (void)
 
 {
   errorPrint ("wgraphPartFmResize: not implemented");

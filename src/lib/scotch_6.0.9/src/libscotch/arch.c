@@ -171,7 +171,7 @@ Arch * restrict const       archptr)
   o = 0;                                          /* Assume everything will be all right */
   if ((archptr->class           != NULL) &&
       (archptr->class->archFree != NULL))         /* If there is a specific freeing routine                */
-    o = archptr->class->archFree (&archptr->data); /* Call it                                              */
+    o = archptr->class->archFree ((void*) &archptr->data); /* Call it                                              */
 
 #ifdef SCOTCH_DEBUG_GRAPH2
   memSet (archptr, ~0, sizeof (Arch));            /* Purge graph fields */

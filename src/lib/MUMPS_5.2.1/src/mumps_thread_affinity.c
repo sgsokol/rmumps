@@ -14,7 +14,7 @@
  */
 #include "mumps_thread_affinity.h"
 void MUMPS_CALL
-MUMPS_THREAD_AFFINITY_RETURN()
+MUMPS_THREAD_AFFINITY_RETURN(void)
 {
   /*
    * Thread affinity tools will be available in the future.

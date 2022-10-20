@@ -12,7 +12,7 @@
  *  http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html
  *
  */
-int mumps_numa_return()
+int mumps_numa_return(void)
 {
 return 0;
 }

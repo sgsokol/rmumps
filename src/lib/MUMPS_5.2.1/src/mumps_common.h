@@ -37,16 +37,16 @@
 # define F_SYMBOL(lower_case,upper_case) mumps_##lower_case
 #endif
 MUMPS_INT*
-mumps_get_mapping();
+mumps_get_mapping(void);
 #define MUMPS_ASSIGN_MAPPING \
     F_SYMBOL(assign_mapping,ASSIGN_MAPPING)
 void MUMPS_CALL
 MUMPS_ASSIGN_MAPPING(MUMPS_INT *f77mapping);
 #define MUMPS_NULLIFY_C_MAPPING F_SYMBOL(nullify_c_mapping,NULLIFY_C_MAPPING)
 void MUMPS_CALL
-MUMPS_NULLIFY_C_MAPPING();
+MUMPS_NULLIFY_C_MAPPING(void);
 MUMPS_INT*
-mumps_get_pivnul_list();
+mumps_get_pivnul_list(void);
 #define MUMPS_ASSIGN_PIVNUL_LIST \
     F_SYMBOL(assign_pivnul_list,ASSIGN_PIVNUL_LIST)
 void MUMPS_CALL
@@ -54,9 +54,9 @@ MUMPS_ASSIGN_PIVNUL_LIST(MUMPS_INT *f77pivnul_list);
 #define MUMPS_NULLIFY_C_PIVNUL_LIST \
     F_SYMBOL(nullify_c_pivnul_list,NULLIFY_C_PIVNUL_LIST)
 void MUMPS_CALL
-MUMPS_NULLIFY_C_PIVNUL_LIST();
+MUMPS_NULLIFY_C_PIVNUL_LIST(void);
 MUMPS_INT*
-mumps_get_uns_perm();
+mumps_get_uns_perm(void);
 #define MUMPS_ASSIGN_UNS_PERM \
     F_SYMBOL(assign_uns_perm,ASSIGN_UNS_PERM)
 void MUMPS_CALL
@@ -64,9 +64,9 @@ MUMPS_ASSIGN_UNS_PERM(MUMPS_INT *f77sym_perm);
 #define MUMPS_NULLIFY_C_UNS_PERM \
     F_SYMBOL(nullify_c_uns_perm,NULLIFY_C_UNS_PERM)
 void MUMPS_CALL
-MUMPS_NULLIFY_C_UNS_PERM();
+MUMPS_NULLIFY_C_UNS_PERM(void);
 MUMPS_INT*
-mumps_get_sym_perm();
+mumps_get_sym_perm(void);
 #define MUMPS_ASSIGN_SYM_PERM \
     F_SYMBOL(assign_sym_perm,ASSIGN_SYM_PERM)
 void MUMPS_CALL
@@ -74,7 +74,7 @@ MUMPS_ASSIGN_SYM_PERM(MUMPS_INT * f77sym_perm);
 #define MUMPS_NULLIFY_C_SYM_PERM \
     F_SYMBOL(nullify_c_sym_perm,NULLIFY_C_SYM_PERM)
 void MUMPS_CALL
-MUMPS_NULLIFY_C_SYM_PERM();
+MUMPS_NULLIFY_C_SYM_PERM(void);
 #define MUMPS_ICOPY_32TO64_64C_IP_C \
     F_SYMBOL(icopy_32to64_64c_ip_c,ICOPY_32TO64_64C_IP_C)
 void MUMPS_CALL

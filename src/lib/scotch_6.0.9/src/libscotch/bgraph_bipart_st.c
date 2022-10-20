@@ -120,14 +120,14 @@ static union {
 } bgraphbipartstdefaultml = { { 100, 0.8L, &stratdummy, &stratdummy } };
 
 static StratMethodTab       bgraphbipartstmethtab[] = { /* Bipartitioning methods array */
-                              { BGRAPHBIPARTSTMETHBD, "b",  bgraphBipartBd, &bgraphbipartstdefaultbd },
-                              { BGRAPHBIPARTSTMETHDF, "d",  bgraphBipartDf, &bgraphbipartstdefaultdf },
-                              { BGRAPHBIPARTSTMETHEX, "x",  bgraphBipartEx, NULL },
-                              { BGRAPHBIPARTSTMETHFM, "f",  bgraphBipartFm, &bgraphbipartstdefaultfm },
-                              { BGRAPHBIPARTSTMETHGG, "h",  bgraphBipartGg, &bgraphbipartstdefaultgg },
-                              { BGRAPHBIPARTSTMETHGP, "g",  bgraphBipartGp, &bgraphbipartstdefaultgp },
-                              { BGRAPHBIPARTSTMETHML, "m",  bgraphBipartMl, &bgraphbipartstdefaultml },
-                              { BGRAPHBIPARTSTMETHZR, "z",  bgraphBipartZr, NULL },
+                              { BGRAPHBIPARTSTMETHBD, "b",  (arch_arg_2_t*) bgraphBipartBd, &bgraphbipartstdefaultbd },
+                              { BGRAPHBIPARTSTMETHDF, "d",  (arch_arg_2_t*) bgraphBipartDf, &bgraphbipartstdefaultdf },
+                              { BGRAPHBIPARTSTMETHEX, "x",  (arch_arg_2_t*) bgraphBipartEx, NULL },
+                              { BGRAPHBIPARTSTMETHFM, "f",  (arch_arg_2_t*) bgraphBipartFm, &bgraphbipartstdefaultfm },
+                              { BGRAPHBIPARTSTMETHGG, "h",  (arch_arg_2_t*) bgraphBipartGg, &bgraphbipartstdefaultgg },
+                              { BGRAPHBIPARTSTMETHGP, "g",  (arch_arg_2_t*) bgraphBipartGp, &bgraphbipartstdefaultgp },
+                              { BGRAPHBIPARTSTMETHML, "m",  (arch_arg_2_t*) bgraphBipartMl, &bgraphbipartstdefaultml },
+                              { BGRAPHBIPARTSTMETHZR, "z",  (arch_arg_2_t*) bgraphBipartZr, NULL },
                               { -1,                   NULL, NULL,           NULL } };
 
 static StratParamTab        bgraphbipartstparatab[] = { /* Method parameter list */
