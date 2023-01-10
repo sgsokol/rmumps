@@ -14,7 +14,7 @@ ifeq "$(INC_OS)" ".sunos"
 else
  DSUNOS=
 endif
-FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS)
+FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS) -DHAVE_STDBOOL_H
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 ifeq "$(INC_OS)" ".win"
  FLAGS.GKlib += -DMINGW

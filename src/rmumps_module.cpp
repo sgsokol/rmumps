@@ -169,12 +169,12 @@ SEXP Rmumps::solve(RObject b) {
       // many sparse rhs
       return solvestm(as<List>(b));
     } else {
-      sprintf(buf, "expected simple_triplet_matrix but got something else");
+      snprintf(buf, NBUF, "expected simple_triplet_matrix but got something else");
       stop(buf);
     }
     break;
   default:
-    sprintf(buf, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
+    snprintf(buf, NBUF, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
     stop(buf);
     return R_NilValue;
   }
@@ -288,7 +288,7 @@ NumericMatrix Rmumps::solves(S4 mat) {
   }
   //if (!mat.inherits("dgCMatrix")) {
   //  CharacterVector cstr(mat.slot("class"));
-  //  sprintf(buf, "sparse rhs matrix must be of dgCMatrix class. Instead '%s' class is received (cf. pkg Matrix)", as<std::string>(cstr[0]).c_str());
+  //  snprintf(buf, NBUF, "sparse rhs matrix must be of dgCMatrix class. Instead '%s' class is received (cf. pkg Matrix)", as<std::string>(cstr[0]).c_str());
   //  stop(buf);
   //}
   if (di[0] == 0 && di[1] == 0) {
@@ -330,7 +330,7 @@ NumericMatrix Rmumps::solvestm(List mat) {
   int nrow=mat["nrow"];
   int ncol=mat["ncol"];
   if (!mat.inherits("simple_triplet_matrix")) {
-    sprintf(buf, "solvestm() expects an rhs matrix of simple_triplet_matrix class");
+    snprintf(buf, NBUF, "solvestm() expects an rhs matrix of simple_triplet_matrix class");
     stop(buf);
   }
   if (nrow == 0 && ncol == 0) {
@@ -444,7 +444,7 @@ void Rmumps::set_icntl(IntegerVector iv, IntegerVector ii) {
   // set control vector ICNTL at positions in ii (1-based)) to the values in iv
   // only 1 <= ii <= 33 are effectively used
   if (iv.size() != ii.size()) {
-    sprintf(buf, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
+    snprintf(buf, NBUF, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
     stop(buf);
   }
   for (auto i=0; i < ii.size(); i++) {
@@ -457,7 +457,7 @@ void Rmumps::set_cntl(NumericVector v, IntegerVector iv) {
   // set control vector CNTL at positions in iv (1-based)) to the values in v
   // only 1 <= iv <= 5 are effectively used
   if (v.size() != iv.size()) {
-    sprintf(buf, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", (int) v.size(), (int) iv.size());
+    snprintf(buf, NBUF, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", (int) v.size(), (int) iv.size());
     stop(buf);
   }
   for (auto i=0; i < iv.size(); i++) {
@@ -505,7 +505,7 @@ void Rmumps::set_keep(IntegerVector iv, IntegerVector ii) {
   // set control vector KEEP at positions in ii (1-based)) to the values in iv
   // only 1 <= ii <= 500 are effectively used
   if (iv.size() != ii.size()) {
-    sprintf(buf, "set_keep: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
+    snprintf(buf, NBUF, "set_keep: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
     stop(buf);
   }
   for (auto i=0; i < ii.size(); i++) {
@@ -661,7 +661,7 @@ void Rmumps::new_mat(RObject mat_, int sym, bool copy_) {
     break;
   }
   default:
-    sprintf(buf, "constructor form a single object is expecting Matrix::dgTMatrix (i.e. S4SXP) or slam::simple_triplet_matrix (i.e. VECSXP) class as input. Got '%d' SEXP instead", mat_.sexp_type());
+    snprintf(buf, NBUF, "constructor form a single object is expecting Matrix::dgTMatrix (i.e. S4SXP) or slam::simple_triplet_matrix (i.e. VECSXP) class as input. Got '%d' SEXP instead", mat_.sexp_type());
     stop(buf);
   }
   //Rf_PrintValue(wrap(irn));

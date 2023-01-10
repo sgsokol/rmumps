@@ -26,7 +26,8 @@ public:
   int ncore;
   std::set<int> jobs;
   MUMPS_INT sym;
-  char buf[512];
+#define NBUF 512
+  char buf[NBUF];
   
   Rmumps(RObject mat);
   Rmumps(RObject mat, int sym);
