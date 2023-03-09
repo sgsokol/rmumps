@@ -239,7 +239,7 @@ FILE * restrict const       stream)
   o = (fprintf (stream, "%s\n",                   /* Write architecture class */
                 archptr->class->archname) == EOF);
   if (archptr->class->archSave != NULL)           /* If class has saving function      */
-    o |= archptr->class->archSave (&archptr->data, stream); /* Write architecture data */
+    o |= archptr->class->archSave ((void*) &archptr->data, stream); /* Write architecture data */
   if (o != 0)
     errorPrint ("archSave: bad output");
 
@@ -416,7 +416,7 @@ const Arch * const          archptr,
 ArchDom * const             domnptr,
 FILE * const                stream)
 {
-  return (archptr->class->domLoad (&archptr->data, /* Call proper routine */
+  return (archptr->class->domLoad ((void*) &archptr->data, /* Call proper routine */
                                    &domnptr->data,
                                    stream));
 }
@@ -434,8 +434,8 @@ const Arch * const          archptr,
 const ArchDom * const       domnptr,
 FILE * const                stream)
 {
-  return (archptr->class->domSave (&archptr->data, /* Call proper routine */
-                                   &domnptr->data,
+  return (archptr->class->domSave ((void*) &archptr->data, /* Call proper routine */
+                                   (void*) &domnptr->data,
                                    stream));
 }
 

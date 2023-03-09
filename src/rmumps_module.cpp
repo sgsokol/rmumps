@@ -559,6 +559,28 @@ List Rmumps::triplet() {
   tr.attr("class")="simple_triplet_matrix";
   return tr;
 }
+void Rmumps::set_perm_in(IntegerVector p_in) {
+  // set a vector of symmetric permutation provided by user
+  param.ICNTL(7)=1;
+  param.ICNTL(28)=1;
+  param.perm_in=(MUMPS_INT*) &*p_in.begin();
+  jobs.erase(jobs.begin(), jobs.end()); // invalidate previous factorizations both symbolic and numeric
+}
+IntegerVector Rmumps::get_sym_perm() {
+  // returns a vector of symmetric permutation used by mumps
+  if (param.sym_perm)
+    return IntegerVector(param.sym_perm, param.sym_perm+param.n);
+  else
+    return IntegerVector(0);
+}
+IntegerVector Rmumps::get_uns_perm() {
+  // returns a vector of unsymmetric permutation used by mumps
+  // Rcout << "param.uns_perm=" << param.uns_perm << std::endl;
+  if (param.uns_perm)
+    return IntegerVector(param.uns_perm, param.uns_perm+param.n);
+  else
+    return IntegerVector(0);
+}
 std::string Rmumps::mumps_version() { return MUMPS_VERSION; }
 double Rmumps::det() {
   if (jobs.count(2) != 1 || param.ICNTL(33) != 1) {
@@ -780,6 +802,9 @@ RCPP_MODULE(mod_Rmumps){
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")
   .method("det", &Rmumps::det, "Return determinant of the matrix")
   .method("mumps_version", &Rmumps::mumps_version, "Return determinant of the matrix")
+  .method("set_perm_in", &Rmumps::set_perm_in, "Set permutation vector defined by user")
+  .method("get_sym_perm", &Rmumps::get_sym_perm, "Get symmetric permutation used by MUMPS")
+  .method("get_uns_perm", &Rmumps::get_uns_perm, "Get unsymmetrical permutation used by MUMPS")
   ;
 }
 

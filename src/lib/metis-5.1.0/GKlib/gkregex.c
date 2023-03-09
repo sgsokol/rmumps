@@ -449,7 +449,8 @@ typedef struct re_dfa_t re_dfa_t;
 
 #ifndef _LIBC
 # ifdef __i386__
-#  define internal_function   __attribute ((regparm (3), stdcall))
+/*#  define internal_function   __attribute ((regparm (3), stdcall))*/
+#  define internal_function
 # else
 #  define internal_function
 # endif

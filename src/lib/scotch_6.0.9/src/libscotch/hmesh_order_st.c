@@ -290,7 +290,7 @@ const Strat * restrict const    strat)            /*+ Mesh ordering strategy    
 #else /* SCOTCH_DEBUG_HMESH2 */
     default :
 #endif /* SCOTCH_DEBUG_HMESH2 */
-      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) (meshptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
+      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) ((void*)meshptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
 #ifdef SCOTCH_DEBUG_HMESH2
     default :
       errorPrint ("hmeshOrderSt: invalid parameter");
