@@ -1,3 +1,10 @@
+Version 5.2.1-25
+================
+
+* 2023-11-02
+ - fixed warnings on function prototype signaled by CRAN
+ - fixed gcc UBSAN issues signaled by CRAN
+
 Version 5.2.1-23
 ================
 

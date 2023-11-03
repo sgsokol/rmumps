@@ -41,7 +41,7 @@ libdir		= ../../lib
 include ../Makefile.inc$(INC_OS)
 
 %$(OBJ)	:	%.c
-				$(CC) $(HCFLAGS) $(CLIBFLAGS) -I$(includedir) -c $(<) -o $(@)
+				$(CC) $(HCFLAGS) -O0 $(CLIBFLAGS) -I$(includedir) -c $(<) -o $(@)
 
 %$(EXE)	:	%.c
 		 		$(CC) $(HCFLAGS) -I$(includedir) $(<) -o $(@) -L. -lesmumps -L$(libdir) -lscotch -lscotcherrexit $(HLDFLAGS)

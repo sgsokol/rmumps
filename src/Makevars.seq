@@ -7,6 +7,7 @@ AR?=ar
 INC_OS := $(shell "$(R_HOME)/bin/Rscript" ../R/inc_os.R)
 
 #PKG_CFLAGS= -g -O2 -Wall -pedantic -mtune=native -Werror=format-security -Wp,-D_FORTIFY_SOURCE=3 -fexceptions -fstack-protector-strong -fstack-clash-protection -fcf-protection -Werror=implicit-function-declaration -Wstrict-prototypes
+#PKG_CFLAGS= -g -O0
 PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib -ldmumps -lmumps_common -lmpiseq -lpord -lmetis -lesmumps -lscotch -lscotcherr -pthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 #MY_FCFLAGS=-Wall -pedantic -flto -O2 -g

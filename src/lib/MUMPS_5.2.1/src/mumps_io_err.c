@@ -36,7 +36,7 @@ void MUMPS_CALL
 MUMPS_LOW_LEVEL_INIT_ERR_STR(MUMPS_INT *dim, char* err_str, mumps_ftnlen l1){
   mumps_err = err_str;
   dim_mumps_err = (MUMPS_INT *) dim;
-  mumps_err_max_len = (MUMPS_INT) *dim;
+  mumps_err_max_len = (MUMPS_INT) (*dim)-1;
   err_flag = 0;
   return;
 }
