@@ -1,3 +1,9 @@
+Version 5.2.1-26
+================
+
+* 2023-11-28
+ - fixed warnings about format string signaled by CRAN
+
 Version 5.2.1-25
 ================
 

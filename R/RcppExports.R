@@ -97,5 +97,5 @@ Rmumps__get_permutation <- function(pm) {
 
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
-    .Call('_rmumps_RcppExport_registerCCallable', PACKAGE = 'rmumps')
+    .Call('_rmumps_RcppExport_registerCCallable')
 })
