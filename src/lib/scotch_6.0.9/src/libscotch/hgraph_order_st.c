@@ -307,7 +307,7 @@ const Strat * restrict const    strat)            /*+ Graph ordering strategy   
 #else /* SCOTCH_DEBUG_HGRAPH2 */
     default :
 #endif /* SCOTCH_DEBUG_HGRAPH2 */
-      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) (grafptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
+      return (((arch_arg_5_t*) strat->tabl->methtab[strat->data.method.meth].func) ((void*) grafptr, ordeptr, ordenum, cblkptr, (void *) &strat->data.method.data));
 #ifdef SCOTCH_DEBUG_HGRAPH2
     default :
       errorPrint ("hgraphOrderSt: invalid parameter");

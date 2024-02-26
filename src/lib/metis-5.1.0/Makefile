@@ -1,3 +1,4 @@
+### this file is not used. All variables are set in ../Makefile
 #R vars
 #PKG_CFLAGS=-O3 -mtune=native -fpic
 #AR=ar

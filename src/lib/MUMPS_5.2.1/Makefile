@@ -21,7 +21,7 @@ z:
 s:
 	$(MAKE) ARITH=s mumps_lib
 d:
-	$(MAKE) ARITH=d mumps_lib
+	$(MAKE) ARITH=d FC_FIXED="$(FC_FIXED)" mumps_lib
 
 
 # Is Makefile.inc available ?
@@ -59,7 +59,7 @@ requiredobj: Makefile.inc $(LIBSEQNEEDED) $(libdir)/libpord$(PLAT)$(LIBEXT)
 # dummy MPI library (sequential version)
 
 libseqneeded:
-	(cd libseq; $(MAKE))
+	(cd libseq; $(MAKE) FC_FIXED="$(FC_FIXED)")
 
 # Build the libpord.a library and copy it into $(topdir)/lib
 $(libdir)/libpord$(PLAT)$(LIBEXT):

@@ -262,7 +262,9 @@ const Order * const         ordeptr)              /*+ Matrix ordering           
       sorttab = (INT *)           ((byte *) hashtab + sortoft);
       tloktab = (SymbolFaxTlok *) ((byte *) hashtab + tlokoft);
 
-      memset (hashtab, ~0, hashsiz * sizeof (INT)); /* Initialize hash table */
+      /*memset (hashtab, ~0, hashsiz * sizeof (INT)); /* Initialize hash table */
+      for (int i=0; i < hashsiz; i++)
+        hashtab[i]=~0;
     }
 
     sortnbr = 0;                                  /* No vertices yet                 */

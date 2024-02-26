@@ -14,7 +14,7 @@ ifeq "$(INC_OS)" ".sunos"
 else
  DSUNOS=
 endif
-FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS)
+FLAGS.GKlib=-I$(DMETIS)/GKlib -DUSE_GKREGEX $(DSUNOS) -DHAVE_STDBOOL_H
 FLAGS.metis=-I. -I$(DMETIS)/libmetis -I$(DMETIS)/include -w
 ifeq "$(INC_OS)" ".win"
  FLAGS.GKlib += -DMINGW
@@ -53,7 +53,7 @@ metislib: $(SOURCES.C:.c=.o)
 allmumps: scotchlibs metislib
 	@(mkdir -p $(DMUMPS)/lib)
 	#$(MAKE) -C $(DMUMPS)/libseq CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS)" PKG_FCFLAGS="$(PKG_FCFLAGS)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
-	$(MAKE) -C $(DMUMPS) mumps_lib DSCOTCH=$(DSCOTCH) DMETIS=$(DMETIS) ARITH=$(ARITH) CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH)" PKG_FCFLAGS="$(PKG_FCFLAGS) $(FLAGS.MUMPS) $(FLAGS.MPI)" AR="$(AR) cvr " RANLIB="$(RANLIB)"
+	$(MAKE) -C $(DMUMPS) mumps_lib DSCOTCH=$(DSCOTCH) DMETIS=$(DMETIS) ARITH=$(ARITH) CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(PKG_CFLAGS) -DMUMPS_ARITH=MUMPS_ARITH_$(ARITH) $(FLAGS.MUMPS) $(FLAGS.MPI) $(FLAGS.PORD) $(FLAGS.SCOTCH)" PKG_FCFLAGS="$(PKG_FCFLAGS) $(FLAGS.MUMPS) $(FLAGS.MPI)" AR="$(AR) cvr " RANLIB="$(RANLIB)" FC_FIXED="$(FC_FIXED)"
 	#$(AR) cqT $(DLIB)/MUMPS_thin $(FUSELIBS)
 	#@(cd $(DLIB) && \
 	# echo -e 'create liballmumps.a\naddlib MUMPS_thin\nsave\nend' | $(AR) -M)

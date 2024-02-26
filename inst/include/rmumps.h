@@ -26,7 +26,8 @@ public:
   int ncore;
   std::set<int> jobs;
   MUMPS_INT sym;
-  char buf[512];
+#define NBUF 512
+  char buf[NBUF];
   
   Rmumps(RObject mat);
   Rmumps(RObject mat, int sym);
@@ -78,6 +79,9 @@ public:
   List triplet();
   std::string mumps_version();
   double det();
+  IntegerVector get_sym_perm();
+  IntegerVector get_uns_perm();
+  void set_perm_in(IntegerVector p_in);
 private:
   int ref; // counts shallow copies of this object
   DMUMPS_STRUC_C param;

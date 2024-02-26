@@ -14,7 +14,7 @@ libmpiseq$(PLAT)$(LIBEXT): mpi.o mpic.o elapse.o
 	$(AR)$@ mpi.o mpic.o elapse.o
 	$(RANLIB) $@
 .f.o:
-	$(FC) $(OPTF)              -c $*.f $(OUTF)$*.o
+	$(FC) $(OPTF) $(FC_FIXED) -c $*.f $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(CDEFS) -I. -c $*.c $(OUTC)$*.o
 

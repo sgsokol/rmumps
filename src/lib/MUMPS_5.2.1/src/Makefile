@@ -380,11 +380,11 @@ mumps_static_mapping.o:          lr_common.o
 $(OBJS_COMMON_OTHER):$(OBJS_COMMON_MOD)
 $(OBJS_OTHER):$(OBJS_COMMON_MOD) $(OBJS_MOD)
 
-.SUFFIXES: .c .F95 .o
+.SUFFIXES: .c .F95 .o .F
 .F95.o:
 	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F95 $(OUTF)$*.o
 .F.o:
-	$(FC) $(OPTF) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F $(OUTF)$*.o
+	$(FC) $(OPTF) $(FC_FIXED) $(INCS) $(IORDERINGSF) $(ORDERINGSF) -I. -I../include -c $*.F $(OUTF)$*.o
 .c.o:
 	$(CC) $(OPTC) $(INCS) -I../include $(CDEFS) $(IORDERINGSC) $(ORDERINGSC) -c $*.c $(OUTC)$*.o
 

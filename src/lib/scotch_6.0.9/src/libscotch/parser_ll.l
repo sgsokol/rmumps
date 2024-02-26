@@ -120,13 +120,13 @@ STRING                      \"[^\"]*\"
 
 %%
 <lstrat>[0-9A-Za-z]         {
-                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN);
+                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN-1);
                               yylval.STRING[PARSERSTRINGLEN - 1] = '\0';
                               return (METHODNAME);
                             }
 
 <lparam>{IDENT}             {
-                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN);
+                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN-1);
                               yylval.STRING[PARSERSTRINGLEN - 1] = '\0';
                               return (PARAMNAME);
                             }
@@ -152,7 +152,7 @@ STRING                      \"[^\"]*\"
 
 <lparamstring>{STRING}      {
                               yytext[yyleng - 1] = '\0'; /* Remove the heading and trailing \" */
-                              strncpy (yylval.STRING, yytext + 1, PARSERSTRINGLEN);
+                              strncpy (yylval.STRING, yytext + 1, PARSERSTRINGLEN-1);
                               yylval.STRING[PARSERSTRINGLEN - 1] = '\0';
                               return (VALSTRING);
                             }
@@ -166,7 +166,7 @@ STRING                      \"[^\"]*\"
                               return (VALDOUBLE);
                             }
 <ltest>{IDENT}              {
-                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN);
+                              strncpy (yylval.STRING, yytext, PARSERSTRINGLEN-1);
                               yylval.STRING[PARSERSTRINGLEN - 1] = '\0';
                               return (PARAMNAME);
                             }

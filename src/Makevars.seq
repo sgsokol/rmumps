@@ -5,7 +5,10 @@ RANLIB?=ranlib
 AR?=ar
 
 INC_OS := $(shell "$(R_HOME)/bin/Rscript" ../R/inc_os.R)
+FC_FIXED := $(shell "$(R_HOME)/bin/R" CMD config FC | grep -q -F /ifx && echo "-fixed" || echo "")
 
+#PKG_CFLAGS= -g -O2 -Wall -pedantic -mtune=native -Werror=format-security -Wp,-D_FORTIFY_SOURCE=3 -fexceptions -fstack-protector-strong -fstack-clash-protection -fcf-protection -Werror=implicit-function-declaration -Wstrict-prototypes
+#PKG_CFLAGS= -g -O0
 PKG_CXXFLAGS=-I$(DMUMPS)/include
 PKG_LIBS= -L./lib -ldmumps -lmumps_common -lmpiseq -lpord -lmetis -lesmumps -lscotch -lscotcherr -pthread $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 #MY_FCFLAGS=-Wall -pedantic -flto -O2 -g
@@ -14,4 +17,4 @@ $(SHLIB): lib/libdmumps.a
 
 lib/libdmumps.a:
 	$(MAKE) -C lib \
-	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS)"  PKG_FCFLAGS="$(FCFLAGS) $(FPICFLAGS) $(PKG_FCFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)"
+	  CC="$(CC)" FC="$(FC)" PKG_CFLAGS="$(CFLAGS) $(CPICFLAGS) $(PKG_CFLAGS)"  PKG_FCFLAGS="$(FCFLAGS) $(FPICFLAGS) $(PKG_FCFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)" INC_OS="$(INC_OS)" FC_FIXED="$(FC_FIXED)"

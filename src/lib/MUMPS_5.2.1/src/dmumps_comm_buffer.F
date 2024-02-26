@@ -3229,8 +3229,6 @@ C ssg
       INTEGER I
       INCLUDE 'mpif.h'
       IERR = 0
-c ssg     CALL MPI_PACK( size(BLR_LorU), 1, MPI_INTEGER,
-c     &       BUF(1), LBUF, POSITION, COMM, IERR )
       DO I = 1, size(BLR_LorU)
         CALL DMUMPS_MPI_PACK_LRB(BLR_LorU(I), BUF, LBUF, POSITION, 
      &                          COMM, IERR)
@@ -3253,36 +3251,10 @@ c     &       BUF(1), LBUF, POSITION, COMM, IERR )
       ELSE
         ISLR_INT = 0
       ENDIF
-c ssg     CALL MPI_PACK( ISLR_INT, 1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
-c      CALL MPI_PACK( LRB%LRFORM,
-c     &     1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
-c      CALL MPI_PACK( LRB%K,
-c     &     1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
-c      CALL MPI_PACK( LRB%M, 
-c     &     1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
-c      CALL MPI_PACK( LRB%N,
-c     &     1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
-c      CALL MPI_PACK( LRB%KSVD,
-c     &     1, MPI_INTEGER,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
       IF (LRB%ISLR) THEN
         IF (LRB%K .GT. 0) THEN
-c ssg         CALL MPI_PACK( LRB%Q(1,1), 
-c     &      LRB%M*LRB%K,
-c     &      MPI_DOUBLE_PRECISION, BUF(1), LBUF, POSITION, COMM, IERR )
-c          CALL MPI_PACK( LRB%R(1,1),
-c     &      LRB%N*LRB%K, MPI_DOUBLE_PRECISION,
-c     &      BUF(1), LBUF, POSITION, COMM, IERR )
         ENDIF
       ELSE
-c ssg       CALL MPI_PACK( LRB%Q(1,1), LRB%M*LRB%N
-c     &     ,MPI_DOUBLE_PRECISION,
-c     &     BUF(1), LBUF, POSITION, COMM, IERR )
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_MPI_PACK_LRB
@@ -3308,23 +3280,6 @@ c     &     BUF(1), LBUF, POSITION, COMM, IERR )
       INCLUDE 'mpif.h'
       INCLUDE 'mumps_tags.h'
       IERR = 0
-C ssg      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-C     &               ISLR_INT, 1, MPI_INTEGER, COMM, IERR )
-c      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &               LRFORM, 1,
-c     &               MPI_INTEGER, COMM, IERR )
-c      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &               K, 1,
-c     &               MPI_INTEGER, COMM, IERR )
-c      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &               M, 1,
-c     &               MPI_INTEGER, COMM, IERR )
-c      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &               N, 1,
-c     &               MPI_INTEGER, COMM, IERR )
-c      CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &               KSVD, 1,
-c     &               MPI_INTEGER, COMM, IERR )
       IF (ISLR_INT .eq. 1) THEN
         ISLR = .TRUE.
       ELSE
@@ -3339,17 +3294,8 @@ c     &               MPI_INTEGER, COMM, IERR )
       ENDIF
       IF (ISLR) THEN
         IF (K .GT. 0) THEN
-c ssg         CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &                   LRB%Q(1,1), M*K, MPI_DOUBLE_PRECISION,
-c     &                   COMM, IERR )
-c          CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &                   LRB%R(1,1), N*K, MPI_DOUBLE_PRECISION,
-c     &                   COMM, IERR)
         ENDIF
       ELSE
-c ssg       CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION,
-c     &                   LRB%Q(1,1), M*N, MPI_DOUBLE_PRECISION,
-c     &                   COMM, IERR)
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_MPI_UNPACK_LRB
@@ -3375,8 +3321,6 @@ c     &                   COMM, IERR)
       DOUBLE PRECISION :: PIV1, PIV2, OFFDIAG
       INCLUDE 'mpif.h'
       IERR = 0
-C ssg      CALL MPI_PACK( size(BLR), 1, MPI_INTEGER,
-C     &       BUF(1), LBUF, POSITION, COMM, IERR )
       allocate(BLOCK(MAXI_CLUSTER), STAT=ALLOCOK )
       IF ( ALLOCOK .GT. 0 ) THEN
              WRITE(*,*) 'pb allocation in mumps_mpi_pack_scale_lr'
@@ -3414,18 +3358,12 @@ C     &       BUF(1), LBUF, POSITION, COMM, IERR )
      &       BUF(1), LBUF, POSITION, COMM, IERR )
         IF (BLR(I)%ISLR) THEN
           IF (BLR(I)%K .GT. 0) THEN
-C ssg            CALL MPI_PACK( BLR(I)%Q(1,1), BLR(I)%M*BLR(I)%K,
-C     &       MPI_DOUBLE_PRECISION,
-C     &       BUF(1), LBUF, POSITION, COMM, IERR )
             J =1
           DO WHILE (J <= BLR(I)%N)
               IF (IPIV(J) > 0) THEN
                 SCALED(1:BLR(I)%K,1) = A(POSELTD+LD_DIAG*(J-1)+J-1) 
      &            * BLR(I)%R(1:BLR(I)%K,J)
                 J = J+1
-C ssg              CALL MPI_PACK( SCALED(1,1), BLR(I)%K,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
               ELSE 
                 PIV1    = A(POSELTD+LD_DIAG*(J-1)+J-1)
                 PIV2    = A(POSELTD+LD_DIAG*J+J)
@@ -3433,15 +3371,9 @@ C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                 BLOCK(1:BLR(I)%K)    = BLR(I)%R(1:BLR(I)%K,J)
                 SCALED(1:BLR(I)%K,1) = PIV1 * BLR(I)%R(1:BLR(I)%K,J)
      &            + OFFDIAG * BLR(I)%R(1:BLR(I)%K,J+1)
-C ssg                CALL MPI_PACK( SCALED(1,1), BLR(I)%K,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                 SCALED(1:BLR(I)%K,2) = OFFDIAG * BLOCK(1:BLR(I)%K)
      &            + PIV2 * BLR(I)%R(1:BLR(I)%K,J+1)
                  J =J+2
-C ssg                CALL MPI_PACK( SCALED(1,2), BLR(I)%K,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
               ENDIF
           END DO
         ENDIF
@@ -3451,9 +3383,6 @@ C     &           BUF(1), LBUF, POSITION, COMM, IERR )
               IF (IPIV(J) > 0) THEN
                 SCALED(1:BLR(I)%M,1) = A(POSELTD+LD_DIAG*(J-1)+J-1) 
      &           * BLR(I)%Q(1:BLR(I)%M,J)
-C ssg                CALL MPI_PACK( SCALED(1,1), BLR(I)%M,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                 J = J+1
               ELSE 
                 PIV1    = A(POSELTD+LD_DIAG*(J-1)+J-1)
@@ -3462,14 +3391,8 @@ C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                 BLOCK(1:BLR(I)%M)    = BLR(I)%Q(1:BLR(I)%M,J)
                 SCALED(1:BLR(I)%M,1) = PIV1 * BLR(I)%Q(1:BLR(I)%M,J)
      &            + OFFDIAG * BLR(I)%Q(1:BLR(I)%M,J+1)
-C ssg                CALL MPI_PACK( SCALED(1,1), BLR(I)%M,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                 SCALED(1:BLR(I)%M,2) = OFFDIAG * BLOCK(1:BLR(I)%M)
      &            + PIV2 * BLR(I)%Q(1:BLR(I)%M,J+1)
-C ssg                CALL MPI_PACK( SCALED(1,2), BLR(I)%M,
-C     &           MPI_DOUBLE_PRECISION,
-C     &           BUF(1), LBUF, POSITION, COMM, IERR )
                  J=J+2
               ENDIF
           END DO

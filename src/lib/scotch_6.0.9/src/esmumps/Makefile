@@ -121,6 +121,7 @@ symbol_fax_graph$(OBJ)		:	symbol_fax_graph.c			\
 					order.h					\
 					fax.h					\
 					$(includedir)/scotch.h
+				$(CC) $(HCFLAGS) -O0 $(CLIBFLAGS) -I$(includedir) -c $(<) -o $(@)
 
 esmumps$(OBJ)			:	esmumps.c				\
 					common.h				\

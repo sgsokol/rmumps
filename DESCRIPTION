@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.2.1-20
-Date: 2022-10-19
+Version: 5.2.1-28
+Date: 2024-02-26
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role=c("ctb", "cph")),
@@ -54,6 +54,7 @@ Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-
          person("Takuji Nishimura", role="cph"),
          person("Universite de Bordeaux", role="cph"),
          person("CNRS", role="cph"),
+         person("INSA", role="cph"),
          person("INRAE", role="cph")
          )
 Maintainer: Serguei Sokol <sokol@insa-toulouse.fr>
@@ -70,7 +71,7 @@ License: GPL (>= 2)
 Depends: methods
 Imports: Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
-SystemRequirements: C++11, GNU Make
+SystemRequirements: GNU Make
 NeedsCompilation: yes
 Biarch: yes
 Suggests: testthat, Matrix, slam

@@ -146,7 +146,7 @@ const int                   procnum)              /*+ Number of current process 
       if (datasiz == 1)
         naexptr[naexnum ++] = charval;
       else {
-        sprintf (&naexptr[naexnum], FILENAMEDISTEXPANDSTR, dataval); /* TRICK: Change format string if FILENAMEDISTEXPANDNBR changes */
+        /*sprintf (&naexptr[naexnum], FILENAMEDISTEXPANDSTR, dataval);*/ /* TRICK: Change format string if FILENAMEDISTEXPANDNBR changes */
         naexptr[naexnum + FILENAMEDISTEXPANDNBR] = ' ';
         naexnum = strchr (&naexptr[naexnum], ' ') - naexptr;
       }

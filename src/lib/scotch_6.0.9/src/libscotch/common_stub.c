@@ -71,7 +71,7 @@ int commonStubDummy;                              /* Dummy variable so that the 
 
 #ifdef COMMON_STUB_FORK
 int
-fork ()
+fork (void)
 {
   errorPrint ("fork() not implemented on this system");
   return     (-1);

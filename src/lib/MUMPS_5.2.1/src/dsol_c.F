@@ -1139,9 +1139,6 @@ C
       ENDIF
       IF ( MYID .EQ. MASTER ) THEN
        DO WHILE (N2RECV .NE. 0)
-!        CALL MPI_RECV( BUFFER, SIZE_BUF_BYTES, MPI_PACKED,
-!     &                 MPI_ANY_SOURCE,
-!     &                 GatherSol, COMM, STATUS, IERR ) ! ssg !
         POS_BUF = 0
         CALL MPI_UNPACK( BUFFER,SIZE_BUF_BYTES, POS_BUF,
      &                   NPIV, 1, MPI_INTEGER, COMM, IERR)
@@ -1497,9 +1494,6 @@ C
       ENDIF
       IF ( MYID .EQ. MASTER ) THEN
        DO WHILE (N2RECV .NE. 0)
-!        CALL MPI_RECV( BUFFER, SIZE_BUF_BYTES, MPI_PACKED,
-!     &                 MPI_ANY_SOURCE,
-!     &                 GatherSol, COMM, STATUS, IERR ) ! ssg !
         POS_BUF = 0
         CALL MPI_UNPACK( BUFFER,SIZE_BUF_BYTES, POS_BUF,
      &                   J, 1, MPI_INTEGER, COMM, IERR)
@@ -1866,9 +1860,6 @@ C
         ENDIF
         IF ( KEEP(350).EQ.2 ) THEN
            DO WHILE ( ENTRIES_2_PROCESS .NE. 0)
-!              CALL MPI_RECV( BUF_INDX, BUF_MAXSIZE, MPI_INTEGER,
-!     &             MPI_ANY_SOURCE,
-!     &             ScatterRhsI, COMM, STATUS, IERR ) ! ssg !
               CALL MPI_GET_COUNT(STATUS,MPI_INTEGER,BUF_EFFSIZE,IERR)
               PROC_WHO_ASKS = STATUS(MPI_SOURCE)
 !$            OMP_FLAG = .FALSE.
@@ -1895,9 +1886,6 @@ C
            BUF_EFFSIZE= 0
         ELSE
             DO WHILE ( ENTRIES_2_PROCESS .NE. 0)
-!              CALL MPI_RECV( BUF_INDX, BUF_MAXSIZE, MPI_INTEGER,
-!     &             MPI_ANY_SOURCE,
-!     &             ScatterRhsI, COMM, STATUS, IERR ) ! ssg !
               CALL MPI_GET_COUNT( STATUS, MPI_INTEGER,BUF_EFFSIZE,IERR)
               PROC_WHO_ASKS = STATUS(MPI_SOURCE)
               DO I = 1, BUF_EFFSIZE
@@ -2003,10 +1991,6 @@ C
                   CALL MPI_SEND(BUF_INDX, BUF_EFFSIZE, MPI_INTEGER,
      &            MASTER, ScatterRhsI, COMM, IERR )
                   IF (KEEP(350).EQ.2) THEN
-!                    CALL MPI_RECV(BUF_RHS_2, BUF_EFFSIZE*NRHS,
-!     &                 MPI_DOUBLE_PRECISION,
-!     &                 MASTER,
-!     &                 ScatterRhsR, COMM, STATUS, IERR ) ! ssg !
 !$                  OMP_FLAG = .FALSE.
 !$                  CHUNK = NRHS
 !$                  IF (BUF_EFFSIZE*NRHS .GE. KEEP(363)) THEN
@@ -2029,10 +2013,6 @@ C
                      ENDDO
 !$OMP END PARALLEL DO
                    ELSE
-!                     CALL MPI_RECV(BUF_RHS, BUF_EFFSIZE*NRHS,
-!     &                 MPI_DOUBLE_PRECISION,
-!     &                 MASTER,
-!     &                 ScatterRhsR, COMM, STATUS, IERR ) ! ssg !
                      DO I = 1, BUF_EFFSIZE
                         INDX = POSINRHSCOMP_FWD(BUF_INDX(I))
                         DO K = 1, NRHS

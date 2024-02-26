@@ -1,32 +1,76 @@
+Version 5.2.1-28
+================
+
+* 2024-02-26
+ - fixed gcc UBSAN issues signaled by CRAN
+
+Version 5.2.1-27
+================
+
+* 2024-02-02
+ - fixed warnings about _FORTIFY_SOURCE and fixed form fortran signaled by CRAN
+Version 5.2.1-26
+================
+
+* 2023-11-28
+ - fixed warnings about format string signaled by CRAN
+
+Version 5.2.1-25
+================
+
+* 2023-11-02
+ - fixed warnings on function prototype signaled by CRAN
+ - fixed gcc UBSAN issues signaled by CRAN
+
+Version 5.2.1-23
+================
+
+* 2023-03-08
+ - added set_perm_in() method to set user provided permutation
+ - fixed buffer overflow in memset() call, likely due to gcc optimization (signaled by CRAN team)
+ - updated CITATION as recommended by win-builder header
+
+Version 5.2.1-22
+================
+
+* 2023-01-11
+ - fixed pointer qualifier discarding for clang15  (signaled by CRAN team)
+
+Version 5.2.1-21
+================
+
+* 2023-01-10
+ - fixed compilation errors in C23 mode (signaled by CRAN team)
+
 Version 5.2.1-20
 ================
 
 * 2022-10-19
- -fixed compilation errors about function prototypes signaled by CRAN team
+ - fixed compilation errors about function prototypes (signaled by CRAN team)
 
 Version 5.2.1-18
 ================
 
 * 2022-10-03
- -fixed metis/gklib compilation error from clang-15 signaled by CRAN team
+ - fixed metis/gklib compilation error from clang-15 (signaled by CRAN team)
 
 Version 5.2.1-15
 ================
 
 * 2022-03-25
- - fixed rank mismatch errors from gcc-12 signaled by CRAN team
+ - fixed rank mismatch errors from gcc-12 (signaled by CRAN team)
  
 Version 5.2.1-14
 ================
 
 * 2021-08-11
- - fixed -Wunneeded-internal-declaration signaled by CRAN team
+ - fixed -Wunneeded-internal-declaration (signaled by CRAN team)
 
 Version 5.2.1-13
 ================
 
 * 2021-07-19
- - fixed -Wswitch signaled by CRAN team
+ - fixed -Wswitch (signaled by CRAN team)
  
 Version 5.2.1-12
 ================
@@ -47,26 +91,26 @@ Version 5.2.1-10
 ================
 
 * 2020-01-27
- - fixed gcc-9 warning about uninitialized variables
+ - fixed gcc-9 warning about uninitialized variables (signaled by CRAN team)
 
 Version 5.2.1-9
 ===============
 
 * 2020-01-27
- - fixed gcc-10 warning about uninitialized variables
+ - fixed gcc-10 warning about uninitialized variables (signaled by CRAN team)
 
 Version 5.2.1-8
 ===============
 
 * 2020-01-23
- - fixed gcc-10 warning about type mismatches signaled by CRAN team
+ - fixed gcc-10 warning about type mismatches signaled by CRAN team (signaled by CRAN team)
  - added Copyright holders to DESCRIPTION file
 
 Version 5.2.1-7
 ===============
 
 * 2019-12-06
- - fixed clang-10 warning signaled by CRAN team.
+ - fixed clang-10 warning (signaled by CRAN team)
 
 Version 5.2.1-6
 ===============
@@ -78,13 +122,13 @@ Version 5.2.1-6
 ===============
 
 * 2019-08-26
- - fixed clang issues
+ - fixed clang issues (signaled by CRAN team)
 
 VVersion 5.2.1-4
 ===============
 
 * 2019-08-21
- - fixed some more LTO warnings
+ - fixed some more LTO warnings (signaled by CRAN team)
  
 ersion 5.2.1-3
 ===============
@@ -96,7 +140,7 @@ Version 5.2.1-2
 ===============
 
 * 2019-07-19
- - fixed LTO issues signaled by CRAN team
+ - fixed LTO issues (signaled by CRAN team)
  - removed compile test on win-i386
  
 Version 5.2.1-1
@@ -208,7 +252,7 @@ Version 5.0.1.9-1
 =================
 
 * 2016-04-14
- - fixed building process (by R-core team)
+ - fixed building process (signaled by CRAN team)
  
 Version 5.0.1.9
 ===============
@@ -243,7 +287,7 @@ Version 5.0.1.7
   + fixed a non initialized variable use in C++ code;
   + a .a prefix is used for static library on Windows instead of .dll;
  - fixed the use of default values in constructors which are ignored by
-   RcppModule (detected by UBSAN test run by R-core team);
+   RcppModule (detected by UBSAN test run by CRAN team);
 
 Version 5.0.1.4
 ===============

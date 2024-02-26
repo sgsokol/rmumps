@@ -169,12 +169,12 @@ SEXP Rmumps::solve(RObject b) {
       // many sparse rhs
       return solvestm(as<List>(b));
     } else {
-      sprintf(buf, "expected simple_triplet_matrix but got something else");
+      snprintf(buf, NBUF-1, "expected simple_triplet_matrix but got something else");
       stop(buf);
     }
     break;
   default:
-    sprintf(buf, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
+    snprintf(buf, NBUF-1, "unauthorized SEXP type of rhs (%d)", b.sexp_type());
     stop(buf);
     return R_NilValue;
   }
@@ -288,7 +288,7 @@ NumericMatrix Rmumps::solves(S4 mat) {
   }
   //if (!mat.inherits("dgCMatrix")) {
   //  CharacterVector cstr(mat.slot("class"));
-  //  sprintf(buf, "sparse rhs matrix must be of dgCMatrix class. Instead '%s' class is received (cf. pkg Matrix)", as<std::string>(cstr[0]).c_str());
+  //  snprintf(buf, NBUF-1, "sparse rhs matrix must be of dgCMatrix class. Instead '%s' class is received (cf. pkg Matrix)", as<std::string>(cstr[0]).c_str());
   //  stop(buf);
   //}
   if (di[0] == 0 && di[1] == 0) {
@@ -330,7 +330,7 @@ NumericMatrix Rmumps::solvestm(List mat) {
   int nrow=mat["nrow"];
   int ncol=mat["ncol"];
   if (!mat.inherits("simple_triplet_matrix")) {
-    sprintf(buf, "solvestm() expects an rhs matrix of simple_triplet_matrix class");
+    snprintf(buf, NBUF-1, "solvestm() expects an rhs matrix of simple_triplet_matrix class");
     stop(buf);
   }
   if (nrow == 0 && ncol == 0) {
@@ -444,7 +444,7 @@ void Rmumps::set_icntl(IntegerVector iv, IntegerVector ii) {
   // set control vector ICNTL at positions in ii (1-based)) to the values in iv
   // only 1 <= ii <= 33 are effectively used
   if (iv.size() != ii.size()) {
-    sprintf(buf, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
+    snprintf(buf, NBUF-1, "set_icntl: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
     stop(buf);
   }
   for (auto i=0; i < ii.size(); i++) {
@@ -457,7 +457,7 @@ void Rmumps::set_cntl(NumericVector v, IntegerVector iv) {
   // set control vector CNTL at positions in iv (1-based)) to the values in v
   // only 1 <= iv <= 5 are effectively used
   if (v.size() != iv.size()) {
-    sprintf(buf, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", (int) v.size(), (int) iv.size());
+    snprintf(buf, NBUF-1, "set_cntl: length(v) and length(iv) must be the same (got %d and %d respectively)", (int) v.size(), (int) iv.size());
     stop(buf);
   }
   for (auto i=0; i < iv.size(); i++) {
@@ -505,7 +505,7 @@ void Rmumps::set_keep(IntegerVector iv, IntegerVector ii) {
   // set control vector KEEP at positions in ii (1-based)) to the values in iv
   // only 1 <= ii <= 500 are effectively used
   if (iv.size() != ii.size()) {
-    sprintf(buf, "set_keep: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
+    snprintf(buf, NBUF-1, "set_keep: length(iv) and length(ii) must be the same (got %d and %d respectively)", (int) iv.size(), (int) ii.size());
     stop(buf);
   }
   for (auto i=0; i < ii.size(); i++) {
@@ -558,6 +558,28 @@ List Rmumps::triplet() {
   );
   tr.attr("class")="simple_triplet_matrix";
   return tr;
+}
+void Rmumps::set_perm_in(IntegerVector p_in) {
+  // set a vector of symmetric permutation provided by user
+  param.ICNTL(7)=1;
+  param.ICNTL(28)=1;
+  param.perm_in=(MUMPS_INT*) &*p_in.begin();
+  jobs.erase(jobs.begin(), jobs.end()); // invalidate previous factorizations both symbolic and numeric
+}
+IntegerVector Rmumps::get_sym_perm() {
+  // returns a vector of symmetric permutation used by mumps
+  if (param.sym_perm)
+    return IntegerVector(param.sym_perm, param.sym_perm+param.n);
+  else
+    return IntegerVector(0);
+}
+IntegerVector Rmumps::get_uns_perm() {
+  // returns a vector of unsymmetric permutation used by mumps
+  // Rcout << "param.uns_perm=" << param.uns_perm << std::endl;
+  if (param.uns_perm)
+    return IntegerVector(param.uns_perm, param.uns_perm+param.n);
+  else
+    return IntegerVector(0);
 }
 std::string Rmumps::mumps_version() { return MUMPS_VERSION; }
 double Rmumps::det() {
@@ -661,7 +683,7 @@ void Rmumps::new_mat(RObject mat_, int sym, bool copy_) {
     break;
   }
   default:
-    sprintf(buf, "constructor form a single object is expecting Matrix::dgTMatrix (i.e. S4SXP) or slam::simple_triplet_matrix (i.e. VECSXP) class as input. Got '%d' SEXP instead", mat_.sexp_type());
+    snprintf(buf, NBUF-1, "constructor from a single object is expecting Matrix::dgTMatrix (i.e. S4SXP) or slam::simple_triplet_matrix (i.e. VECSXP) class as input. Got '%d' SEXP instead", mat_.sexp_type());
     stop(buf);
   }
   //Rf_PrintValue(wrap(irn));
@@ -780,6 +802,9 @@ RCPP_MODULE(mod_Rmumps){
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")
   .method("det", &Rmumps::det, "Return determinant of the matrix")
   .method("mumps_version", &Rmumps::mumps_version, "Return determinant of the matrix")
+  .method("set_perm_in", &Rmumps::set_perm_in, "Set permutation vector defined by user")
+  .method("get_sym_perm", &Rmumps::get_sym_perm, "Get symmetric permutation used by MUMPS")
+  .method("get_uns_perm", &Rmumps::get_uns_perm, "Get unsymmetrical permutation used by MUMPS")
   ;
 }
 

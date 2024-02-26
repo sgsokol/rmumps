@@ -12,7 +12,8 @@
 }
 \details{
   Create a new Rmumps object with \code{A <- Rmumps$new(asparse)} then solve a
-  linear system with one or many right hand sides \code{x <- solve(A, b)}
+  linear system with one or many right hand sides \code{x <- solve(A, b)}.
+  Cf. \link{Rmumps}  
 }
 \author{
   Serguei Sokol, INRA
@@ -22,7 +23,7 @@
 \references{
   MUMPS official site http://mumps.enseeiht.fr
 
-  Sokol S (2022). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.2.1-19, <URL: http://CRAN.R-project.org/package=rmumps>.
+  Sokol S (2024). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.2.1-27, <URL: http://CRAN.R-project.org/package=rmumps>.
 }
 \examples{
   \dontrun{
