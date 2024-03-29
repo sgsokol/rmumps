@@ -120,6 +120,13 @@ test_that("int size", {
   expect_equal(vkeep[10], 8/sizeint)
 })
 
+# test determinants
+a=as(diag(n), "dgCMatrix")
+am=Rmumps$new(a)
+test_that("det", {
+  expect_equal(am$det(), 1.)
+  expect_equal(am$log2det(), 0.)
+})
 
 rm(a, asy, am)
 gc()
