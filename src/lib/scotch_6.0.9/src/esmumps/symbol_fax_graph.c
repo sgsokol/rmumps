@@ -67,6 +67,8 @@
 /*
 **  The defines and includes.
 */
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 #define SYMBOL_FAX
 #define SYMBOL_FAX_GRAPH
@@ -130,3 +132,4 @@ const Order * const         ordeptr)              /*+ Matrix ordering           
 #include "symbol_fax.c"
   }
 }
+#pragma GCC pop_options

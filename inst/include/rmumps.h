@@ -79,6 +79,7 @@ public:
   List triplet();
   std::string mumps_version();
   double det();
+  double log2det();
   IntegerVector get_sym_perm();
   IntegerVector get_uns_perm();
   void set_perm_in(IntegerVector p_in);

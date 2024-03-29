@@ -589,6 +589,13 @@ double Rmumps::det() {
   }
   return param.rinfog[12-1]*exp2(param.infog[34-1]);
 }
+double Rmumps::log2det() {
+  if (jobs.count(2) != 1 || param.ICNTL(33) != 1) {
+    param.ICNTL(33)=1;
+    do_job(4);
+  }
+  return log2(param.rinfog[12-1]) + param.infog[34-1];
+}
 
 /* constructors */
 Rmumps::Rmumps(RObject mat, int sym, bool copy_) {
@@ -801,7 +808,8 @@ RCPP_MODULE(mod_Rmumps){
   .method("show", &Rmumps::print, "Print the size of matrix and decompositions done")
   .method("triplet", &Rmumps::triplet, "Return an object of simple_triplet_matrix class with i, j, v fields representing the matrix")
   .method("det", &Rmumps::det, "Return determinant of the matrix")
-  .method("mumps_version", &Rmumps::mumps_version, "Return determinant of the matrix")
+  .method("log2det", &Rmumps::log2det, "Return log2(determinant) of the matrix (i.e. log base 2)")
+  .method("mumps_version", &Rmumps::mumps_version, "Return used mumps version")
   .method("set_perm_in", &Rmumps::set_perm_in, "Set permutation vector defined by user")
   .method("get_sym_perm", &Rmumps::get_sym_perm, "Get symmetric permutation used by MUMPS")
   .method("get_uns_perm", &Rmumps::get_uns_perm, "Get unsymmetrical permutation used by MUMPS")
