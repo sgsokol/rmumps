@@ -57,6 +57,8 @@
 /*
 **  The defines and includes.
 */
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 #define VGRAPH_SEPARATE_GG
 
@@ -300,3 +302,4 @@ const VgraphSeparateGgParam * const paraptr)      /*+ Method parameters +*/
 
   return (0);
 }
+#pragma GCC pop_options

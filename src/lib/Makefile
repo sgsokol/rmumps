@@ -3,6 +3,7 @@
 DMUMPS=MUMPS_5.2.1
 DMETIS=metis-5.1.0
 DSCOTCH=scotch_6.0.9
+#DSCOTCH=scotch-v7.0.4
 DLIB=../lib
 ARITH = d
 FLAGS.MPI=-I../libseq
@@ -37,7 +38,7 @@ FUSELIBS=$(DMUMPS)/lib/libdmumps.a $(DMUMPS)/lib/libmumps_common.a $(DMUMPS)/lib
 all: allmumps
 
 scotchlibs:
-	$(MAKE) -C $(DSCOTCH)/src CC="$(CC)" PKG_CFLAGS="$(CFLAGS) $(PKG_CFLAGS)" INC_OS="$(INC_OS)" scotch esmumps
+	$(MAKE) -C $(DSCOTCH)/src CC="$(CC)" PKG_CFLAGS="$(CFLAGS) $(PKG_CFLAGS)" INC_OS="$(INC_OS)" libscotch esmumps
 	mkdir -p $(DLIB)
 	mv -f $(DSCOTCH)/lib/libscotch.a $(DSCOTCH)/lib/libscotcherr.a $(DSCOTCH)/src/esmumps/libesmumps.a $(DLIB)/
 metislib: $(SOURCES.C:.c=.o) 

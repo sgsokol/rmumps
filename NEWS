@@ -1,3 +1,9 @@
+Version 5.2.1-30
+================
+
+* 2024-06-14
+ - fixed buffer overflow on ubuntu/gcc13
+
 Version 5.2.1-29
 ================
 

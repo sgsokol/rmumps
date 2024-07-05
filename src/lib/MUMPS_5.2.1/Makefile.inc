@@ -53,6 +53,7 @@
 SCOTCHDIR  = ${topdir}/../$(DSCOTCH)/
 #LSCOTCHDIR  = ${topdir}/../scotch_6.0.4/lib
 ISCOTCH    = -I$(SCOTCHDIR)/include 
+#ISCOTCH    = -I$(SCOTCHDIR)/src/libscotch
 # You have to choose one among the following two lines depending on
 # the type of analysis you want to perform. If you want to perform only
 # sequential analysis choose the first (remember to add -Dscotch in the ORDERINGSF
