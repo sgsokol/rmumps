@@ -474,7 +474,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 
     if (ambig && !exact) {
       if (print_errors)
-        fprintf(stderr, "%s: option `%s' is ambiguous\n", argv[0], argv[gk_optind]);
+        Rf_warning("%s: option `%s' is ambiguous\n", argv[0], argv[gk_optind]);
 
       nextchar += strlen (nextchar);
       gk_optind++;
@@ -493,10 +493,10 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 	  if (print_errors) {
 	    if (argv[gk_optind - 1][1] == '-')
 	      /* --option */
-	      fprintf(stderr, "%s: option `--%s' doesn't allow an argument\n", argv[0], pfound->name);
+	      Rf_warning("%s: option `--%s' doesn't allow an argument\n", argv[0], pfound->name);
 	    else
 	      /* +option or -option */
-	      fprintf(stderr, "%s: option `%c%s' doesn't allow an argument\n", argv[0], argv[gk_optind - 1][0], pfound->name);
+	      Rf_warning("%s: option `%c%s' doesn't allow an argument\n", argv[0], argv[gk_optind - 1][0], pfound->name);
 	  }
 
 	  nextchar += strlen (nextchar);
@@ -510,7 +510,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 	  gk_optarg = argv[gk_optind++];
 	else {
 	  if (print_errors)
-	    fprintf(stderr, "%s: option `%s' requires an argument\n", argv[0], argv[gk_optind - 1]);
+	    Rf_warning("%s: option `%s' requires an argument\n", argv[0], argv[gk_optind - 1]);
 	  nextchar += strlen (nextchar);
 	  gk_optopt = pfound->val;
 	  return optstring[0] == ':' ? ':' : '?';
@@ -533,10 +533,10 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
       if (print_errors) {
 	if (argv[gk_optind][1] == '-')
 	  /* --option */
-	  fprintf(stderr, "%s: unrecognized option `--%s'\n", argv[0], nextchar);
+	  Rf_warning("%s: unrecognized option `--%s'\n", argv[0], nextchar);
 	else
 	  /* +option or -option */
-	  fprintf(stderr, "%s: unrecognized option `%c%s'\n", argv[0], argv[gk_optind][0], nextchar);
+	  Rf_warning("%s: unrecognized option `%c%s'\n", argv[0], argv[gk_optind][0], nextchar);
       }
       nextchar = (char *) "";
       gk_optind++;
@@ -558,9 +558,9 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
       if (print_errors) {
         if (posixly_correct)
 	  /* 1003.2 specifies the format of this message.  */
-	  fprintf(stderr, "%s: illegal option -- %c\n", argv[0], c);
+	  Rf_warning("%s: illegal option -- %c\n", argv[0], c);
 	else
-	  fprintf(stderr, "%s: invalid option -- %c\n", argv[0], c);
+	  Rf_warning("%s: invalid option -- %c\n", argv[0], c);
       }
       gk_optopt = c;
       return '?';
@@ -586,7 +586,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
       else if (gk_optind == argc) {
 	if (print_errors) {
 	  /* 1003.2 specifies the format of this message.  */
-	  fprintf(stderr, "%s: option requires an argument -- %c\n", argv[0], c);
+	  Rf_warning("%s: option requires an argument -- %c\n", argv[0], c);
 	}
 	gk_optopt = c;
 	if (optstring[0] == ':')
@@ -626,7 +626,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
       }
       if (ambig && !exact) {
 	if (print_errors)
-	  fprintf(stderr, "%s: option `-W %s' is ambiguous\n", argv[0], argv[gk_optind]);
+	  Rf_warning("%s: option `-W %s' is ambiguous\n", argv[0], argv[gk_optind]);
 	nextchar += strlen (nextchar);
 	gk_optind++;
 	return '?';
@@ -639,7 +639,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 	    gk_optarg = nameend + 1;
 	  else {
 	    if (print_errors)
-	      fprintf(stderr, "%s: option `-W %s' doesn't allow an argument\n", argv[0], pfound->name);
+	      Rf_warning("%s: option `-W %s' doesn't allow an argument\n", argv[0], pfound->name);
 
 	    nextchar += strlen (nextchar);
 	    return '?';
@@ -650,7 +650,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 	    gk_optarg = argv[gk_optind++];
 	  else {
 	    if (print_errors)
-	      fprintf(stderr, "%s: option `%s' requires an argument\n", argv[0], argv[gk_optind - 1]);
+	      Rf_warning("%s: option `%s' requires an argument\n", argv[0], argv[gk_optind - 1]);
 	    nextchar += strlen (nextchar);
 	    return optstring[0] == ':' ? ':' : '?';
 	  }
@@ -689,7 +689,7 @@ static int gk_getopt_internal(int argc, char **argv, char *optstring,
 	else if (gk_optind == argc) {
 	  if (print_errors) {
 	    /* 1003.2 specifies the format of this message.  */
-	    fprintf(stderr, "%s: option requires an argument -- %c\n", argv[0], c);
+	    Rf_warning("%s: option requires an argument -- %c\n", argv[0], c);
 	  }
 	  gk_optopt = c;
 	  if (optstring[0] == ':')

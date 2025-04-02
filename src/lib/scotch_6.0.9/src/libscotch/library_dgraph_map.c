@@ -289,12 +289,12 @@ const double                kbalval)              /*+ Desired imbalance ratio   
   char *              exasptr;
   char *              muceptr;
 
-  sprintf (kbaltab, "%lf", kbalval);
-  sprintf (bbaltab, "%lf", kbalval);
+  snprintf (kbaltab, 31, "%lf", kbalval);
+  snprintf (bbaltab, 31, "%lf", kbalval);
 
   vertnbr = MAX (2000 * procnbr, 10000);
   vertnbr = MIN (vertnbr, 100000);
-  sprintf (verttab, GNUMSTRING, vertnbr);
+  snprintf (verttab, 31, GNUMSTRING, vertnbr);
 
   strcpy (bufftab, "r{bal=<KBAL>,sep=m{vert=<VERT>,asc=b{bnd=<DIFP><MUCE><EXAP>,org=<MUCE><EXAP>},low=q{strat=(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>},seq=q{strat=(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>}},seq=r{bal=<KBAL>,poli=S,sep=(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>}}");
   stringSubst (bufftab, "<BIPA>", ((flagval & SCOTCH_STRATSPEED) != 0) ? ""
@@ -368,13 +368,13 @@ const double                bbalval)              /*+ Maximum imbalance ratio   
   char *              exasptr;
   char *              muceptr;
 
-  sprintf (bbaltab, "%lf", bbalval);
-  sprintf (denstab, "%lf", densval);
-  sprintf (pwgttab, GNUMSTRING, pwgtval);
+  snprintf (bbaltab, 31, "%lf", bbalval);
+  snprintf (denstab, 31, "%lf", densval);
+  snprintf (pwgttab, 31, GNUMSTRING, pwgtval);
 
   vertnbr = MAX (2000 * procnbr, 10000);
   vertnbr = MIN (vertnbr, 100000);
-  sprintf (verttab, GNUMSTRING, vertnbr);
+  snprintf (verttab, 31, GNUMSTRING, vertnbr);
 
   strcpy (bufftab, "r{sep=/((load><PWGT>)&!(edge>vert*<DENS>*(vert-1)))?m{vert=<VERT>,asc=b{bnd=<DIFP><MUCE><EXAP>,org=<MUCE><EXAP>},low=q{strat=(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>},seq=q{strat=/((load><PWGT>)&!(edge>vert*<DENS>*(vert-1)))?(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>;}};,seq=r{sep=/((load><PWGT>)&!(edge>vert*<DENS>*(vert-1)))?(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>;}}");
   stringSubst (bufftab, "<BIPA>", ((flagval & SCOTCH_STRATSPEED) != 0) ? ""

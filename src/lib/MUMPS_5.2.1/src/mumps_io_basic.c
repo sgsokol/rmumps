@@ -52,8 +52,8 @@ MUMPS_INT mumps_set_file(MUMPS_INT type,MUMPS_INT file_number_arg){
      so as to name were unique */
   char name[351];
 #if ! defined(_WIN32)
-  MUMPS_INT fd;
-  char buf[64]; /* for error message */
+  /*MUMPS_INT fd;*/
+  /*char buf[64];*/ /* for error message */
 #endif
   mumps_file_struct  *mumps_io_pfile_pointer_array;
   if (file_number_arg > ((mumps_files+type)->mumps_io_nb_file)-1){
@@ -94,21 +94,21 @@ MUMPS_INT mumps_set_file(MUMPS_INT type,MUMPS_INT file_number_arg){
 /* MinGW does not have a mkstemp function and MinGW defines _WIN32,
  * so we also go in the else branch below with MinGW */
 #if ! defined(_WIN32)
-  strcpy(name,mumps_ooc_file_prefix);
-  fd=mkstemp(name);  
+  strncpy(name,mumps_ooc_file_prefix,350);
+  /*fd=mkstemp(name);  */
   /* Note that a file name is built by mkstemp and that the file is 
      opened. fd hold the file descriptor to access it.
      We want to close the file that will be opened later
      and might be removed before the end of the processus.
   */
-  if(fd < 0) {
-    sprintf(buf,"File creation failure");
+  /*if(fd < 0) {
+    snprintf(buf, 63, "File creation failure");
     return mumps_io_sys_error(-90,buf);
   } else {
-    close(fd); 
-  }
+    close(fd);
+  } */
 #else
-  sprintf(name,"%s_%d_%d",mumps_ooc_file_prefix,((mumps_files+type)->mumps_io_current_file_number)+1,type);
+  snprintf(name, 63, "%s_%d_%d",mumps_ooc_file_prefix,((mumps_files+type)->mumps_io_current_file_number)+1,type);
 #endif
 /*   *(mumps_io_pfile_pointer_array+mumps_io_current_file_number)=fopen(name,"w+"); */
 /*   *(mumps_io_pfile_name+mumps_io_current_file_number)=(char *)malloc((strlen(name)+1)*sizeof(char)); */
@@ -294,7 +294,7 @@ MUMPS_INT mumps_io_do_write_block(void * address_block,
   }
   if(to_be_written!=0){
     *ierr = -90;
-    sprintf(buf,"Internal (1) error in low-level I/O operation %lf",to_be_written);
+    snprintf(buf, 63, "Internal (1) error in low-level I/O operation %lf",to_be_written);
     return mumps_io_error(*ierr,buf);
   }
   /* printf("write ok -> %d \n");*/
@@ -391,12 +391,12 @@ MUMPS_INT mumps_free_file_pointers(MUMPS_INT *step){
     }
     for(i=0;i<(mumps_files+j)->mumps_io_nb_file_opened;i++){
 #if ! defined( MUMPS_WIN32 )
-      ierr=close((((mumps_files+j)->mumps_io_pfile_pointer_array)+i)->file);
+      /*ierr=close((((mumps_files+j)->mumps_io_pfile_pointer_array)+i)->file);*/ierr=0;
       if(ierr==-1){
         return mumps_io_sys_error(-90,"Problem while closing OOC file");
       }
 #else
-      ierr=fclose((((mumps_files+j)->mumps_io_pfile_pointer_array)+i)->file);
+      /*ierr=fclose((((mumps_files+j)->mumps_io_pfile_pointer_array)+i)->file);*/ierr=0;
       if(ierr==-1){
         return mumps_io_error(-90,"Problem while closing OOC file\n");
       }    
@@ -563,26 +563,27 @@ MUMPS_INT mumps_init_file_name(char* mumps_dir,char* mumps_file,
   }
   if(tmp_fname!=NULL){
 #if ! defined( MUMPS_WIN32 )
-      sprintf(base_name,"_%s%d_XXXXXX",mumps_base,*_myid);
+      snprintf(base_name, 19, "_%s%d_XXXXXX",mumps_base,*_myid);
 #else
-      sprintf(base_name,"_%s%d",mumps_base,*_myid);
+      snprintf(base_name, 19, "_%s%d",mumps_base,*_myid);
 #endif
       mumps_ooc_file_prefix=(char *)malloc((strlen(SEPARATOR)+strlen(tmp_dir)+strlen(tmp_fname)+strlen(base_name)+1+1)*sizeof(char));
       if(mumps_ooc_file_prefix==NULL){
         return mumps_io_error(-13,"Allocation problem in low-level OOC layer\n");
       }
-      sprintf(mumps_ooc_file_prefix,"%s%s%s%s",tmp_dir,SEPARATOR,tmp_fname,base_name);
+      snprintf(mumps_ooc_file_prefix, 255, "%s%s%s%s",tmp_dir,SEPARATOR,tmp_fname,base_name);
   }else{
 #if ! defined( MUMPS_WIN32 )
-    sprintf(base_name,"%s%s%d_XXXXXX",SEPARATOR,mumps_base,*_myid);
+    snprintf(base_name, 19, "%s%s%d_XXXXXX",SEPARATOR,mumps_base,*_myid);
 #else
-    sprintf(base_name,"%s%s%d",SEPARATOR,mumps_base,*_myid);
+    snprintf(base_name, 19, "%s%s%d",SEPARATOR,mumps_base,*_myid);
 #endif
-      mumps_ooc_file_prefix=(char *)malloc((strlen(SEPARATOR)+strlen(tmp_dir)+strlen(base_name)+1)*sizeof(char));
+      int len_prefix=strlen(SEPARATOR)+strlen(tmp_dir)+strlen(base_name);
+      mumps_ooc_file_prefix=(char *)malloc((len_prefix+1)*sizeof(char));
       if(mumps_ooc_file_prefix==NULL){
         return mumps_io_error(-13,"Allocation problem in low-level OOC layer\n");
       }
-      sprintf(mumps_ooc_file_prefix,"%s%s%s",tmp_dir,SEPARATOR,base_name);
+      snprintf(mumps_ooc_file_prefix,len_prefix,"%s%s%s",tmp_dir,SEPARATOR,base_name);
   }  
   if(!dir_flag){
     free(tmp_dir);

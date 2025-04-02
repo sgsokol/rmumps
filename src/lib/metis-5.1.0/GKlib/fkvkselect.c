@@ -64,13 +64,13 @@ jump_over:
 
 /*
   if (cand[lo].key < cand[hi].key)
-    printf("Hmm Error: %d %d %d %f %f\n", i, lo, hi, cand[lo].key, cand[hi].key);
+    Rf_warning("Hmm Error: %d %d %d %f %f\n", i, lo, hi, cand[lo].key, cand[hi].key);
 
 
   for (i=topk; i<n; i++) {
     for (j=0; j<topk; j++)
       if (cand[i].key > cand[j].key)
-        printf("Hmm Error: %d %d %f %f %d %d\n", i, j, cand[i].key, cand[j].key, lo, hi);
+        Rf_warning("Hmm Error: %d %d %f %f %d %d\n", i, j, cand[i].key, cand[j].key, lo, hi);
   }
 */
 
@@ -128,13 +128,13 @@ jump_over:
 
 /*
   if (cand[lo].key > cand[hi].key)
-    printf("Hmm Error: %d %d %d %f %f\n", i, lo, hi, cand[lo].key, cand[hi].key);
+    Rf_warning("Hmm Error: %d %d %d %f %f\n", i, lo, hi, cand[lo].key, cand[hi].key);
 
 
   for (i=topk; i<n; i++) {
     for (j=0; j<topk; j++)
       if (cand[i].key < cand[j].key)
-        printf("Hmm Error: %d %d %f %f %d %d\n", i, j, cand[i].key, cand[j].key, lo, hi);
+        Rf_warning("Hmm Error: %d %d %f %f %d %d\n", i, j, cand[i].key, cand[j].key, lo, hi);
   }
 */
 

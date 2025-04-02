@@ -82,7 +82,7 @@ void FreeWorkSpace(ctrl_t *ctrl)
   gk_mcoreDestroy(&ctrl->mcore, ctrl->dbglvl&METIS_DBG_INFO);
 
   IFSET(ctrl->dbglvl, METIS_DBG_INFO,
-      printf(" nbrpool statistics\n" 
+      Rf_warning(" nbrpool statistics\n" 
              "        nbrpoolsize: %12zu   nbrpoolcpos: %12zu\n"
              "    nbrpoolreallocs: %12zu\n\n",
              ctrl->nbrpoolsize,  ctrl->nbrpoolcpos, 

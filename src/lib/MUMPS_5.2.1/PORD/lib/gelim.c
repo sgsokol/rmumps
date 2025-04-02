@@ -154,34 +154,34 @@ printElimGraph(gelim_t *Gelim)
           => degree[u]: approximate degree
         ---------------------------------------------------------------- */
      if ((Gelim->score[u] == -1) || (Gelim->score[u] >= 0))
-      { printf("--- adjacency list of variable %d (weight %d, degree %d, "
+      { Rf_warning("--- adjacency list of variable %d (weight %d, degree %d, "
                "score %d):\n", u, G->vwght[u], Gelim->degree[u],
                Gelim->score[u]);
-        printf("elements:\n");
+        Rf_warning("elements:\n");
         count = 0;
         for (i = istart; i < istart + Gelim->elen[u]; i++)
-         { printf("%5d", G->adjncy[i]);
+         { Rf_warning("%5d", G->adjncy[i]);
            if ((++count % 16) == 0)
-             printf("\n");
+             Rf_warning("\n");
          }
         if ((count % 16) != 0)
-          printf("\n");
-        printf("variables:\n");
+          Rf_warning("\n");
+        Rf_warning("variables:\n");
         count = 0;
         for (i = istart + Gelim->elen[u]; i < istart + Gelim->len[u]; i++)
-         { printf("%5d", G->adjncy[i]);
+         { Rf_warning("%5d", G->adjncy[i]);
            if ((++count % 16) == 0)
-             printf("\n");
+             Rf_warning("\n");
          }
         if ((count % 16) != 0)
-          printf("\n");
+          Rf_warning("\n");
       }
 
      /* ---------------------------------------------------------------
         case 2: u is nonprincipal/removed by mass elimination
         ---------------------------------------------------------------- */
      else if (Gelim->score[u] == -2)
-       printf("--- variable %d is nonprincipal/removed by mass elim. "
+       Rf_warning("--- variable %d is nonprincipal/removed by mass elim. "
               "(parent %d)\n", u, Gelim->parent[u]);
 
      /* -----------------------------------------------
@@ -189,35 +189,35 @@ printElimGraph(gelim_t *Gelim)
           => degree[u]: weight of boundary
         ----------------------------------------------- */
      else if (Gelim->score[u] == -3)
-      { printf("--- boundary of element %d (degree %d, score %d):"
+      { Rf_warning("--- boundary of element %d (degree %d, score %d):"
                "\n", u, Gelim->degree[u], Gelim->score[u]);
         count = 0;
         for (i = istart; i < istart + Gelim->len[u]; i++)
          { v = G->adjncy[i];
            if (G->vwght[v] > 0)
-            { printf("%5d", G->adjncy[i]);
+            { Rf_warning("%5d", G->adjncy[i]);
               if ((++count % 16) == 0)
-                printf("\n");
+                Rf_warning("\n");
             }
          }
         if ((count % 16) != 0)
-          printf("\n");
+          Rf_warning("\n");
       }
 
      /* --------------------------------
         case 4: u is an absorbed element
         -------------------------------- */
      else if (Gelim->score[u] == -4)
-       printf("--- element %d has been absorbed (parent %d)\n", u,
+       Rf_warning("--- element %d has been absorbed (parent %d)\n", u,
               Gelim->parent[u]);
 
      /* ----------------------------------------
         none of the above cases is true => error
         ---------------------------------------- */
      else
-      { fprintf(stderr, "\nError in function printElimGraph\n"
+      { Rf_error("\nError in function printElimGraph\n"
              "  node %d has invalid score %d\n", u, Gelim->score[u]);
-        quit();
+        /*quit();*/
       }
    }
 }
@@ -282,7 +282,7 @@ setupElimGraph(graph_t *G)
             deg += vwght[adjncy[i]];
           break;
         default:
-          fprintf(stderr, "\nError in function setupElimGraph\n"
+          Rf_error("\nError in function setupElimGraph\n"
                "  unrecognized graph type %d\n", Gelim->G->type);
       }
      degree[u] = deg;
@@ -316,14 +316,14 @@ crunchElimGraph(gelim_t *Gelim)
    { i = xadj[u];                /* is adjacency list of u still in use? */
      if (i != -1)                /* verify that list is non-empty */
       { if (len[u] == 0)
-         { fprintf(stderr, "\nError in function crunchElimGraph\n"
+         { Rf_error("\nError in function crunchElimGraph\n"
                 "  adjacency list of node %d is empty\n", u);
-           quit();
+           /*quit();*/
          }
         xadj[u] = adjncy[i];     /* if so, move first item to xadj[u] */
         adjncy[i] = -(u+1);      /* u's adjacency list is headed by -(u+1) */
         if (len[u] == 0)
-          printf("error: u %d, len %d\n", u, len[u]);
+          Rf_warning("error: u %d, len %d\n", u, len[u]);
       }
    }
 
@@ -434,9 +434,9 @@ buildElement(gelim_t *Gelim, PORD_INT me)
 
                  /* crunch adjacency list -- !!!we need more memory!!! */
                  if (!crunchElimGraph(Gelim))
-                  { fprintf(stderr, "\nError in function buildElement\n"
+                  { Rf_error("\nError in function buildElement\n"
                          "  unable to construct element (not enough memory)\n");
-                    quit();
+                    /*quit();*/
                   }
 
                  /* crunch partially constructed element me */
@@ -516,7 +516,7 @@ updateAdjncy(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *tmp,
      jdest = jfirstolde = jstart;
 
 #ifdef DEBUG
-     printf("Updating adjacency list of node %d\n", u);
+     Rf_warning("Updating adjacency list of node %d\n", u);
 #endif
 
      /* --------------------------------------------------------
@@ -527,7 +527,7 @@ updateAdjncy(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *tmp,
       { e = adjncy[j];
 
 #ifdef DEBUG
-        printf("  >> element %d (score %d, parent %d)\n", e,score[e],parent[e]);
+        Rf_warning("  >> element %d (score %d, parent %d)\n", e,score[e],parent[e]);
 #endif
 
         if (score[e] == -4)       /* e has been absorbed in this elim. step */
@@ -554,7 +554,7 @@ updateAdjncy(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *tmp,
       { v = adjncy[j];
 
 #ifdef DEBUG
-        printf("  >> variable %d (score %d)\n", v, score[v]);
+        Rf_warning("  >> variable %d (score %d)\n", v, score[v]);
 #endif
 
         if (score[v] == -3)       /* v has been eliminated in this step */
@@ -573,13 +573,13 @@ updateAdjncy(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *tmp,
      (*pflag)++;                  /* clear tmp for next round */
 
 #ifdef DEBUG
-     printf(" node %d: neighboring elements:\n", u);
+     Rf_warning(" node %d: neighboring elements:\n", u);
      for (j = jstart; j < jstart + elen[u]; j++)
-       printf("%5d", adjncy[j]);
-     printf("\n node %d: neighboring variables:\n", u);
+       Rf_warning("%5d", adjncy[j]);
+     Rf_warning("\n node %d: neighboring variables:\n", u);
      for (j = jstart + elen[u]; j < jstart + len[u]; j++)
-       printf("%5d", adjncy[j]);
-     printf("\n");
+       Rf_warning("%5d", adjncy[j]);
+     Rf_warning("\n");
 #endif
    }
 
@@ -616,10 +616,10 @@ updateAdjncy(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *tmp,
      (*pflag)++;                  /* clear tmp for next round */
 
 #ifdef DEBUG
-     printf(" node %d: neighboring uncovered variables:\n", u);
+     Rf_warning(" node %d: neighboring uncovered variables:\n", u);
      for (j = jstart + elen[u]; j < jstart + len[u]; j++)
-       printf("%5d", adjncy[j]);
-     printf("\n");
+       Rf_warning("%5d", adjncy[j]);
+     Rf_warning("\n");
 #endif
    }
 
@@ -650,7 +650,7 @@ findIndNodes(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin,
   score = Gelim->score;
 
 #ifdef DEBUG
-  printf("Checking reachset for indistinguishable variables\n");
+  Rf_warning("Checking reachset for indistinguishable variables\n");
 #endif
 
   /* -----------------------------------------------------------------------
@@ -681,7 +681,7 @@ findIndNodes(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin,
      parent[u] = chk;
      /* JYL: temporary:
         if (parent[u] < - 10)
-        printf("Probleme %d \n",chk);*/
+        Rf_warning("Probleme %d \n",chk);*/
      next[u] = bin[chk];
      bin[chk] = u;
    }
@@ -719,10 +719,10 @@ findIndNodes(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin,
                { parent[w] = v;          /* representative of w is v */
                  /* Temporary JY
 		    if (parent[w] < - 10)
-	               printf("Probleme\n");
+	               Rf_warning("Probleme\n");
                   */
 #ifdef DEBUG
-                 printf(" non-principal variable %d (score %d) mapped onto "
+                 Rf_warning(" non-principal variable %d (score %d) mapped onto "
                         "%d (score %d)\n", w, score[w], v, score[v]); 
 #endif
 
@@ -790,7 +790,7 @@ updateDegree(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin)
       { me = adjncy[xadj[u]];  /* in the neighborhood of u */
 
 #ifdef DEBUG
-        printf("Updating degree of all variables in L(%d) (initiated by %d)\n",
+        Rf_warning("Updating degree of all variables in L(%d) (initiated by %d)\n",
                me, u);
 #endif
 
@@ -822,7 +822,7 @@ updateDegree(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin)
              for (j = xadj[v]; j < xadj[v] + elen[v]; j++)
               { e = adjncy[j];
                 if (e != me)
-                  printf("  >> element %d: degree %d, outer degree %d\n", e,
+                  Rf_warning("  >> element %d: degree %d, outer degree %d\n", e,
                          degree[e], bin[e]);
               }
          }
@@ -857,7 +857,7 @@ updateDegree(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT *bin)
               bin[v] = -1;
 
 #ifdef DEBUG
-              printf("  >> variable %d (totvwght %d, vwght %d): deg %d, "
+              Rf_warning("  >> variable %d (totvwght %d, vwght %d): deg %d, "
                      "degme %d, approx degree %d\n", v, totvwght, vwghtv, deg,
                      degree[me], degree[v]);
 #endif
@@ -926,7 +926,7 @@ updateScore(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT scoret
       { me = adjncy[xadj[u]];  /* in the neighborhood of u */
 
 #ifdef DEBUG
-        printf("Updating score of all variables in L(%d) (initiated by %d)\n",
+        Rf_warning("Updating score of all variables in L(%d) (initiated by %d)\n",
                me, u);
 #endif
 
@@ -955,9 +955,9 @@ updateScore(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT scoret
                              - (double)deg*(double)vwghtv);
                    break;
                  default:
-                   fprintf(stderr, "\nError in function updateScore\n"
+                   Rf_error("\nError in function updateScore\n"
                         "  unrecognized selection strategy %d\n", scoretype);
-                   quit();
+                   /*quit();*/
                }
               /* Some buckets have offset nvtx / 2.
 	       * Using MAX_INT - nvtx should then be safe */
@@ -980,24 +980,24 @@ updateScore(gelim_t *Gelim, PORD_INT *reachset, PORD_INT nreach, PORD_INT scoret
                              - deg*vwghtv);
                    break;
                  default:
-                   fprintf(stderr, "\nError in function updateScore\n"
+                   Rf_error("\nError in function updateScore\n"
                         "  unrecognized selection strategy %d\n", scoretype);
-                   quit();
+                   /*quit();*/
                  }
                score[v] = scr;
 	      }
               bin[v] = -1;
 
 #ifdef DEBUG
-              printf("  >> variable %d (me %d): weight %d, (ext)degme %d, "
+              Rf_warning("  >> variable %d (me %d): weight %d, (ext)degme %d, "
                      "degree %d, score %d\n", u, me, vwghtv, degme, degree[v],
                      score[v]);
 #endif
          
               if (score[v] < 0)
-               { fprintf(stderr, "\nError in function updateScore\n"
+               { Rf_error("\nError in function updateScore\n"
                       " score[%d] = %d is negative\n", v, score[v]);
-                 quit();
+                 /*quit();*/
                }
             }
          }
@@ -1050,14 +1050,14 @@ extractElimTree(gelim_t *Gelim)
          nfronts++;
          break;
        default:
-         fprintf(stderr, "\nError in function extractElimTree\n"
+         Rf_error("\nError in function extractElimTree\n"
               "  ordering not complete (score[%d] = %d)\n", u, score[u]);
-         quit();
+         /*quit();*/
      }
 
 #ifdef DEBUG
   for (u = 0; u < nvtx; u++)
-    printf("node %d: score %d, par %d, fch %d, sib %d\n", u, score[u],
+    Rf_warning("node %d: score %d, par %d, fch %d, sib %d\n", u, score[u],
            par[u], fch[u], sib[u]);
 #endif
 

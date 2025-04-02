@@ -298,8 +298,8 @@ const WgraphPartGpParam * const paraptr)      /*+ Method parameters +*/
     }
   }
   for (partval = 0; partval < wgrafptr->partnbr; partval ++) /* for each part */
-    printf("\033[0;33mcompload[" GNUMSTRING "] " GNUMSTRING " " GNUMSTRING "\033[0m\n", partval, wgrafptr->compload[partval], wgrafptr->compsize[partval]);
-  printf("\033[0;33mfronload " GNUMSTRING " " GNUMSTRING "\033[0m\n", wgrafptr->fronload, wgrafptr->fronnbr);
+    Rf_warning("\033[0;33mcompload[" GNUMSTRING "] " GNUMSTRING " " GNUMSTRING "\033[0m\n", partval, wgrafptr->compload[partval], wgrafptr->compsize[partval]);
+  Rf_warning("\033[0;33mfronload " GNUMSTRING " " GNUMSTRING "\033[0m\n", wgrafptr->fronload, wgrafptr->fronnbr);
   memFree(vexxtax + wgrafptr->s.baseval);          /* Free work arrays */
 
   return (0);

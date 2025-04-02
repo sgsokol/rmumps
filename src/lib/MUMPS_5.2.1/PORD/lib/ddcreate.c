@@ -135,24 +135,24 @@ printDomainDecomposition(domdec_t *dd)
   PORD_INT   count, u, v, i, istart, istop;
 
   G = dd->G;
-  printf("\n#nodes %d (#domains %d, weight %d), #edges %d, totvwght %d\n",
+  Rf_warning("\n#nodes %d (#domains %d, weight %d), #edges %d, totvwght %d\n",
          G->nvtx, dd->ndom, dd->domwght, G->nedges >> 1, G->totvwght);
-  printf("partition weights: S %d, B %d, W %d\n", dd->cwght[GRAY],
+  Rf_warning("partition weights: S %d, B %d, W %d\n", dd->cwght[GRAY],
          dd->cwght[BLACK], dd->cwght[WHITE]);
   for (u = 0; u < G->nvtx; u++)
    { count = 0;
-     printf("--- adjacency list of node %d (vtype %d, color %d, map %d\n",
+     Rf_warning("--- adjacency list of node %d (vtype %d, color %d, map %d\n",
             u, dd->vtype[u], dd->color[u], dd->map[u]);
      istart = G->xadj[u];
      istop = G->xadj[u+1];
      for (i = istart; i < istop; i++)
       { v = G->adjncy[i];
-        printf("%5d (vtype %2d, color %2d)", v, dd->vtype[v], dd->color[v]);
+        Rf_warning("%5d (vtype %2d, color %2d)", v, dd->vtype[v], dd->color[v]);
         if ((++count % 3) == 0)
-          printf("\n");
+          Rf_warning("\n");
       }
      if ((count % 3) != 0)
-       printf("\n");
+       Rf_warning("\n");
    }
 }
 
@@ -171,14 +171,14 @@ checkDomainDecomposition(domdec_t *dd)
   vtype = dd->vtype;
 
   err = FALSE;
-  printf("checking domain decomposition (#nodes %d, #edges %d)\n",
+  Rf_warning("checking domain decomposition (#nodes %d, #edges %d)\n",
          dd->G->nvtx, dd->G->nedges >> 1);
 
   ndom = domwght = 0;
   for (u = 0; u < nvtx; u++)
    { /* check node type */
      if ((vtype[u] != 1) && (vtype[u] != 2))
-      { printf("ERROR: node %d is neither DOMAIN nor MULTISEC\n", u);
+      { Rf_warning("ERROR: node %d is neither DOMAIN nor MULTISEC\n", u);
         err = TRUE;
       }
      /* count domains and sum up their weight */
@@ -196,21 +196,21 @@ checkDomainDecomposition(domdec_t *dd)
         if (vtype[v] == 2) multi++;
       }
      if ((vtype[u] == 1) && (dom > 0))
-      { printf("ERROR: domain %d is adjacent to other domain\n", u);
+      { Rf_warning("ERROR: domain %d is adjacent to other domain\n", u);
         err = TRUE;
       }
      if ((vtype[u] == 2) && (dom < 2))
-      { printf("ERROR: less than 2 domains adjacent to multisec node %d\n", u);
+      { Rf_warning("ERROR: less than 2 domains adjacent to multisec node %d\n", u);
         err = TRUE;
       }
      if ((vtype[u] == 2) && (multi > 0))
-      { printf("ERROR: multisec %d is adjacent to other multisec nodes\n", u);
+      { Rf_warning("ERROR: multisec %d is adjacent to other multisec nodes\n", u);
         err = TRUE;
       }
    }
   /* check number and weight of domains */
   if ((ndom != dd->ndom) || (domwght != dd->domwght))
-   { printf("ERROR: number/size (%d/%d) of domains does not match with those in"
+   { Rf_warning("ERROR: number/size (%d/%d) of domains does not match with those in"
             " domain decomp. (%d/%d)\n", ndom, domwght, dd->ndom, dd->domwght);
      err = TRUE;
    }
@@ -498,9 +498,9 @@ constructDomainDecomposition(graph_t *G, PORD_INT *map)
             deg += vwght[adjncy[i]];
           break;
         default:
-          fprintf(stderr, "\nError in function constructDomainDecomposition\n"
+          Rf_error("\nError in function constructDomainDecomposition\n"
                "  unrecognized graph type %d\n", G->type);
-          quit();
+          /*quit();*/
       }
      key[u] = deg;
    }
@@ -593,9 +593,9 @@ computePriorities(domdec_t *dd, PORD_INT *msvtxlist, PORD_INT *key, PORD_INT sco
        break;
 
      default:
-       fprintf(stderr, "\nError in internal function computePriorities\n"
+       Rf_error("\nError in internal function computePriorities\n"
             "  unrecognized node selection strategy %d\n", scoretype);
-       quit();
+       /*quit();*/
    }
 }
 

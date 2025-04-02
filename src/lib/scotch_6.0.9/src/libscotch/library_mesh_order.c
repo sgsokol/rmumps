@@ -398,7 +398,7 @@ const double                balrat)               /*+ Desired imbalance ratio +*
 
   strcpy (bufftab, "c{rat=0.7,cpr=n{sep=/(vnod>120)?m{vnod=100,low=h{pass=10},asc=f{bal=<BBAL>}}:;,ole=v{strat=d{cmin=0,cmax=10000000,frat=0}},ose=g},unc=n{sep=/(vnod>120)?m{vnod=100,low=h{pass=10},asc=f{bal=<BBAL>}}:;,ole=v{strat=d{cmin=0,cmax=10000000,frat=0}},ose=g}}");
 
-  sprintf (bbaltab, "%lf", balrat);
+  snprintf (bbaltab, 31, "%lf", balrat);
   stringSubst (bufftab, "<BBAL>", bbaltab);
 
   if (SCOTCH_stratMeshOrder (stratptr, bufftab) != 0) {

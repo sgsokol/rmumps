@@ -113,8 +113,8 @@ C
      &           +int(2*SIZE_INT*1,kind=8)
 #endif
 #if defined(OOC_VERBOSE)
-        write(*,*) 'First ooc file: ',
-     &   READ_OOC_FIRST_FILE_NAME(1:READ_OOC_FILE_NAME_LENGTH-2)
+C        write(*,*) 'First ooc file: ',
+C     &   READ_OOC_FIRST_FILE_NAME(1:READ_OOC_FILE_NAME_LENGTH-2)
 #endif
       ENDIF
  100  continue
@@ -202,10 +202,10 @@ C
       ierr = 0
       tmp_err = 0
       supp=200+MYID
-      open(UNIT=supp,FILE=SUPPFILE,STATUS='old',
-     &     form='unformatted',iostat=tmp_err)
+C      open(UNIT=supp,FILE=SUPPFILE,STATUS='old',
+C     &     form='unformatted',iostat=tmp_err)
       if (tmp_err.eq.0) THEN
-        close(UNIT=supp,STATUS='delete',iostat=tmp_err)
+C        close(UNIT=supp,STATUS='delete',iostat=tmp_err)
         if(tmp_err.ne.0) then
           ierr = 1
           tmp_err = 0
@@ -216,9 +216,9 @@ C
           ierr = 1
           tmp_err = 0
         endif
-        open(UNIT=supp,FILE=INFOFILE,STATUS='old',iostat=tmp_err)
+C        open(UNIT=supp,FILE=INFOFILE,STATUS='old',iostat=tmp_err)
         if (tmp_err.eq.0) THEN
-          close(UNIT=supp,STATUS='delete',iostat=tmp_err)
+C          close(UNIT=supp,STATUS='delete',iostat=tmp_err)
         endif
         if (tmp_err.ne.0) THEN
           ierr = ierr + 2
@@ -270,7 +270,7 @@ C
          saveprefix=trim(adjustl(id%SAVE_PREFIX))
          len_save_prefix=len_trim(saveprefix)
       ENDIF
-      write(STRING_MYID,'(I10)') id%MYID
+C      write(STRING_MYID,'(I10)') id%MYID
       LAST_CHAR_DIR=savedir(len_save_dir:len_save_dir)
       if(LAST_CHAR_DIR.NE."/") then
          SAVE_FILE=trim(adjustl(savedir))//"/"

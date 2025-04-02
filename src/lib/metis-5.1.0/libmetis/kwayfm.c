@@ -137,15 +137,15 @@ void Greedy_KWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
   }
 
   if (ctrl->dbglvl&METIS_DBG_REFINE) {
-     printf("%s: [%6"PRIDX" %6"PRIDX"]-[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"," 
+     Rf_warning("%s: [%6"PRIDX" %6"PRIDX"]-[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"," 
             " Nv-Nb[%6"PRIDX" %6"PRIDX"], Cut: %6"PRIDX,
             (omode == OMODE_REFINE ? "GRC" : "GBC"),
             pwgts[iargmin(nparts, pwgts)], imax(nparts, pwgts), minwgt[0], maxwgt[0], 
             ComputeLoadImbalance(graph, nparts, ctrl->pijbm), 
             graph->nvtxs, graph->nbnd, graph->mincut);
      if (ctrl->minconn) 
-       printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-     printf("\n");
+       Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+     Rf_warning("\n");
   }
 
   queue = rpqCreate(nvtxs);
@@ -284,7 +284,7 @@ void Greedy_KWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
       nmoved++;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO, 
-          printf("\t\tMoving %6"PRIDX" to %3"PRIDX". Gain: %4"PRIDX". Cut: %6"PRIDX"\n", 
+          Rf_warning("\t\tMoving %6"PRIDX" to %3"PRIDX". Gain: %4"PRIDX". Cut: %6"PRIDX"\n", 
               i, to, mynbrs[k].ed-myrinfo->id, graph->mincut));
 
       /* Update the subdomain connectivity information */
@@ -336,14 +336,14 @@ void Greedy_KWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
     }
 
     if (ctrl->dbglvl&METIS_DBG_REFINE) {
-       printf("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
+       Rf_warning("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
               " Nmoves: %5"PRIDX", Cut: %6"PRIDX", Vol: %6"PRIDX,
               pwgts[iargmin(nparts, pwgts)], imax(nparts, pwgts),
               ComputeLoadImbalance(graph, nparts, ctrl->pijbm), 
               graph->nbnd, nmoved, graph->mincut, ComputeVolume(graph, where));
        if (ctrl->minconn) 
-         printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-       printf("\n");
+         Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+       Rf_warning("\n");
     }
 
     if (nmoved == 0 || (omode == OMODE_REFINE && graph->mincut == oldcut))
@@ -449,15 +449,15 @@ void Greedy_KWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
   pmarker = iset(nparts, -1, iwspacemalloc(ctrl, nparts));
 
   if (ctrl->dbglvl&METIS_DBG_REFINE) {
-     printf("%s: [%6"PRIDX" %6"PRIDX"]-[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL
+     Rf_warning("%s: [%6"PRIDX" %6"PRIDX"]-[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL
          ", Nv-Nb[%6"PRIDX" %6"PRIDX"], Cut: %5"PRIDX", Vol: %5"PRIDX,
          (omode == OMODE_REFINE ? "GRV" : "GBV"),
          pwgts[iargmin(nparts, pwgts)], imax(nparts, pwgts), minwgt[0], maxwgt[0], 
          ComputeLoadImbalance(graph, nparts, ctrl->pijbm), 
          graph->nvtxs, graph->nbnd, graph->mincut, graph->minvol);
      if (ctrl->minconn) 
-       printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-     printf("\n");
+       Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+     Rf_warning("\n");
   }
 
   queue = ipqCreate(nvtxs);
@@ -607,7 +607,7 @@ void Greedy_KWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
       nmoved++;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO, 
-          printf("\t\tMoving %6"PRIDX" from %3"PRIDX" to %3"PRIDX". "
+          Rf_warning("\t\tMoving %6"PRIDX" from %3"PRIDX" to %3"PRIDX". "
                  "Gain: [%4"PRIDX" %4"PRIDX"]. Cut: %6"PRIDX", Vol: %6"PRIDX"\n", 
               i, from, to, xgain+mynbrs[k].gv, mynbrs[k].ned-myrinfo->nid, 
               graph->mincut, graph->minvol));
@@ -644,14 +644,14 @@ void Greedy_KWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
     }
 
     if (ctrl->dbglvl&METIS_DBG_REFINE) {
-       printf("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
+       Rf_warning("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
               " Nmoves: %5"PRIDX", Cut: %6"PRIDX", Vol: %6"PRIDX,
               pwgts[iargmin(nparts, pwgts)], imax(nparts, pwgts),
               ComputeLoadImbalance(graph, nparts, ctrl->pijbm), 
               graph->nbnd, nmoved, graph->mincut, graph->minvol);
        if (ctrl->minconn) 
-         printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-       printf("\n");
+         Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+       Rf_warning("\n");
     }
 
     if (nmoved == 0 || 
@@ -784,15 +784,15 @@ void Greedy_McKWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
   }
 
   if (ctrl->dbglvl&METIS_DBG_REFINE) {
-     printf("%s: [%6"PRIDX" %6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"(%.3"PRREAL")," 
+     Rf_warning("%s: [%6"PRIDX" %6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"(%.3"PRREAL")," 
             " Nv-Nb[%6"PRIDX" %6"PRIDX"], Cut: %6"PRIDX", (%"PRIDX")",
             (omode == OMODE_REFINE ? "GRC" : "GBC"),
             imin(nparts*ncon, pwgts), imax(nparts*ncon, pwgts), imax(nparts*ncon, maxwgt),
             ComputeLoadImbalance(graph, nparts, pijbm), origbal,
             graph->nvtxs, graph->nbnd, graph->mincut, niter);
      if (ctrl->minconn) 
-       printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-     printf("\n");
+       Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+     Rf_warning("\n");
   }
 
   queue = rpqCreate(nvtxs);
@@ -939,7 +939,7 @@ void Greedy_McKWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
       nmoved++;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO, 
-          printf("\t\tMoving %6"PRIDX" to %3"PRIDX". Gain: %4"PRIDX". Cut: %6"PRIDX"\n", 
+          Rf_warning("\t\tMoving %6"PRIDX" to %3"PRIDX". Gain: %4"PRIDX". Cut: %6"PRIDX"\n", 
               i, to, mynbrs[k].ed-myrinfo->id, graph->mincut));
 
       /* Update the subdomain connectivity information */
@@ -992,14 +992,14 @@ void Greedy_McKWayCutOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
     }
 
     if (ctrl->dbglvl&METIS_DBG_REFINE) {
-       printf("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
+       Rf_warning("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
               " Nmoves: %5"PRIDX", Cut: %6"PRIDX", Vol: %6"PRIDX,
               imin(nparts*ncon, pwgts), imax(nparts*ncon, pwgts), 
               ComputeLoadImbalance(graph, nparts, pijbm), 
               graph->nbnd, nmoved, graph->mincut, ComputeVolume(graph, where));
        if (ctrl->minconn) 
-         printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-       printf("\n");
+         Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+       Rf_warning("\n");
     }
 
     if (nmoved == 0 || (omode == OMODE_REFINE && graph->mincut == oldcut))
@@ -1128,15 +1128,15 @@ void Greedy_McKWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
   pmarker = iset(nparts, -1, iwspacemalloc(ctrl, nparts));
 
   if (ctrl->dbglvl&METIS_DBG_REFINE) {
-     printf("%s: [%6"PRIDX" %6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"(%.3"PRREAL"),"
+     Rf_warning("%s: [%6"PRIDX" %6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL"(%.3"PRREAL"),"
          ", Nv-Nb[%6"PRIDX" %6"PRIDX"], Cut: %5"PRIDX", Vol: %5"PRIDX", (%"PRIDX")",
          (omode == OMODE_REFINE ? "GRV" : "GBV"),
          imin(nparts*ncon, pwgts), imax(nparts*ncon, pwgts), imax(nparts*ncon, maxwgt),
          ComputeLoadImbalance(graph, nparts, pijbm), origbal,
          graph->nvtxs, graph->nbnd, graph->mincut, graph->minvol, niter);
      if (ctrl->minconn) 
-       printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-     printf("\n");
+       Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+     Rf_warning("\n");
   }
 
   queue = ipqCreate(nvtxs);
@@ -1291,7 +1291,7 @@ void Greedy_McKWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
       nmoved++;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO, 
-          printf("\t\tMoving %6"PRIDX" from %3"PRIDX" to %3"PRIDX". "
+          Rf_warning("\t\tMoving %6"PRIDX" from %3"PRIDX" to %3"PRIDX". "
                  "Gain: [%4"PRIDX" %4"PRIDX"]. Cut: %6"PRIDX", Vol: %6"PRIDX"\n", 
               i, from, to, xgain+mynbrs[k].gv, mynbrs[k].ned-myrinfo->nid, 
               graph->mincut, graph->minvol));
@@ -1332,14 +1332,14 @@ void Greedy_McKWayVolOptimize(ctrl_t *ctrl, graph_t *graph, idx_t niter,
     }
 
     if (ctrl->dbglvl&METIS_DBG_REFINE) {
-       printf("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
+       Rf_warning("\t[%6"PRIDX" %6"PRIDX"], Bal: %5.3"PRREAL", Nb: %6"PRIDX"."
               " Nmoves: %5"PRIDX", Cut: %6"PRIDX", Vol: %6"PRIDX,
               imin(nparts*ncon, pwgts), imax(nparts*ncon, pwgts), 
               ComputeLoadImbalance(graph, nparts, pijbm), 
               graph->nbnd, nmoved, graph->mincut, graph->minvol);
        if (ctrl->minconn) 
-         printf(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
-       printf("\n");
+         Rf_warning(", Doms: [%3"PRIDX" %4"PRIDX"]", imax(nparts, nads), isum(nparts, nads,1));
+       Rf_warning("\n");
     }
 
     if (nmoved == 0 || 

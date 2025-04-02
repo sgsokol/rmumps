@@ -29,6 +29,10 @@
 ## The fact that you are presently reading this means that you have had
 ## knowledge of the CeCILL-C license and that you accept its terms.
 ##
+VERSION	= 6
+RELEASE = 0
+PATCHLEVEL = 9
+
 
 includedir	= ../../include
 libdir		= ../../lib
@@ -89,7 +93,7 @@ ptinstall			:	install					\
 					$(libdir)/libptscotch$(LIB)
 
 clean				:
-					-$(RM) *~ *$(OBJ) lib*$(LIB) parser_yy.c parser_ly.h parser_ll.c *scotch.h *scotchf.h y.output *dummysizes$(EXE)
+					-$(RM) *~ *$(OBJ) lib*$(LIB) y.output *dummysizes$(EXE)
 
 realclean			:	clean
 
@@ -2648,29 +2652,31 @@ parser$(OBJ)			:	parser.c				\
 					parser_ly.h				\
 					parser_yy.h
 
-parser_ll.c			:	parser_ll.l				\
-					module.h				\
-					common.h				\
-					parser.h				\
-					parser_ll.h				\
-					parser_ly.h
-					($(LEX) parser_ll.l &&			\
-					 $(MV) lex.yy.c parser_ll.c) ||		\
-					$(CP) last_resort/parser_ll.c . 
+#parser_ll.c			:	
+#parser_ll.l				\
+#					module.h				\
+#					common.h				\
+#					parser.h				\
+#					parser_ll.h				\
+#					parser_ly.h
+#					($(LEX) parser_ll.l &&			\
+#					 $(MV) lex.yy.c parser_ll.c) ||		\
+#					$(CP) last_resort/parser_ll.c . 
 
 parser_ll$(OBJ)			:	parser_ll.c				\
 					parser_ly.h
 
 parser_ly.h			:	parser_yy.c
 
-parser_yy.c			:	parser_yy.y				\
-					module.h				\
-					common.h				\
-					parser.h				\
-					parser_yy.h
-					($(YACC) -d -v parser_yy.y &&		\
-					 $(MV) y.tab.c parser_yy.c &&		\
-					 $(MV) y.tab.h parser_ly.h) ||		\
+parser_yy.c			:	
+#parser_yy.y				\
+#					module.h				\
+#					common.h				\
+#					parser.h				\
+#					parser_yy.h
+#					($(YACC) -d -v parser_yy.y &&		\
+#					 $(MV) y.tab.c parser_yy.c &&		\
+#					 $(MV) y.tab.h parser_ly.h) ||		\
 					$(CP) last_resort/parser_ly.h last_resort/parser_yy.c .
 
 parser_yy$(OBJ)			:	parser_yy.c
@@ -3057,40 +3063,40 @@ wgraph_store$(OBJ)		:	wgraph_store.c				\
 					graph.h					\
 					wgraph.h
 
-dummysizes$(EXE)		:	dummysizes.c				\
-					module.h				\
-					common.h				\
-					arch$(OBJ)				\
-					graph.h					\
-					geom.h					\
-					mesh.h					\
-					mapping.h				\
-					order.h					\
-					parser.h
-			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(HLDFLAGS)
-
-ptdummysizes$(EXE)		:	dummysizes.c				\
-					module.h				\
-					common.h				\
-					dgraph.h				\
-					dorder.h
-			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
-
-scotch.h			:	dummysizes$(EXE)			\
-					library.h
-					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library.h scotch.h
-
-scotchf.h			:	dummysizes$(EXE) 			\
-					library_f.h
-					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_f.h scotchf.h
-
-ptscotch.h			:	ptdummysizes$(EXE)			\
-					library_pt.h
-					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt.h ptscotch.h
-
-ptscotchf.h			:	ptdummysizes$(EXE)			\
-					library_pt_f.h
-					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt_f.h ptscotchf.h
+#dummysizes$(EXE)		:	dummysizes.c				\
+#					module.h				\
+#					common.h				\
+#					arch$(OBJ)				\
+#					graph.h					\
+#					geom.h					\
+#					mesh.h					\
+#					mapping.h				\
+#					order.h					\
+#					parser.h
+#			 		$(CCD) $(HCFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(HLDFLAGS)
+#
+#ptdummysizes$(EXE)		:	dummysizes.c				\
+#					module.h				\
+#					common.h				\
+#					dgraph.h				\
+#					dorder.h
+#			 		$(CCD) $(CCDFLAGS) -DSCOTCH_VERSION_NUM=$(VERSION) -DSCOTCH_RELEASE_NUM=$(RELEASE) -DSCOTCH_PATCHLEVEL_NUM=$(PATCHLEVEL) $(<) -o $(@) $(LDFLAGS)
+#
+#scotch.h			:	dummysizes$(EXE)			\
+#					library.h
+#					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library.h scotch.h
+#
+#scotchf.h			:	dummysizes$(EXE) 			\
+#					library_f.h
+#					./dummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_f.h scotchf.h
+#
+#ptscotch.h			:	ptdummysizes$(EXE)			\
+#					library_pt.h
+#					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt.h ptscotch.h
+#
+#ptscotchf.h			:	ptdummysizes$(EXE)			\
+#					library_pt_f.h
+#					./ptdummysizes$(EXE) "-s$(SCOTCH_NAME_SUFFIX)" library_pt_f.h ptscotchf.h
 
 libscotch$(LIB)			:	$(LIBSCOTCHDEPS)
 					$(AR) $(ARFLAGS) $(@) $(?)

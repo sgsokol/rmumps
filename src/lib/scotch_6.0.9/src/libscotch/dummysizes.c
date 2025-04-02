@@ -129,7 +129,7 @@ int                         subsval)
   char *              subsptr;
 
   subsptr = malloc (16 * sizeof (char));
-  sprintf (subsptr, "%d", (int) ((subsval + sizeof (double) - 1) / sizeof (double)));
+  snprintf (subsptr, 15, "%d", (int) ((subsval + sizeof (double) - 1) / sizeof (double)));
 
   return (subsptr);
 }
@@ -142,7 +142,7 @@ char *                      suffptr)
   char *              subsptr;
 
   subsptr = malloc (128 * sizeof (char));
-  sprintf (subsptr, "%s%s", nameptr, suffptr);
+  snprintf (subsptr, 127, "%s%s", nameptr, suffptr);
 
   return (subsptr);
 }
@@ -184,8 +184,8 @@ char *                      argv[])
       if (C_fileNum < C_FILEARGNBR)               /* A file name has been given */
         C_fileTab[C_fileNum ++].nameptr = argv[i];
       else {
-        fprintf (stderr, "dummysizes: ERROR: main: too many file names given");
-        exit    (1);
+        Rf_error("%s", "dummysizes: ERROR: main: too many file names given");
+        /*exit    (1);*/
       }
     }
     else {                                        /* If found an option name */
@@ -199,12 +199,12 @@ char *                      argv[])
           suffptr = &argv[i][2];
           break;
         case 'V' :
-          fprintf (stderr, "dummysizes, version " SCOTCH_VERSION_STRING "\n");
-          fprintf (stderr, "Copyright 2004,2007-2010,2018 IPB, Universite de Bordeaux, INRIA & CNRS, France\n");
-          fprintf (stderr, "This software is libre/free software under CeCILL-C -- see the user's manual for more information\n");
+          Rf_warning("%s", "dummysizes, version " SCOTCH_VERSION_STRING "\n");
+          Rf_warning("%s", "Copyright 2004,2007-2010,2018 IPB, Universite de Bordeaux, INRIA & CNRS, France\n");
+          Rf_warning("%s", "This software is libre/free software under CeCILL-C -- see the user's manual for more information\n");
           return  (0);
         default :
-          fprintf (stderr, "dummysizes: ERROR: main: unprocessed option (\"%s\")", argv[i]);
+          Rf_warning("dummysizes: ERROR: main: unprocessed option (\"%s\")", argv[i]);
           exit    (1);
       }
     }
@@ -214,7 +214,7 @@ char *                      argv[])
     if ((C_fileTab[i].nameptr[0] != '-') ||       /* If not standard stream */
         (C_fileTab[i].nameptr[1] != '\0')) {
       if ((C_fileTab[i].fileptr = fopen (C_fileTab[i].nameptr, ((C_fileTab[i].flagval & FILEMODE) == FILEMODER) ? "r" : "w")) == NULL) { /* Open the file */
-          fprintf (stderr, "dummysizes: ERROR: main: cannot open file (%d)", i);
+          Rf_warning("dummysizes: ERROR: main: cannot open file (%d)", i);
           exit    (1);
       }
     }
@@ -295,8 +295,8 @@ char *                      argv[])
 #endif /* SCOTCH_PTSCOTCH */
 #ifdef SCOTCH_NAME_SUFFIX
     if (regcomp (&regedat, " SCOTCH_[a-z][0-9a-zA-Z_]*", 0) != 0) {
-      fprintf (stderr, "dummysizes: ERROR: cannot compile regular expression\n");
-      exit    (1);
+      Rf_error("%s", "dummysizes: ERROR: cannot compile regular expression\n");
+      /*exit    (1);*/
     }
 #endif /* SCOTCH_NAME_SUFFIX */
   }
@@ -307,8 +307,8 @@ char *                      argv[])
 
     if (((charnbr = strlen (chartab)) >= (CHARMAX - 1)) && /* If line read is at least as long as maximum size     */
         (chartab[CHARMAX - 1] != '\n')) {         /* And last character is not a newline, that is, some is missing */
-      fprintf (stderr, "dummysizes: ERROR: line too long\n");
-      exit    (1);
+      Rf_error("%s", "dummysizes: ERROR: line too long\n");
+      /*exit    (1);*/
     }
 
     for (subsnum = 0; subsnum < subsnbr; subsnum ++) { /* Perform substitutions */
@@ -325,7 +325,7 @@ char *                      argv[])
         }
 
         strcpy (chartmp, charptr + subslen);      /* Save remaining of line                                          */
-        sprintf (charptr, "%s%s", substab[subsnum][1], chartmp); /* Replace remaining of line with substituted token */
+        snprintf (charptr, CHARMAX-strlen(charptr)-1, "%s%s", substab[subsnum][1], chartmp); /* Replace remaining of line with substituted token */
         charptr += strlen (substab[subsnum][1]);  /* Restart search from end of substituted token                    */
       }
     }
@@ -333,7 +333,7 @@ char *                      argv[])
     if (suffptr[0] != '\0') {                     /* If suffix provided                     */
       if (regexec (&regedat, chartab, 1, &matcdat, 0) == 0) { /* If matched a function name */
         strcpy (chartmp, chartab + matcdat.rm_eo); /* Save remaining of line                */
-        sprintf (chartab + matcdat.rm_eo, "%s%s", suffptr, chartmp); /* Add suffix to name  */
+        snprintf (chartab + matcdat.rm_eo, CHARMAX- matcdat.rm_eo-1, "%s%s", suffptr, chartmp); /* Add suffix to name  */
       }
     }
 #endif /* SCOTCH_NAME_SUFFIX */

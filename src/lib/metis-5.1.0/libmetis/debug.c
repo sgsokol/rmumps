@@ -106,7 +106,7 @@ idx_t ComputeMaxCut(graph_t *graph, idx_t nparts, idx_t *where)
 
   maxcut = cuts[iargmax(nparts, cuts)];
 
-  printf("%zu => %"PRIDX"\n", iargmax(nparts, cuts), maxcut);
+  Rf_warning("%zu => %"PRIDX"\n", iargmax(nparts, cuts), maxcut);
 
   gk_free((void **)&cuts, LTERM);
 
@@ -283,7 +283,7 @@ idx_t CheckNodePartitionParams(graph_t *graph)
       }
       if (edegrees[0] != graph->nrinfo[i].edegrees[0] || 
           edegrees[1] != graph->nrinfo[i].edegrees[1]) {
-        printf("Something wrong with edegrees: %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"\n", 
+        Rf_warning("Something wrong with edegrees: %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"\n", 
             i, edegrees[0], edegrees[1], 
             graph->nrinfo[i].edegrees[0], graph->nrinfo[i].edegrees[1]);
         return 0;
@@ -294,7 +294,7 @@ idx_t CheckNodePartitionParams(graph_t *graph)
   if (pwgts[0] != graph->pwgts[0] || 
       pwgts[1] != graph->pwgts[1] || 
       pwgts[2] != graph->pwgts[2]) {
-    printf("Something wrong with part-weights: %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"\n", pwgts[0], pwgts[1], pwgts[2], graph->pwgts[0], graph->pwgts[1], graph->pwgts[2]);
+    Rf_warning("Something wrong with part-weights: %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"\n", pwgts[0], pwgts[1], pwgts[2], graph->pwgts[0], graph->pwgts[1], graph->pwgts[2]);
     return 0;
   }
 
@@ -446,7 +446,7 @@ void CheckKWayVolPartitionParams(ctrl_t *ctrl, graph_t *graph)
       for (kk=0; kk<tmprinfo.nnbrs; kk++) {
         if (tmpnbrs[kk].pid == pid) {
           if (tmpnbrs[kk].gv != mynbrs[k].gv)
-            printf("[%8"PRIDX" %8"PRIDX" %8"PRIDX" %+8"PRIDX" %+8"PRIDX"]\n", 
+            Rf_warning("[%8"PRIDX" %8"PRIDX" %8"PRIDX" %+8"PRIDX" %+8"PRIDX"]\n", 
                 i, where[i], pid, mynbrs[k].gv, tmpnbrs[kk].gv);
           break;
         }

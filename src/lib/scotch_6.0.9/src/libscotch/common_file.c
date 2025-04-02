@@ -93,7 +93,7 @@ const int                   procnum)              /*+ Number of current process 
     return (NULL);
 
 #ifdef COMMON_DEBUG
-  sprintf (naexptr, FILENAMEDISTEXPANDSTR, procnbr); /* TRICK: Test if FILENAMEDISTEXPANDNBR is a size large enough */
+  snprintf (naexptr, naexmax, FILENAMEDISTEXPANDSTR, procnbr); /* TRICK: Test if FILENAMEDISTEXPANDNBR is a size large enough */
   if (atoi (naexptr) != procnbr) {
     errorPrint ("fileNameDistExpand: undersized integer string size");
     memFree    (naexptr);
@@ -176,7 +176,7 @@ const int                   filenbr)
 
   for (i = 0; i < filenbr; i ++) {                /* For all file names     */
     filetab[i].nameptr = "-";                     /* Assume standard stream */
-    filetab[i].fileptr = ((filetab[i].flagval & FILEMODE) == FILEMODER) ? stdin : stdout;
+    filetab[i].fileptr = ((filetab[i].flagval & FILEMODE) == FILEMODER) ? /*stdin*/ NULL : /*stdout*/ NULL;
     filetab[i].compptr = NULL;                    /* No (de)compression yet */
   }
 }

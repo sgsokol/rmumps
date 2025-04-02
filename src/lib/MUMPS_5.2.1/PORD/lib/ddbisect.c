@@ -79,7 +79,7 @@ checkDDSep(domdec_t *dd)
   cwght = dd->cwght;
 
   err = FALSE;
-  printf("checking separator of domain decomposition (S %d, B %d, W %d)\n",
+  Rf_warning("checking separator of domain decomposition (S %d, B %d, W %d)\n",
          cwght[GRAY], cwght[BLACK], cwght[WHITE]);
 
   checkS = checkB = checkW = 0;
@@ -98,25 +98,25 @@ checkDDSep(domdec_t *dd)
         { case GRAY:
             checkS += vwght[u];
             if ((nBdom == 0) || (nWdom == 0))
-              printf("WARNING: multisec %d belongs to S, but nBdom = %d and "
+              Rf_warning("WARNING: multisec %d belongs to S, but nBdom = %d and "
                      "nWdom = %d\n", u, nBdom, nWdom);
             break;
           case BLACK: 
             checkB += vwght[u];
             if (nWdom > 0)
-             { printf("ERROR: black multisec %d adjacent to white domain\n", u);
+             { Rf_warning("ERROR: black multisec %d adjacent to white domain\n", u);
                err = TRUE;
              }
             break;
           case WHITE:
             checkW += vwght[u];
             if (nBdom > 0)
-             { printf("ERROR: white multisec %d adjacent to black domain\n", u);
+             { Rf_warning("ERROR: white multisec %d adjacent to black domain\n", u);
                err = TRUE;
              }
             break;
           default:
-            printf("ERROR: multisec %d has unrecognized color %d\n", u,
+            Rf_warning("ERROR: multisec %d has unrecognized color %d\n", u,
                    color[u]);
             err = TRUE;
         }
@@ -130,14 +130,14 @@ checkDDSep(domdec_t *dd)
          case WHITE:
            checkW += vwght[u]; break;
          default:
-           printf("ERROR: domain %d has unrecognized color %d\n", u, color[u]);
+           Rf_warning("ERROR: domain %d has unrecognized color %d\n", u, color[u]);
            err = TRUE;
        }
 
   /* check cwght[GRAY], cwght[BLACK], cwght[WHITE] */
   if ((checkS != cwght[GRAY]) || (checkB != cwght[BLACK])
      || (checkW != cwght[WHITE]))
-   { printf("ERROR in partitioning: checkS %d (S %d), checkB %d (B %d), "
+   { Rf_warning("ERROR in partitioning: checkS %d (S %d), checkB %d (B %d), "
             "checkW %d (W %d)\n", checkS, cwght[GRAY], checkB, cwght[BLACK],
              checkW, cwght[WHITE]);
      err = TRUE;
@@ -407,7 +407,7 @@ updateB2W(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
         deltaW[u] = 1;
 
 #ifdef DEBUG
-        printf(" B2W case (1): (via multisec %d) removing domain %d from "
+        Rf_warning(" B2W case (1): (via multisec %d) removing domain %d from "
                "w_bucket\n", u, v);
 #endif
 
@@ -427,7 +427,7 @@ updateB2W(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if (vtype[v] == 1)
             {
 #ifdef DEBUG
-              printf(" B2W case (2): (via multisec %d) removing domain %d from "
+              Rf_warning(" B2W case (2): (via multisec %d) removing domain %d from "
                      "b_bucket\n", u, v);
 #endif
 
@@ -452,7 +452,7 @@ updateB2W(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if ((tmp_color[v] == BLACK) && (vtype[v] == 1))
             {
 #ifdef DEBUG
-              printf(" B2W case (3): (via multisec %d) removing domain %d from "
+              Rf_warning(" B2W case (3): (via multisec %d) removing domain %d from "
                      "b_bucket\n", u, v);
 #endif
 
@@ -475,7 +475,7 @@ updateB2W(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if (vtype[v] == 1)
             {
 #ifdef DEBUG
-              printf(" B2W case (4): (via multisec %d) removing domain %d from "
+              Rf_warning(" B2W case (4): (via multisec %d) removing domain %d from "
                      "w_bucket\n", u, v);
 #endif
 
@@ -519,7 +519,7 @@ updateW2B(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
         deltaB[u] = 1;
 
 #ifdef DEBUG
-        printf(" W2B case (1): (via multisec %d) removing domain %d from "
+        Rf_warning(" W2B case (1): (via multisec %d) removing domain %d from "
                "b_bucket\n", u, v);
 #endif
 
@@ -539,7 +539,7 @@ updateW2B(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if (vtype[v] == 1)
             {
 #ifdef DEBUG
-              printf(" W2B case (2): (via multisec %d) removing domain %d from "
+              Rf_warning(" W2B case (2): (via multisec %d) removing domain %d from "
                      "w_bucket\n", u, v);
 #endif
 
@@ -564,7 +564,7 @@ updateW2B(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if ((tmp_color[v] == WHITE) && (vtype[v] == 1))
             {
 #ifdef DEBUG
-              printf(" W2B case (3): (via multisec %d) removing domain %d from "
+              Rf_warning(" W2B case (3): (via multisec %d) removing domain %d from "
                      "w_bucket\n", u, v);
 #endif
 
@@ -587,7 +587,7 @@ updateW2B(bucket_t *w_bucket, bucket_t *b_bucket, domdec_t *dd, PORD_INT domain,
            if (vtype[v] == 1)
             {
 #ifdef DEBUG
-              printf(" W2B case (4): (via multisec %d) removing domain %d from "
+              Rf_warning(" W2B case (4): (via multisec %d) removing domain %d from "
                      "b_bucket\n", u, v);
 #endif
 
@@ -718,7 +718,7 @@ OUTER_LOOP_START:
      }
 
 #ifdef DEBUG
-  printf("starting inner loop: b_bucket->nobj %d, w_bucket->nobj %d\n",
+  Rf_warning("starting inner loop: b_bucket->nobj %d, w_bucket->nobj %d\n",
          b_bucket->nobj, w_bucket->nobj);
   waitkey();
 #endif
@@ -734,7 +734,7 @@ INNER_LOOP_START:
                  (tmp_W+deltaW[b_domain]));
 
 #ifdef DEBUG
-     printf("best black domain: %d, deltaS %d, deltaB %d, deltaW %d, "
+     Rf_warning("best black domain: %d, deltaS %d, deltaB %d, deltaW %d, "
             "cost %7.2f\n", b_domain, deltaS[b_domain], deltaB[b_domain],
             deltaW[b_domain], b_value);
 #endif
@@ -744,7 +744,7 @@ INNER_LOOP_START:
                  (tmp_W+deltaW[w_domain]));
 
 #ifdef DEBUG
-     printf("best white domain: %d, deltaS %d, deltaB %d, deltaW %d, "
+     Rf_warning("best white domain: %d, deltaS %d, deltaB %d, deltaW %d, "
             "cost %7.2f\n", w_domain, deltaS[w_domain], deltaB[w_domain],
             deltaW[w_domain], w_value);
 #endif
@@ -762,7 +762,7 @@ INNER_LOOP_START:
    }
 
 #ifdef DEBUG
-  printf(" domain %d removed from bucket\n", domain);
+  Rf_warning(" domain %d removed from bucket\n", domain);
 #endif
 
   /* -------------------------------------------------------------------
@@ -820,7 +820,7 @@ INNER_LOOP_END:
      partition improved => re-start the whole stuff
      ---------------------------------------------- */
 #ifdef DEBUG
-  printf(" INNER_LOOP_END (#pyhs. flips %d): S %d, B %d, W %d (%7.2f)\n",
+  Rf_warning(" INNER_LOOP_END (#pyhs. flips %d): S %d, B %d, W %d (%7.2f)\n",
          bestglobalpos, cwght[GRAY], cwght[BLACK], cwght[WHITE],
          bestglobalvalue);
   waitkey();

@@ -30,6 +30,8 @@
 #include "macros.h"
 #include <proto.h>
 
+#include <R_ext/Error.h>
+
 
 #if defined(COMPILER_MSC)
 #if defined(rint)

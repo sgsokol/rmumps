@@ -530,9 +530,10 @@ C
       IF (INFO(1).LT.0) GOTO 640
  200  CONTINUE
       IF ( INODE .eq. KEEP(38) ) THEN
-        WRITE(*,*) 'Error .. in DMUMPS_FAC_PAR: ',
-     &             ' INODE == KEEP(38)'
-        Stop
+C        WRITE(*,*) 'Error .. in DMUMPS_FAC_PAR: ',
+C     &             ' INODE == KEEP(38)'
+C        Stop
+        call rexit('Error .. in DMUMPS_FAC_PAR: INODE == KEEP(38)')
       END IF
       IF ( FPERE.EQ.0 ) THEN
         NBROOT_TRAITEES = NBROOT_TRAITEES + 1

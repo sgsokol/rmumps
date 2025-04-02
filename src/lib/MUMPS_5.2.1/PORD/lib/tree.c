@@ -158,7 +158,7 @@ printElimTree(elimtree_t *T)
   silbings = T->silbings;
   vtx2front = T->vtx2front;
 
-  printf("#fronts %d, root %d\n", nfronts, root);
+  Rf_warning("#fronts %d, root %d\n", nfronts, root);
 
   /* -----------------------------------------------------------
      store the vertices/columns of a front in a bucket structure
@@ -178,26 +178,26 @@ printElimTree(elimtree_t *T)
      print fronts according to a postorder traversal of the tree
      ----------------------------------------------------------- */
   for (K = firstPostorder(T); K != -1; K = nextPostorder(T, K))
-   { printf("--- front %d, ncolfactor %d, ncolupdate %d, parent %d\n",
+   { Rf_warning("--- front %d, ncolfactor %d, ncolupdate %d, parent %d\n",
             K, ncolfactor[K], ncolupdate[K], parent[K]);
      count = 0;
-     printf("children:\n");
+     Rf_warning("children:\n");
      for (child = firstchild[K]; child != -1; child = silbings[child])
-      { printf("%5d", child);
+      { Rf_warning("%5d", child);
         if ((++count % 16) == 0)
-          printf("\n");
+          Rf_warning("\n");
       }
      if ((count % 16) != 0)
-       printf("\n");
+       Rf_warning("\n");
      count = 0;
-     printf("vertices mapped to front:\n");
+     Rf_warning("vertices mapped to front:\n");
      for (u = first[K]; u != -1; u = link[u])
-      { printf("%5d", u);
+      { Rf_warning("%5d", u);
         if ((++count % 16) == 0)
-          printf("\n");
+          Rf_warning("\n");
       }
      if ((count % 16) != 0)
-       printf("\n");
+       Rf_warning("\n");
    }
 
   /* ----------------------

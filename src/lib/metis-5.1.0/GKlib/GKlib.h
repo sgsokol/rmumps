@@ -78,7 +78,9 @@
 
 #include <gk_proto.h>
 
-
+#include <R_ext/RS.h>
+#include <R_ext/Random.h>
+double unifCrand(void);
 #endif  /* GKlib.h */
 
 

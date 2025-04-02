@@ -37,7 +37,7 @@ void encodeblock(unsigned char *in, unsigned char *out)
   out[2] += B64OFFSET;
   out[3] += B64OFFSET;
 
-//  printf("%c %c %c %c %2x %2x %2x %2x %2x %2x %2x\n", out[0], out[1], out[2], out[3], out[0], out[1], out[2], out[3], in[0], in[1], in[2]);
+//  Rf_warning("%c %c %c %c %2x %2x %2x %2x %2x %2x %2x\n", out[0], out[1], out[2], out[3], out[0], out[1], out[2], out[3], in[0], in[1], in[2]);
 }
 
 /******************************************************************************

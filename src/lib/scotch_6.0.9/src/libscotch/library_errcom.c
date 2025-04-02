@@ -85,13 +85,13 @@ const char * const          errstr,               /*+ printf-like variable argum
 #if ((defined X_ARCHi586_pc_linux2) || (defined X_ARCHi686_pc_linux2))
   vsnprintf  (errbuf, 1023, errstr, errlist);     /* Write result to buffer       */
 #else
-  vsprintf   (errbuf, errstr, errlist);           /* Write result to buffer       */
+  vsnprintf   (errbuf, 1023, errstr, errlist);           /* Write result to buffer       */
 #endif /* X_ARCHi586_pc_linux2 */
   va_end     (errlist);                           /* Close variable-argument list */
   errbuf[1023] = '\0';                            /* Set end of string            */
-  errorPrint (errbuf);                            /* Print arguments              */
-
-  exit       (1);
+  /*errorPrint (errbuf); */                           /* Print arguments              */
+  Rf_error("%s", errbuf);
+  /*exit       (1);*/
 }
 
 /* This routine prints a warning message with
@@ -113,9 +113,10 @@ const char * const          errstr,               /*+ printf-like variable argum
 #if ((defined X_ARCHi586_pc_linux2) || (defined X_ARCHi686_pc_linux2))
   vsnprintf   (errbuf, 1023, errstr, errlist);    /* Write result to buffer       */
 #else
-  vsprintf    (errbuf, errstr, errlist);          /* Write result to buffer       */
+  vsnprintf    (errbuf, 1023, errstr, errlist);          /* Write result to buffer       */
 #endif /* X_ARCHi586_pc_linux2 */
   va_end      (errlist);                          /* Close variable-argument list */
   errbuf[1023] = '\0';                            /* Set end of string            */
-  errorPrintW (errbuf);                           /* Print arguments              */
+  /*errorPrintW (errbuf);*/                           /* Print arguments              */
+  Rf_warning("%s", errbuf);
 }

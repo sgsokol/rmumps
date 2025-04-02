@@ -580,11 +580,11 @@ C
       IF (STRAT .EQ. -3) THEN
          PERM_RHS(1:SIZEPERM)=0
          DO I=1, SIZEPERM 
-           CALL random_number(RAND_NUM) 
+           CALL randomRnumber(RAND_NUM) 
            RAND_NUM = RAND_NUM*dble(SIZEPERM) 
            J = ceiling(RAND_NUM) 
            DO WHILE (PERM_RHS(J).NE.0) 
-             CALL random_number(RAND_NUM)
+             CALL randomRnumber(RAND_NUM)
              RAND_NUM = RAND_NUM*dble(SIZEPERM)
              J = ceiling(RAND_NUM)
            ENDDO

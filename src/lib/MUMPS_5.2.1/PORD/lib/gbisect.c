@@ -89,24 +89,24 @@ printGbisect(gbisect_t *Gbisect)
   PORD_INT     count, u, v, i, istart, istop;
 
   G = Gbisect->G;
-  printf("\n#nodes %d, #edges %d, totvwght %d\n", G->nvtx, G->nedges >> 1,
+  Rf_warning("\n#nodes %d, #edges %d, totvwght %d\n", G->nvtx, G->nedges >> 1,
          G->totvwght);
-  printf("partition weights: S %d, B %d, W %d\n", Gbisect->cwght[GRAY],
+  Rf_warning("partition weights: S %d, B %d, W %d\n", Gbisect->cwght[GRAY],
          Gbisect->cwght[BLACK], Gbisect->cwght[WHITE]);
   for (u = 0; u < G->nvtx; u++)
    { count = 0;
-     printf("--- adjacency list of node %d (weight %d, color %d)\n", u,
+     Rf_warning("--- adjacency list of node %d (weight %d, color %d)\n", u,
             G->vwght[u], Gbisect->color[u]);
      istart = G->xadj[u];
      istop = G->xadj[u+1];
      for (i = istart; i < istop; i++)
       { v = G->adjncy[i];
-        printf("%5d (color %2d)", v, Gbisect->color[v]);
+        Rf_warning("%5d (color %2d)", v, Gbisect->color[v]);
         if ((++count % 4) == 0)
-          printf("\n");
+          Rf_warning("%s", "\n");
       }
      if ((count % 4) != 0)
-       printf("\n");
+       Rf_warning("%s", "\n");
    }
 }
 
@@ -126,7 +126,7 @@ checkSeparator(gbisect_t *Gbisect)
   cwght = Gbisect->cwght;
 
   err = FALSE;
-  printf("checking separator of induced subgraph (S %d, B %d, W %d)\n",
+  Rf_warning("checking separator of induced subgraph (S %d, B %d, W %d)\n",
          cwght[GRAY], cwght[BLACK], cwght[WHITE]);
 
   checkS = checkB = checkW = 0;
@@ -143,14 +143,14 @@ checkSeparator(gbisect_t *Gbisect)
              if (color[v] == BLACK) b = TRUE;
            }
           if (!((a) && (b)))
-            printf("WARNING: not a minimal separator (node %d)\n", u);
+            Rf_warning("WARNING: not a minimal separator (node %d)\n", u);
           break;
         case BLACK:               /* is it realy a separator? */
           checkB += vwght[u];
           for (i = istart; i < istop; i++)
            { v = adjncy[i];
              if (color[v] == WHITE)
-              { printf("ERROR: white node %d adjacent to black node %d\n", u,v);
+              { Rf_warning("ERROR: white node %d adjacent to black node %d\n", u,v);
                 err = TRUE;
               }
            }
@@ -159,7 +159,7 @@ checkSeparator(gbisect_t *Gbisect)
           checkW += vwght[u];
           break;
         default:
-          printf("ERROR: node %d has unrecognized color %d\n", u, color[u]);
+          Rf_warning("ERROR: node %d has unrecognized color %d\n", u, color[u]);
           err = TRUE;
       }
    }
@@ -167,7 +167,7 @@ checkSeparator(gbisect_t *Gbisect)
   /* check cwght[GRAY], cwght[BLACK], cwght[WHITE] */
   if ((checkS != cwght[GRAY]) || (checkB != cwght[BLACK])
      || (checkW != cwght[WHITE]))
-   { printf("ERROR in partitioning: checkS %d (S %d), checkB %d (B %d), "
+   { Rf_warning("ERROR in partitioning: checkS %d (S %d), checkB %d (B %d), "
             "checkW %d (W %d)\n", checkS, cwght[GRAY], checkB, cwght[BLACK],
              checkW, cwght[WHITE]);
      err = TRUE;
@@ -203,7 +203,7 @@ constructSeparator(gbisect_t *Gbisect, options_t *options, timings_t *cpus)
 #endif
 
   if (options[OPTION_MSGLVL] > 2)
-    printf("\t  0. dom.dec.: #nodes %d (#domains %d, weight %d), #edges %d\n",
+    Rf_warning("\t  0. dom.dec.: #nodes %d (#domains %d, weight %d), #edges %d\n",
            dd->G->nvtx, dd->ndom, dd->domwght, dd->G->nedges >> 1);
   pord_stoptimer(cpus[TIME_INITDOMDEC]);
 
@@ -222,7 +222,7 @@ constructSeparator(gbisect_t *Gbisect, options_t *options, timings_t *cpus)
 #endif
 
      if (options[OPTION_MSGLVL] > 2)
-       printf("\t %2d. dom.dec.: #nodes %d (#domains %d, weight %d), #edges %d"
+       Rf_warning("\t %2d. dom.dec.: #nodes %d (#domains %d, weight %d), #edges %d"
               "\n", i, dd->G->nvtx, dd->ndom, dd->domwght, dd->G->nedges >> 1);
    }
   pord_stoptimer(cpus[TIME_COARSEDOMDEC]);
@@ -240,7 +240,7 @@ constructSeparator(gbisect_t *Gbisect, options_t *options, timings_t *cpus)
 #endif
 
   if (options[OPTION_MSGLVL] > 2)
-    printf("\t %2d. dom.dec. sep.: S %d, B %d, W %d [cost %7.2f]\n",
+    Rf_warning("\t %2d. dom.dec. sep.: S %d, B %d, W %d [cost %7.2f]\n",
            i, dd->cwght[GRAY], dd->cwght[BLACK], dd->cwght[WHITE],
            F(dd->cwght[GRAY], dd->cwght[BLACK], dd->cwght[WHITE]));
   pord_stoptimer(cpus[TIME_INITSEP]);
@@ -268,7 +268,7 @@ constructSeparator(gbisect_t *Gbisect, options_t *options, timings_t *cpus)
      dd = dd2;
      i--;
      if (options[OPTION_MSGLVL] > 2)
-       printf("\t %2d. dom.dec. sep.: S %d, B %d, W %d [cost %7.2f]\n",
+       Rf_warning("\t %2d. dom.dec. sep.: S %d, B %d, W %d [cost %7.2f]\n",
               i, dd->cwght[GRAY], dd->cwght[BLACK], dd->cwght[WHITE],
               F(dd->cwght[GRAY], dd->cwght[BLACK], dd->cwght[WHITE]));
    }
@@ -352,13 +352,13 @@ smoothBy2Layers(gbisect_t *Gbisect, PORD_INT *bipartvertex, PORD_INT *pnX,
        free(rc);
        break;
      default:
-       fprintf(stderr, "\nError in function smoothSeparator\n"
+       Rf_error("\nError in function smoothSeparator\n"
             "  unrecognized bipartite graph type %d\n", Gbipart->G->type);
-       quit();
+       /*quit();*/
    }
 
 #ifdef DEBUG
-  printf("Dulmage-Mendelsohn decomp. computed\n"
+  Rf_warning("Dulmage-Mendelsohn decomp. computed\n"
          "SI %d, SX %d, SR %d, BI %d, BX %d, BR %d\n", dmwght[SI], dmwght[SX],
          dmwght[SR], dmwght[BI], dmwght[BX], dmwght[BR]);
 #endif
@@ -375,7 +375,7 @@ smoothBy2Layers(gbisect_t *Gbisect, PORD_INT *bipartvertex, PORD_INT *pnX,
    { smoothed = TRUE;
 
 #ifdef DEBUG
-     printf("exchange SI with BX\n");
+     Rf_warning("%s", "exchange SI with BX\n");
 #endif
 
      cwght[white] += dmwght[SI]; cwght[GRAY] -= dmwght[SI];
@@ -403,7 +403,7 @@ smoothBy2Layers(gbisect_t *Gbisect, PORD_INT *bipartvertex, PORD_INT *pnX,
    { smoothed = TRUE;
 
 #ifdef DEBUG
-     printf("exchange SR with BR\n");
+     Rf_warning("%s", "exchange SR with BR\n");
 #endif
 
      cwght[white] += dmwght[SR]; cwght[GRAY] -= dmwght[SR];
@@ -504,7 +504,7 @@ smoothSeparator(gbisect_t *Gbisect, options_t *options)
           a = smoothBy2Layers(Gbisect, bipartvertex, &nX, BLACK, WHITE);
       }
      if ((options[OPTION_MSGLVL] > 2) && (a))
-       printf("\t separator smoothed: S %d, B %d, W %d [cost %7.2f]\n",
+       Rf_warning("\t separator smoothed: S %d, B %d, W %d [cost %7.2f]\n",
               cwght[GRAY], cwght[BLACK], cwght[WHITE],
               F(cwght[GRAY], cwght[BLACK], cwght[WHITE])); 
    } while (a);

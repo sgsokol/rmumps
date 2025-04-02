@@ -91,8 +91,9 @@ void*  mumps_async_thread_function_with_sem (void* arg){
            }
            break;
          default:
-           printf("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
-           exit (-3);
+           /*printf("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
+           exit (-3);*/
+           Rf_error("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
          }
       /* Notify that the IO was performed */
       /* Wait that finished_requests queue could register 
@@ -312,7 +313,7 @@ MUMPS_INT mumps_low_level_init_ooc_c_th(MUMPS_INT* async, MUMPS_INT* ierr){
   /*  mumps_io_flag_async=*async; */
   if(*async!=IO_ASYNC_TH){
     *ierr = -91;
-    sprintf(buf,"Internal error: mumps_low_level_init_ooc_c_th should not to be called with strat_IO=%d\n",*async);
+    snprintf(buf,127,"Internal error: mumps_low_level_init_ooc_c_th should not to be called with strat_IO=%d\n",*async);
     return mumps_io_error(*ierr,buf);
   }
   if(*async){
@@ -349,7 +350,7 @@ MUMPS_INT mumps_low_level_init_ooc_c_th(MUMPS_INT* async, MUMPS_INT* ierr){
         break;
       default:
         *ierr = -92;
-        sprintf(buf,"Internal error: mumps_low_level_init_ooc_c_th should not to be called with strat_IO=%d\n",*async);
+        snprintf(buf,127,"Internal error: mumps_low_level_init_ooc_c_th should not to be called with strat_IO=%d\n",*async);
         return mumps_io_error(*ierr,buf);
       }
       ret_code=pthread_create(&io_thread,NULL,mumps_async_thread_function_with_sem,NULL);

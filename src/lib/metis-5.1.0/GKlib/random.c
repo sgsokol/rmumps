@@ -75,7 +75,9 @@ void gk_randinit(uint64_t seed)
   for (mti=1; mti<NN; mti++) 
     mt[mti] = (6364136223846793005ULL * (mt[mti-1] ^ (mt[mti-1] >> 62)) + mti);
 #else
-  srand((unsigned int) seed);
+  /*srand((unsigned int) seed);*/
+  GetRNGstate();
+  PutRNGstate();
 #endif
 }
 
@@ -117,7 +119,8 @@ uint64_t gk_randint64(void)
 
   return x & 0x7FFFFFFFFFFFFFFF;
 #else
-  return (uint64_t)(((uint64_t) rand()) << 32 | ((uint64_t) rand()));
+  /*return (uint64_t)(((uint64_t) rand()) << 32 | ((uint64_t) rand()));*/
+  return (uint64_t)((1 << 64 - 1)*unifCrand());
 #endif
 }
 
@@ -127,8 +130,6 @@ uint32_t gk_randint32(void)
 #ifdef USE_GKRAND
   return (uint32_t)(gk_randint64() & 0x7FFFFFFF);
 #else
-  return (uint32_t)rand();
+  return /*(uint32_t)rand();*/ (uint32_t)((1<<32-1)*unifCrand());
 #endif
 }
-
-

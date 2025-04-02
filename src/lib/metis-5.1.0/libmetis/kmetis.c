@@ -126,7 +126,7 @@ idx_t MlevelKWayPartitioning(ctrl_t *ctrl, graph_t *graph, idx_t *part)
 
     IFSET(ctrl->dbglvl, METIS_DBG_TIME, gk_stopcputimer(ctrl->InitPartTmr));
     IFSET(ctrl->dbglvl, METIS_DBG_IPART, 
-        printf("Initial %"PRIDX"-way partitioning cut: %"PRIDX"\n", ctrl->nparts, objval));
+        Rf_warning("Initial %"PRIDX"-way partitioning cut: %"PRIDX"\n", ctrl->nparts, objval));
 
     RefineKWay(ctrl, graph, cgraph);
 

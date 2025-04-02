@@ -1,3 +1,9 @@
+Version 5.2.1-31
+================
+
+* 2025-04-02
+ - removed printf, sprintf, abort, exit, rand, srand, std[in,out,err] signaled by R CRAN team
+
 Version 5.2.1-30
 ================
 

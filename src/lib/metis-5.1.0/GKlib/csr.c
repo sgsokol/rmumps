@@ -445,7 +445,7 @@ gk_csr_t *gk_csr_Read(char *filename, int format, int readvals, int numbering)
     if (fmt > 111)
       gk_errexit(SIGERR, "Cannot read this type of file format [fmt=%zu]!\n", fmt);
 
-    sprintf(fmtstr, "%03zu", fmt%1000);
+    snprintf(fmtstr, 255, "%03zu", fmt%1000);
     readsizes = (fmtstr[0] == '1');
     readwgts  = (fmtstr[1] == '1');
     readvals  = (fmtstr[2] == '1');
@@ -591,28 +591,28 @@ gk_csr_t *gk_csr_Read(char *filename, int format, int readvals, int numbering)
 void gk_csr_Write(gk_csr_t *mat, char *filename, int format, int writevals, int numbering)
 {
   ssize_t i, j;
-  FILE *fpout;
+  /*FILE *fpout;*/
 
   if (format == GK_CSR_FMT_BINROW) {
     if (filename == NULL)
       gk_errexit(SIGERR, "The filename parameter cannot be NULL.\n");
-    fpout = gk_fopen(filename, "wb", "gk_csr_Write: fpout");
+    /*fpout = gk_fopen(filename, "wb", "gk_csr_Write: fpout");
 
     fwrite(&(mat->nrows), sizeof(int32_t), 1, fpout); 
     fwrite(&(mat->ncols), sizeof(int32_t), 1, fpout); 
     fwrite(mat->rowptr, sizeof(ssize_t), mat->nrows+1, fpout); 
     fwrite(mat->rowind, sizeof(int32_t), mat->rowptr[mat->nrows], fpout); 
     if (writevals)
-      fwrite(mat->rowval, sizeof(float), mat->rowptr[mat->nrows], fpout); 
+      fwrite(mat->rowval, sizeof(float), mat->rowptr[mat->nrows], fpout);
 
-    gk_fclose(fpout);
+    gk_fclose(fpout);*/
     return;
   }
 
   if (format == GK_CSR_FMT_BINCOL) {
     if (filename == NULL)
       gk_errexit(SIGERR, "The filename parameter cannot be NULL.\n");
-    fpout = gk_fopen(filename, "wb", "gk_csr_Write: fpout");
+    /*fpout = gk_fopen(filename, "wb", "gk_csr_Write: fpout");
 
     fwrite(&(mat->nrows), sizeof(int32_t), 1, fpout); 
     fwrite(&(mat->ncols), sizeof(int32_t), 1, fpout); 
@@ -621,31 +621,34 @@ void gk_csr_Write(gk_csr_t *mat, char *filename, int format, int writevals, int 
     if (writevals) 
       fwrite(mat->colval, sizeof(float), mat->colptr[mat->ncols], fpout); 
 
-    gk_fclose(fpout);
+    gk_fclose(fpout);*/
     return;
   }
 
-  if (filename)
+  /*if (filename)
     fpout = gk_fopen(filename, "w", "gk_csr_Write: fpout");
   else
-    fpout = stdout; 
+    fpout = stdout; */
 
   if (format == GK_CSR_FMT_CLUTO) {
-    fprintf(fpout, "%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);
+    /*fprintf(fpout, "%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);*/
+    Rf_warning("%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);
     writevals = 1;
     numbering = 1;
   }
 
   for (i=0; i<mat->nrows; i++) {
     for (j=mat->rowptr[i]; j<mat->rowptr[i+1]; j++) {
-      fprintf(fpout, " %d", mat->rowind[j]+(numbering ? 1 : 0));
+      /*fprintf(fpout, " %d", mat->rowind[j]+(numbering ? 1 : 0));*/
+      Rf_warning(" %d", mat->rowind[j]+(numbering ? 1 : 0));
       if (writevals) 
-        fprintf(fpout, " %f", mat->rowval[j]);
+        /*fprintf(fpout, " %f", mat->rowval[j]);*/
+        Rf_warning(" %f", mat->rowval[j]);
     }
-    fprintf(fpout, "\n");
+    /*fprintf(fpout, "\n");*/
   }
-  if (filename)
-    gk_fclose(fpout);
+  /*if (filename)
+    gk_fclose(fpout);*/
 }
 
 
@@ -1564,7 +1567,7 @@ void gk_csr_Scale(gk_csr_t *mat, int type)
           nnzcols += (collen[i] > 0 ? 1 : 0);
 
         bgfreq = gk_max(10, (ssize_t)(.5*rowptr[nrows]/nnzcols));
-        printf("nnz: %zd, nnzcols: %d, bgfreq: %d\n", rowptr[nrows], nnzcols, bgfreq);
+        Rf_warning("nnz: %zd, nnzcols: %d, bgfreq: %d\n", rowptr[nrows], nnzcols, bgfreq);
 
         #pragma omp for schedule(static)
         for (i=0; i<ncols; i++)

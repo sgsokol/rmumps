@@ -138,7 +138,7 @@ constructMultisector(graph_t *G, options_t* options, timings_t *cpus)
      ----------------------------------- */
     if ((nvtx <= MIN_NODES) && (options[OPTION_ORDTYPE] != MINIMUM_PRIORITY)
         && (options[OPTION_MSGLVL] > 0))
-   { printf("\nWarning in constructMultisector\n"
+   { Rf_warning("\nWarning in constructMultisector\n"
          "  graph has less than %d nodes, skipping separator construction\n\n",
          MIN_NODES);
      options[OPTION_ORDTYPE] = MINIMUM_PRIORITY;
@@ -168,9 +168,9 @@ constructMultisector(graph_t *G, options_t* options, timings_t *cpus)
        break;
 
      default:
-       fprintf(stderr, "\nError in function constructMultisector\n"
+       Rf_error("\nError in function constructMultisector\n"
             "  unrecognized ordering type %d\n", ordtype);
-       quit();
+       /*quit();*/
    }
   return(ms);
 }
@@ -201,9 +201,9 @@ extractMS2stage(nestdiss_t *ndroot)
    { parent = nd->parent;
      if ((parent == NULL) || (parent->childB == NULL)
         || (parent->childW == NULL))
-       { fprintf(stderr, "\nError in function extractMS2stage\n"
+       { Rf_error("\nError in function extractMS2stage\n"
               "  nested dissection tree corrupted\n");
-         quit();
+         /*quit();*/
        }
       if (parent->childB == nd)        /* left subtree of parent visited */
         for (nd = parent->childW; nd->childB != NULL; nd = nd->childB);
@@ -257,9 +257,9 @@ extractMSmultistage(nestdiss_t *ndroot)
    { parent = nd->parent;
      if ((parent == NULL) || (parent->childB == NULL)
         || (parent->childW == NULL))
-       { fprintf(stderr, "\nError in function extractMSmultistage\n"
+       { Rf_error("\nError in function extractMSmultistage\n"
               "  nested dissection tree corrupted\n");
-         quit();
+         /*quit();*/
        }
       if (parent->childB == nd)        /* left subtree of parent visited */
         for (nd = parent->childW; nd->childB != NULL; nd = nd->childB);

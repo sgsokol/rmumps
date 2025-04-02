@@ -168,7 +168,7 @@ void CreateGraphDual(idx_t ne, idx_t nn, idx_t *eptr, idx_t *eind, idx_t ncommon
   idx_t *marker, *nbrs;
 
   if (ncommon < 1) {
-    printf("  Increased ncommon to 1, as it was initially %"PRIDX"\n", ncommon);
+    Rf_warning("  Increased ncommon to 1, as it was initially %"PRIDX"\n", ncommon);
     ncommon = 1;
   }
 

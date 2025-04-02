@@ -496,10 +496,10 @@ const double                balrat)               /*+ Desired imbalance ratio   
   char *              oleaptr;
   char *              osepptr;
 
-  sprintf (bbaltab, "%lf", balrat);
-  sprintf (levltab, GNUMSTRING, levlnbr);
+  snprintf (bbaltab, 31, "%lf", balrat);
+  snprintf (levltab, 31, GNUMSTRING, levlnbr);
 
-  sprintf (bufftab, (((flagval & SCOTCH_STRATDISCONNECTED) != 0) ? "o{strat=%s}" : "%s"),
+  snprintf (bufftab, 8191, (((flagval & SCOTCH_STRATDISCONNECTED) != 0) ? "o{strat=%s}" : "%s"),
            "c{rat=0.7,cpr=n{sep=/(<TSTS>)?m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<BBAL>},org=(|h{pass=10})f{bal=<BBAL>}}}<SEPA>;,ole=<OLEA>,ose=<OSEP>},unc=n{sep=/(<TSTS>)?m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<BBAL>},org=(|h{pass=10})f{bal=<BBAL>}}}<SEPA>;,ole=<OLEA>,ose=<OSEP>}}");
 
   switch (flagval & (SCOTCH_STRATLEVELMIN | SCOTCH_STRATLEVELMAX)) {

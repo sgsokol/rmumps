@@ -96,7 +96,7 @@ void MinCover(idx_t *xadj, idx_t *adjncy, idx_t asize, idx_t bsize, idx_t *cover
             }
             else { /* This column node is matched */
               if (flag[mate[col]]) 
-                printf("\nSomething wrong, flag[%"PRIDX"] is 1",mate[col]);
+                Rf_warning("\nSomething wrong, flag[%"PRIDX"] is 1",mate[col]);
               queue[rptr++] = mate[col];
               level[mate[col]] = level[row] + 1;
             }
@@ -187,13 +187,13 @@ void MinCover_Decompose(idx_t *xadj, idx_t *adjncy, idx_t asize, idx_t bsize, id
 
   k = 0;
   if (iabs(card[VC]+card[SC]-card[HR]) < iabs(card[VC]-card[SR]-card[HR])) {  /* S = VC+SC+HR */
-    /* printf("%"PRIDX" %"PRIDX" ",vc+sc, hr); */
+    /* Rf_warning("%"PRIDX" %"PRIDX" ",vc+sc, hr); */
     for (i=0; i<bsize; i++) 
       if (where[i] == VC || where[i] == SC || where[i] == HR)
         cover[k++] = i;
   }
   else {  /* S = VC+SR+HR */
-    /* printf("%"PRIDX" %"PRIDX" ",vc, hr+sr); */
+    /* Rf_warning("%"PRIDX" %"PRIDX" ",vc, hr+sr); */
     for (i=0; i<bsize; i++) 
       if (where[i] == VC || where[i] == SR || where[i] == HR)
         cover[k++] = i;

@@ -88,14 +88,14 @@ SPACE_ordering(graph_t *G, options_t *options, timings_t *cpus)
 
   if (Gc != NULL)
    { if (options[OPTION_MSGLVL] > 0)
-       printf("compressed graph constructed (#nodes %d, #edges %d)\n",
+       Rf_warning("compressed graph constructed (#nodes %d, #edges %d)\n",
               Gc->nvtx, Gc->nedges >> 1);
    }
   else
    { Gc = G;
      free(vtxmap);
      if (options[OPTION_MSGLVL] > 0)
-       printf("no compressed graph constructed\n");
+       Rf_warning("no compressed graph constructed\n");
    }
 
   /* -------------------
@@ -109,7 +109,7 @@ SPACE_ordering(graph_t *G, options_t *options, timings_t *cpus)
 	
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("quality of multisector: #stages %d, #nodes %d, weight %d\n",
+    Rf_warning("quality of multisector: #stages %d, #nodes %d, weight %d\n",
            ms->nstages, ms->nnodes, ms->totmswght);
 
   /* ---------------------------------
@@ -128,7 +128,7 @@ SPACE_ordering(graph_t *G, options_t *options, timings_t *cpus)
         totnzf   += minprior->stageinfo[istage].nzf;
         totops   += minprior->stageinfo[istage].ops;
       }
-     printf("quality of ordering: #steps %d, nzl %d, ops %e\n", totnstep,
+     Rf_warning("quality of ordering: #steps %d, nzl %d, ops %e\n", totnstep,
             totnzf, totops);
    }
 
@@ -422,7 +422,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   pord_stoptimer(t_graph);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("\ninduced graph constructed: #vertices %d, #edges %d, #components "
+    Rf_warning("\ninduced graph constructed: #vertices %d, #edges %d, #components "
            "%d\n", G->nvtx, G->nedges >> 1, connectedComponents(G));
 
   /* --------------------------------------------
@@ -434,7 +434,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   freeGraph(G);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T->nfronts, nFactorIndices(T),
            nFactorEntries(T), nFactorOps(T), nWorkspace(T));
 
@@ -447,7 +447,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   freeElimTree(T);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T2->nfronts, nFactorIndices(T2),
            nFactorEntries(T2), nFactorOps(T2), nWorkspace(T2));
 
@@ -459,7 +459,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   pord_stoptimer(t_symb);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("quality of factor matrix:\n\tneqs %d, #indices %d, nzl %d\n",
+    Rf_warning("quality of factor matrix:\n\tneqs %d, #indices %d, nzl %d\n",
            L->css->neqs, L->css->nind, L->nelem);
 
   /* -----------------------
@@ -470,7 +470,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   pord_stoptimer(t_num);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("performance of numerical factorization: %6.2f mflops\n",
+    Rf_warning("performance of numerical factorization: %6.2f mflops\n",
             (double)nFactorOps(T2) / t_num / 1000000);
 
   /* ------------------------------
@@ -481,7 +481,7 @@ SPACE_solve(inputMtx_t *A, FLOAT *rhs, FLOAT *xvec, options_t *options,
   pord_stoptimer(t_solvetri);
 
   if (options[OPTION_MSGLVL] > 0)
-    printf("performance of forward/backward solve:  %6.2f mflops\n",
+    Rf_warning("performance of forward/backward solve:  %6.2f mflops\n",
             (double)nTriangularOps(T2) / t_solvetri / 1000000);
 
   freeElimTree(T2);
@@ -578,7 +578,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   pord_stoptimer(t_graph);
 
   if (msglvl > 0)
-    printf("\ninduced graph constructed: #vertices %d, #edges %d, #components "
+    Rf_warning("\ninduced graph constructed: #vertices %d, #edges %d, #components "
            "%d\n", G->nvtx, G->nedges >> 1, connectedComponents(G));
 
   /* ---------------------------------------------------
@@ -594,7 +594,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   free(invp);
 
   if (msglvl > 0)
-    printf("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T->nfronts, nFactorIndices(T),
            nFactorEntries(T), nFactorOps(T), nWorkspace(T));
 
@@ -607,7 +607,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   freeElimTree(T);
 
   if (msglvl > 0)
-    printf("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T2->nfronts, nFactorIndices(T2),
            nFactorEntries(T2), nFactorOps(T2), nWorkspace(T2));
 
@@ -619,7 +619,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   pord_stoptimer(t_symb);
 
   if (msglvl > 0)
-    printf("quality of factor matrix:\n\tneqs %d, #indices %d, nzl %d\n",
+    Rf_warning("quality of factor matrix:\n\tneqs %d, #indices %d, nzl %d\n",
            L->css->neqs, L->css->nind, L->nelem);
 
   /* -----------------------
@@ -630,7 +630,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   pord_stoptimer(t_num);
 
   if (msglvl > 0)
-    printf("performance of numerical factorization: %6.2f mflops\n",
+    Rf_warning("performance of numerical factorization: %6.2f mflops\n",
             (double)nFactorOps(T2) / t_num / 1000000);
 
   /* ------------------------------
@@ -641,7 +641,7 @@ SPACE_solveWithPerm(inputMtx_t *A, PORD_INT *perm, FLOAT *rhs, FLOAT *xvec,
   pord_stoptimer(t_solvetri);
 
   if (msglvl > 0)
-    printf("performance of forward/backward solve:  %6.2f mflops\n",
+    Rf_warning("performance of forward/backward solve:  %6.2f mflops\n",
             (double)nTriangularOps(T2) / t_solvetri / 1000000);
 
   freeElimTree(T2);
@@ -721,7 +721,7 @@ SPACE_mapping(graph_t *G, PORD_INT *perm, options_t *options, timings_t *cpus)
   free(invp);
 
   if (msglvl > 0)
-    printf("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of initial elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T->nfronts, nFactorIndices(T),
            nFactorEntries(T), nFactorOps(T), nWorkspace(T));
 
@@ -734,7 +734,7 @@ SPACE_mapping(graph_t *G, PORD_INT *perm, options_t *options, timings_t *cpus)
   freeElimTree(T);
 
   if (msglvl > 0)
-    printf("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
+    Rf_warning("quality of transformed elim. tree: #fronts %d, #indices %d\n\t"
            "nzl %d, ops %e, wspace %d\n", T2->nfronts, nFactorIndices(T2),
            nFactorEntries(T2), nFactorOps(T2), nWorkspace(T2));
 

@@ -41,7 +41,7 @@ void ComputePartitionInfoBipartite(graph_t *graph, idx_t nparts, idx_t *where)
     mustfree += 2;
   }
 
-  printf("%"PRIDX"-way Cut: %5"PRIDX", Vol: %5"PRIDX", ", nparts, ComputeCut(graph, where), ComputeVolume(graph, where));
+  Rf_warning("%"PRIDX"-way Cut: %5"PRIDX", Vol: %5"PRIDX", ", nparts, ComputeCut(graph, where), ComputeVolume(graph, where));
 
   /* Compute balance information */
   kpwgts = ismalloc(ncon*nparts, 0, "ComputePartitionInfo: kpwgts");
@@ -52,17 +52,17 @@ void ComputePartitionInfoBipartite(graph_t *graph, idx_t nparts, idx_t *where)
   }
 
   if (ncon == 1) {
-    printf("\tBalance: %5.3"PRREAL" out of %5.3"PRREAL"\n", 
+    Rf_warning("\tBalance: %5.3"PRREAL" out of %5.3"PRREAL"\n", 
             1.0*nparts*kpwgts[iargmax(nparts, kpwgts)]/(1.0*isum(nparts, kpwgts, 1)),
             1.0*nparts*vwgt[iargmax(nvtxs, vwgt)]/(1.0*isum(nparts, kpwgts, 1)));
   }
   else {
-    printf("\tBalance:");
+    Rf_warning("\tBalance:");
     for (j=0; j<ncon; j++) 
-      printf(" (%5.3"PRREAL" out of %5.3"PRREAL")", 
+      Rf_warning(" (%5.3"PRREAL" out of %5.3"PRREAL")", 
             1.0*nparts*kpwgts[ncon*iargmax_strd(nparts, kpwgts+j, ncon)+j]/(1.0*isum(nparts, kpwgts+j, ncon)),
             1.0*nparts*vwgt[ncon*iargmax_strd(nvtxs, vwgt+j, ncon)+j]/(1.0*isum(nparts, kpwgts+j, ncon)));
-    printf("\n");
+    Rf_warning("\n");
   }
 
 
@@ -89,19 +89,19 @@ void ComputePartitionInfoBipartite(graph_t *graph, idx_t nparts, idx_t *where)
 
   for (i=0; i<nparts; i++)
     kpwgts[i] = isum(nparts, padjncy+i*nparts, 1);
-  printf("Min/Max/Avg/Bal # of adjacent     subdomains: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL"\n",
+  Rf_warning("Min/Max/Avg/Bal # of adjacent     subdomains: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL"\n",
     kpwgts[iargmin(nparts, kpwgts)], kpwgts[iargmax(nparts, kpwgts)], isum(nparts, kpwgts, 1)/nparts, 
     1.0*nparts*kpwgts[iargmax(nparts, kpwgts)]/(1.0*isum(nparts, kpwgts, 1)));
 
   for (i=0; i<nparts; i++)
     kpwgts[i] = isum(nparts, padjcut+i*nparts, 1);
-  printf("Min/Max/Avg/Bal # of adjacent subdomain cuts: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL"\n",
+  Rf_warning("Min/Max/Avg/Bal # of adjacent subdomain cuts: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL"\n",
     kpwgts[iargmin(nparts, kpwgts)], kpwgts[iargmax(nparts, kpwgts)], isum(nparts, kpwgts, 1)/nparts, 
     1.0*nparts*kpwgts[iargmax(nparts, kpwgts)]/(1.0*isum(nparts, kpwgts, 1)));
 
   for (i=0; i<nparts; i++)
     kpwgts[i] = isum(nparts, padjwgt+i*nparts, 1);
-  printf("Min/Max/Avg/Bal/Frac # of interface    nodes: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL" %7.3"PRREAL"\n",
+  Rf_warning("Min/Max/Avg/Bal/Frac # of interface    nodes: %5"PRIDX" %5"PRIDX" %5"PRIDX" %7.3"PRREAL" %7.3"PRREAL"\n",
     kpwgts[iargmin(nparts, kpwgts)], kpwgts[iargmax(nparts, kpwgts)], isum(nparts, kpwgts, 1)/nparts, 
     1.0*nparts*kpwgts[iargmax(nparts, kpwgts)]/(1.0*isum(nparts, kpwgts, 1)), 1.0*isum(nparts, kpwgts, 1)/(1.0*nvtxs));
 

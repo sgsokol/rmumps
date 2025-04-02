@@ -2928,7 +2928,7 @@ C ssg
       INTEGER :: depth
       logical force_cand
       DOUBLE PRECISION Y
-      intrinsic random_number
+C      intrinsic random_number
       integer nmb_propmap_strict,share2,procsrest,current2
       integer k69onid
       INTEGER, ALLOCATABLE, DIMENSION(:) :: procs_inode
@@ -3063,7 +3063,7 @@ C ssg
      &           dble(nmb_procs_inode)))
             procsrest=nmb_procs_inode - nmb_propmap_strict
             share2=min(share2,procsrest)
-            CALL random_number(Y)
+            CALL randomRnumber(Y)
             current2=int(dble(Y)*dble(procsrest))
             k=1
             i=1
@@ -3136,7 +3136,7 @@ C ssg
       integer MUMPS_REG_GETKMAX, MUMPS_BLOC2_GET_NSLAVESMIN
       external MUMPS_REG_GETKMAX, MUMPS_BLOC2_GET_NSLAVESMIN
       DOUBLE PRECISION Y
-      intrinsic random_number
+C      intrinsic random_number
       integer nmb_propmap_strict,share2,procsrest,current2
       integer k69onid,nb_free_procs,local_son_indice,nb_procs_for_sons,
      &     ptr_upper_ro_procs
@@ -3530,7 +3530,7 @@ C ssg
             procsrest=nmb_procs_inode - nmb_propmap_strict
             share2=min(share2,procsrest)
             share2 = 0 
-            CALL random_number(Y)
+            CALL randomRnumber(Y)
             current2     =int(dble(Y)*dble(procsrest))
             nb_free_procs=1
             do j=1,cv_slavef
@@ -4563,7 +4563,8 @@ C ssg
       r = stackr(s)
       k = (l+r) / 2
       if(l.LT.k) then
-         if(s.GE.ss) stop 'maxsize of stack reached'
+C         if(s.GE.ss) stop 'maxsize of stack reached'
+         if(s.GE.ss) call rexit('maxsize of stack reached')
          s = s + 1
          stackl(s) = l
          stackr(s) = k
@@ -4574,7 +4575,8 @@ C ssg
       r = stackr(s)
       k = (l+r) / 2
       if(k+1.LT.r) then
-         if(s.GE.ss) stop 'maxsize of stack reached'
+C         if(s.GE.ss) stop 'maxsize of stack reached'
+         if(s.GE.ss) call rexit('maxsize of stack reached')
          s = s + 1
          stackl(s) = k+1
          stackr(s) = r
@@ -5034,3 +5036,11 @@ C ssg
         timeAssembly = ((n*n/p)/(gamma/(log(p)/log(2.0d0))))
       end function timeAssembly
       end subroutine MUMPS_GET_SPLIT_4_PERF
+      subroutine randomRnumber(x)
+      double precision, intent(out) :: x
+      DOUBLE PRECISION unifrand
+        call getrngseed()
+        x = unifrand()
+        call putrngseed()
+        return 
+      end subroutine randomRnumber

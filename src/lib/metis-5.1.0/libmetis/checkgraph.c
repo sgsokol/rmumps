@@ -61,7 +61,7 @@ int CheckGraph(graph_t *graph, int numflag, int verbose)
 
       if (i == k) {
         if (verbose)
-          printf("Vertex %"PRIDX" contains a self-loop "
+          Rf_warning("Vertex %"PRIDX" contains a self-loop "
                  "(i.e., diagonal entry in the matrix)!\n", i+numflag);
         err++;
       }
@@ -70,7 +70,7 @@ int CheckGraph(graph_t *graph, int numflag, int verbose)
           if (adjncy[l] == i) {
             if (adjwgt[l] != adjwgt[j]) {
               if (verbose) 
-                printf("Edges (u:%"PRIDX" v:%"PRIDX" wgt:%"PRIDX") and "
+                Rf_warning("Edges (u:%"PRIDX" v:%"PRIDX" wgt:%"PRIDX") and "
                        "(v:%"PRIDX" u:%"PRIDX" wgt:%"PRIDX") "
                        "do not have the same weight!\n", 
                        i+numflag, k+numflag, adjwgt[j],
@@ -82,7 +82,7 @@ int CheckGraph(graph_t *graph, int numflag, int verbose)
         }
         if (l == xadj[k+1]) {
           if (verbose)
-            printf("Missing edge: (%"PRIDX" %"PRIDX")!\n", k+numflag, i+numflag);
+            Rf_warning("Missing edge: (%"PRIDX" %"PRIDX")!\n", k+numflag, i+numflag);
           err++;
         }
       }
@@ -92,7 +92,7 @@ int CheckGraph(graph_t *graph, int numflag, int verbose)
       }
       else {
         if (verbose)
-          printf("Edge %"PRIDX" from vertex %"PRIDX" is repeated %"PRIDX" times\n", 
+          Rf_warning("Edge %"PRIDX" from vertex %"PRIDX" is repeated %"PRIDX" times\n", 
               k+numflag, i+numflag, htable[k]++);
         err++;
       }
@@ -104,7 +104,7 @@ int CheckGraph(graph_t *graph, int numflag, int verbose)
 
  
   if (err > 0 && verbose) { 
-    printf("A total of %"PRIDX" errors exist in the input file. "
+    Rf_warning("A total of %"PRIDX" errors exist in the input file. "
            "Correct them, and run again!\n", err);
   }
 
@@ -123,14 +123,14 @@ int CheckInputGraphWeights(idx_t nvtxs, idx_t ncon, idx_t *xadj, idx_t *adjncy,
   idx_t i;
 
   if (ncon <= 0) {
-    printf("Input Error: ncon must be >= 1.\n");
+    Rf_warning("Input Error: ncon must be >= 1.\n");
     return 0;
   }
 
   if (vwgt) {
     for (i=ncon*nvtxs; i>=0; i--) {
       if (vwgt[i] < 0) {
-        printf("Input Error: negative vertex weight(s).\n");
+        Rf_warning("Input Error: negative vertex weight(s).\n");
         return 0;
       }
     }
@@ -138,7 +138,7 @@ int CheckInputGraphWeights(idx_t nvtxs, idx_t ncon, idx_t *xadj, idx_t *adjncy,
   if (vsize) {
     for (i=nvtxs; i>=0; i--) {
       if (vsize[i] < 0) {
-        printf("Input Error: negative vertex sizes(s).\n");
+        Rf_warning("Input Error: negative vertex sizes(s).\n");
         return 0;
       }
     }
@@ -146,7 +146,7 @@ int CheckInputGraphWeights(idx_t nvtxs, idx_t ncon, idx_t *xadj, idx_t *adjncy,
   if (adjwgt) {
     for (i=xadj[nvtxs]-1; i>=0; i--) {
       if (adjwgt[i] < 0) {
-        printf("Input Error: non-positive edge weight(s).\n");
+        Rf_warning("Input Error: non-positive edge weight(s).\n");
         return 0;
       }
     }

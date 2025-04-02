@@ -3452,12 +3452,13 @@ C        Matrix is assembled
 C        and centralized
 C        ====================
         IF (id%WRITE_PROBLEM(1:20) .NE. "NAME_NOT_INITIALIZED")THEN
-          OPEN(IUNIT,FILE=trim(id%WRITE_PROBLEM))
+C          OPEN(IUNIT,FILE=trim(id%WRITE_PROBLEM))
+          IUNIT=0
           CALL DMUMPS_DUMP_MATRIX( id, IUNIT, I_AM_SLAVE, I_AM_MASTER,
      &         IS_DISTRIBUTED,  ! = .FALSE., centralized
      &         IS_ELEMENTAL,    ! Elemental or not
      &         .FALSE.)
-          CLOSE(IUNIT)
+C          CLOSE(IUNIT)
         ENDIF
       ELSE IF (id%KEEP(54).EQ.3) THEN
 C        =====================
@@ -3481,14 +3482,14 @@ C        same if all processors share the same
 C        file system.
 C        -----------------------------------------
          IF (MM_WRITE_CHECK.EQ.id%NSLAVES .AND. I_AM_SLAVE) THEN
-            WRITE(MM_IDSTR,'(I9)') id%MYID_NODES
-            OPEN(IUNIT,
-     &           FILE=trim(id%WRITE_PROBLEM)//trim(adjustl(MM_IDSTR)))
+C            WRITE(MM_IDSTR,'(I9)') id%MYID_NODES
+C            OPEN(IUNIT,
+C     &           FILE=trim(id%WRITE_PROBLEM)//trim(adjustl(MM_IDSTR)))
             CALL DMUMPS_DUMP_MATRIX(id, IUNIT, I_AM_SLAVE, I_AM_MASTER,
      &           IS_DISTRIBUTED,           ! =.TRUE., distributed
      &           IS_ELEMENTAL,             ! Elemental or not
      &           .FALSE.)
-            CLOSE(IUNIT)
+C            CLOSE(IUNIT)
          ENDIF
 C     ELSE ...
 C     Nothing written in other cases.
@@ -3500,9 +3501,9 @@ C     ===============
      &     associated(id%RHS) .AND.
      &     id%WRITE_PROBLEM(1:20)
      &     .NE. "NAME_NOT_INITIALIZED")THEN
-        OPEN(IUNIT,FILE=trim(id%WRITE_PROBLEM) //".rhs")
+C        OPEN(IUNIT,FILE=trim(id%WRITE_PROBLEM) //".rhs")
         CALL DMUMPS_DUMP_RHS(IUNIT, id)
-        CLOSE(IUNIT)
+C        CLOSE(IUNIT)
       ENDIF
       RETURN
       END SUBROUTINE DMUMPS_DUMP_PROBLEM
@@ -3574,16 +3575,19 @@ C     Write header line:
          ELSE
             SYMM="symmetric"
          END IF
-         WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix coordinate ',
-     &           trim(ARITH)," ",trim(SYMM)
-         WRITE(IUNIT,*) id%N, id%N, NNZ_i
+C         WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix coordinate ',
+C     &           trim(ARITH)," ",trim(SYMM)
+C         WRITE(IUNIT,*) id%N, id%N, NNZ_i
+C
          IF ((associated(id%A)).AND.(.NOT.SAVE_PATTERN)) THEN
             DO I8=1_8,NNZ_i
                IF (id%KEEP(50).NE.0 .AND. id%IRN(I8).LT.id%JCN(I8)) THEN
 C              permute upper diag entry
-                     WRITE(IUNIT,*) id%JCN(I8), id%IRN(I8), id%A(I8)
+C                     WRITE(IUNIT,*) id%JCN(I8), id%IRN(I8), id%A(I8)
+C
                ELSE
-                     WRITE(IUNIT,*) id%IRN(I8), id%JCN(I8), id%A(I8)
+C                     WRITE(IUNIT,*) id%IRN(I8), id%JCN(I8), id%A(I8)
+C
                ENDIF
             ENDDO
          ELSE
@@ -3591,9 +3595,11 @@ C           pattern only
             DO I8=1_8,id%KEEP8(28)
                IF (id%KEEP(50).NE.0 .AND. id%IRN(I8).LT.id%JCN(I8)) THEN
 C                 permute upper diag entry
-                  WRITE(IUNIT,*) id%JCN(I8), id%IRN(I8)
+C                  WRITE(IUNIT,*) id%JCN(I8), id%IRN(I8)
+C
                ELSE
-                     WRITE(IUNIT,*) id%IRN(I8), id%JCN(I8)
+C                     WRITE(IUNIT,*) id%IRN(I8), id%JCN(I8)
+C
                ENDIF
             ENDDO
          ENDIF
@@ -3616,18 +3622,19 @@ C        ==================
          ELSE
             SYMM="symmetric"
          END IF
-         WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix coordinate ',
-     &           trim(ARITH)," ",trim(SYMM)
-         WRITE(IUNIT,*) id%N, id%N, NNZ_i
+C         WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix coordinate ',
+C     &           trim(ARITH)," ",trim(SYMM)
+C         WRITE(IUNIT,*) id%N, id%N, NNZ_i
+C
          IF ((associated(id%A_loc)).AND.(.NOT.SAVE_PATTERN)) THEN
             DO I8=1_8,NNZ_i
                IF (id%KEEP(50).NE.0 .AND.
      &             id%IRN_loc(I8).LT.id%JCN_loc(I8)) THEN
-                     WRITE(IUNIT,*) id%JCN_loc(I8), id%IRN_loc(I8),
-     &                    id%A_loc(I8)
+C                     WRITE(IUNIT,*) id%JCN_loc(I8), id%IRN_loc(I8),
+C     &                    id%A_loc(I8)
                ELSE
-                     WRITE(IUNIT,*) id%IRN_loc(I8), id%JCN_loc(I8),
-     &                    id%A_loc(I8)
+C                     WRITE(IUNIT,*) id%IRN_loc(I8), id%JCN_loc(I8),
+C     &                    id%A_loc(I8)
                ENDIF
             ENDDO
          ELSE
@@ -3635,9 +3642,11 @@ C        ==================
                IF (id%KEEP(50).NE.0 .AND. 
      &            id%IRN_loc(I8).LT.id%JCN_loc(I8)) THEN
 C                 permute upper diag entry
-                  WRITE(IUNIT,*) id%JCN_loc(I8), id%IRN_loc(I8)
+C                  WRITE(IUNIT,*) id%JCN_loc(I8), id%IRN_loc(I8)
+C
                ELSE
-                  WRITE(IUNIT,*) id%IRN_loc(I8), id%JCN_loc(I8)
+C                  WRITE(IUNIT,*) id%IRN_loc(I8), id%JCN_loc(I8)
+C
                ENDIF
             ENDDO
          ENDIF
@@ -3645,14 +3654,21 @@ C                 permute upper diag entry
 C        ==================
 C        ELEMENTAL MATRIX
 C        ==================         
-         WRITE(IUNIT,*) id%N," :: N"
-         WRITE(IUNIT,*) id%NELT," :: NELT"
-         WRITE(IUNIT,*) size(id%ELTVAR)," :: NELTVAR"
-         WRITE(IUNIT,*) size(id%A_ELT)," :: NELTVL"
-         WRITE(IUNIT,*) id%ELTPTR(:)," ::ELTPTR"
-         WRITE(IUNIT,*) id%ELTVAR(:)," ::ELTVAR"
+C         WRITE(IUNIT,*) id%N," :: N"
+C
+C         WRITE(IUNIT,*) id%NELT," :: NELT"
+C
+C         WRITE(IUNIT,*) size(id%ELTVAR)," :: NELTVAR"
+C
+C         WRITE(IUNIT,*) size(id%A_ELT)," :: NELTVL"
+C
+C         WRITE(IUNIT,*) id%ELTPTR(:)," ::ELTPTR"
+C
+C         WRITE(IUNIT,*) id%ELTVAR(:)," ::ELTVAR"
+C
          IF(.NOT.SAVE_PATTERN) THEN
-            WRITE(IUNIT,*) id%A_ELT(:)         
+C            WRITE(IUNIT,*) id%A_ELT(:)         
+C
          ENDIF
       ENDIF
       RETURN
@@ -3683,10 +3699,11 @@ C  =====================
 C
       IF (associated(id%RHS)) THEN
                ARITH='real'
-        WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix array ',
-     &           trim(ARITH),
-     &           ' general'
-        WRITE(IUNIT,*) id%N, id%NRHS
+C        WRITE(IUNIT,FMT=*)'%%MatrixMarket matrix array ',
+C     &           trim(ARITH),
+C     &           ' general'
+C        WRITE(IUNIT,*) id%N, id%NRHS
+C
         IF ( id%NRHS .EQ. 1 ) THEN
            LD_RHS = id%N
         ELSE
@@ -3695,7 +3712,8 @@ C
         DO J = 1, id%NRHS
            DO I = 1, id%N
               K=(J-1)*LD_RHS+I
-                 WRITE(IUNIT,*) id%RHS(K)
+C                 WRITE(IUNIT,*) id%RHS(K)
+C
         ENDDO
         ENDDO
       ENDIF

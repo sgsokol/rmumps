@@ -93,21 +93,21 @@ printGbipart(gbipart_t *Gbipart)
   PORD_INT     count, u, i, istart, istop;
 
   G = Gbipart->G;
-  printf("\n#vertices %d (nX %d, nY %d), #edges %d, type %d, totvwght %d\n",
+  Rf_warning("\n#vertices %d (nX %d, nY %d), #edges %d, type %d, totvwght %d\n",
          G->nvtx, Gbipart->nX, Gbipart->nY, G->nedges >> 1, G->type,
          G->totvwght);
   for (u = 0; u < G->nvtx; u++)
    { count = 0;
-     printf("--- adjacency list of vertex %d (weight %d):\n", u, G->vwght[u]);
+     Rf_warning("--- adjacency list of vertex %d (weight %d):\n", u, G->vwght[u]);
      istart = G->xadj[u];
      istop = G->xadj[u+1];
      for (i = istart; i < istop; i++)
-      { printf("%5d", G->adjncy[i]);
+      { Rf_warning("%5d", G->adjncy[i]);
         if ((++count % 16) == 0)
-          printf("\n");
+          Rf_warning("\n");
       }
      if ((count % 16) != 0)
-       printf("\n");
+       Rf_warning("\n");
    }
 }
 
@@ -132,9 +132,9 @@ setupBipartiteGraph(graph_t *G, PORD_INT *bipartvertex, PORD_INT nX, PORD_INT nY
   for (i = 0; i < nX+nY; i++)
    { u = bipartvertex[i];
      if ((u < 0) || (u >= nvtx))
-      { fprintf(stderr, "\nError in function setupBipartiteGraph\n"
+      { Rf_error("\nError in function setupBipartiteGraph\n"
              "  node %d does not belong to graph\n", u);
-        quit();
+        /*quit();*/
       }
      jstart = xadj[u];
      jstop = xadj[u+1];

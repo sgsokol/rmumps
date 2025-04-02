@@ -54,7 +54,7 @@ void Init2WayPartition(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
       gk_errexit(SIGERR, "Unknown initial partition type: %d\n", ctrl->iptype);
   }
 
-  IFSET(ctrl->dbglvl, METIS_DBG_IPART, printf("Initial Cut: %"PRIDX"\n", graph->mincut));
+  IFSET(ctrl->dbglvl, METIS_DBG_IPART, Rf_warning("Initial Cut: %"PRIDX"\n", graph->mincut));
   IFSET(ctrl->dbglvl, METIS_DBG_TIME, gk_stopcputimer(ctrl->InitPartTmr));
   ctrl->dbglvl = dbglvl;
 
@@ -97,7 +97,7 @@ void InitSeparator(ctrl_t *ctrl, graph_t *graph, idx_t niparts)
       gk_errexit(SIGERR, "Unkown iptype of %"PRIDX"\n", ctrl->iptype);
   }
 
-  IFSET(ctrl->dbglvl, METIS_DBG_IPART, printf("Initial Sep: %"PRIDX"\n", graph->mincut));
+  IFSET(ctrl->dbglvl, METIS_DBG_IPART, Rf_warning("Initial Sep: %"PRIDX"\n", graph->mincut));
   IFSET(ctrl->dbglvl, METIS_DBG_TIME, gk_stopcputimer(ctrl->InitPartTmr));
 
   ctrl->dbglvl = dbglvl;
@@ -157,13 +157,13 @@ void RandomBisection(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
 
     /* Do some partition refinement  */
     Compute2WayPartitionParams(ctrl, graph);
-    /* printf("IPART: %3"PRIDX" [%5"PRIDX" %5"PRIDX"] [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->nvtxs, pwgts[0], pwgts[1], graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+    /* Rf_warning("IPART: %3"PRIDX" [%5"PRIDX" %5"PRIDX"] [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->nvtxs, pwgts[0], pwgts[1], graph->pwgts[0], graph->pwgts[1], graph->mincut); */
 
     Balance2Way(ctrl, graph, ntpwgts);
-    /* printf("BPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+    /* Rf_warning("BPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
 
     FM_2WayRefine(ctrl, graph, ntpwgts, 4);
-    /* printf("RPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
+    /* Rf_warning("RPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], graph->pwgts[1], graph->mincut); */
 
     if (inbfs==0 || bestcut > graph->mincut) {
       bestcut = graph->mincut;
@@ -285,19 +285,19 @@ void GrowBisection(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
     **************************************************************/
     Compute2WayPartitionParams(ctrl, graph);
     /*
-    printf("IPART: %3"PRIDX" [%5"PRIDX" %5"PRIDX"] [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", 
+    Rf_warning("IPART: %3"PRIDX" [%5"PRIDX" %5"PRIDX"] [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", 
         graph->nvtxs, pwgts[0], pwgts[1], graph->pwgts[0], graph->pwgts[1], graph->mincut); 
     */
 
     Balance2Way(ctrl, graph, ntpwgts);
     /*
-    printf("BPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0],
+    Rf_warning("BPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0],
         graph->pwgts[1], graph->mincut); 
     */
 
     FM_2WayRefine(ctrl, graph, ntpwgts, ctrl->niter);
     /*
-    printf("RPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], 
+    Rf_warning("RPART: [%5"PRIDX" %5"PRIDX"] %5"PRIDX"\n", graph->pwgts[0], 
         graph->pwgts[1], graph->mincut);
     */
 
@@ -543,7 +543,7 @@ void GrowBisectionNode(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
     FM_2WayNodeRefine1Sided(ctrl, graph, 4);
 
     /*
-    printf("ISep: [%"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"] %"PRIDX"\n", 
+    Rf_warning("ISep: [%"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"] %"PRIDX"\n", 
         inbfs, graph->pwgts[0], graph->pwgts[1], graph->pwgts[2], bestcut); 
     */
     
@@ -612,7 +612,7 @@ void GrowBisectionNode2(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
     FM_2WayNodeRefine2Sided(ctrl, graph, 4);
 
     /*
-    printf("ISep: [%"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"] %"PRIDX"\n", 
+    Rf_warning("ISep: [%"PRIDX" %"PRIDX" %"PRIDX" %"PRIDX"] %"PRIDX"\n", 
         inbfs, graph->pwgts[0], graph->pwgts[1], graph->pwgts[2], bestcut); 
     */
 

@@ -9,7 +9,7 @@
 
 #ifndef _GK_MACROS_H_
 #define _GK_MACROS_H_
-
+#include <R_ext/Error.h>
 /*-------------------------------------------------------------
  * Usefull commands 
  *-------------------------------------------------------------*/
@@ -21,7 +21,8 @@
 #define sign(a, b) ((a >= 0 ? b : -b))
 
 #define ONEOVERRANDMAX (1.0/(RAND_MAX+1.0))
-#define RandomInRange(u) ((int) (ONEOVERRANDMAX*(u)*rand()))
+/*#define RandomInRange(u) ((int) (ONEOVERRANDMAX*(u)*rand()))*/
+#define RandomInRange(u) ((int) ((u)*unifCrand()))
 
 #define gk_abs(x) ((x) >= 0 ? (x) : -(x))
 
@@ -58,9 +59,11 @@
 #ifdef DMALLOC
 #   define MALLOC_CHECK(ptr)                                          \
     if (malloc_verify((ptr)) == DMALLOC_VERIFY_ERROR) {  \
-        printf("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
+        /*printf("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
               __LINE__, __FILE__);                               \
-        abort();                                                \
+        abort();   */                                             \
+        Rf_error("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
+              __LINE__, __FILE__); \
     }
 #else
 #   define MALLOC_CHECK(ptr) ;
@@ -89,32 +92,38 @@
  *-------------------------------------------------------------*/
 #define GKASSERT(expr)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
-        abort();                                                \
+        abort();*/                                                \
+        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+              __LINE__, __FILE__); \
     }
 
 #define GKASSERTP(expr,msg)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
         printf msg ; \
         printf("\n"); \
-        abort();                                                \
+        abort(); */                                               \
+        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
+              __LINE__, __FILE__, msg); \
     }
 
 #define GKCUASSERT(expr)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
-              __LINE__, __FILE__);                               \
+        /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+              __LINE__, __FILE__); */                              \
+        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+              __LINE__, __FILE__); \
     }
 
 #define GKCUASSERTP(expr,msg)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        Rf_warning("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
-        printf msg ; \
-        printf("\n"); \
+        Rf_warning("%s", msg) ; \
+        /*printf("\n");*/ \
     }
 
 /*-------------------------------------------------------------
@@ -123,18 +132,22 @@
 #ifndef NDEBUG
 #   define ASSERT(expr)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
-        assert(expr);                                                \
+        assert(expr);*/                                                \
+        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+              __LINE__, __FILE__); \
     }
 
 #   define ASSERTP(expr,msg)                                          \
     if (!(expr)) {                                               \
-        printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
         printf msg ; \
         printf("\n"); \
-        assert(expr);                                                \
+        assert(expr); */                                               \
+        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
+              __LINE__, __FILE__, msg); \
     }
 #else
 #   define ASSERT(expr) ;

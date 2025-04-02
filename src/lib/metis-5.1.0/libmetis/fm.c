@@ -116,7 +116,7 @@ void FM_2WayCutRefine(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts, idx_t niter
       swaps[nswaps] = higain;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO, 
-        printf("Moved %6"PRIDX" from %"PRIDX". [%3"PRIDX" %3"PRIDX"] %5"PRIDX" [%4"PRIDX" %4"PRIDX"]\n", higain, from, ed[higain]-id[higain], vwgt[higain], newcut, pwgts[0], pwgts[1]));
+        Rf_warning("Moved %6"PRIDX" from %"PRIDX". [%3"PRIDX" %3"PRIDX"] %5"PRIDX" [%4"PRIDX" %4"PRIDX"]\n", higain, from, ed[higain]-id[higain], vwgt[higain], newcut, pwgts[0], pwgts[1]));
 
       /**************************************************************
       * Update the id[i]/ed[i] values of the affected nodes
@@ -329,11 +329,11 @@ void FM_Mc2WayCutRefine(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts, idx_t nit
       swaps[nswaps] = higain;
 
       if (ctrl->dbglvl&METIS_DBG_MOVEINFO) {
-        printf("Moved%6"PRIDX" from %"PRIDX"(%"PRIDX") Gain:%5"PRIDX", "
+        Rf_warning("Moved%6"PRIDX" from %"PRIDX"(%"PRIDX") Gain:%5"PRIDX", "
             "Cut:%5"PRIDX", NPwgts:", higain, from, cnum, ed[higain]-id[higain], newcut);
         for (l=0; l<ncon; l++) 
-          printf("(%.3"PRREAL" %.3"PRREAL")", pwgts[l]*invtvwgt[l], pwgts[ncon+l]*invtvwgt[l]);
-        printf(" %+.3"PRREAL" LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
+          Rf_warning("(%.3"PRREAL" %.3"PRREAL")", pwgts[l]*invtvwgt[l], pwgts[ncon+l]*invtvwgt[l]);
+        Rf_warning(" %+.3"PRREAL" LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
             minbal, ComputeLoadImbalance(graph, 2, ctrl->pijbm), newbal);
       }
 
@@ -484,7 +484,7 @@ void SelectQueue(graph_t *graph, real_t *pijbm, real_t *ubfactors,
     }
 
     /*
-    printf("Selected1 %"PRIDX"(%"PRIDX") -> %"PRIDX" [%5"PRREAL"]\n", 
+    Rf_warning("Selected1 %"PRIDX"(%"PRIDX") -> %"PRIDX" [%5"PRREAL"]\n", 
         *from, *cnum, rpqLength(queues[2*(*cnum)+(*from)]), max); 
     */
   }
@@ -502,7 +502,7 @@ void SelectQueue(graph_t *graph, real_t *pijbm, real_t *ubfactors,
       }
     }
     /*
-    printf("Selected2 %"PRIDX"(%"PRIDX") -> %"PRIDX"\n", 
+    Rf_warning("Selected2 %"PRIDX"(%"PRIDX") -> %"PRIDX"\n", 
         *from, *cnum, rpqLength(queues[2*(*cnum)+(*from)]), max); 
     */
   }
@@ -518,25 +518,25 @@ void Print2WayRefineStats(ctrl_t *ctrl, graph_t *graph, real_t *ntpwgts,
   int i;
 
   if (mincutorder == -2) {
-    printf("Parts: ");
-    printf("Nv-Nb[%5"PRIDX" %5"PRIDX"] ICut: %6"PRIDX, 
+    Rf_warning("Parts: ");
+    Rf_warning("Nv-Nb[%5"PRIDX" %5"PRIDX"] ICut: %6"PRIDX, 
         graph->nvtxs, graph->nbnd, graph->mincut);
-    printf(" [");
+    Rf_warning(" [");
     for (i=0; i<graph->ncon; i++)
-      printf("(%.3"PRREAL" %.3"PRREAL" T:%.3"PRREAL" %.3"PRREAL")", 
+      Rf_warning("(%.3"PRREAL" %.3"PRREAL" T:%.3"PRREAL" %.3"PRREAL")", 
           graph->pwgts[i]*graph->invtvwgt[i], 
           graph->pwgts[graph->ncon+i]*graph->invtvwgt[i],
           ntpwgts[i], ntpwgts[graph->ncon+i]);
-    printf("] LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
+    Rf_warning("] LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
         ComputeLoadImbalance(graph, 2, ctrl->pijbm), deltabal);
   }
   else {
-    printf("\tMincut: %6"PRIDX" at %5"PRIDX" NBND %6"PRIDX" NPwgts: [", 
+    Rf_warning("\tMincut: %6"PRIDX" at %5"PRIDX" NBND %6"PRIDX" NPwgts: [", 
         graph->mincut, mincutorder, graph->nbnd);
     for (i=0; i<graph->ncon; i++)
-      printf("(%.3"PRREAL" %.3"PRREAL")", 
+      Rf_warning("(%.3"PRREAL" %.3"PRREAL")", 
           graph->pwgts[i]*graph->invtvwgt[i], graph->pwgts[graph->ncon+i]*graph->invtvwgt[i]);
-    printf("] LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
+    Rf_warning("] LB: %.3"PRREAL"(%+.3"PRREAL")\n", 
         ComputeLoadImbalance(graph, 2, ctrl->pijbm), deltabal);
   }
 }

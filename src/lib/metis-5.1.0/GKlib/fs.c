@@ -208,7 +208,7 @@ int gk_mkpath(char *pathname)
 {
   char tmp[2048];
 
-  sprintf(tmp, "mkdir -p %s", pathname);
+  snprintf(tmp, 2047, "mkdir -p %s", pathname);
   return system(tmp);
 }
 
@@ -220,6 +220,6 @@ int gk_rmpath(char *pathname)
 {
   char tmp[2048];
 
-  sprintf(tmp, "rm -r %s", pathname);
+  snprintf(tmp, 2047, "rm -r %s", pathname);
   return system(tmp);
 }

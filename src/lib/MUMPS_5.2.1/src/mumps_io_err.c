@@ -128,7 +128,7 @@ mumps_io_sys_error(MUMPS_INT mumps_errno, const char* desc)
       len = (len >= mumps_err_max_len ) ? mumps_err_max_len - 1 : len;
       _err = strdup( _desc );
       _err[len] = '\0';
-      sprintf(mumps_err, "%s", _err);
+      snprintf(mumps_err, mumps_err_max_len, "%s", _err);
     } else {
       _err = strdup(strerror(errno));
       _err_len = (MUMPS_INT) strlen(_err);
@@ -140,7 +140,7 @@ mumps_io_sys_error(MUMPS_INT mumps_errno, const char* desc)
       } else {
         len += _err_len;
       }
-      sprintf(mumps_err, "%s: %s", _desc, _err);
+      snprintf(mumps_err, mumps_err_max_len, "%s: %s", _desc, _err);
     }
     free(_err);
 #endif

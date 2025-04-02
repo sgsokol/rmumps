@@ -93,9 +93,9 @@ setupBucket(PORD_INT maxbin, PORD_INT maxitem, PORD_INT offset)
   PORD_INT      i, u;
 
   if (offset < 0)
-   { fprintf(stderr, "\nError in function setupBucket\n"
+   { Rf_error("\nError in function setupBucket\n"
           "  offset must be >= 0\n");
-     quit();
+     /*quit();*/
    }
 
   bucket = newBucket(maxbin, maxitem, offset);
@@ -167,20 +167,20 @@ insertBucket(bucket_t *bucket, PORD_INT k, PORD_INT item)
      check whether there are any problems
      ------------------------------------ */
   if (abs(k) >= MAX_INT - bucket->offset - 1)
-   { fprintf(stderr, "\nError in function insertBucket\n"
+   { Rf_error("\nError in function insertBucket\n"
           "  key %d too large/small for bucket\n", k);
-     quit();
+     /*quit();*/
    }
   if (item > bucket->maxitem)
-   { fprintf(stderr, "\nError in function insertBucket\n"
+   { Rf_error("\nError in function insertBucket\n"
           "  item %d too large for bucket (maxitem is %d)\n", item,
           bucket->maxitem);
-     quit();
+     /*quit();*/
    }
   if (bucket->key[item] != MAX_INT)
-   { fprintf(stderr, "\nError in function insertBucket\n"
+   { Rf_error("\nError in function insertBucket\n"
           "  item %d already in bucket\n", item);
-     quit();
+     /*quit();*/
    }
 
   /* -------------------------------------
@@ -218,9 +218,9 @@ removeBucket(bucket_t *bucket, PORD_INT item)
      check whether item in bucket
      ---------------------------- */
   if (bucket->key[item] == MAX_INT)
-   { fprintf(stderr, "\nError in function removeBucket\n"
+   { Rf_error("\nError in function removeBucket\n"
           "  item %d is not in bucket\n", item);
-     quit();
+     /*quit();*/
    }
 
   /* -----------------------

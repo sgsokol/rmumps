@@ -244,7 +244,7 @@ const int                   protnum)              /* Root process number        
   vertglbmax = DATASIZE (vertglbnbr, grafptr->procglbnbr, 0);
   vertlocnbr = DATASIZE (vertglbnbr, grafptr->procglbnbr, grafptr->proclocnum);
 
-  sprintf (proptab, "%3.3d", (int) reduglbtab[4]); /* Compute file properties */
+  snprintf (proptab, 3, "%3.3d", (int) reduglbtab[4]); /* Compute file properties */
   proptab[0] -= '0';                              /* Vertex labels flag       */
   proptab[1] -= '0';                              /* Edge weights flag        */
   proptab[2] -= '0';                              /* Vertex loads flag        */
@@ -740,7 +740,7 @@ const DgraphFlag            flagval)              /* Graph loading flags        
   vertlocnbr = reduloctab[10];
   edgelocnbr = reduloctab[11];
 
-  sprintf (proptab, "%3.3d", (int) reduglbtab[9]); /* Compute file properties */
+  snprintf (proptab, 3, "%3.3d", (int) reduglbtab[9]); /* Compute file properties */
   proptab[0] -= '0';                              /* Vertex labels flag       */
   proptab[1] -= '0';                              /* Edge weights flag        */
   proptab[2] -= '0';                              /* Vertex loads flag        */

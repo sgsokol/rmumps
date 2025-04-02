@@ -202,7 +202,7 @@ pdbf *gk_readpdbfile(char *fname) { /* {{{ */
 	}
 	fclose(FPIN);
 
-	/* printf("File has coordinates for %d atoms in %d residues\n",atoms,residues); */
+	/* Rf_warning("File has coordinates for %d atoms in %d residues\n",atoms,residues); */
 	toFill->natoms      = atoms;
 	toFill->ncas        = cas;
 	toFill->nbbs        = bbs;
@@ -290,7 +290,7 @@ pdbf *gk_readpdbfile(char *fname) { /* {{{ */
   toFill->cm[res-1].z = avgz/nresatoms;
 	/* Begin test code */
 	if(cas != residues) {
-		printf("Number of residues and CA coordinates differs by %d (!)\n",residues-cas);
+		Rf_warning("Number of residues and CA coordinates differs by %d (!)\n",residues-cas);
 		if(cas < residues) {
 			corruption = corruption|CRP_MISSINGCA;	
 		}
@@ -307,7 +307,7 @@ pdbf *gk_readpdbfile(char *fname) { /* {{{ */
 	fclose(FPIN);
 	toFill->corruption = corruption;
 	/* if(corruption == 0) 
-		printf("File was clean!\n"); */
+		Rf_warning("File was clean!\n"); */
 	return(toFill);
 } /* }}} */
 
@@ -435,26 +435,26 @@ and prints the result on stdout.
 void gk_showcorruption(pdbf *p) {
 	int corruption = p->corruption;
 	if(corruption&CRP_ALTLOCS)
-		printf("Multiple coordinate sets for at least one atom\n");
+		Rf_warning("Multiple coordinate sets for at least one atom\n");
 	if(corruption&CRP_MISSINGCA) 
-		printf("Missing coordiantes for at least one CA atom\n");
+		Rf_warning("Missing coordiantes for at least one CA atom\n");
 	if(corruption&CRP_MISSINGBB) 
-		printf("Missing coordiantes for at least one backbone atom (N,CA,C,O)\n");
+		Rf_warning("Missing coordiantes for at least one backbone atom (N,CA,C,O)\n");
 	if(corruption&CRP_MULTICHAIN) 
-		printf("File contains coordinates for multiple chains\n");
+		Rf_warning("File contains coordinates for multiple chains\n");
 	if(corruption&CRP_MULTICA) 
-		printf("Multiple CA atoms found for the same residue (could be alternate locators)\n");
+		Rf_warning("Multiple CA atoms found for the same residue (could be alternate locators)\n");
 	if(corruption&CRP_MULTICA) 
-		printf("Multiple copies of backbone atoms found for the same residue (could be alternate locators)\n");
+		Rf_warning("Multiple copies of backbone atoms found for the same residue (could be alternate locators)\n");
 }
 			/* sscanf(line, "%6s%5d%*1c%4s%1c%3s%*1c%1c%4d%1c%*3c%8lf%8lf%8lf%6lf%6lf%*6c%4s%2s%2s\n",
 			linetype,&aserial,aname,&altLoc,rname,&chainid,&rserial,&icode,&x,&y,&z,&opcy,&tmpt,segId,element,charge);
-			printf(".%s.%s.%s.\n",segId,element,charge);
-			printf("%-6s%5d%-1s%-4s%1c%3s%1s%1c%4d%1c%3s%8.3lf%8.3lf%8.3lf%6.2f%6.2f%6s%4s%2s%2s\n",
+			Rf_warning(".%s.%s.%s.\n",segId,element,charge);
+			Rf_warning("%-6s%5d%-1s%-4s%1c%3s%1s%1c%4d%1c%3s%8.3lf%8.3lf%8.3lf%6.2f%6.2f%6s%4s%2s%2s\n",
 			linetype,aserial," ",aname,altLoc,rname," ",chainid,rserial,icode," ",x,y,z,opcy,tmpt," ",segId,element,charge); */
 
 			/* and we could probably get away with this using astral files, */
 			/* sscanf(line, "%6s%5d%*1c%4s%1c%3s%*1c%1c%4d%1c%*3c%8lf%8lf%8lf%6lf%6lf%*6c%6s\n",
 			linetype,&aserial,aname,&altLoc,rname,&chainid,&rserial,&icode,&x,&y,&z,&opcy,&tmpt,element);
-			printf("%-6s%5d%-1s%-4s%1c%3s%1s%1c%4d%1c%3s%8.3lf%8.3lf%8.3lf%6.2f%6.2f%6s%6s\n",
+			Rf_warning("%-6s%5d%-1s%-4s%1c%3s%1s%1c%4d%1c%3s%8.3lf%8.3lf%8.3lf%6.2f%6.2f%6s%6s\n",
 			linetype,aserial," ",aname,altLoc,rname," ",chainid,rserial,icode," ",x,y,z,opcy,tmpt," ",element); */

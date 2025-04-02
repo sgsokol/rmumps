@@ -170,16 +170,16 @@ orderMinPriority(minprior_t *minprior, options_t *options, timings_t *cpus)
      check whether nstages is valid
      ------------------------------ */
   if ((nstages < 1) || (nstages > nvtx))
-   { fprintf(stderr, "\nError in function orderMinPriority\n"
+   { Rf_error("\nError in function orderMinPriority\n"
           "  no valid number of stages in multisector (#stages = %d)\n",
           nstages);
-     quit();
+     /*quit();*/
    }
 
   if ((nstages < 2) && (ordtype != MINIMUM_PRIORITY))
-   { fprintf(stderr, "\nError in function orderMinPriority\n"
+   { Rf_error("\nError in function orderMinPriority\n"
           "  not enough stages in multisector (#stages = %d)\n", nstages);
-     quit();
+     /*quit();*/
    }
 
   /* --------------------------------------------------------------
@@ -202,9 +202,9 @@ orderMinPriority(minprior_t *minprior, options_t *options, timings_t *cpus)
        eliminateStage(minprior, nstages-1, scoretype, cpus);
        break;
      default:
-       fprintf(stderr, "\nError in function orderMinPriority\n"
+       Rf_error("\nError in function orderMinPriority\n"
             "  unrecognized ordering type %d\n", ordtype);
-       quit();
+       /*quit();*/
    }
 
   /* -------------------------------------------
@@ -212,7 +212,7 @@ orderMinPriority(minprior_t *minprior, options_t *options, timings_t *cpus)
      ------------------------------------------- */
   if ((ordtype != MINIMUM_PRIORITY) && (options[OPTION_MSGLVL] > 1))
     for (istage = 0; istage < nstages; istage++)
-      printf("%4d. stage: #steps %6d, weight %6d, nzl %8d, ops %e\n", istage,
+      Rf_warning("%4d. stage: #steps %6d, weight %6d, nzl %8d, ops %e\n", istage,
              minprior->stageinfo[istage].nstep,
              minprior->stageinfo[istage].welim,
              minprior->stageinfo[istage].nzf,
@@ -252,7 +252,7 @@ eliminateStage(minprior_t *minprior, PORD_INT istage, PORD_INT scoretype, timing
   score = Gelim->score;
 
 #ifdef DEBUG
-  printf("\nSTARTING NEW ELIMINATION STAGE (nedges %d, maxedges %d)\n\n",
+  Rf_warning("\nSTARTING NEW ELIMINATION STAGE (nedges %d, maxedges %d)\n\n",
          Gelim->G->nedges, Gelim->maxedges);
   if (istage> 0) printElimGraph(Gelim);
   /* waitkey(); */
@@ -290,12 +290,12 @@ eliminateStage(minprior_t *minprior, PORD_INT istage, PORD_INT scoretype, timing
      nreach = minprior->nreach;
 
 #ifdef BE_CAUTIOUS
-     printf("checking arrays auxtmp and auxbin\n");
+     Rf_warning("checking arrays auxtmp and auxbin\n");
      for (u = 0; u < nvtx; u++)
        if ((auxtmp[u] >= *pflag) || (auxbin[u] != -1))
-        { printf("ERROR: flag = %d, auxtmp[%d] = %d, auxbin[%d] = %d\n",
+        { Rf_error("ERROR: flag = %d, auxtmp[%d] = %d, auxbin[%d] = %d\n",
                  *pflag, u, auxtmp[u], u, auxbin[u]);
-          quit();
+          /*quit();*/
         }
 #endif
 
@@ -314,12 +314,12 @@ eliminateStage(minprior_t *minprior, PORD_INT istage, PORD_INT scoretype, timing
      pord_stoptimer(cpus[TIME_FINDINODES]);
 
 #ifdef BE_CAUTIOUS
-     printf("checking arrays auxtmp and auxbin\n");
+     Rf_warning("checking arrays auxtmp and auxbin\n");
      for (u = 0; u < nvtx; u++)
        if ((auxtmp[u] >= *pflag) || (auxbin[u] != -1))
-        { printf("ERROR: flag = %d, auxtmp[%d] = %d, auxbin[%d] = %d\n",
+        { Rf_error("ERROR: flag = %d, auxtmp[%d] = %d, auxbin[%d] = %d\n",
                  *pflag, u, auxtmp[u], u, auxbin[u]);
-          quit();
+          /*quit();*/
         }
 #endif
 
@@ -384,7 +384,7 @@ eliminateStep(minprior_t *minprior, PORD_INT istage, PORD_INT scoretype)
   score = Gelim->score;
 
 #ifdef DEBUG
-  printf("\nStarting new elimination step (nedges %d, maxedges %d)\n",
+  Rf_warning("\nStarting new elimination step (nedges %d, maxedges %d)\n",
          Gelim->G->nedges, Gelim->maxedges);
   /* waitkey(); */
 #endif
@@ -430,11 +430,11 @@ eliminateStep(minprior_t *minprior, PORD_INT istage, PORD_INT scoretype)
       }
 
 #ifdef DEBUG
-     printf("Node %d (weight %d, score %d) eliminated: (boundary weight %d)\n",
+     Rf_warning("Node %d (weight %d, score %d) eliminated: (boundary weight %d)\n",
             u, vwghtu, minscr, degree[u]);
      for (i = istart; i < istop; i++)
-       printf("%4d (degree %2d)", adjncy[i], degree[adjncy[i]]);
-     printf("\n");
+       Rf_warning("%4d (degree %2d)", adjncy[i], degree[adjncy[i]]);
+     Rf_warning("\n");
 #endif
 
       /* ---------------------------------------------------------------

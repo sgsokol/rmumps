@@ -3090,8 +3090,9 @@ regerror (
     /* Only error codes returned by the rest of the code should be passed
        to this routine.  If we are given anything else, or if other regex
        code generates an invalid error code, then the program has a bug.
-       Dump core so we can fix it.  */
-    abort ();
+       Dump core so we can fix it.  
+    abort ();*/
+    Rf_error("%s", "");
 
   msg = gettext (__re_error_msgid + __re_error_msgid_idx[errcode]);
 

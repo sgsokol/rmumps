@@ -87,7 +87,7 @@ Vgraph * restrict const             grafptr)      /*+ Separation graph +*/
   FILE * restrict     fileptr;
   Gnum                vertnum;                    /* Vertex number */
 
-  sprintf (nametab, "vgraphseparatevw_output_%08d.map", vgraphseparatevwfilenum ++);
+  snprintf (nametab, 63, "vgraphseparatevw_output_%08d.map", vgraphseparatevwfilenum ++);
   if ((fileptr = fopen (nametab, "w+")) == NULL) {
     errorPrint ("vgraphSeparateVw: cannot open partition file");
     return     (1);

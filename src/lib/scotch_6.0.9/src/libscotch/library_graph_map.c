@@ -645,10 +645,10 @@ const double                kbalval)              /*+ Desired imbalance ratio   
   const char *        exasptr;
   const char *        exaxptr;
 
-  sprintf (bbaltab, "%lf", kbalval);
-  sprintf (kbaltab, "%lf", kbalval);
-  sprintf (kmovtab, GNUMSTRING, (Gnum) (((flagval & SCOTCH_STRATQUALITY) != 0) ? 200 : 80));
-  sprintf (mvrttab, GNUMSTRING, (Gnum) (MAX ((20 * partnbr), 10000)));
+  snprintf (bbaltab, 63, "%lf", kbalval);
+  snprintf (kbaltab, 63, "%lf", kbalval);
+  snprintf (kmovtab, 63, GNUMSTRING, (Gnum) (((flagval & SCOTCH_STRATQUALITY) != 0) ? 200 : 80));
+  snprintf (mvrttab, 63, GNUMSTRING, (Gnum) (MAX ((20 * partnbr), 10000)));
 
   strcpy (bufftab, ((flagval & SCOTCH_STRATRECURSIVE) != 0)
           ? "<RECU>"                              /* Use only the recursive bipartitioning framework */
@@ -711,9 +711,9 @@ const double                bbalval)              /*+ Maximum imbalance ratio +*
   char *              difsptr;
   char *              exasptr;
 
-  sprintf (bbaltab, "%lf", bbalval);
-  sprintf (denstab, "%lf", densval);
-  sprintf (pwgttab, GNUMSTRING, pwgtval);
+  snprintf (bbaltab, 31, "%lf", bbalval);
+  snprintf (denstab, 31, "%lf", densval);
+  snprintf (pwgttab, 31, GNUMSTRING, pwgtval);
 
   strcpy (bufftab, "r{job=u,map=t,poli=L,sep=/((load><PWGT>)&!(edge>vert*<DENS>*(vert-1)))?(<BIPA>m{vert=80,low=h{pass=10}f{bal=<BBAL>,move=80},asc=b{bnd=<DIFS>f{bal=<BBAL>,move=80},org=f{bal=<BBAL>,move=80}}})<EXAS>;}");
   stringSubst (bufftab, "<BIPA>", ((flagval & SCOTCH_STRATSPEED) != 0) ? ""

@@ -54,7 +54,7 @@
 */
 
 #define VMESH_SEPARATE_FM
-
+#include <R_ext/Error.h>
 /* #define SCOTCH_DEBUG_VMESH3 */              /* For intensive debugging */
 
 #include "module.h"
@@ -148,8 +148,9 @@ const Gnum                                hashold) /*+ Maximum number of vertice
   }
 
 /* TODO */
-  fprintf (stderr, "hertnum no longer valid !\n");
-  exit    (1);
+  /*fprintf (stderr, "hertnum no longer valid !\n");*/
+  Rf_error("%s", "hertnum no longer valid !");
+  /*exit    (1);*/
 
   addradj = (byte *) helmtab - (byte *) (*helmptr); /* Compute address difference */
 
@@ -228,7 +229,8 @@ const Gnum                                hashold) /*+ Maximum number of vertice
     }
   }
 
-  fprintf (stderr, "########### vmeshSeparateFmResize (%ld) !!!\n", (long) hashold);
+  Rf_warning("########### vmeshSeparateFmResize (%ld) !!!\n", (long) hashold);
+  
 
   return (0);
 }
@@ -584,7 +586,7 @@ const VmeshSeparateFmParam * restrict const paraptr) /*+ Method parameters    +*
         gainTablAdd (tablptr, (GainLink *) velmptr, velmptr->ncmpgain2); /* Put it in table */
     }
 
-/* fprintf (stderr, "LOOP %ld\t(%ld,\t%ld)\n", (long) passnbr, (long) ncmpload2bst, (long) ncmploaddltbst); */
+   Rf_warning("LOOP %ld\t(%ld,\t%ld)\n", (long) passnbr, (long) ncmpload2bst, (long) ncmploaddltbst);
 
     moveflag = 0;                                 /* No moves to date                          */
     movenbr  = 0;                                 /* No uneffective moves yet                  */

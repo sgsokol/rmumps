@@ -128,7 +128,7 @@ const GraphFlag             flagval)              /* Graph loading flags        
     errorPrint ("graphLoad: bad input (2)");
     return     (1);
   }
-  sprintf (proptab, "%3.3d", (int) propval);      /* Compute file properties */
+  snprintf (proptab, 4, "%3.3d", (int) propval);      /* Compute file properties */
   proptab[0] -= '0';                              /* Vertex labels flag      */
   proptab[1] -= '0';                              /* Edge weights flag       */
   proptab[2] -= '0';                              /* Vertex loads flag       */

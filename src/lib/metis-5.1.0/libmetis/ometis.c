@@ -192,7 +192,7 @@ void MlevelNestedDissection(ctrl_t *ctrl, graph_t *graph, idx_t *order,
   MlevelNodeBisectionMultiple(ctrl, graph);
 
   IFSET(ctrl->dbglvl, METIS_DBG_SEPINFO, 
-      printf("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
+      Rf_warning("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
         graph->nvtxs, graph->pwgts[0], graph->pwgts[1], graph->pwgts[2]));
 
 
@@ -246,7 +246,7 @@ void MlevelNestedDissectionCC(ctrl_t *ctrl, graph_t *graph, idx_t *order,
   MlevelNodeBisectionMultiple(ctrl, graph);
 
   IFSET(ctrl->dbglvl, METIS_DBG_SEPINFO, 
-      printf("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
+      Rf_warning("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
         graph->nvtxs, graph->pwgts[0], graph->pwgts[1], graph->pwgts[2]));
 
   /* Order the nodes in the separator */
@@ -263,7 +263,7 @@ void MlevelNestedDissectionCC(ctrl_t *ctrl, graph_t *graph, idx_t *order,
 
   if (ctrl->dbglvl&METIS_DBG_INFO) {
     if (ncmps > 2)
-      printf("  Bisection resulted in %"PRIDX" connected components\n", ncmps);
+      Rf_warning("  Bisection resulted in %"PRIDX" connected components\n", ncmps);
   }
   
   sgraphs = SplitGraphOrderCC(ctrl, graph, ncmps, cptr, cind);

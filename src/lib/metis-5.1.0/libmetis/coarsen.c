@@ -237,7 +237,7 @@ idx_t Match_RM(ctrl_t *ctrl, graph_t *graph)
     }
   }
 
-  //printf("nunmatched: %zu\n", nunmatched);
+  //Rf_warning("nunmatched: %zu\n", nunmatched);
 
   /* see if a 2-hop matching is required/allowed */
   if (!ctrl->no2hop && nunmatched > UNMATCHEDFOR2HOP*nvtxs) 
@@ -378,7 +378,7 @@ idx_t Match_SHEM(ctrl_t *ctrl, graph_t *graph)
     }
   }
 
-  //printf("nunmatched: %zu\n", nunmatched);
+  //Rf_warning("nunmatched: %zu\n", nunmatched);
 
   /* see if a 2-hop matching is required/allowed */
   if (!ctrl->no2hop && nunmatched > UNMATCHEDFOR2HOP*nvtxs) 
@@ -451,7 +451,7 @@ idx_t Match_2HopAny(ctrl_t *ctrl, graph_t *graph, idx_t *perm, idx_t *match,
 
   nunmatched = *r_nunmatched;
 
-  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, printf("IN: nunmatched: %zu\t", * nunmatched)); */
+  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, Rf_warning("IN: nunmatched: %zu\t", * nunmatched)); */
 
   /* create the inverted index */
   WCOREPUSH;
@@ -496,7 +496,7 @@ idx_t Match_2HopAny(ctrl_t *ctrl, graph_t *graph, idx_t *perm, idx_t *match,
   }
   WCOREPOP;
 
-  /* IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, printf("OUT: nunmatched: %zu\n", nunmatched)); */
+  /* IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, Rf_warning("OUT: nunmatched: %zu\n", nunmatched)); */
 
   IFSET(ctrl->dbglvl, METIS_DBG_TIME, gk_stopcputimer(ctrl->Aux3Tmr));
 
@@ -532,7 +532,7 @@ idx_t Match_2HopAll(ctrl_t *ctrl, graph_t *graph, idx_t *perm, idx_t *match,
   nunmatched = *r_nunmatched;
   mask = IDX_MAX/maxdegree;
 
-  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, printf("IN: nunmatched: %zu\t", nunmatched)); */
+  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, Rf_warning("IN: nunmatched: %zu\t", nunmatched)); */
 
   WCOREPUSH;
 
@@ -585,7 +585,7 @@ idx_t Match_2HopAll(ctrl_t *ctrl, graph_t *graph, idx_t *perm, idx_t *match,
   }
   WCOREPOP;
 
-  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, printf("OUT: ncand: %zu, nunmatched: %zu\n", ncand, nunmatched)); */
+  /*IFSET(ctrl->dbglvl, METIS_DBG_COARSEN, Rf_warning("OUT: ncand: %zu, nunmatched: %zu\n", ncand, nunmatched)); */
 
   IFSET(ctrl->dbglvl, METIS_DBG_TIME, gk_stopcputimer(ctrl->Aux3Tmr));
 
@@ -602,12 +602,12 @@ void PrintCGraphStats(ctrl_t *ctrl, graph_t *graph)
 {
   idx_t i;
 
-  printf("%10"PRIDX" %10"PRIDX" %10"PRIDX" [%"PRIDX"] [", 
+  Rf_warning("%10"PRIDX" %10"PRIDX" %10"PRIDX" [%"PRIDX"] [", 
       graph->nvtxs, graph->nedges, isum(graph->nedges, graph->adjwgt, 1), ctrl->CoarsenTo);
 
   for (i=0; i<graph->ncon; i++)
-    printf(" %8"PRIDX":%8"PRIDX, ctrl->maxvwgt[i], graph->tvwgt[i]);
-  printf(" ]\n");
+    Rf_warning(" %8"PRIDX":%8"PRIDX, ctrl->maxvwgt[i], graph->tvwgt[i]);
+  Rf_warning(" ]\n");
 }
 
 

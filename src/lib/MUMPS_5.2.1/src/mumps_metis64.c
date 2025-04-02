@@ -13,6 +13,7 @@
  *
  */
 #include <stdio.h>  /* For NULL constant (stddef.h) and debug printings */
+#include <R_ext/Error.h>
 #include "mumps_metis64.h"
 #if defined(parmetis) || defined(parmetis3)
 /*PARMETIS*/
@@ -117,8 +118,9 @@ MUMPS_METIS_KWAY_64(MUMPS_INT8 *n,     MUMPS_INT8 *iptr,
      k, NULL, NULL, options,
      &edgecut, part);
 #  else
-     printf("** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
-     /*ierr=1;*/
+     /*printf("** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
+     ierr=1;*/
+     Rf_error("%s", "** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
 #  endif
 #endif
   return;

@@ -131,6 +131,7 @@
 #endif /* HAVE_NOT_SYS_WAIT_H */
 #endif /* COMMON_PTHREAD */
 
+#include <R_ext/Error.h>
 /*
 **  Working definitions.
 */
@@ -479,3 +480,6 @@ void nu pl
 
 #define STRINGIFY2(n)               #n
 #define STRINGIFY(n)                STRINGIFY2(n)
+
+/* make inoperant exit(n) for R */
+#define exit(x) 

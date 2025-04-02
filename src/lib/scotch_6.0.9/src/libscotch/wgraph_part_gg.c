@@ -111,7 +111,7 @@ const WgraphPartGgParam * const paraptr)    /*+ Method parameters +*/
   GainLink * restrict               gainlinkptr;
   WgraphPartGgVertex * restrict     vertlist;    /* List of vertices                                               */
 
-  printf ("GG (" GNUMSTRING ")\n", wgrafptr->s.vertnbr);
+  Rf_warning("GG (" GNUMSTRING ")\n", wgrafptr->s.vertnbr);
 
   if (((tabl = gainTablInit (GAIN_LINMAX, WGRAPHSEPAGGSUBBITS)) == NULL) || /* Use logarithmic array only */
       memAllocGroup((void **) (void *)
@@ -322,7 +322,7 @@ const WgraphPartGgParam * const paraptr)    /*+ Method parameters +*/
   }
 
   for (partval = 0; partval < wgrafptr->partnbr; partval ++)
-    printf("\033[0;33mcompload[" GNUMSTRING "] " GNUMSTRING " " GNUMSTRING "\033[0m\n", partval, wgrafptr->compload[partval], wgrafptr->compsize[partval]);
+    Rf_warning("\033[0;33mcompload[" GNUMSTRING "] " GNUMSTRING " " GNUMSTRING "\033[0m\n", partval, wgrafptr->compload[partval], wgrafptr->compsize[partval]);
   memFree(vexxtax + wgrafptr->s.baseval);       /* Free work arrays */
   gainTablExit (tabl);
 

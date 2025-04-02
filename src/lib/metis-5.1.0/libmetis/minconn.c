@@ -163,7 +163,7 @@ void UpdateEdgeSubDomainGraph(ctrl_t *ctrl, idx_t u, idx_t v, idx_t ewgt,
       ctrl->adwgts[u][nads] = ewgt;
       nads++;
       if (r_maxndoms != NULL && nads > *r_maxndoms) {
-        printf("You just increased the maxndoms: %"PRIDX" %"PRIDX"\n", 
+        Rf_warning("You just increased the maxndoms: %"PRIDX" %"PRIDX"\n", 
             nads, *r_maxndoms);
         *r_maxndoms = nads;
       }
@@ -265,7 +265,7 @@ void EliminateSubDomainEdges(ctrl_t *ctrl, graph_t *graph)
     max   = nads[iargmax(nparts, nads)];
 
     IFSET(ctrl->dbglvl, METIS_DBG_CONNINFO, 
-          printf("Adjacent Subdomain Stats: Total: %3"PRIDX", "
+          Rf_warning("Adjacent Subdomain Stats: Total: %3"PRIDX", "
                  "Max: %3"PRIDX"[%zu], Avg: %3"PRIDX"\n", 
                  total, max, iargmax(nparts, nads), avg)); 
 
@@ -294,7 +294,7 @@ void EliminateSubDomainEdges(ctrl_t *ctrl, graph_t *graph)
       }
 
       IFSET(ctrl->dbglvl, METIS_DBG_CONNINFO, 
-            printf("Me: %"PRIDX", Degree: %4"PRIDX", TotalOut: %"PRIDX",\n", 
+            Rf_warning("Me: %"PRIDX", Degree: %4"PRIDX", TotalOut: %"PRIDX",\n", 
                 me, nads[me], totalout));
 
       /* Sort the connections according to their cut */
@@ -360,7 +360,7 @@ void EliminateSubDomainEdges(ctrl_t *ctrl, graph_t *graph)
           ikvsortd(ncand, cand);
     
           IFSET(ctrl->dbglvl, METIS_DBG_CONNINFO, 
-                printf("\tMinOut: %4"PRIDX", to: %3"PRIDX", TtlWgt: %5"PRIDX"[#:%"PRIDX"]\n", 
+                Rf_warning("\tMinOut: %4"PRIDX", to: %3"PRIDX", TtlWgt: %5"PRIDX"[#:%"PRIDX"]\n", 
                     mypmat[other], other, isum(ncon, cpwgt, 1), nind));
 
           /* Go through and select the first domain that is common with 'me', and does
@@ -395,7 +395,7 @@ void EliminateSubDomainEdges(ctrl_t *ctrl, graph_t *graph)
                 }
     
                 IFSET(ctrl->dbglvl, METIS_DBG_CONNINFO, 
-                      printf("\t\tto=%"PRIDX", nadd=%"PRIDX", %"PRIDX"\n", k, nadd, nads[k]));
+                      Rf_warning("\t\tto=%"PRIDX", nadd=%"PRIDX", %"PRIDX"\n", k, nadd, nads[k]));
     
                 if (nads[k]+nadd < nads[me]) {
                   if (target2 == -1 || nads[target2]+bestnadd > nads[k]+nadd ||
@@ -427,7 +427,7 @@ void EliminateSubDomainEdges(ctrl_t *ctrl, graph_t *graph)
     
           if (target != -1) {
             IFSET(ctrl->dbglvl, METIS_DBG_CONNINFO, 
-                printf("\t\tScheme: %"PRIDX". Moving to %"PRIDX"\n", scheme, target));
+                Rf_warning("\t\tScheme: %"PRIDX". Moving to %"PRIDX"\n", scheme, target));
             move = 1;
             break;
           }
@@ -585,7 +585,7 @@ void MoveGroupMinConnForVol(ctrl_t *ctrl, graph_t *graph, idx_t to, idx_t nind,
 
     xgain = (myrinfo->nid == 0 && myrinfo->ned > 0 ? vsize[i] : 0);
 
-    //printf("Moving %"PRIDX" from %"PRIDX" to %"PRIDX" [vsize: %"PRIDX"] [xgain: %"PRIDX"]\n", 
+    //Rf_warning("Moving %"PRIDX" from %"PRIDX" to %"PRIDX" [vsize: %"PRIDX"] [xgain: %"PRIDX"]\n", 
     //    i, from, to, vsize[i], xgain);
     
     /* find the location of 'to' in myrinfo or create it if it is not there */
@@ -595,7 +595,7 @@ void MoveGroupMinConnForVol(ctrl_t *ctrl, graph_t *graph, idx_t to, idx_t nind,
     }
 
     if (k == myrinfo->nnbrs) {
-      //printf("Missing neighbor\n");
+      //Rf_warning("Missing neighbor\n");
 
       if (myrinfo->nid > 0)
         xgain -= vsize[i];
@@ -608,7 +608,7 @@ void MoveGroupMinConnForVol(ctrl_t *ctrl, graph_t *graph, idx_t to, idx_t nind,
         onbrs  = ctrl->vnbrpool + orinfo->inbr;
         ASSERT(other != to)
 
-        //printf("  %8d %8d %3d\n", (int)ii, (int)vsize[ii], (int)other);
+        //Rf_warning("  %8d %8d %3d\n", (int)ii, (int)vsize[ii], (int)other);
 
         if (from == other) {
           /* Same subdomain vertex: Decrease the gain if 'to' is a new neighbor. */
@@ -701,7 +701,7 @@ void PrintSubDomainGraph(graph_t *graph, idx_t nparts, idx_t *where)
     }
   }
 
-  /* printf("Subdomain Info\n"); */
+  /* Rf_warning("Subdomain Info\n"); */
   total = max = 0;
   for (i=0; i<nparts; i++) {
     for (k=0, j=0; j<nparts; j++) {
@@ -713,15 +713,15 @@ void PrintSubDomainGraph(graph_t *graph, idx_t nparts, idx_t *where)
     if (k > max)
       max = k;
 /*
-    printf("%2"PRIDX" -> %2"PRIDX"  ", i, k);
+    Rf_warning("%2"PRIDX" -> %2"PRIDX"  ", i, k);
     for (j=0; j<nparts; j++) {
       if (pmat[i*nparts+j] > 0)
-        printf("[%2"PRIDX" %4"PRIDX"] ", j, pmat[i*nparts+j]);
+        Rf_warning("[%2"PRIDX" %4"PRIDX"] ", j, pmat[i*nparts+j]);
     }
-    printf("\n");
+    Rf_warning("\n");
 */
   }
-  printf("Total adjacent subdomains: %"PRIDX", Max: %"PRIDX"\n", total, max);
+  Rf_warning("Total adjacent subdomains: %"PRIDX", Max: %"PRIDX"\n", total, max);
 
   gk_free((void **)&pmat, LTERM);
 }

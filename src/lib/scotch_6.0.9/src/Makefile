@@ -143,4 +143,4 @@ realclean			:	required
 					(cd libscotchmetis ; $(MAKE) realclean)
 					#(cd check ;          $(MAKE) realclean)
 					(cd esmumps ;        $(MAKE) realclean)
-					-$(RM) ../bin/* ../include/* ../lib/*
+					-$(RM) ../bin/* ../lib/*

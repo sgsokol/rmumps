@@ -115,7 +115,7 @@ gk_graph_t *gk_graph_Read(char *filename, int format, int isfewgts,
     if (fmt > 111)
       gk_errexit(SIGERR, "Cannot read this type of file format [fmt=%zu]!\n", fmt);
 
-    sprintf(fmtstr, "%03zu", fmt%1000);
+    snprintf(fmtstr, 255, "%03zu", fmt%1000);
     readsizes = (fmtstr[0] == '1');
     readwgts  = (fmtstr[1] == '1');
     readvals  = (fmtstr[2] == '1');
@@ -278,15 +278,15 @@ void gk_graph_Write(gk_graph_t *graph, char *filename, int format)
 {
   ssize_t i, j;
   int hasvwgts, hasvsizes, hasewgts;
-  FILE *fpout;
+  /*FILE *fpout;*/
 
   if (format != GK_GRAPH_FMT_METIS)
     gk_errexit(SIGERR, "Unknown file format. %d\n", format);
 
-  if (filename)
+  /*if (filename)
     fpout = gk_fopen(filename, "w", "gk_graph_Write: fpout");
   else
-    fpout = stdout; 
+    fpout = stdout; */
 
 
   hasewgts  = (graph->iadjwgt || graph->fadjwgt);
@@ -294,40 +294,50 @@ void gk_graph_Write(gk_graph_t *graph, char *filename, int format)
   hasvsizes = (graph->ivsizes || graph->fvsizes);
 
   /* write the header line */
-  fprintf(fpout, "%d %zd", graph->nvtxs, graph->xadj[graph->nvtxs]/2);
+  /*fprintf(fpout, "%d %zd", graph->nvtxs, graph->xadj[graph->nvtxs]/2);
   if (hasvwgts || hasvsizes || hasewgts) 
     fprintf(fpout, " %d%d%d", hasvsizes, hasvwgts, hasewgts);
-  fprintf(fpout, "\n");
+  fprintf(fpout, "\n");*/
+  Rf_warning("%d %zd", graph->nvtxs, graph->xadj[graph->nvtxs]/2);
+  if (hasvwgts || hasvsizes || hasewgts)
+    Rf_warning(" %d%d%d", hasvsizes, hasvwgts, hasewgts);
 
 
   for (i=0; i<graph->nvtxs; i++) {
     if (hasvsizes) {
       if (graph->ivsizes)
-        fprintf(fpout, " %d", graph->ivsizes[i]);
+        /*fprintf(fpout, " %d", graph->ivsizes[i]);*/
+        Rf_warning(" %d", graph->ivsizes[i]);
       else
-        fprintf(fpout, " %f", graph->fvsizes[i]);
+        /*fprintf(fpout, " %f", graph->fvsizes[i]);*/
+        Rf_warning(" %f", graph->fvsizes[i]);
     }
 
     if (hasvwgts) {
       if (graph->ivwgts)
-        fprintf(fpout, " %d", graph->ivwgts[i]);
+        /*fprintf(fpout, " %d", graph->ivwgts[i]);*/
+        Rf_warning(" %d", graph->ivwgts[i]);
       else
-        fprintf(fpout, " %f", graph->fvwgts[i]);
+        /*fprintf(fpout, " %f", graph->fvwgts[i]);*/
+        Rf_warning(" %f", graph->fvwgts[i]);
     }
 
     for (j=graph->xadj[i]; j<graph->xadj[i+1]; j++) {
-      fprintf(fpout, " %d", graph->adjncy[j]+1);
+      /*fprintf(fpout, " %d", graph->adjncy[j]+1);*/
+      Rf_warning(" %d", graph->adjncy[j]+1);
       if (hasewgts) {
         if (graph->iadjwgt)
-          fprintf(fpout, " %d", graph->iadjwgt[j]);
+          /*fprintf(fpout, " %d", graph->iadjwgt[j]);*/
+          Rf_warning(" %d", graph->iadjwgt[j]);
         else 
-          fprintf(fpout, " %f", graph->fadjwgt[j]);
+          /*fprintf(fpout, " %f", graph->fadjwgt[j]);*/
+          Rf_warning(" %f", graph->fadjwgt[j]);
       }
     }
-    fprintf(fpout, "\n");
+    /*fprintf(fpout, "\n");*/
   }
-  if (filename)
-    gk_fclose(fpout);
+  /*if (filename)
+    gk_fclose(fpout);*/
 }
 
 

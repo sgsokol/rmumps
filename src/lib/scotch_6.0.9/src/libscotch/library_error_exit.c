@@ -57,7 +57,7 @@
 */
 
 #define LIBRARY_ERROR
-
+#include <R_ext/Error.h>
 #include "module.h"
 #include "common.h"
 #include "scotch.h"
@@ -116,7 +116,8 @@ const char * const          errstr,               /*+ printf-like variable argum
   int                 proclocnum;
 #endif /* SCOTCH_PTSCOTCH */
 
-  fprintf  (stderr, "%s", _SCOTCHerrorProgName);
+  /*fprintf  (stderr, "%s", _SCOTCHerrorProgName);*/
+/*  
 #ifdef SCOTCH_PTSCOTCH
   if ((MPI_Initialized (&proclocnum) == MPI_SUCCESS) &&
       (proclocnum != 0)                              &&
@@ -124,22 +125,24 @@ const char * const          errstr,               /*+ printf-like variable argum
     fprintf (stderr, "(%d): ", proclocnum);
   else
     fprintf (stderr, ": ");
-#else /* SCOTCH_PTSCOTCH */
-  if (_SCOTCHerrorProgName[0] != '\0')
+#else*/ /* SCOTCH_PTSCOTCH */
+/*  if (_SCOTCHerrorProgName[0] != '\0')
     fprintf  (stderr, ": ");
-#endif /* SCOTCH_PTSCOTCH */
-  fprintf  (stderr, "ERROR: ");
+#endif*/ /* SCOTCH_PTSCOTCH */
+
+  /*fprintf  (stderr, "ERROR: ");*/
   va_start (errlist, errstr);
-  vfprintf (stderr, errstr, errlist);             /* Print arguments */
-  va_end   (errlist);
+  /*vfprintf (stderr, errstr, errlist); */            /* Print arguments */
+  Rf_error(errstr, errlist);
+  /*va_end   (errlist);
   fprintf  (stderr, "\n");
-  fflush   (stderr);                              /* In case it has been set to buffered mode */
+  fflush   (stderr);*/                              /* In case it has been set to buffered mode */
 
 #ifdef SCOTCH_ERROR_SLEEP
   sleep (SCOTCH_ERROR_SLEEP);                     /* Wait for messages to be propagated */
 #endif /* SCOTCH_ERROR_SLEEP */
 
-  exit (EXIT_FAILURE);
+  /*exit (EXIT_FAILURE);*/
 }
 
 /* This routine prints a warning message with
@@ -159,7 +162,8 @@ const char * const          errstr,               /*+ printf-like variable argum
   int                 proclocnum;
 #endif /* SCOTCH_PTSCOTCH */
 
-  fprintf  (stderr, "%s", _SCOTCHerrorProgName);
+  /*fprintf  (stderr, "%s", _SCOTCHerrorProgName);*/
+/*
 #ifdef SCOTCH_PTSCOTCH
   if ((MPI_Initialized (&proclocnum) == MPI_SUCCESS) &&
       (proclocnum != 0)                              &&
@@ -167,14 +171,15 @@ const char * const          errstr,               /*+ printf-like variable argum
     fprintf (stderr, "(%d): ", proclocnum);
   else
     fprintf (stderr, ": ");
-#else /* SCOTCH_PTSCOTCH */
-  if (_SCOTCHerrorProgName[0] != '\0')
+#else*/ /* SCOTCH_PTSCOTCH */
+/*  if (_SCOTCHerrorProgName[0] != '\0')
     fprintf  (stderr, ": ");
-#endif /* SCOTCH_PTSCOTCH */
-  fprintf  (stderr, "WARNING: ");
+#endif*/ /* SCOTCH_PTSCOTCH */
+  /*fprintf  (stderr, "WARNING: ");*/
   va_start (errlist, errstr);
-  vfprintf (stderr, errstr, errlist);             /* Print arguments */
+  /*vfprintf (stderr, errstr, errlist);*/             /* Print arguments */
+  Rf_warning(errstr, errlist);
   va_end   (errlist);
-  fprintf  (stderr, "\n");
-  fflush   (stderr);                              /* In case it has been set to buffered mode */
+  /*fprintf  (stderr, "\n");
+  fflush   (stderr);*/                              /* In case it has been set to buffered mode */
 }

@@ -147,8 +147,8 @@ void *gk_malloc(size_t nbytes, char *msg)
   ptr = (void *)malloc(nbytes);
 
   if (ptr == NULL) {
-    fprintf(stderr, "   Current memory used:  %10zu bytes\n", gk_GetCurMemoryUsed());
-    fprintf(stderr, "   Maximum memory used:  %10zu bytes\n", gk_GetMaxMemoryUsed());
+    Rf_warning("   Current memory used:  %10zu bytes\n", gk_GetCurMemoryUsed());
+    Rf_warning("   Maximum memory used:  %10zu bytes\n", gk_GetMaxMemoryUsed());
     gk_errexit(SIGMEM, "***Memory allocation failed for %s. Requested size: %zu bytes", 
         msg, nbytes);
     return NULL;
@@ -182,8 +182,8 @@ void *gk_realloc(void *oldptr, size_t nbytes, char *msg)
   ptr = (void *)realloc(oldptr, nbytes);
 
   if (ptr == NULL) {
-    fprintf(stderr, "   Maximum memory used: %10zu bytes\n", gk_GetMaxMemoryUsed());
-    fprintf(stderr, "   Current memory used: %10zu bytes\n", gk_GetCurMemoryUsed());
+    Rf_warning("   Maximum memory used: %10zu bytes\n", gk_GetMaxMemoryUsed());
+    Rf_warning("   Current memory used: %10zu bytes\n", gk_GetCurMemoryUsed());
     gk_errexit(SIGMEM, "***Memory realloc failed for %s. " "Requested size: %zu bytes", 
         msg, nbytes);
     return NULL;

@@ -31,8 +31,9 @@ C ssg
       INCLUDE 'mpif.h'
       INTEGER CNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
-      WRITE(*,*) 'Error. MPI_BSEND should not be called.'
+C      WRITE(*,*) 'Error. MPI_BSEND should not be called.'
 C      STOP
+      call rexit('Error. MPI_BSEND should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_BSEND
@@ -61,13 +62,15 @@ C***********************************************************************
       INTEGER CNT, DATATYPE, RECCNT, RECTYPE, ROOT, COMM, IERR
       INTEGER SENDBUF(*), RECVBUF(*)
       IF ( RECCNT .NE. CNT ) THEN
-        WRITE(*,*) 'ERROR in MPI_GATHER, RECCNT != CNT'
+C        WRITE(*,*) 'ERROR in MPI_GATHER, RECCNT != CNT'
 C        STOP
+        call rexit('ERROR in MPI_GATHER, RECCNT != CNT')
       ELSE
         CALL MUMPS_COPY( CNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_GATHER, DATATYPE=',DATATYPE
+C          WRITE(*,*) 'ERROR in MPI_GATHER, DATATYPE=',DATATYPE
 C          STOP
+           call rexit('ERROR in MPI_GATHER, DATATYPE=')
         END IF
       END IF
       IERR = 0
@@ -89,13 +92,15 @@ C     This requires passing the offset DISPLS(1) to
 C     "MUMPS_COPY_DATATYPE" routines.
 C
       IF ( RECCNT(1) .NE. CNT ) THEN
-        WRITE(*,*) 'ERROR in MPI_GATHERV, RECCNT(1) != CNT'
+C        WRITE(*,*) 'ERROR in MPI_GATHERV, RECCNT(1) != CNT'
 C        STOP
+        call rexit('ERROR in MPI_GATHERV, RECCNT(1) != CNT')
       ELSE
         CALL MUMPS_COPY( CNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_GATHERV, DATATYPE=',DATATYPE
+C          WRITE(*,*) 'ERROR in MPI_GATHERV, DATATYPE=',DATATYPE
 C          STOP
+          call rexit('ERROR in MPI_GATHERV, DATATYPE=')
         END IF
       END IF
       IERR = 0
@@ -111,8 +116,9 @@ C***********************************************************************
       IF (.NOT. MUMPS_IS_IN_PLACE(SENDBUF, CNT)) THEN
         CALL MUMPS_COPY( CNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_ALLREDUCE, DATATYPE=',DATATYPE
+C          WRITE(*,*) 'ERROR in MPI_ALLREDUCE, DATATYPE=',DATATYPE
 C          STOP
+          call rexit('ERROR in MPI_ALLREDUCE, DATATYPE=')
         END IF
       ENDIF
       IERR = 0
@@ -128,8 +134,9 @@ C***********************************************************************
       IF (.NOT. MUMPS_IS_IN_PLACE(SENDBUF, CNT)) THEN
         CALL MUMPS_COPY( CNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_REDUCE, DATATYPE=',DATATYPE
+C          WRITE(*,*) 'ERROR in MPI_REDUCE, DATATYPE=',DATATYPE
 C          STOP
+          call rexit('ERROR in MPI_REDUCE, DATATYPE=')
         END IF
       ENDIF
       IERR = 0
@@ -157,8 +164,9 @@ C***********************************************************************
       IF (.NOT. MUMPS_IS_IN_PLACE(SENDBUF, RCVCNT)) THEN
         CALL MUMPS_COPY( RCVCNT, SENDBUF, RECVBUF, DATATYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_REDUCE_SCATTER, DATATYPE=',DATATYPE
+C          WRITE(*,*) 'ERROR in MPI_REDUCE_SCATTER, DATATYPE=',DATATYPE
 C          STOP
+          call rexit('ERROR in MPI_REDUCE_SCATTER, DATATYPE=')
         END IF
       ENDIF
       IERR = 0
@@ -168,8 +176,9 @@ C***********************************************************************
       SUBROUTINE MPI_ABORT( COMM, IERRCODE, IERR )
       IMPLICIT NONE
       INTEGER COMM, IERRCODE, IERR
-      WRITE(*,*) "** MPI_ABORT called"
+C      WRITE(*,*) "** MPI_ABORT called"
 C      STOP
+      call rexit("** MPI_ABORT called")
       END SUBROUTINE MPI_ABORT
 C***********************************************************************
       SUBROUTINE MPI_ALLTOALL( SENDBUF, SENDCNT, SENDTYPE,
@@ -178,16 +187,19 @@ C***********************************************************************
       INTEGER SENDCNT, SENDTYPE, RECVCNT, RECVTYPE, COMM, IERR
       INTEGER SENDBUF(*), RECVBUF(*)
       IF ( RECVCNT .NE. SENDCNT ) THEN
-        WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVCNT != SENDCNT'
-        STOP
+C        WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVCNT != SENDCNT'
+C        STOP
+        call rexit('ERROR in MPI_ALLTOALL, RECVCNT != SENDCNT')
       ELSE IF ( RECVTYPE .NE. SENDTYPE ) THEN
-        WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVTYPE != SENDTYPE'
-        STOP
+C        WRITE(*,*) 'ERROR in MPI_ALLTOALL, RECVTYPE != SENDTYPE'
+C        STOP
+        call rexit('ERROR in MPI_ALLTOALL, RECVTYPE != SENDTYPE')
       ELSE
         CALL MUMPS_COPY( SENDCNT, SENDBUF, RECVBUF, SENDTYPE, IERR )
         IF ( IERR .NE. 0 ) THEN
-          WRITE(*,*) 'ERROR in MPI_ALLTOALL, SENDTYPE=',SENDTYPE
-          STOP
+C          WRITE(*,*) 'ERROR in MPI_ALLTOALL, SENDTYPE=',SENDTYPE
+C          STOP
+          call rexit('ERROR in MPI_ALLTOALL, SENDTYPE=')
         END IF
       END IF
       IERR = 0
@@ -313,8 +325,9 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER DATATYPE, CNT, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
-      WRITE(*,*) 'Error. MPI_GET_CNT should not be called.'
-      STOP
+C      WRITE(*,*) 'Error. MPI_GET_CNT should not be called.'
+C      STOP
+      call rexit('Error. MPI_GET_CNT should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_GET_COUNT
@@ -390,8 +403,9 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER CNT, DATATYPE, DEST, TAG, COMM, IERR, IREQ
       INTEGER BUF(*)
-      WRITE(*,*) 'Error. MPI_ISEND should not be called.'
+C      WRITE(*,*) 'Error. MPI_ISEND should not be called.'
 C      STOP
+      call rexit('Error. MPI_ISEND should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_ISEND
@@ -436,8 +450,9 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER INCNT, DATATYPE, OUTCNT, POSITION, COMM, IERR
       INTEGER INBUF(*), OUTBUF(*)
-      WRITE(*,*) 'Error. MPI_PACKED should not be called.'
+C      WRITE(*,*) 'Error. MPI_PACKED should not be called.'
 C      STOP
+      call rexit('Error. MPI_PACKED should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PACK
@@ -446,8 +461,9 @@ C***********************************************************************
       IMPLICIT NONE
       INCLUDE 'mpif.h'
       INTEGER INCNT, DATATYPE, COMM, SIZE, IERR
-      WRITE(*,*) 'Error. MPI_PACK_SIZE should not be called.'
+C      WRITE(*,*) 'Error. MPI_PACK_SIZE should not be called.'
 C      STOP
+      call rexit('Error. MPI_PACK_SIZE should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PACK_SIZE
@@ -457,8 +473,9 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER SOURCE, TAG, COMM, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
-      WRITE(*,*) 'Error. MPI_PROBE should not be called.'
+C      WRITE(*,*) 'Error. MPI_PROBE should not be called.'
 C      STOP
+      call rexit('Error. MPI_PROBE should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_PROBE
@@ -469,8 +486,9 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER CNT, DATATYPE, SOURCE, TAG, COMM, IERR
       INTEGER BUF(*), STATUS(MPI_STATUS_SIZE)
-      WRITE(*,*) 'Error. MPI_RECV should not be called.'
+C      WRITE(*,*) 'Error. MPI_RECV should not be called.'
 C      STOP
+      call rexit('Error. MPI_RECV should not be called.')
       IERR = 0
       RETURN
       END SUBROUTINE MPI_RECV
@@ -488,7 +506,8 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER CNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
-      WRITE(*,*) 'Error. MPI_SEND should not be called.'
+C      WRITE(*,*) 'Error. MPI_SEND should not be called.'
+      call rexit('Error. MPI_SEND should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -499,7 +518,8 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER CNT, DATATYPE, DEST, TAG, COMM, IERR
       INTEGER BUF(*)
-      WRITE(*,*) 'Error. MPI_SSEND should not be called.'
+C      WRITE(*,*) 'Error. MPI_SSEND should not be called.'
+      call rexit('Error. MPI_SSEND should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -522,7 +542,8 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER INSIZE, POSITION, OUTCNT, DATATYPE, COMM, IERR
       INTEGER INBUF(*), OUTBUF(*)
-      WRITE(*,*) 'Error. MPI_UNPACK should not be called.'
+C      WRITE(*,*) 'Error. MPI_UNPACK should not be called.'
+      call rexit('Error. MPI_UNPACK should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -533,7 +554,8 @@ C***********************************************************************
       INCLUDE 'mpif.h'
       INTEGER IREQ, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
-      WRITE(*,*) 'Error. MPI_WAIT should not be called.'
+C      WRITE(*,*) 'Error. MPI_WAIT should not be called.'
+      call rexit('Error. MPI_WAIT should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -545,7 +567,8 @@ C***********************************************************************
       INTEGER CNT, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
       INTEGER ARRAY_OF_REQUESTS( CNT )
-      WRITE(*,*) 'Error. MPI_WAITALL should not be called.'
+C      WRITE(*,*) 'Error. MPI_WAITALL should not be called.'
+      call rexit('Error. MPI_WAITALL should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -558,7 +581,8 @@ C***********************************************************************
       INTEGER CNT, INDEX, IERR
       INTEGER STATUS( MPI_STATUS_SIZE )
       INTEGER ARRAY_OF_REQUESTS( CNT )
-      WRITE(*,*) 'Error. MPI_WAITANY should not be called.'
+C      WRITE(*,*) 'Error. MPI_WAITANY should not be called.'
+      call rexit('Error. MPI_WAITANY should not be called.')
 C      STOP
       IERR = 0
       RETURN
@@ -760,7 +784,8 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER CNTXT, NPROW, NPCOL
       CHARACTER C
-        WRITE(*,*) 'Error. BLACS_GRIDINIT should not be called.'
+C        WRITE(*,*) 'Error. BLACS_GRIDINIT should not be called.'
+        call rexit('Error. BLACS_GRIDINIT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE blacs_gridinit
@@ -768,7 +793,8 @@ C***********************************************************************
       SUBROUTINE blacs_gridinfo( CNTXT, NPROW, NPCOL, MYROW, MYCOL )
       IMPLICIT NONE
       INTEGER CNTXT, NPROW, NPCOL, MYROW, MYCOL
-        WRITE(*,*) 'Error. BLACS_GRIDINFO should not be called.'
+C        WRITE(*,*) 'Error. BLACS_GRIDINFO should not be called.'
+        call rexit('Error. BLACS_GRIDINFO should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE blacs_gridinfo
@@ -776,7 +802,8 @@ C***********************************************************************
       SUBROUTINE blacs_gridexit( CNTXT )
       IMPLICIT NONE
       INTEGER CNTXT
-        WRITE(*,*) 'Error. BLACS_GRIDEXIT should not be called.'
+C        WRITE(*,*) 'Error. BLACS_GRIDEXIT should not be called.'
+        call rexit('Error. BLACS_GRIDEXIT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE blacs_gridexit
@@ -792,7 +819,8 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER ICSRC, ICTXT, INFO, IRSRC, LLD, M, MB, N, NB
       INTEGER DESC( * )
-        WRITE(*,*) 'Error. DESCINIT should not be called.'
+C        WRITE(*,*) 'Error. DESCINIT should not be called.'
+        call rexit('Error. DESCINIT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE DESCINIT
@@ -801,11 +829,13 @@ C***********************************************************************
       INTEGER N, NB, IPROC, ISRCPROC, NPROCS
 C     Can be called
       IF ( NPROCS .ne. 1 ) THEN
-        WRITE(*,*) 'Error. Last parameter from NUMROC should be 1'
+C        WRITE(*,*) 'Error. Last parameter from NUMROC should be 1'
+        call rexit('Error. Last parameter from NUMROC should be 1')
 C        STOP
       ENDIF
       IF ( IPROC .ne. 0 ) THEN
-        WRITE(*,*) 'Error. IPROC should be 0 in NUMROC.'
+C        WRITE(*,*) 'Error. IPROC should be 0 in NUMROC.'
+        call rexit('Error. IPROC should be 0 in NUMROC.')
 C        STOP
       ENDIF
       NUMROC = N
@@ -818,7 +848,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, N
       INTEGER            DESCA( * )
       COMPLEX            A( * )
-        WRITE(*,*) 'Error. PCPOTRF should not be called.'
+C        WRITE(*,*) 'Error. PCPOTRF should not be called.'
+        call rexit('Error. PCPOTRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcpotrf
@@ -828,7 +859,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, M, N
       INTEGER            DESCA( * ), IPIV( * )
       COMPLEX            A( * )
-        WRITE(*,*) 'Error. PCGETRF should not be called.'
+C        WRITE(*,*) 'Error. PCGETRF should not be called.'
+        call rexit('Error. PCGETRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcgetrf
@@ -840,7 +872,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * )
       COMPLEX            A( * ), B( * )
-        WRITE(*,*) 'Error. PCTRTRS should not be called.'
+C        WRITE(*,*) 'Error. PCTRTRS should not be called.'
+        call rexit('Error. PCTRTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pctrtrs
@@ -852,7 +885,8 @@ C***********************************************************************
       INTEGER            DESCA( * )
 C     DOUBLE COMPLEX     A( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * )
-        WRITE(*,*) 'Error. PZPOTRF should not be called.'
+C        WRITE(*,*) 'Error. PZPOTRF should not be called.'
+        call rexit('Error. PZPOTRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzpotrf
@@ -863,7 +897,8 @@ C***********************************************************************
       INTEGER            DESCA( * ), IPIV( * )
 C     DOUBLE COMPLEX     A( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * )
-        WRITE(*,*) 'Error. PZGETRF should not be called.'
+C        WRITE(*,*) 'Error. PZGETRF should not be called.'
+        call rexit('Error. PZGETRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzgetrf
@@ -876,7 +911,8 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * )
 C     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
-        WRITE(*,*) 'Error. PZTRTRS should not be called.'
+C        WRITE(*,*) 'Error. PZTRTRS should not be called.'
+        call rexit('Error. PZTRTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pztrtrs
@@ -887,7 +923,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, N
       INTEGER            DESCA( * )
       REAL               A( * )
-        WRITE(*,*) 'Error. PSPOTRF should not be called.'
+C        WRITE(*,*) 'Error. PSPOTRF should not be called.'
+        call rexit('Error. PSPOTRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pspotrf
@@ -897,7 +934,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, M, N
       INTEGER            DESCA( * ), IPIV( * )
       REAL               A( * )
-        WRITE(*,*) 'Error. PSGETRF should not be called.'
+C        WRITE(*,*) 'Error. PSGETRF should not be called.'
+        call rexit('Error. PSGETRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psgetrf
@@ -909,7 +947,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * )
       REAL               A( * ), B( * )
-        WRITE(*,*) 'Error. PSTRTRS should not be called.'
+C        WRITE(*,*) 'Error. PSTRTRS should not be called.'
+        call rexit('Error. PSTRTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pstrtrs
@@ -920,7 +959,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, N
       INTEGER            DESCA( * )
       DOUBLE PRECISION   A( * )
-        WRITE(*,*) 'Error. PDPOTRF should not be called.'
+C        WRITE(*,*) 'Error. PDPOTRF should not be called.'
+        call rexit('Error. PDPOTRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdpotrf
@@ -930,7 +970,8 @@ C***********************************************************************
       INTEGER            IA, INFO, JA, M, N
       INTEGER            DESCA( * ), IPIV( * )
       DOUBLE PRECISION   A( * )
-        WRITE(*,*) 'Error. PDGETRF should not be called.'
+C        WRITE(*,*) 'Error. PDGETRF should not be called.'
+        call rexit('Error. PDGETRF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdgetrf
@@ -942,7 +983,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * )
       DOUBLE PRECISION   A( * ), B( * )
-        WRITE(*,*) 'Error. PDTRTRS should not be called.'
+C        WRITE(*,*) 'Error. PDTRTRS should not be called.'
+        call rexit('Error. PDTRTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdtrtrs
@@ -953,7 +995,8 @@ C***********************************************************************
       INTEGER            CSRC, GCINDX, GRINDX, LRINDX, LCINDX, MYCOL,
      &                   MYROW, NPCOL, NPROW, RSRC
       INTEGER            DESC( * )
-        WRITE(*,*) 'Error. INFOG2L should not be called.'
+C        WRITE(*,*) 'Error. INFOG2L should not be called.'
+        call rexit('Error. INFOG2L should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE INFOG2L
@@ -961,7 +1004,8 @@ C***********************************************************************
       INTEGER FUNCTION INDXG2P( INDXGLOB, NB, IPROC, ISRCPROC, NPROCS )
       INTEGER            INDXGLOB, IPROC, ISRCPROC, NB, NPROCS
         INDXG2P = 0
-        WRITE(*,*) 'Error. INFOG2L should not be called.'
+C        WRITE(*,*) 'Error. INFOG2L should not be called.'
+        call rexit('Error. INFOG2L should not be called.')
 C        STOP
       RETURN
       END FUNCTION INDXG2P
@@ -972,7 +1016,8 @@ C***********************************************************************
       COMPLEX            ALPHA
       COMPLEX            X( * )
       INTEGER            DESCX( * )
-        WRITE(*,*) 'Error. PCSCAL should not be called.'
+C        WRITE(*,*) 'Error. PCSCAL should not be called.'
+        call rexit('Error. PCSCAL should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcscal
@@ -984,7 +1029,8 @@ C     DOUBLE COMPLEX     ALPHA
 C     DOUBLE COMPLEX     X( * )
       COMPLEX(kind=kind(0.0D0)) :: ALPHA, X( * )
       INTEGER            DESCX( * )
-        WRITE(*,*) 'Error. PZSCAL should not be called.'
+C        WRITE(*,*) 'Error. PZSCAL should not be called.'
+        call rexit('Error. PZSCAL should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzscal
@@ -995,7 +1041,8 @@ C***********************************************************************
       DOUBLE PRECISION   ALPHA
       DOUBLE PRECISION   X( * )
       INTEGER            DESCX( * )
-        WRITE(*,*) 'Error. PDSCAL should not be called.'
+C        WRITE(*,*) 'Error. PDSCAL should not be called.'
+        call rexit('Error. PDSCAL should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdscal
@@ -1006,7 +1053,8 @@ C***********************************************************************
       REAL               ALPHA
       REAL               X( * )
       INTEGER            DESCX( * )
-        WRITE(*,*) 'Error. PSSCAL should not be called.'
+C        WRITE(*,*) 'Error. PSSCAL should not be called.'
+        call rexit('Error. PSSCAL should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psscal
@@ -1020,7 +1068,8 @@ C     DOUBLE COMPLEX X(*), Y(*)
       COMPLEX(kind=kind(0.0D0)) :: X(*), Y(*)
       DOUBLE PRECISION DOT
         DOT = 0.0d0
-        WRITE(*,*) 'Error. PZDOT should not be called.'
+C        WRITE(*,*) 'Error. PZDOT should not be called.'
+        call rexit('Error. PZDOT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzdot
@@ -1033,7 +1082,8 @@ C***********************************************************************
       COMPLEX X(*), Y(*)
       REAL DOT
         DOT = 0.0e0
-        WRITE(*,*) 'Error. PCDOT should not be called.'
+C        WRITE(*,*) 'Error. PCDOT should not be called.'
+        call rexit('Error. PCDOT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcdot
@@ -1045,7 +1095,8 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
       DOUBLE PRECISION X(*), Y(*), DOT
         DOT = 0.0d0
-        WRITE(*,*) 'Error. PDDOT should not be called.'
+C        WRITE(*,*) 'Error. PDDOT should not be called.'
+        call rexit('Error. PDDOT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pddot
@@ -1057,7 +1108,8 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
       REAL X(*), Y(*), DOT
         DOT = 0.0e0
-        WRITE(*,*) 'Error. PSDOT should not be called.'
+C        WRITE(*,*) 'Error. PSDOT should not be called.'
+        call rexit('Error. PSDOT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psdot
@@ -1068,7 +1120,8 @@ C***********************************************************************
 C     DOUBLE COMPLEX A(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. ZGEBS2D should not be called.'
+C        WRITE(*,*) 'Error. ZGEBS2D should not be called.'
+        call rexit('Error. ZGEBS2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE zgebs2d
@@ -1078,7 +1131,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       COMPLEX A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. CGEBS2D should not be called.'
+C        WRITE(*,*) 'Error. CGEBS2D should not be called.'
+        call rexit('Error. CGEBS2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE cgebs2d
@@ -1088,7 +1142,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       REAL A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. SGEBS2D should not be called.'
+C        WRITE(*,*) 'Error. SGEBS2D should not be called.'
+        call rexit('Error. SGEBS2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE sgebs2d
@@ -1098,7 +1153,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       DOUBLE PRECISION A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. DGEBS2D should not be called.'
+C        WRITE(*,*) 'Error. DGEBS2D should not be called.'
+        call rexit('Error. DGEBS2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE dgebs2d
@@ -1109,7 +1165,8 @@ C***********************************************************************
 C     DOUBLE COMPLEX A(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. ZGEBR2D should not be called.'
+C        WRITE(*,*) 'Error. ZGEBR2D should not be called.'
+        call rexit('Error. ZGEBR2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE zgebr2d
@@ -1119,7 +1176,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       COMPLEX A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. CGEBR2D should not be called.'
+C        WRITE(*,*) 'Error. CGEBR2D should not be called.'
+        call rexit('Error. CGEBR2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE cgebr2d
@@ -1129,7 +1187,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       REAL A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. SGEBR2D should not be called.'
+C        WRITE(*,*) 'Error. SGEBR2D should not be called.'
+        call rexit('Error. SGEBR2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE sgebr2d
@@ -1139,7 +1198,8 @@ C***********************************************************************
       INTEGER CONTXT, M, N, LDA
       DOUBLE PRECISION A(*)
       CHARACTER SCOPE, TOP
-        WRITE(*,*) 'Error. DGEBR2D should not be called.'
+C        WRITE(*,*) 'Error. DGEBR2D should not be called.'
+        call rexit('Error. DGEBR2D should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE dgebr2d
@@ -1151,7 +1211,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       COMPLEX            A( * ), B( * )
-        WRITE(*,*) 'Error. PCGETRS should not be called.'
+C        WRITE(*,*) 'Error. PCGETRS should not be called.'
+        call rexit('Error. PCGETRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcgetrs
@@ -1164,7 +1225,8 @@ C***********************************************************************
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
 c     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
-        WRITE(*,*) 'Error. PZGETRS should not be called.'
+C        WRITE(*,*) 'Error. PZGETRS should not be called.'
+        call rexit('Error. PZGETRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzgetrs
@@ -1176,7 +1238,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       REAL               A( * ), B( * )
-        WRITE(*,*) 'Error. PSGETRS should not be called.'
+C        WRITE(*,*) 'Error. PSGETRS should not be called.'
+        call rexit('Error. PSGETRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psgetrs
@@ -1188,7 +1251,8 @@ C***********************************************************************
       INTEGER            IA, IB, INFO, JA, JB, N, NRHS
       INTEGER            DESCA( * ), DESCB( * ), IPIV( * )
       DOUBLE PRECISION   A( * ), B( * )
-        WRITE(*,*) 'Error. PDGETRS should not be called.'
+C        WRITE(*,*) 'Error. PDGETRS should not be called.'
+        call rexit('Error. PDGETRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdgetrs
@@ -1200,7 +1264,8 @@ C***********************************************************************
       INTEGER         IA, IB, INFO, JA, JB, N, NRHS
       INTEGER         DESCA( * ), DESCB( * )
       COMPLEX         A( * ), B( * )
-        WRITE(*,*) 'Error. PCPOTRS should not be called.'
+C        WRITE(*,*) 'Error. PCPOTRS should not be called.'
+        call rexit('Error. PCPOTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcpotrs
@@ -1213,7 +1278,8 @@ C***********************************************************************
       INTEGER         DESCA( * ), DESCB( * )
 c     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
-        WRITE(*,*) 'Error. PZPOTRS should not be called.'
+C        WRITE(*,*) 'Error. PZPOTRS should not be called.'
+        call rexit('Error. PZPOTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzpotrs
@@ -1225,7 +1291,8 @@ C***********************************************************************
       INTEGER         IA, IB, INFO, JA, JB, N, NRHS
       INTEGER         DESCA( * ), DESCB( * )
       REAL            A( * ), B( * )
-        WRITE(*,*) 'Error. PSPOTRS should not be called.'
+C        WRITE(*,*) 'Error. PSPOTRS should not be called.'
+        call rexit('Error. PSPOTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pspotrs
@@ -1237,7 +1304,8 @@ C***********************************************************************
       INTEGER         IA, IB, INFO, JA, JB, N, NRHS
       INTEGER         DESCA( * ), DESCB( * )
       DOUBLE          PRECISION A( * ), B( * )
-        WRITE(*,*) 'Error. PDPOTRS should not be called.'
+C        WRITE(*,*) 'Error. PDPOTRS should not be called.'
+        call rexit('Error. PDPOTRS should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdpotrs
@@ -1248,7 +1316,8 @@ C***********************************************************************
       INTEGER DESCX(*)
       REAL NORM2
       COMPLEX X( * )
-        WRITE(*,*) 'Error. PCNRM2 should not be called.'
+C        WRITE(*,*) 'Error. PCNRM2 should not be called.'
+        call rexit('Error. PCNRM2 should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pscnrm2
@@ -1260,7 +1329,8 @@ C***********************************************************************
       DOUBLE PRECISION NORM2
 C     DOUBLE COMPLEX X( * )
       COMPLEX(kind=kind(0.0D0)) :: X( * )
-        WRITE(*,*) 'Error. PZNRM2 should not be called.'
+C        WRITE(*,*) 'Error. PZNRM2 should not be called.'
+        call rexit('Error. PZNRM2 should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdznrm2
@@ -1270,7 +1340,8 @@ C***********************************************************************
       INTEGER N, IX, JX, INCX
       INTEGER DESCX(*)
       REAL    NORM2, X( * )
-        WRITE(*,*) 'Error. PSNRM2 should not be called.'
+C        WRITE(*,*) 'Error. PSNRM2 should not be called.'
+        call rexit('Error. PSNRM2 should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psnrm2
@@ -1280,7 +1351,8 @@ C***********************************************************************
       INTEGER N, IX, JX, INCX
       INTEGER DESCX(*)
       DOUBLE PRECISION NORM2, X( * )
-        WRITE(*,*) 'Error. PDNRM2 should not be called.'
+C        WRITE(*,*) 'Error. PDNRM2 should not be called.'
+        call rexit('Error. PDNRM2 should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdnrm2
@@ -1292,7 +1364,8 @@ C***********************************************************************
       INTEGER      DESCA( * )
       COMPLEX      A( * ), WORK( * )
       PCLANGE = 0.0e0
-        WRITE(*,*) 'Error. PCLANGE should not be called.'
+C        WRITE(*,*) 'Error. PCLANGE should not be called.'
+        call rexit('Error. PCLANGE should not be called.')
 C        STOP
       RETURN
       END FUNCTION pclange
@@ -1304,7 +1377,8 @@ C***********************************************************************
       INTEGER      DESCA( * )
       REAL         A( * ), WORK( * )
       PZLANGE = 0.0d0
-        WRITE(*,*) 'Error. PZLANGE should not be called.'
+C        WRITE(*,*) 'Error. PZLANGE should not be called.'
+        call rexit('Error. PZLANGE should not be called.')
 C        STOP
       RETURN
       END FUNCTION pzlange
@@ -1316,7 +1390,8 @@ C***********************************************************************
       INTEGER      DESCA( * )
       REAL         A( * ), WORK( * )
       PSLANGE = 0.0e0
-        WRITE(*,*) 'Error. PSLANGE should not be called.'
+C        WRITE(*,*) 'Error. PSLANGE should not be called.'
+        call rexit('Error. PSLANGE should not be called.')
 C        STOP
       RETURN
       END FUNCTION pslange
@@ -1328,7 +1403,8 @@ C***********************************************************************
       INTEGER      DESCA( * )
       DOUBLE       PRECISION A( * ), WORK( * )
       PDLANGE = 0.0d0
-        WRITE(*,*) 'Error. PDLANGE should not be called.'
+C        WRITE(*,*) 'Error. PDLANGE should not be called.'
+        call rexit('Error. PDLANGE should not be called.')
 C        STOP
       RETURN
       END FUNCTION pdlange
@@ -1342,7 +1418,8 @@ C***********************************************************************
       REAL            ANORM, RCOND
       INTEGER         DESCA( * ), IWORK( * )
       COMPLEX         A( * ), WORK( * )
-        WRITE(*,*) 'Error. PCGECON should not be called.'
+C        WRITE(*,*) 'Error. PCGECON should not be called.'
+        call rexit('Error. PCGECON should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcgecon
@@ -1357,7 +1434,8 @@ C***********************************************************************
       INTEGER         DESCA( * ), IWORK( * )
 C     DOUBLE COMPLEX  A( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A( * ), WORK( * )
-        WRITE(*,*) 'Error. PZGECON should not be called.'
+C        WRITE(*,*) 'Error. PZGECON should not be called.'
+        call rexit('Error. PZGECON should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzgecon
@@ -1371,7 +1449,8 @@ C***********************************************************************
       REAL            ANORM, RCOND
       INTEGER         DESCA( * ), IWORK( * )
       REAL            A( * ), WORK( * )
-        WRITE(*,*) 'Error. PSGECON should not be called.'
+C        WRITE(*,*) 'Error. PSGECON should not be called.'
+        call rexit('Error. PSGECON should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psgecon
@@ -1385,7 +1464,8 @@ C***********************************************************************
       DOUBLE          PRECISION ANORM, RCOND
       INTEGER         DESCA( * ), IWORK( * )
       DOUBLE          PRECISION A( * ), WORK( * )
-        WRITE(*,*) 'Error. PDGECON should not be called.'
+C        WRITE(*,*) 'Error. PDGECON should not be called.'
+        call rexit('Error. PDGECON should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdgecon
@@ -1396,7 +1476,8 @@ C***********************************************************************
       INTEGER    IA, JA, INFO, LWORK, M, N
       INTEGER    DESCA( * ), IPIV( * )
       COMPLEX    A( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PCGEQPF should not be called.'
+C        WRITE(*,*) 'Error. PCGEQPF should not be called.'
+        call rexit('Error. PCGEQPF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcgeqpf
@@ -1408,7 +1489,8 @@ C***********************************************************************
       INTEGER    DESCA( * ), IPIV( * )
 C     DOUBLE COMPLEX A( * ), TAU( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PZGEQPF should not be called.'
+C        WRITE(*,*) 'Error. PZGEQPF should not be called.'
+        call rexit('Error. PZGEQPF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzgeqpf
@@ -1419,7 +1501,8 @@ C***********************************************************************
       INTEGER         IA, JA, INFO, LWORK, M, N
       INTEGER         DESCA( * ), IPIV( * )
       REAL       A( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PSGEQPF should not be called.'
+C        WRITE(*,*) 'Error. PSGEQPF should not be called.'
+        call rexit('Error. PSGEQPF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psgeqpf
@@ -1430,7 +1513,8 @@ C***********************************************************************
       INTEGER         IA, JA, INFO, LWORK, M, N
       INTEGER         DESCA( * ), IPIV( * )
       DOUBLE PRECISION A( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PDGEQPF should not be called.'
+C        WRITE(*,*) 'Error. PDGEQPF should not be called.'
+        call rexit('Error. PDGEQPF should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdgeqpf
@@ -1441,7 +1525,8 @@ C***********************************************************************
       INTEGER N, IX, IY, JX, JY, INCX, INCY
       INTEGER DESCX(*), DESCY(*)
       COMPLEX A(*),X(*),Y(*)
-        WRITE(*,*) 'Error. PCAXPY should not be called.'
+C        WRITE(*,*) 'Error. PCAXPY should not be called.'
+        call rexit('Error. PCAXPY should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcaxpy
@@ -1453,7 +1538,8 @@ C***********************************************************************
       INTEGER DESCX(*), DESCY(*)
 C     DOUBLE COMPLEX A(*),X(*),Y(*)
       COMPLEX(kind=kind(0.0D0)) :: A(*),X(*),Y(*)
-        WRITE(*,*) 'Error. PZAXPY should not be called.'
+C        WRITE(*,*) 'Error. PZAXPY should not be called.'
+        call rexit('Error. PZAXPY should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzaxpy
@@ -1464,7 +1550,8 @@ C***********************************************************************
       INTEGER N, IX, IY, JX, JY, INCX, INCY
       INTEGER DESCX(*), DESCY(*)
       REAL A(*),X(*),Y(*)
-        WRITE(*,*) 'Error. PSAXPY should not be called.'
+C        WRITE(*,*) 'Error. PSAXPY should not be called.'
+        call rexit('Error. PSAXPY should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psaxpy
@@ -1475,7 +1562,8 @@ C***********************************************************************
       INTEGER N, IX, IY, JX, JY, INCX, INCY
       INTEGER DESCX(*), DESCY(*)
       DOUBLE PRECISION A(*),X(*),Y(*)
-        WRITE(*,*) 'Error. PDAXPY should not be called.'
+C        WRITE(*,*) 'Error. PDAXPY should not be called.'
+        call rexit('Error. PDAXPY should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdaxpy
@@ -1488,7 +1576,8 @@ C***********************************************************************
       COMPLEX            ALPHA
       INTEGER            DESCA( * ), DESCB( * )
       COMPLEX            A( * ), B( * )
-        WRITE(*,*) 'Error. PCTRSM should not be called.'
+C        WRITE(*,*) 'Error. PCTRSM should not be called.'
+        call rexit('Error. PCTRSM should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pctrsm 
@@ -1503,7 +1592,8 @@ C     DOUBLE COMPLEX     ALPHA
       INTEGER            DESCA( * ), DESCB( * )
 C     DOUBLE COMPLEX     A( * ), B( * )
       COMPLEX(kind=kind(0.0D0)) ::     A( * ), B( * )
-        WRITE(*,*) 'Error. PZTRSM should not be called.'
+C        WRITE(*,*) 'Error. PZTRSM should not be called.'
+        call rexit('Error. PZTRSM should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pztrsm 
@@ -1516,7 +1606,8 @@ C***********************************************************************
       REAL               ALPHA
       INTEGER            DESCA( * ), DESCB( * )
       REAL               A( * ), B( * )
-        WRITE(*,*) 'Error. PSTRSM should not be called.'
+C        WRITE(*,*) 'Error. PSTRSM should not be called.'
+        call rexit('Error. PSTRSM should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pstrsm 
@@ -1529,7 +1620,8 @@ C***********************************************************************
       DOUBLE PRECISION   ALPHA
       INTEGER            DESCA( * ), DESCB( * )
       DOUBLE PRECISION   A( * ), B( * )
-        WRITE(*,*) 'Error. PDTRSM should not be called.'
+C        WRITE(*,*) 'Error. PDTRSM should not be called.'
+        call rexit('Error. PDTRSM should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdtrsm 
@@ -1542,7 +1634,8 @@ C***********************************************************************
       INTEGER   IA, IC, INFO, JA, JC, K, LWORK, M, N
       INTEGER   DESCA( * ), DESCC( * )
       COMPLEX   A(  *  ), C( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PCUNMQR should not be called.'
+C        WRITE(*,*) 'Error. PCUNMQR should not be called.'
+        call rexit('Error. PCUNMQR should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pcunmqr
@@ -1556,7 +1649,8 @@ C***********************************************************************
       INTEGER   DESCA( * ), DESCC( * )
 C     DOUBLE COMPLEX A(  *  ), C( * ), TAU( * ), WORK( * )
       COMPLEX(kind=kind(0.0D0)) :: A(  *  ), C( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PZUNMQR should not be called.'
+C        WRITE(*,*) 'Error. PZUNMQR should not be called.'
+        call rexit('Error. PZUNMQR should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pzunmqr
@@ -1569,7 +1663,8 @@ C***********************************************************************
       INTEGER   IA, IC, INFO, JA, JC, K, LWORK, M, N
       INTEGER   DESCA( * ), DESCC( * )
       REAL      A(  *  ), C( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PSORMQR should not be called.'
+C        WRITE(*,*) 'Error. PSORMQR should not be called.'
+        call rexit('Error. PSORMQR should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE psormqr
@@ -1582,7 +1677,8 @@ C***********************************************************************
       INTEGER         IA, IC, INFO, JA, JC, K, LWORK, M, N
       INTEGER         DESCA( * ), DESCC( * )
       DOUBLE PRECISION  A(  *  ), C( * ), TAU( * ), WORK( * )
-        WRITE(*,*) 'Error. PDORMQR should not be called.'
+C        WRITE(*,*) 'Error. PDORMQR should not be called.'
+        call rexit('Error. PDORMQR should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pdormqr
@@ -1592,7 +1688,8 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER            DESCAPOS0, IA, INFO, JA, MA, MAPOS0, NA, NAPOS0
       INTEGER            DESCA( * )
-        WRITE(*,*) 'Error. CHK1MAT should not be called.'
+C        WRITE(*,*) 'Error. CHK1MAT should not be called.'
+        call rexit('Error. CHK1MAT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE chk1mat
@@ -1606,7 +1703,8 @@ C***********************************************************************
      &                   NEXTRA
       INTEGER            DESCA( * ), DESCB( * ), EX( NEXTRA ),
      &                   EXPOS( NEXTRA )
-        WRITE(*,*) 'Error. PCHK2MAT should not be called.'
+C        WRITE(*,*) 'Error. PCHK2MAT should not be called.'
+        call rexit('Error. PCHK2MAT should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pchk2mat
@@ -1615,7 +1713,8 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER CONTXT, INFO
       CHARACTER SRNAME
-        WRITE(*,*) 'Error. PXERBLA should not be called.'
+C        WRITE(*,*) 'Error. PXERBLA should not be called.'
+        call rexit('Error. PXERBLA should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE pxerbla
@@ -1625,7 +1724,8 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER            ICSRC, ICTXT, IRSRC, LLD, M, MB, N, NB
       INTEGER            DESC( * )
-        WRITE(*,*) 'Error. DESCSET should not be called.'
+C        WRITE(*,*) 'Error. DESCSET should not be called.'
+        call rexit('Error. DESCSET should not be called.')
 C        STOP
       RETURN
       END SUBROUTINE descset

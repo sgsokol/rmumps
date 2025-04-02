@@ -51,7 +51,7 @@
 */
 
 #define COMMON_ERROR
-
+#include <R_ext/Error.h>
 #include "common.h"
 
 /********************************/
@@ -92,12 +92,13 @@ const char * const          errstr,               /*+ printf-like variable argum
 {
   va_list             errlist;                    /* Argument list of the call */
 
-  fprintf  (stderr, "%sERROR: ", errorProgName);
+  /*fprintf  (stderr, "%sERROR: ", errorProgName);*/
   va_start (errlist, errstr);
-  vfprintf (stderr, errstr, errlist);             /* Print arguments */
+  /*vfprintf (stderr, errstr, errlist);*/             /* Print arguments */
+  Rf_error(errstr, errlist);
   va_end   (errlist);
-  fprintf  (stderr, "\n");
-  fflush   (stderr);                              /* In case it has been set to buffered mode */
+  /*fprintf  (stderr, "\n");
+  fflush   (stderr);*/                              /* In case it has been set to buffered mode */
 }
 
 /* This routine prints a warning message with
@@ -114,10 +115,11 @@ const char * const          errstr,               /*+ printf-like variable argum
 {
   va_list             errlist;                    /* Argument list of the call */
 
-  fprintf  (stderr, "%sWARNING: ", errorProgName);
+  /*fprintf  (stderr, "%sWARNING: ", errorProgName);*/
   va_start (errlist, errstr);
-  vfprintf (stderr, errstr, errlist);             /* Print arguments */
+  /*vfprintf (stderr, errstr, errlist); */            /* Print arguments */
+  Rf_warning(errstr, errlist);
   va_end   (errlist);
-  fprintf  (stderr, "\n");
-  fflush   (stderr);                              /* In case it has been set to buffered mode */
+  /*fprintf  (stderr, "\n");
+  fflush   (stderr);*/                              /* In case it has been set to buffered mode */
 }

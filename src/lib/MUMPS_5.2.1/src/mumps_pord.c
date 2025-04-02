@@ -152,12 +152,13 @@ ouput:
        if (vertex_root == -1)
          {
            /* Should never happen */
-#          if defined(PORD_INTSIZE64) || defined(INTSIZE64)
+/*#          if defined(PORD_INTSIZE64) || defined(INTSIZE64)
            printf(" Internal error in mumps_pord, %ld\n",K);
 #          else
            printf(" Internal error in mumps_pord, %d\n",K);
 #          endif
-           exit(-1);
+           exit(-1);*/
+
          }
        /* for the principal column of the supervariable */
        if (parent[K] == -1)
@@ -269,12 +270,14 @@ input/output:
        if (vertex_root == -1)
          {
            /* Should never happen */
+/*
 #          if defined(PORD_INTSIZE64) || defined(INTSIZE64)
            printf(" Internal error in mumps_pord, %ld\n",K);
 #          else
            printf(" Internal error in mumps_pord, %d\n",K);
 #          endif
-           exit(-1);
+           exit(-1);*/
+
          }
          /* for the principal column of the supervariable */
        if (parent[K] == -1)

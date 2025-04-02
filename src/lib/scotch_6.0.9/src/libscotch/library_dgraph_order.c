@@ -271,9 +271,9 @@ const double                balrat)               /*+ Desired imbalance ratio   
   vertnbr = MAX (2000 * procnbr, 10000);
   vertnbr = MIN (vertnbr, 1000000);
 
-  sprintf (bbaltab, "%lf", balrat);
-  sprintf (levltab, GNUMSTRING, levlnbr);
-  sprintf (verttab, GNUMSTRING, vertnbr);
+  snprintf (bbaltab, 31, "%lf", balrat);
+  snprintf (levltab, 31, GNUMSTRING, levlnbr);
+  snprintf (verttab, 31, GNUMSTRING, vertnbr);
 
   strcpy (bufftab, "n{sep=/(<TSTP>)?m{vert=<VERT>,asc=b{width=3,strat=q{strat=f}},low=q{strat=h},seq=q{strat=m{vert=120,low=h{pass=10},asc=b{width=3,bnd=f{bal=<BBAL>},org=h{pass=10}f{bal=<BBAL>}}}}};,ole=q{strat=n{sep=/(<TSTS>)?m{vert=120,low=h{pass=10},asc=b{width=3,bnd=f{bal=<BBAL>},org=h{pass=10}f{bal=<BBAL>}}};,ole=<OLEA>,ose=<OSEP>}},ose=s,osq=n{sep=/(<TSTS>)?m{vert=120,low=h{pass=10},asc=b{width=3,bnd=f{bal=<BBAL>},org=h{pass=10}f{bal=<BBAL>}}};,ole=<OLEA>,ose=<OSEP>}}");
 

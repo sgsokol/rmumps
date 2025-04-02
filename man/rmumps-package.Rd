@@ -23,7 +23,7 @@
 \references{
   MUMPS official site http://mumps.enseeiht.fr
 
-  Sokol S (2024). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.2.1-29, <URL: http://CRAN.R-project.org/package=rmumps>.
+  Sokol S (2025). _Rmumps: Rcpp port of MUMPS_. rmumps package version 5.2.1-31, <URL: http://CRAN.R-project.org/package=rmumps>.
 }
 \examples{
   \dontrun{

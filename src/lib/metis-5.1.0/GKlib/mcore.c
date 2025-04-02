@@ -72,7 +72,7 @@ void gk_mcoreDestroy(gk_mcore_t **r_mcore, int showstats)
     return;
 
   if (showstats)
-    printf("\n gk_mcore statistics\n" 
+    Rf_warning("\n gk_mcore statistics\n" 
            "           coresize: %12zu         nmops: %12zu  cmop: %6zu\n"
            "        num_callocs: %12zu   num_hallocs: %12zu\n"
            "       size_callocs: %12zu  size_hallocs: %12zu\n"
@@ -85,7 +85,7 @@ void gk_mcoreDestroy(gk_mcore_t **r_mcore, int showstats)
            mcore->max_callocs,  mcore->max_hallocs);
 
   if (mcore->cur_callocs != 0 || mcore->cur_hallocs != 0 || mcore->cmop != 0) {
-    printf("***Warning: mcore memory was not fully freed when destroyed.\n"
+    Rf_warning("***Warning: mcore memory was not fully freed when destroyed.\n"
            " cur_callocs: %6zu  cur_hallocs: %6zu cmop: %6zu\n",
            mcore->cur_callocs,  mcore->cur_hallocs, mcore->cmop);
   }
@@ -108,7 +108,7 @@ void gk_gkmcoreDestroy(gk_mcore_t **r_mcore, int showstats)
     return;
 
   if (showstats)
-    printf("\n gk_mcore statistics\n" 
+    Rf_warning("\n gk_mcore statistics\n" 
            "         nmops: %12zu  cmop: %6zu\n"
            "   num_hallocs: %12zu\n"
            "  size_hallocs: %12zu\n"
@@ -121,7 +121,7 @@ void gk_gkmcoreDestroy(gk_mcore_t **r_mcore, int showstats)
            mcore->max_hallocs);
 
   if (mcore->cur_hallocs != 0 || mcore->cmop != 0) {
-    printf("***Warning: mcore memory was not fully freed when destroyed.\n"
+    Rf_warning("***Warning: mcore memory was not fully freed when destroyed.\n"
            " cur_hallocs: %6zu cmop: %6zu\n",
            mcore->cur_hallocs, mcore->cmop);
   }
@@ -159,7 +159,7 @@ void *gk_mcoreMalloc(gk_mcore_t *mcore, size_t nbytes)
   }
 
   /*
-  printf("MCMALLOC: %zu %d %8zu\n", mcore->cmop-1, 
+  Rf_warning("MCMALLOC: %zu %d %8zu\n", mcore->cmop-1, 
       mcore->mops[mcore->cmop-1].type, mcore->mops[mcore->cmop-1].nbytes);
   */
 
@@ -175,7 +175,7 @@ void *gk_mcoreMalloc(gk_mcore_t *mcore, size_t nbytes)
 void gk_mcorePush(gk_mcore_t *mcore)
 {
   gk_mcoreAdd(mcore, GK_MOPT_MARK, 0, NULL);
-  /* printf("MCPPUSH:   %zu\n", mcore->cmop-1); */
+  /* Rf_warning("MCPPUSH:   %zu\n", mcore->cmop-1); */
 }
 
 
@@ -187,7 +187,7 @@ void gk_mcorePush(gk_mcore_t *mcore)
 void gk_gkmcorePush(gk_mcore_t *mcore)
 {
   gk_gkmcoreAdd(mcore, GK_MOPT_MARK, 0, NULL);
-  /* printf("MCPPUSH:   %zu\n", mcore->cmop-1); */
+  /* Rf_warning("MCPPUSH:   %zu\n", mcore->cmop-1); */
 }
 
 
@@ -225,7 +225,7 @@ void gk_mcorePop(gk_mcore_t *mcore)
 
 DONE:
   ;
-  /*printf("MCPPOP:    %zu\n", mcore->cmop); */
+  /*Rf_warning("MCPPOP:    %zu\n", mcore->cmop); */
 }
 
 

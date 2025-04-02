@@ -150,10 +150,10 @@ const double                balrat)               /*+ Desired imbalance ratio   
   char                bufftab[8192];              /* Should be enough */
   char                kbaltab[64];
 
-  sprintf (bufftab, "m{vert=%ld,low=r{sep=m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<KBAL>},org=(|h{pass=10})f{bal=<KBAL>}}}|m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<KBAL>},org=(|h{pass=10})f{bal=<KBAL>}}}},asc=f{bal=<KBAL>}}",
+  snprintf (bufftab, 8191, "m{vert=%ld,low=r{sep=m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<KBAL>},org=(|h{pass=10})f{bal=<KBAL>}}}|m{rat=0.7,vert=100,low=h{pass=10},asc=b{width=3,bnd=f{bal=<KBAL>},org=(|h{pass=10})f{bal=<KBAL>}}}},asc=f{bal=<KBAL>}}",
            (long) (20 * partnbr));
 
-  sprintf (kbaltab, "%lf", balrat);
+  snprintf (kbaltab, 63, "%lf", balrat);
   stringSubst (bufftab, "<KBAL>", kbaltab);
 
   if (SCOTCH_stratGraphPartOvl (straptr, bufftab) != 0) {

@@ -9,6 +9,10 @@
 /
 ******************************************************************************/
 
+#include <R_ext/Error.h>
+#include <R_ext/RS.h>
+#include <R_ext/Random.h>
+double unifCrand(void);
 
 /* Some compilers (VC++ for instance) define a min and a max in the stdlib */
 #ifdef min
@@ -22,26 +26,30 @@
 
 #define  mymalloc(ptr, nr, type) \
            if (!(ptr = (type*)malloc((max(nr,1)) * sizeof(type)))) \
-            { printf("malloc failed on line %d of file %s (nr=%d)\n", \
-                     __LINE__, __FILE__, nr); \
-              exit(ERR); \
+            { /*printf("malloc failed on line %d of file %s (nr=%d)\n",*/ \
+                     /*__LINE__, __FILE__, nr);*/ \
+              /*exit(ERR);*/ \
+              Rf_error("%s", "mymalloc failed"); \
             }
 
 #define myrealloc(ptr, nr, type) \
            if (!(ptr = (type*)realloc(ptr, (nr) * sizeof(type)))) \
-            { printf("realloc failed on line %d of file %s (nr=%d)\n", \
-                     __LINE__, __FILE__, nr); \
-              exit(ERR); \
+            { /*printf("realloc failed on line %d of file %s (nr=%d)\n",*/ \
+                     /*__LINE__, __FILE__, nr);*/ \
+              /*exit(ERR);*/ \
+              Rf_error("%s", "myremalloc failed"); \
             }
 
 #define myrandom(range) \
-           rand() % (range);
+           /*rand() % (range);*/ \
+           (range)*unifCrand()
 
 #define swap(a, b, tmp) \
            { (tmp) = (a); (a) = (b); (b) = (tmp); }
 
 #define seed() \
-           srand((PORD_INT)time(0) % 10000);
+           /*srand((PORD_INT)time(0) % 10000);*/ \
+           {GetRNGstate(); PutRNGstate();}
 
 #define bit(var, d) \
            ((var) & (1 << (d)))
@@ -62,7 +70,7 @@
            var += ((FLOAT)clock()/CLOCKS_PER_SEC);
 
 #define quit() \
-           exit(ERR);
+           Rf_error("%s", ""); /*exit(ERR);*/
 
 #ifdef PARIX
 #undef pord_starttimer(var)
@@ -83,5 +91,5 @@
 #endif
 #undef quit()
 #define quit() \
-           exit(ERR);
+           Rf_error("%s", ""); /*exit(ERR);*/
 #endif
