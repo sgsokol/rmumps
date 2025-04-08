@@ -237,8 +237,8 @@ C
       CURRENT_BLR = 0
       ALLOCATE( IPIV( NASS ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
-        WRITE(*,*) MYID, ' : DMUMPS_FAC2_LDLT failed to allocate ',
-     &  NASS, ' integers'
+        call rwarn(' : DMUMPS_FAC2_LDLT failed to allocate ')
+c~      &  NASS, ' integers'
         IFLAG = -13
         IERROR=NASS
         GO TO 490
@@ -250,9 +250,9 @@ C
       ENDIF
       ALLOCATE ( DIAG_ORIG(SIZEDIAG_ORIG), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
-          WRITE(*,*) MYID,
-     &      ' : FAC_NIV2 failed to allocate ',
-     &      NASS, ' REAL/COMPLEX entries'
+          call rwarn(
+     &      ' : FAC_NIV2 failed to allocate ')
+c~      &      NASS, ' REAL/COMPLEX entries'
           IFLAG=-13
           IERROR=NASS
           GO TO 490
@@ -563,8 +563,8 @@ C
           ENDIF
           NELIM = IEND_BLOCK - NPIV
           IF (IEND_BLR.NE.IEND_BLOCK) THEN
-            WRITE(*,*) "Internal error 1 in DMUMPS_FAC2_LDLT",
-     &      IEND_BLR, IEND_BLOCK
+            call rwarn("Internal error 1 in DMUMPS_FAC2_LDLT")
+c~      &      IEND_BLR, IEND_BLOCK
             CALL MUMPS_ABORT()
           ENDIF
           IF (NELIM .EQ. IEND_BLR - IBEG_BLR + 1) THEN
@@ -1088,8 +1088,8 @@ C
           A(POSELT+int(JJ,8)+int(LDAFS,8)*int(JJ-1,8))= ONE
           TO_UPDATE=.FALSE. 
        ELSE
-          write(*,*) ' Internal error related ', 
-     &               'to null pivot row detection'
+          call rwarn(' Internal error related ' //
+     &               'to null pivot row detection')
           CALL MUMPS_ABORT()
         ENDIF
       ENDDO

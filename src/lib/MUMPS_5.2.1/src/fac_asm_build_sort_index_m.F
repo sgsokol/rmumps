@@ -82,9 +82,9 @@ C ssg
         NELIM = IW(K2 + 1+KEEP(IXSZ))
         IF ( ISON_IN_PLACE > 0 ) THEN
            IF (ISON_IN_PLACE.NE.IFSON) THEN
-         write(6,*) MYID, ':',
-     &   ' Internal error 1 in MUMPS_BUILD_SORT_INDEX ',
-     &   ' in place node is not the first son a interior split node '
+         call rwarn(
+     &   ' Internal error 1 in MUMPS_BUILD_SORT_INDEX '//
+     &   ' in place node is not the first son a interior split node ')
          CALL MUMPS_ABORT()
           ENDIF
           NELIM_SON_IN_PLACE = NELIM
@@ -98,20 +98,24 @@ C ssg
         NROWS  = NCOLS
         ITRANS = NROWS
         IF (NIV1) THEN
-          write(6,*) MYID, ':',
-     &    ' Internal error 2 in MUMPS_BUILD_SORT_INDEX ',
-     &    ' interior split node of type 1 '
+          call rwarn(
+     &    ' Internal error 2 in MUMPS_BUILD_SORT_INDEX '//
+     &    ' interior split node of type 1 ')
           CALL MUMPS_ABORT()
         ENDIF
         I= MUMPS_TYPENODE(PROCNODE_STEPS(STEP(IFSON)),SLAVEF)
         J= MUMPS_TYPESPLIT(PROCNODE_STEPS(STEP(IFSON)), 
      &              SLAVEF)
         IF (LEVEL1_SON.or.J.LT.4) THEN
-           write(6,*) MYID, ':',
-     &     ' Internal error 3 in MUMPS_BUILD_SORT_INDEX ',
-     &     ' son', IFSON, 
-     &     ' of interior split node', INODE, ' of type 1 ', 
-     &     ' NSLSON =', NSLSON, ' TYPE_SON=', I, 'TYPESPLIT_SON=', J
+           call rwarn(
+     &     ' Internal error 3 in MUMPS_BUILD_SORT_INDEX '//
+     &     ' son'//
+c~      , IFSON, 
+     &     ' of interior split node'//
+c~      , INODE, 
+     &     ' of type 1 '//
+     &     ' NSLSON =')
+c~      , NSLSON, ' TYPE_SON=', I, 'TYPESPLIT_SON=', J
            CALL MUMPS_ABORT()
         ENDIF
 #if ! defined(NO_XXNBPR)
@@ -456,9 +460,12 @@ C ssg
         ENDDO
         IF (NFRONT_EFF.NE.NFRONT-KEEP(253) .AND.
      &       .NOT. (KEEP(376).EQ.1 .AND. KEEP(79) .GE.1)) THEN
-          write(6,*) MYID, ': INODE', INODE, ' of type 4 ', 
-     &             ' not yet fully assembled ', 
-     &             ' NFRONT_EFF, NFRONT =',  NFRONT_EFF, NFRONT
+          call rwarn(': INODE'//
+c~           , INODE,
+     &             ' of type 4 '//
+     &             ' not yet fully assembled '//
+     &             ' NFRONT_EFF, NFRONT =')
+c~      ,  NFRONT_EFF, NFRONT
           CALL MUMPS_ABORT()
         ENDIF
        ENDIF
@@ -496,8 +503,8 @@ C ssg
           IW(IP2+I-1)=IW(IP1+I-1)
         ENDDO
       ELSE IF (NFRONT .LT. NFRONT_EFF) THEN
-        WRITE(*,*) "Internal error in MUMPS_BUILD_SORT_INDEX",
-     &             NFRONT, NFRONT_EFF
+        call rwarn("Internal error in MUMPS_BUILD_SORT_INDEX")
+c~      &             NFRONT, NFRONT_EFF
        IFLAG = -53
        GOTO 800
       ENDIF
@@ -540,7 +547,7 @@ C ssg
             ENDDO
           ELSE
              IF (.not. NIV1) THEN
-                WRITE(*,*) "Internal error 1 in MUMPS_BUILD_SORT_INDEX"
+                call rwarn("Internal error 1 in MUMPS_BUILD_SORT_INDEX")
                 CALL MUMPS_ABORT() 
               ENDIF
               IF (.not.LEVEL1_SON) THEN

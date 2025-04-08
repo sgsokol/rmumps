@@ -105,7 +105,7 @@ C
         ALLOCATE( mumps_par_array_bis(DMUMPS_STRUC_ARRAY_SIZE +
      &  DMUMPS_STRUC_ARRAY_SIZE_INIT), stat=IERR)
         IF (IERR /= 0) THEN
-          WRITE(*,*) ' ** Allocation Error 1 in DMUMPS_F77.'
+          call rwarn(' ** Allocation Error 1 in DMUMPS_F77.')
           CALL MUMPS_ABORT()
         END IF
         DO I = 1, DMUMPS_STRUC_ARRAY_SIZE
@@ -126,7 +126,7 @@ C
         N_INSTANCES = N_INSTANCES+1
         ALLOCATE( mumps_par_array(INSTANCE_NUMBER)%PTR,stat=IERR )
         IF (IERR /= 0) THEN
-          WRITE(*,*) '** Allocation Error 2 in DMUMPS_F77.'
+          call rwarn('** Allocation Error 2 in DMUMPS_F77.')
           CALL MUMPS_ABORT()
         ENDIF
         ICNTL(1:60)         = 0
@@ -140,14 +140,14 @@ C
       END IF
       IF ( INSTANCE_NUMBER .LE. 0 .OR. INSTANCE_NUMBER .GT.
      &     DMUMPS_STRUC_ARRAY_SIZE ) THEN
-        WRITE(*,*) ' ** Instance Error 1 in DMUMPS_F77',
-     &             INSTANCE_NUMBER
+        call rwarn(' ** Instance Error 1 in DMUMPS_F77')
+c~      &             INSTANCE_NUMBER
         CALL MUMPS_ABORT()
       END IF
       IF ( .NOT. associated ( mumps_par_array(INSTANCE_NUMBER)%PTR ) )
      &     THEN
-        WRITE(*,*) ' Instance Error 2 in DMUMPS_F77',
-     &             INSTANCE_NUMBER
+        call rwarn(' Instance Error 2 in DMUMPS_F77')
+c~      &             INSTANCE_NUMBER
         CALL MUMPS_ABORT()
       END IF
       mumps_par => mumps_par_array(INSTANCE_NUMBER)%PTR
@@ -362,8 +362,8 @@ C
              DMUMPS_STRUC_ARRAY_SIZE = 0
            END IF
          ELSE
-           WRITE(*,*) "** Warning: instance already freed"
-           WRITE(*,*) "            this should normally not happen."
+           call rwarn("** Warning: instance already freed"//
+     &      "            this should normally not happen.")
          ENDIF
       END IF
       RETURN

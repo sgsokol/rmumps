@@ -57,7 +57,7 @@ C
             NPARTSASS=size(BLR_ARRAY(IWHDLR)%PANELS_L)
             NB_BLR = size(BLR_ARRAY(IWHDLR)%BEGS_BLR_STATIC) -1
          ELSE
-           WRITE(6,*) " Internal error in DMUMPS_SOL_FWD_SU_MASTER"
+           call rwarn(" Internal error in DMUMPS_SOL_FWD_SU_MASTER")
          ENDIF
         ELSE
          IF (associated(BLR_ARRAY(IWHDLR)%PANELS_U))
@@ -215,7 +215,7 @@ C
          NB_BLR = size(BLR_ARRAY(IWHDLR)%BEGS_BLR_STATIC)
          NB_BLR = NB_BLR - 2
       ELSE
-        WRITE(6,*) " Internal error 1 in DMUMPS_SOL_SLAVE_LR_U"
+        call rwarn(" Internal error 1 in DMUMPS_SOL_SLAVE_LR_U")
         CALL MUMPS_ABORT()
       ENDIF
       PTRX = PTRX_INIT
@@ -308,9 +308,10 @@ C
                IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NRHS_B * K
-                 write(*,*) 'Allocation problem in BLR routine 
-     &         DMUMPS_SOL_FWD_BLR_UPDATE: ',
-     &         'not enough memory? memory requested = ', IERROR
+                 call rwarn('Allocation problem in BLR routine 
+     &         DMUMPS_SOL_FWD_BLR_UPDATE: '//
+     &         'not enough memory? memory requested = ')
+c~      , IERROR
                  CYCLE
                ENDIF
                CALL dgemm('N', 'N', K, NRHS_B, N, ONE,
@@ -413,7 +414,7 @@ C
             NPARTSASS=size(BLR_ARRAY(IWHDLR)%PANELS_L)
             NB_BLR = size(BLR_ARRAY(IWHDLR)%BEGS_BLR_STATIC) -1
          ELSE
-           WRITE(6,*) " Internal error in DMUMPS_SOL_FWD_SU_MASTER"
+           call rwarn(" Internal error in DMUMPS_SOL_FWD_SU_MASTER")
          ENDIF
         ENDIF
       PCBINRHSCOMP= IPOSINRHSCOMP + NPIV_GLOBAL
@@ -579,9 +580,10 @@ C
               IF (allocok .GT. 0) THEN
                 IFLAG  = -13
                 IERROR = NRHS_B * K
-                write(*,*) 'Allocation problem in BLR routine 
-     &         DMUMPS_SOL_BWD_BLR_UPDATE: ',
-     &         'not enough memory? memory requested = ', IERROR
+                call rwarn('Allocation problem in BLR routine 
+     &         DMUMPS_SOL_BWD_BLR_UPDATE: '//
+     &         'not enough memory? memory requested = ')
+c~      , IERROR
                 CYCLE
               ENDIF
               IF (IS_T2_SLAVE) THEN

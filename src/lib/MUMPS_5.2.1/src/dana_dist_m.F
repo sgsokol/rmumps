@@ -280,7 +280,7 @@ C
          LEAF = LEAF - 1
          INODE = IPOOL(LEAF)
       ELSE
-         WRITE(MYID+6,*) ' ERROR 1 in DMUMPS_ANA_DISTM '
+         call rwarn(" ERROR 1 in DMUMPS_ANA_DISTM ")
          CALL MUMPS_ABORT()
       ENDIF
  95   CONTINUE 
@@ -697,8 +697,8 @@ C
                ISTKI_OOC = ISTKI_OOC - STKI - (XSIZE_OOC-XSIZE_IC)
                ITOP = ITOP - 1
                IF (ITOP.LT.0) THEN
-                  write(*,*) MYID,
-     &            ': ERROR 2 in DMUMPS_ANA_DISTM. ITOP = ',ITOP
+                 call rwarn(
+     &            ': ERROR 2 in DMUMPS_ANA_DISTM. ITOP = ')
                   CALL MUMPS_ABORT()
                ENDIF
  70         CONTINUE
@@ -735,8 +735,8 @@ C
               ISTKI_OOC = ISTKI_OOC - STKI - (XSIZE_OOC-XSIZE_IC)
               ITOP = ITOP - 1
               IF (ITOP.LT.0) THEN
-                write(*,*) MYID,
-     &          ': ERROR 2 in DMUMPS_ANA_DISTM. ITOP = ',ITOP
+                call rwarn(
+     &          ': ERROR 2 in DMUMPS_ANA_DISTM. ITOP = ')
                 CALL MUMPS_ABORT()
               ENDIF
             ENDIF
@@ -1227,12 +1227,12 @@ C
          ENDIF
          IF (STACKCB) THEN
             IF (FRERE(STEP(INODE)).EQ.0) THEN
-                  write(*,*) ' ERROR 3 in DMUMPS_ANA_DISTM'
+                  call rwarn(" ERROR 3 in DMUMPS_ANA_DISTM")
                   CALL MUMPS_ABORT()
            ENDIF
            ITOP = ITOP + 1
            IF ( ITOP .GT. NSTEPS ) THEN
-             WRITE(*,*) 'ERROR 4 in DMUMPS_ANA_DISTM '
+             call rwarn("ERROR 4 in DMUMPS_ANA_DISTM ")
            ENDIF
            LSTKI(ITOP) = SIZECBI
            ISTKI=ISTKI + SIZECBI

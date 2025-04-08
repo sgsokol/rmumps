@@ -118,7 +118,8 @@ C ssg
         IF ( NSLAVES .NE. 0 .and. KEEP(50).ne.0 ) THEN
           IW( IWPOSCB + 4 + KEEP(IXSZ) ) = NROW - NCOL
           IF ( NROW - NCOL .GE. 0 ) THEN
-            WRITE(*,*) 'Error in PROCESS_MAITRE2:',NROW,NCOL
+            call rwarn('Error in PROCESS_MAITRE2:')
+c~             ,NROW,NCOL
             CALL MUMPS_ABORT()
           END IF
         ELSE

@@ -1,3 +1,9 @@
+Version 5.2.1-32
+================
+
+* 2025-04-07
+ - removed 'write' calls in *.F signaled by R CRAN team on debian system
+
 Version 5.2.1-31
 ================
 

@@ -1,8 +1,8 @@
 Package: rmumps
 Type: Package
 Title: Wrapper for MUMPS Library
-Version: 5.2.1-31
-Date: 2025-04-02
+Version: 5.2.1-32
+Date: 2025-04-07
 Authors@R: c(person("Serguei", "Sokol", role=c("aut", "cre"), email="sokol@insa-toulouse.fr"),
          person("Emmanuel", "Agullo", role="ctb"),
          person("Patrick", "Amestoy", role=c("ctb", "cph")),

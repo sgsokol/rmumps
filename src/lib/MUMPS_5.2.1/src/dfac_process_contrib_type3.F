@@ -177,7 +177,7 @@ C ssg
          IF ( (LREQA.NE.0_8) .AND.
      &       (PTRIST(STEP(IROOT)).LT.0).AND.
      &        KEEP(60)==0) THEN
-          WRITE(*,*) ' Error in DMUMPS_PROCESS_CONTRIB_TYPE3'
+          call rwarn(' Error in DMUMPS_PROCESS_CONTRIB_TYPE3')
           CALL MUMPS_ABORT()
          ENDIF
          CALL DMUMPS_ALLOC_CB(.FALSE.,0_8,.FALSE.,.FALSE.,
@@ -216,7 +216,7 @@ C ssg
         IF ( (LREQA.NE.0_8) .AND.
      &       (PTRIST(STEP(IROOT)).LT.0).AND.
      &       KEEP(60)==0) THEN
-         WRITE(*,*) ' Error in DMUMPS_PROCESS_CONTRIB_TYPE3'
+         call rwarn(' Error in DMUMPS_PROCESS_CONTRIB_TYPE3')
          CALL MUMPS_ABORT()
         ENDIF
         IF (LREQA.NE.0_8) THEN

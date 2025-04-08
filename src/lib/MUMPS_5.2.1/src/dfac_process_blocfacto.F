@@ -219,8 +219,8 @@ C ssg
                IERROR = max(NB_BLR_U,1)
                LP = ICNTL(1)
                IF (ICNTL(4) .LE. 0) LP=-1
-               IF (LP > 0) WRITE(LP,*) MYID,
-     &              ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+               IF (LP > 0) call rwarn(
+     &            ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
                GOTO 700
             ENDIF
             ALLOCATE(BEGS_BLR_U(NB_BLR_U+2), stat=allocok)
@@ -229,8 +229,8 @@ C ssg
                IERROR = NB_BLR_U+2
                LP = ICNTL(1)
                IF (ICNTL(4) .LE. 0) LP=-1
-               IF (LP > 0) WRITE(LP,*) MYID,
-     &              ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+               IF (LP > 0) call rwarn(
+     &            ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
                GOTO 700
             ENDIF
             CALL DMUMPS_MPI_UNPACK_LR(BUFR, LBUFR, LBUFR_BYTES, 
@@ -429,8 +429,8 @@ C ssg
                IERROR = size(BEGS_BLR_U)+IPANEL-1
                LP = ICNTL(1)
                IF (ICNTL(4) .LE. 0) LP=-1
-               IF (LP > 0) WRITE(LP,*) MYID,
-     &           ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+               IF (LP > 0) call rwarn(
+     &           ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
                GOTO 700
             ENDIF
             BEGS_BLR_COL(1:IPANEL-1) = 1
@@ -494,8 +494,8 @@ C ssg
      &          + LWORK*OMP_NUM
            LP = ICNTL(1)
            IF (ICNTL(4) .LE. 0) LP=-1
-           IF (LP > 0) WRITE(LP,*) MYID,
-     &          ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+           IF (LP > 0) call rwarn(
+     &          ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
            GOTO 700
         ENDIF
         CURRENT_BLR=1 
@@ -505,8 +505,8 @@ C ssg
               IERROR = NB_BLR_L
               LP = ICNTL(1)
               IF (ICNTL(4) .LE. 0) LP=-1
-              IF (LP > 0) WRITE(LP,*) MYID,
-     &             ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+              IF (LP > 0) call rwarn(
+     &             ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
               GOTO 700
            ENDIF
         CALL SYSTEM_CLOCK(T1)
@@ -701,7 +701,7 @@ C ssg
       ENDIF
       IF ( .not. LASTBL .AND. 
      &   (IW(IOLDPS+1+KEEP(IXSZ)) .EQ. IW(IOLDPS + 3+KEEP(IXSZ))) ) THEN
-        write(*,*) 'Internal ERROR 1 **** IN BLACFACTO '
+        call rwarn('Internal ERROR 1 **** IN BLACFACTO ')
         CALL MUMPS_ABORT()
       ENDIF
       IF (LR_ACTIVATED) THEN
@@ -777,8 +777,8 @@ C ssg
      &           + LWORK*OMP_NUM
                LP = ICNTL(1)
                IF (ICNTL(4) .LE. 0) LP=-1
-               IF (LP > 0) WRITE(LP,*) MYID,
-     &          ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO'
+               IF (LP > 0) call rwarn(
+     &          ': ERROR allocation during DMUMPS_PROCESS_BLOCFACTO')
                GOTO 700
              ENDIF
            ENDIF
@@ -897,8 +897,8 @@ C ssg
       IERR = 0
       IF (size(BLR_U) .NE. 
      &     MAX(NB_BLOCK_U,1) ) THEN
-        WRITE(*,*) "Internal error 1 in DMUMPS_MPI_UNPACK",
-     &             NB_BLOCK_U,size(BLR_U)
+        call rwarn("Internal error 1 in DMUMPS_MPI_UNPACK")
+c~      &             NB_BLOCK_U,size(BLR_U)
         CALL MUMPS_ABORT()
       ENDIF
       BEGS_BLR_U(1) = 1
@@ -931,8 +931,8 @@ C ssg
      &             IFLAG, IERROR, KEEP8 )
         IF (IFLAG.LT.0) RETURN
         IF (LRFORM .NE. BLR_U(I)%LRFORM) THEN
-          WRITE(*,*) "Internal error 2 in ALLOC_LRB",
-     &    LRFORM, BLR_U(I)%LRFORM
+          call rwarn("Internal error 2 in ALLOC_LRB")
+c~      &    LRFORM, BLR_U(I)%LRFORM
         ENDIF
         IF (ISLR) THEN
           IF (K .GT. 0) THEN

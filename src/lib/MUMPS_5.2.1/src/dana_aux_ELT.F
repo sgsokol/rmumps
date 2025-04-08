@@ -117,17 +117,17 @@ C
       IF (KEEP(1).LT.1) KEEP(1) = 1
       NEMIN = KEEP(1)
       IF (LDIAG.LE.2 .OR. MP.LE.0) GO TO 10
-      WRITE (MP,99999) N, NELT, LIW, INFO(1)
+c~       WRITE (MP,99999) N, NELT, LIW, INFO(1)
       K = min0(10,NELT+1)
       IF (LDIAG.EQ.4) K = NELT+1
-      IF (K.GT.0) WRITE (MP,99998) (ELTPTR(I),I=1,K)
+c~       IF (K.GT.0) WRITE (MP,99998) (ELTPTR(I),I=1,K)
       K = min0(10,ELTPTR(NELT+1)-1)
       IF (LDIAG.EQ.4) K = ELTPTR(NELT+1)-1
-      IF (K.GT.0) WRITE (MP,99995) (ELTVAR(I),I=1,K)
+c~       IF (K.GT.0) WRITE (MP,99995) (ELTVAR(I),I=1,K)
       K = min0(10,N)
       IF (LDIAG.EQ.4) K = N
       IF (IORD.EQ.1 .AND. K.GT.0) THEN
-        WRITE (MP,99997) (IKEEP(I,1),I=1,K)
+c~         WRITE (MP,99997) (IKEEP(I,1),I=1,K)
       ENDIF
    10 L1 = 1
       L2 = L1 + N
@@ -203,7 +203,8 @@ C
          ELSEIF (KEEP(60) == 2 .OR. KEEP(60) == 3 ) THEN
            KEEP(38) = LISTVAR_SCHUR(1)
         ELSE
-           WRITE(*,*) "Internal error in DMUMPS_ANA_F_ELT",KEEP(60)
+c~            WRITE(*,*) "Internal error in DMUMPS_ANA_F_ELT",KEEP(60)
+           call rwarn("Internal error in DMUMPS_ANA_F_ELT")
            CALL MUMPS_ABORT()
          ENDIF
         ELSE
@@ -215,9 +216,9 @@ C
       ELSE
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
         IF (IORD.EQ.5) THEN
-         IF (PROK) THEN
-          WRITE(MPRINT,'(A)') ' Ordering based on METIS'
-         ENDIF
+c~          IF (PROK) THEN
+c~           WRITE(MPRINT,'(A)') ' Ordering based on METIS'
+c~          ENDIF
          CALL DMUMPS_ANA_G1_ELT(N, NZ8, NELT, ELTPTR(NELT+1)-1, 
      &              ELTPTR, ELTVAR, XNODEL, NODEL,
      &              IWtemp(1,2), IW(L1))
@@ -276,16 +277,19 @@ C
      &          LLIW8, .FALSE., .TRUE. )
 #endif
          ELSE
-            WRITE(*,*)
-     &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
-     &        METIS_IDX_SIZE
+c~             WRITE(*,*)
+c~      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
+c~      &        METIS_IDX_SIZE
+            call rwarn("Internal error in METIS wrappers, "//
+     &       "METIS_IDX_SIZE=")
             CALL MUMPS_ABORT()
          ENDIF
          IF (INFO(1) .LT. 0) GOTO 90
          DEALLOCATE(IW2)
       ELSE IF (IORD.NE.1) THEN
-          WRITE(*,*) IORD
-          WRITE(*,*)  'bad option for ordering'
+c~           WRITE(*,*) IORD
+c~           WRITE(*,*)  'bad option for ordering'
+          call rwarn('bad option for ordering')
           CALL MUMPS_ABORT()
         ENDIF
 #endif
@@ -324,7 +328,8 @@ C
          ELSEIF (KEEP(60) == 2 .OR. KEEP(60) == 3 ) THEN
            KEEP(38) = LISTVAR_SCHUR(1)
         ELSE
-           WRITE(*,*) "Internal error in DMUMPS_ANA_F_ELT",KEEP(60)
+c~            WRITE(*,*) "Internal error in DMUMPS_ANA_F_ELT",KEEP(60)
+           call rwarn("Internal error in DMUMPS_ANA_F_ELT")
            CALL MUMPS_ABORT()
          ENDIF
        ENDIF
@@ -396,10 +401,10 @@ C
      &                       NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                       MP, LDIAG, INFO(1), INFO(2))
           IF (INFO(1).LT.0) GOTO 90 
-          IF (PROK) THEN
-               WRITE(MP,*) " Number of split nodes in pre-splitting=",
-     &         KEEP(61)
-          ENDIF
+c~           IF (PROK) THEN
+c~                WRITE(MP,*) " Number of split nodes in pre-splitting=",
+c~      &         KEEP(61)
+c~           ENDIF
         ENDIF
        ENDIF
       ENDIF
@@ -421,20 +426,20 @@ C
       IF (LDIAG.GT.2 .AND. MP.GT.0) THEN
          K = min0(10,N)
          IF (LDIAG.EQ.4) K = N
-         IF (K.GT.0) WRITE (MP,99997) (IKEEP(I,1),I=1,K)
-         IF (K.GT.0) WRITE (MP,99991) (IKEEP(I,2),I=1,K)
-         IF (K.GT.0) WRITE (MP,99990) (IKEEP(I,3),I=1,K)
-         IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
-         IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
-         IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99997) (IKEEP(I,1),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99991) (IKEEP(I,2),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99990) (IKEEP(I,3),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
       ENDIF
       GO TO 90
    40 INFO(1) = -4
       INFO(2) = K
    90 CONTINUE
       IF (INFO(1) .LT.0) THEN
-        IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99996) INFO(1)
-        IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99982) INFO(2)
+c~         IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99996) INFO(1)
+c~         IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) WRITE (LP,99982) INFO(2)
       ENDIF
       IF (allocated(IW)) DEALLOCATE(IW)
       IF (allocated(IPE8)) DEALLOCATE(IPE8)
@@ -482,15 +487,15 @@ C
       ENDDO
       IF ( IERROR.GT.0 .AND. MP.GT.0 .AND. ICNTL(4).GE.2 ) THEN
         NBERR = 0
-        WRITE(MP,99999)
+c~         WRITE(MP,99999)
         DO I = 1, NELT
           DO K = XELNOD(I), XELNOD(I+1)-1
             J = ELNOD(K)
             IF ( J.LT.1 .OR. J.GT.N ) THEN
               NBERR = NBERR + 1
               IF (NBERR.LE.10) THEN
-                WRITE(MP,'(A,I8,A,I8,A)')
-     &          'Element ',I,' variable ',J,' ignored.' 
+c~                 WRITE(MP,'(A,I8,A,I8,A)')
+c~      &          'Element ',I,' variable ',J,' ignored.' 
               ELSE
                 GO TO 100
               ENDIF
@@ -832,14 +837,16 @@ C
       INTEGER INODE, LEAF, NBLEAF, NBROOT, III, IN
       ALLOCATE(TNSTK( N ), stat=allocok)
       IF (allocok.ne.0) THEN
-         WRITE(6,*) ' Allocation error of TNSTK in '
-     &       // 'routine DMUMPS_FRTELT '
+c~          WRITE(6,*) ' Allocation error of TNSTK in '
+c~      &       // 'routine DMUMPS_FRTELT '
+         call rwarn(' Allocation error of TNSTK in '//
+     &    'routine DMUMPS_FRTELT ')
          CALL MUMPS_ABORT()
       ENDIF
       ALLOCATE(IPOOL( N ), stat=allocok)
       IF (allocok.ne.0) THEN
-         WRITE(6,*) ' Allocation error of IPOOL in '
-     &      // 'routine DMUMPS_FRTELT '
+         call rwarn(' Allocation error of IPOOL in '
+     &      // 'routine DMUMPS_FRTELT ')
          CALL MUMPS_ABORT()
       ENDIF
       TNSTK = NE
@@ -889,7 +896,7 @@ C
            INODE=IPOOL(III)
            III = III + 1
         ELSE
-           WRITE(6,*) ' ERROR 1 in subroutine DMUMPS_FRTELT '
+           call rwarn(' ERROR 1 in subroutine DMUMPS_FRTELT ')
            CALL MUMPS_ABORT()
         ENDIF
  95     CONTINUE 
@@ -958,8 +965,8 @@ C
       CALL DMUMPS_SUPVAR(N,NELT,XELNOD(NELT+1)-1,ELNOD,XELNOD,
      &           NSUP,IW(3*N+3+1),3*N+3,IW,LP,INFO44)
       IF (INFO44(1) .LT. 0) THEN
-        IF (LP.GE.0) WRITE(LP,*) 
-     &     'Error return from DMUMPS_SUPVAR. INFO(1) = ',INFO44(1) 
+        IF (LP.GE.0) call rwarn(
+     &     'Error return from DMUMPS_SUPVAR. INFO(1) = ')
       ENDIF
       IW(1:NSUP) = 0
       LEN(1:N) = 0
@@ -1069,19 +1076,19 @@ C
       END IF
       GO TO 50
    10 INFO(1) = -1
-      IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
+c~       IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
       GO TO 50
    20 INFO(1) = -2
-      IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
+c~       IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
       GO TO 50
    30 INFO(1) = -3
-      IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
+c~       IF (LP.GT.0) WRITE (LP,FMT=9000) INFO(1)
       GO TO 50
    40 INFO(1) = -4
-      IF (LP.GT.0) THEN
-         WRITE (LP,FMT=9000) INFO(1)
-         WRITE (LP,FMT=9010) INFO(4)
-      END IF
+c~       IF (LP.GT.0) THEN
+c~          WRITE (LP,FMT=9000) INFO(1)
+c~          WRITE (LP,FMT=9010) INFO(4)
+c~       END IF
    50 RETURN
  9000 FORMAT (/3X,'Error message from DMUMPS_SUPVAR: INFO(1) = ',I2)
  9010 FORMAT (3X,'LIW is insufficient. Upper bound on required work',

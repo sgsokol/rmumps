@@ -107,7 +107,8 @@ C
         CASE(S_FREE);
           DMUMPS_DM_ISBAND = .FALSE.
         CASE DEFAULT;
-          WRITE(*,*) "Wrong state during DMUMPS_DM_ISBAND", XXSTATE
+          call rwarn("Wrong state during DMUMPS_DM_ISBAND")
+c~           , XXSTATE
           CALL MUMPS_ABORT()
         END SELECT
       RETURN
@@ -231,8 +232,8 @@ C
             IF (TYPEINODE.EQ.3) GOTO 100
             MOVE2DYNAMIC = MOVE2DYNAMIC.OR..TRUE.
           ELSE
-            WRITE(*,*) "Internal error in DMUMPS_DM_CBSTATIC2DYNAMIC",
-     &      MOVE2DYNAMIC
+            call rwarn("Internal error in DMUMPS_DM_CBSTATIC2DYNAMIC")
+c~      &      MOVE2DYNAMIC
             CALL MUMPS_ABORT()
           ENDIF
           MOVE2DYNAMIC = MOVE2DYNAMIC .AND. (RCURRENT_SIZE .NE. 0_8)
@@ -271,9 +272,9 @@ C
             ELSE IF (IS_PAMASTER) THEN
               PAMASTER(STEP(INODE)) = TMP_ADDRESS
             ELSE
-              WRITE(*,*) 
-     &          "Internal error 3 in DMUMPS_DM_CBSTATIC2DYNAMIC",
-     &        RCURRENT, PTRAST(STEP(INODE)), PAMASTER(STEP(INODE))
+              call rwarn(
+     &          "Internal error 3 in DMUMPS_DM_CBSTATIC2DYNAMIC")
+c~      &        RCURRENT, PTRAST(STEP(INODE)), PAMASTER(STEP(INODE))
               CALL MUMPS_ABORT()
             ENDIF
             LRLUS = LRLUS + (RCURRENT_SIZE-SIZEHOLE)
@@ -352,8 +353,8 @@ C
           ELSE IF (IS_PTRAST) THEN
             TMP_ADDRESS = PTRAST(STEP(INODE))
           ELSE
-            WRITE(*,*) "Internal error 1 in DMUMPS_DM_FREEALLDYNAMICCB"
-     &      , IS_PTRAST, IS_PAMASTER
+            call rwarn("Internal error 1 in DMUMPS_DM_FREEALLDYNAMICCB")
+c~      &      , IS_PTRAST, IS_PAMASTER
           ENDIF
           CALL DMUMPS_DM_SET_PTR(TMP_ADDRESS, DYN_SIZE, TMP_PTR)
           CALL DMUMPS_DM_FREE_BLOCK(TMP_PTR, DYN_SIZE, KEEP8)

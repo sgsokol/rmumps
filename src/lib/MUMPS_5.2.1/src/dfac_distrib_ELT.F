@@ -102,9 +102,9 @@ C ssg
         IF ( MAXELT_REAL_SIZE .GT. KEEP(39) ) THEN
           NBRECORDS = MAXELT_REAL_SIZE
           IF ( MPG .GT. 0 ) THEN
-            WRITE(MPG,*)
-     & ' ** Warning : For element distrib NBRECORDS set to ',
-     & MAXELT_REAL_SIZE,' because one element is large'
+            call rwarn(
+     & ' ** Warning : For element distrib NBRECORDS set to ')
+c~      & MAXELT_REAL_SIZE,' because one element is large'
           END IF
         END IF
         ALLOCATE( BUFI( 2*NBRECORDS+1, NBUF ), stat=allocok )
@@ -243,8 +243,8 @@ C ssg
           KEEP8(26) = RECV_RELTPTR8 - 1_8
         ENDIF
         IF ( RELTPTR8 - 1_8 .NE. NA_ELT8 ) THEN
-          WRITE(*,*) " ** Internal error in DMUMPS_ELT_DISTRIB",
-     &               RELTPTR8 - 1_8, NA_ELT8
+          call rwarn(" ** Internal error in DMUMPS_ELT_DISTRIB")
+c~      &               RELTPTR8 - 1_8, NA_ELT8
           CALL MUMPS_ABORT()
         END IF
         DEST = -2

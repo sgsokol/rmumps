@@ -324,17 +324,17 @@ C
       PROK    = ((MP.GT.0).AND.(id%ICNTL(4).GE.2))
       PROKG   = ( MPG .GT. 0 .and. id%MYID .eq. MASTER )
       PROKG   = (PROKG.AND.(id%ICNTL(4).GE.2))
-      IF ( PROK ) WRITE( MP, 130 )
-      IF ( PROKG ) WRITE( MPG, 130 )
-      IF ( PROKG .and. KEEP(53).GT.0 ) THEN
-        WRITE(MPG,'(/A,I3)') ' Null space option :', KEEP(19)
-        IF ( KEEP(21) .ne. N ) THEN 
-          WRITE( MPG, '(A,I10)') ' Max deficiency    : ', KEEP(21)
-        END IF
-        IF ( KEEP(22) .ne. 0 ) THEN 
-          WRITE( MPG, '(A,I10)') ' Min deficiency    : ', KEEP(22)
-        END IF
-      END IF
+c~       IF ( PROK ) WRITE( MP, 130 )
+c~       IF ( PROKG ) WRITE( MPG, 130 )
+c~       IF ( PROKG .and. KEEP(53).GT.0 ) THEN
+c~         WRITE(MPG,'(/A,I3)') ' Null space option :', KEEP(19)
+c~         IF ( KEEP(21) .ne. N ) THEN 
+c~           WRITE( MPG, '(A,I10)') ' Max deficiency    : ', KEEP(21)
+c~         END IF
+c~         IF ( KEEP(22) .ne. 0 ) THEN 
+c~           WRITE( MPG, '(A,I10)') ' Min deficiency    : ', KEEP(22)
+c~         END IF
+c~       END IF
 C     -------------------------------------
 C     Depending on the type of parallelism,
 C     the master can now (soon) potentially
@@ -399,10 +399,10 @@ C           Out of range values treated as 0
 C           To activate BLR during factorization,
 C           ICNTL(35) must have been set at analysis.
             IF (LPOK)  THEN
-              WRITE(LP,'(A)') 
-     &      " *** Error with BLR setting "
-              WRITE(LP,'(A)') " *** BLR was not activated during ",
-     &      " analysis but is requested during factorization."
+              call rwarn(
+     &      " *** Error with BLR setting ")
+              call rwarn(" *** BLR was not activated during " //
+     &      " analysis but is requested during factorization.")
             ENDIF
             id%INFO(1)=-54
             id%INFO(2)=0
@@ -480,7 +480,7 @@ C         id%KEEP(479)>0
             IF (id%KEEP(475).LT.2) THEN
 C             Reset to 3 if 5 or to 4 if 6
               id%KEEP(480) = id%KEEP(480) - 2
-              write(*,*) ' Resetting KEEP(480) to ', id%KEEP(480)
+c~               write(*,*) ' Resetting KEEP(480) to ', id%KEEP(480)
             ENDIF
           ENDIF
  105    CONTINUE
@@ -543,10 +543,10 @@ C       set (directly) CNTL(1) = 0.0
 C       ---------------------------------------
         IF ( KEEP(50) .eq. 1 ) THEN
           IF (id%CNTL(1) .ne. ZERO ) THEN
-            IF ( PROKG ) THEN
-              WRITE(MPG,'(A)')
-     &' ** Warning : SPD solver called, resetting CNTL(1) to 0.0D0'
-            END IF
+c~             IF ( PROKG ) THEN
+c~               WRITE(MPG,'(A)')
+c~      &' ** Warning : SPD solver called, resetting CNTL(1) to 0.0D0'
+c~             END IF
           END IF
           id%CNTL(1) = ZERO
         END IF
@@ -559,22 +559,22 @@ C         In practice, will have failed earlier if RHS not allocated.
 C         Still it looks safer to keep this test.
           id%INFO(1)=-43
           id%INFO(2)=20
-          IF (LPOK) WRITE(LP,'(A)')
-     &       ' ERROR: Sparse RHS is incompatible with forward',
-     &       ' performed during factorization (ICNTL(32)=1)'
+          IF (LPOK)call rwarn(
+     &       ' ERROR: Sparse RHS is incompatible with forward' //
+     &       ' performed during factorization (ICNTL(32)=1)')
         ELSE IF (id%ICNTL(30).NE.0) THEN ! out-of-range => 1
           id%INFO(1)=-43
           id%INFO(2)=30
-          IF (LPOK) WRITE(LP,'(A)')
-     &       ' ERROR: A-1 functionality incompatible with forward',
-     &       ' performed during factorization (ICNTL(32)=1)'
+          IF (LPOK) call rwarn(
+     &       ' ERROR: A-1 functionality incompatible with forward' //
+     &       ' performed during factorization (ICNTL(32)=1)')
         ELSE IF (id%ICNTL(9) .NE. 1) THEN
           id%INFO(1)=-43
           id%INFO(2)=9
-          IF (LPOK) WRITE(LP,'(A)')
-     &       ' ERROR: Transpose system (ICNTL(9).NE.0) not ',
-     &       ' compatible with forward performed during',
-     &       ' factorization (ICNTL(32)=1)'
+          IF (LPOK) call rwarn(
+     &       ' ERROR: Transpose system (ICNTL(9).NE.0) not ' //
+     &       ' compatible with forward performed during' //
+     &       ' factorization (ICNTL(32)=1)')
         ENDIF
       ENDIF
       CALL MUMPS_PROPINFO( id%ICNTL(1), id%INFO(1),
@@ -599,12 +599,12 @@ c     by resetting ITMP to zero on each proc where WK_USER is provided
       id%KEEP8(4) = ITMP8 * 1000000_8   ! convert to nb of bytes
       IF ( PROKG ) THEN
           NWORKING = id%NSLAVES
-          WRITE( MPG, 172 ) NWORKING, id%ICNTL(22), KEEP(486),
-     &    KEEP(12), 
-     &    id%KEEP8(111), KEEP(126), KEEP(127), KEEP(28),
-     &    id%KEEP8(4)/1000000_8, LWK_USER_SUM8, id%CNTL(1)
-          IF (KEEP(252).GT.0) 
-     &    WRITE(MPG,173) KEEP(253)
+c~           WRITE( MPG, 172 ) NWORKING, id%ICNTL(22), KEEP(486),
+c~      &    KEEP(12), 
+c~      &    id%KEEP8(111), KEEP(126), KEEP(127), KEEP(28),
+c~      &    id%KEEP8(4)/1000000_8, LWK_USER_SUM8, id%CNTL(1)
+c~           IF (KEEP(252).GT.0) 
+c~      &    WRITE(MPG,173) KEEP(253)
       ENDIF
       IF (KEEP(201).LE.0) THEN
 C       In-core version or no factors
@@ -924,7 +924,7 @@ C         scaling option KEEP(52)=7 or 8 (SimScale)
 C
           IF (PROKG.AND.(KEEP(52).EQ.7.OR.KEEP(52).EQ.8) 
      &             .AND. (K233+K231+K232).GT.0) THEN
-           IF (K232.GT.0) WRITE(MPG, 166) id%DKEEP(4)
+c~            IF (K232.GT.0) WRITE(MPG, 166) id%DKEEP(4)
           ENDIF
         ENDIF
       ENDIF ! LSCAL
@@ -999,7 +999,7 @@ C     to make it available on all processors.
                id%INFO(1)=-13
                id%INFO(2)=id%KEEP(255)
                IF (LPOK)
-     &         WRITE(LP,*) 'ERREUR while allocating RHS on a slave'
+     &         call rwarn("ERREUR while allocating RHS on a slave")
                NULLIFY(RHS_MUMPS)
             ENDIF
             RHS_MUMPS_ALLOCATED = .TRUE.
@@ -1029,7 +1029,7 @@ C             transpose).
              id%INFO(1)=-13
              id%INFO(2)=1
              IF (LPOK)
-     &            WRITE(LP,*) 'ERREUR while allocating RHS on a slave'
+     &            call rwarn("ERREUR while allocating RHS on a slave")
              NULLIFY(RHS_MUMPS)
           ENDIF
           RHS_MUMPS_ALLOCATED = .TRUE.
@@ -1141,8 +1141,8 @@ C      (with 0< CNTL(6) <= 1)
          ELSE  !  (CNTL(3) .EQ. ZERO) THEN
            SEUIL = N*EPS*ANORMINF  ! standard articles
          ENDIF
-         IF (PROKG) WRITE(MPG,*)
-     &   ' ABSOLUTE PIVOT THRESHOLD for rank revealing =',SEUIL
+c~          IF (PROKG) WRITE(MPG,*)
+c~      &   ' ABSOLUTE PIVOT THRESHOLD for rank revealing =',SEUIL
       ENDIF
 C     After QR with pivoting of root or SVD, diagonal entries 
 C     need be analysed to determine null space vectors.
@@ -1189,14 +1189,14 @@ C         We keep strategy currently used in MUMPS 4.10.0
            id%DKEEP(1)  = 1.0D-5*EPS*ANORMINF
           ENDIF
          ENDIF
-         IF (PROKG) WRITE(MPG,*)
-     &    ' ZERO PIVOT DETECTION ON, THRESHOLD          =',id%DKEEP(1)
+c~          IF (PROKG) WRITE(MPG,*)
+c~      &    ' ZERO PIVOT DETECTION ON, THRESHOLD          =',id%DKEEP(1)
          IF (CNTL5.GT.ZERO) THEN
             id%DKEEP(2) = CNTL5 * ANORMINF
-            IF (PROKG) WRITE(MPG,*) 
-     &    ' FIXATION FOR NULL PIVOTS                    =',id%DKEEP(2)
+c~             IF (PROKG) WRITE(MPG,*) 
+c~      &    ' FIXATION FOR NULL PIVOTS                    =',id%DKEEP(2)
          ELSE
-            IF (PROKG) WRITE(MPG,*) 'INFINITE FIXATION '
+            IF (PROKG) call rwarn("INFINITE FIXATION ")
             IF (id%KEEP(50).EQ.0) THEN
 C             Unsym
             ! the user let us choose a fixation. set in NEGATIVE
@@ -1399,8 +1399,8 @@ C          --------------------------
            IF((dble(KEEP(100))*dble(KEEP(35))/dble(2)).GT.
      &          (dble(1999999999)))THEN
              IF (PROKG) THEN
-               WRITE(MPG,*)id%MYID,': Warning: DIM_BUF_IO might be
-     &  too big for Filesystem'
+               call rwarn(': Warning: DIM_BUF_IO might be
+     &  too big for Filesystem')
              ENDIF
            ENDIF
            ALLOCATE (id%OOC_INODE_SEQUENCE(KEEP(28),
@@ -1450,7 +1450,7 @@ C       LOAD_END must be done but not OOC_END_FACTO
            IF ((KEEP(201).EQ.1).OR.(KEEP(201).EQ.2)) THEN
              CALL DMUMPS_OOC_INIT_FACTO(id,MAXS)
           ELSE
-             WRITE(*,*) "Internal error in DMUMPS_FAC_DRIVER"
+             call rwarn("Internal error in DMUMPS_FAC_DRIVER")
              CALL MUMPS_ABORT()
            ENDIF
            IF(id%INFO(1).LT.0)THEN
@@ -1560,10 +1560,10 @@ C       ------------------------------------
           ALLOCATE( id%DBLARR( 1 ), stat =IERR )
         END IF
         IF ( IERR .NE. 0 ) THEN
-          IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ': Allocation error for DBLARR(',id%KEEP8(26),')'
-          ENDIF
+c~           IF (LPOK) THEN
+c~             WRITE(LP,*) id%MYID,
+c~      &      ': Allocation error for DBLARR(',id%KEEP8(26),')'
+c~           ENDIF
           id%INFO(1)=-13
           CALL MUMPS_SET_IERROR(id%KEEP8(26), id%INFO(2))
           NULLIFY(id%DBLARR)
@@ -1737,7 +1737,7 @@ C       send the arrowheads.
           IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -13
             CALL MUMPS_SET_IERROR(LWK, id%INFO(2))
-            write(6,*) ' PB1 ALLOC LARGEMAT'
+            call rwarn(" PB1 ALLOC LARGEMAT")
           ENDIF
 #endif
         ENDIF
@@ -1759,7 +1759,7 @@ C         --------------------------------
                  id%INFO(1) = -13
                  id%INFO(2) = 1
                  NULLIFY(id%INTARR)
-                 write(6,*) ' PB2 ALLOC INTARR'
+                 call rwarn(" PB2 ALLOC INTARR")
                  CALL MUMPS_ABORT()
               ENDIF
            ENDIF
@@ -1782,7 +1782,7 @@ C         --------------------------------
      &      id%ISTEP_TO_INIV2, id%I_AM_CAND,
      &      id%CANDIDATES) 
 C
-C         write(6,*) '!!! A,IRN,JCN are freed during factorization '
+C         call rwarn("!!! A,IRN,JCN are freed during factorization ")
           DEALLOCATE (id%A)
           NULLIFY(id%A)
           DEALLOCATE (id%IRN)
@@ -1797,7 +1797,7 @@ C         write(6,*) '!!! A,IRN,JCN are freed during factorization '
               id%INFO(2) = MAXS
               NULLIFY(id%S)
               id%KEEP8(23)=0_8
-              write(6,*) ' PB2 ALLOC LARGEMAT',MAXS
+              call rwarn(' PB2 ALLOC LARGEMAT')
               CALL MUMPS_ABORT()
             ENDIF
           ELSE
@@ -1916,12 +1916,12 @@ C      anymore during the solve phase for IR and Error analysis.
             DEALLOCATE(id%A_loc)
             NULLIFY(id%A_loc)
          ENDIF
-       write(6,*) ' Warning :', 
-     &        ' id%A_loc, IRN_loc, JCN_loc deallocated !!! '
+       call rwarn(' Warning :' //
+     &        ' id%A_loc, IRN_loc, JCN_loc deallocated !!! ')
 #endif
-      IF (PROK) THEN
-        WRITE(MP,120) NLOCAL8, NSEND8
-      END IF
+c~       IF (PROK) THEN
+c~         WRITE(MP,120) NLOCAL8, NSEND8
+c~       END IF
       END IF
       IF ( KEEP(46) .eq. 0 .AND. id%MYID.eq.MASTER ) THEN
 C       ------------------------------
@@ -1940,9 +1940,9 @@ C     --------------------------
 !     &                 MPI_SUM, MASTER, id%COMM, IERR )
       NSEND_TOT8=NSEND8 ! ssg !
       NLOCAL_TOT8=NLOCAL8 ! ssg !
-      IF ( PROKG ) THEN
-        WRITE(MPG,125) NLOCAL_TOT8, NSEND_TOT8
-      END IF
+c~       IF ( PROKG ) THEN
+c~         WRITE(MPG,125) NLOCAL_TOT8, NSEND_TOT8
+c~       END IF
 C
 C     -------------------------
 C     Check for possible errors
@@ -1991,7 +1991,7 @@ C     ------------------------
       IF ( id%MYID.EQ.MASTER) THEN
         CALL MUMPS_SECFIN(TIME)
         id%DKEEP(93) = TIME
-        IF (PROKG) WRITE(MPG,160) id%DKEEP(93)
+c~         IF (PROKG) WRITE(MPG,160) id%DKEEP(93)
       END IF
 C
 C     TIMINGS:
@@ -2123,10 +2123,10 @@ C
      &         )
           END IF
         END IF
-        IF ( PROK ) THEN
-          WRITE( MP, 9999 ) DMUMPS_LBUFR_BYTES,
-     &                      DMUMPS_LBUF, DMUMPS_LBUF_INT
-        END IF
+c~         IF ( PROK ) THEN
+c~           WRITE( MP, 9999 ) DMUMPS_LBUFR_BYTES,
+c~      &                      DMUMPS_LBUF, DMUMPS_LBUF_INT
+c~         END IF
  9999   FORMAT( /,' Allocated buffers',/,' ------------------',/,
      &  ' Size of reception buffer in bytes ...... = ', I10,
      &  /,
@@ -2141,9 +2141,9 @@ C       ---------------------------
 C         convert to size in integer  id%INFO(2)= DMUMPS_LBUF_INT
           id%INFO(2)= (DMUMPS_LBUF_INT+KEEP(34)-1)/KEEP(34)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &     ':Allocation error in DMUMPS_BUF_ALLOC_SMALL_BUF'
-     &     ,id%INFO(2)
+            call rwarn(
+     &     ':Allocation error in DMUMPS_BUF_ALLOC_SMALL_BUF')
+c~      &     ,id%INFO(2)
           ENDIF
           GO TO 110
         END IF
@@ -2153,9 +2153,9 @@ C         convert to size in integer  id%INFO(2)= DMUMPS_LBUF_INT
 C         convert to size in integer          id%INFO(2)= DMUMPS_LBUF
           id%INFO(2)= (DMUMPS_LBUF+KEEP(34)-1)/KEEP(34)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &     ': Allocation error in DMUMPS_BUF_ALLOC_CB'
-     &     ,id%INFO(2)
+            call rwarn(
+     &     ': Allocation error in DMUMPS_BUF_ALLOC_CB')
+c~      &     ,id%INFO(2)
           ENDIF
           GO TO 110
         END IF
@@ -2172,8 +2172,9 @@ C       -----------------------------
           id%INFO(2)=id%LBUFR
           NULLIFY(id%BUFR)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &     ': Allocation error for id%BFUR(', id%LBUFR,')', IERR
+            call rwarn(
+     &     ': Allocation error for id%BFUR(')
+c~      , id%LBUFR,')', IERR
           ENDIF
           GO TO 110
         END IF
@@ -2208,8 +2209,9 @@ C         In-core or reals for factors not stored
           id%INFO(2)=MAXIS
           NULLIFY(id%IS)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &       ': Allocation error for id%IS(',MAXIS,')'
+            call rwarn(
+     &       ': Allocation error for id%IS(')
+c~      ,MAXIS,')'
           ENDIF
           GO TO 110
         END IF
@@ -2224,8 +2226,9 @@ C       -----------------------
           id%INFO(1)=-13
           id%INFO(2)=id%KEEP(28)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ': Allocation error for id%PTLUST_S(', id%KEEP(28),')'
+            call rwarn(
+     &      ': Allocation error for id%PTLUST_S(')
+c~      , id%KEEP(28),')'
           ENDIF
           NULLIFY(id%PTLUST_S)
           GOTO 100
@@ -2237,8 +2240,9 @@ C       -----------------------
           id%INFO(2)=id%KEEP(28)
           NULLIFY(id%PTRFAC)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ': Allocation error for id%PTRFAC(', id%KEEP(28),')'
+            call rwarn(
+     &      ': Allocation error for id%PTRFAC(')
+c~      , id%KEEP(28),')'
           ENDIF
           GOTO 100
         END IF
@@ -2267,8 +2271,9 @@ C     ----------------------------------------------------
           id%INFO(1)=-13
           id%INFO(2)=IPOOL + LPOOL - 1
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ': Allocation error for IWK(',IPOOL+LPOOL-1,')'
+            call rwarn(
+     &      ': Allocation error for IWK(')
+c~      ,IPOOL+LPOOL-1,')'
           ENDIF
           GOTO 110
         END IF
@@ -2277,8 +2282,9 @@ C     ----------------------------------------------------
           id%INFO(1)=-13
           id%INFO(2)=2 * id%KEEP(28)
           IF (LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ': Allocation error for IWKB(', 2*id%KEEP(28),')'
+            call rwarn(
+     &      ': Allocation error for IWKB(')
+c~      , 2*id%KEEP(28),')'
           ENDIF
           GOTO 110
         END IF
@@ -2299,10 +2305,10 @@ C
 C
 C       Store size of receive buffers in module
         CALL DMUMPS_BUF_DIST_IRECV_SIZE( id%LBUFR_BYTES )
-        IF (PROK) THEN
-          WRITE( MP, 170 ) MAXS, MAXIS, id%KEEP8(12), KEEP(15),
-     &    id%KEEP8(26), id%KEEP8(27), id%KEEP8(11), KEEP(26), KEEP(27)
-        ENDIF
+c~         IF (PROK) THEN
+c~           WRITE( MP, 170 ) MAXS, MAXIS, id%KEEP8(12), KEEP(15),
+c~      &    id%KEEP8(26), id%KEEP8(27), id%KEEP8(11), KEEP(26), KEEP(27)
+c~         ENDIF
       END IF
 C     ===============================================================
 C     Before calling the main driver, DMUMPS_FAC_B,
@@ -2509,11 +2515,11 @@ C       ----------------------------------------------------
      &       id%NSLAVES, IRANK,
      &       id%KEEP(1) )
 C FIXME Check if WK_USER used and indicate, total space to WK_USER
-      IF (PROK ) THEN
-          WRITE(MP,'(A,I12) ')
-     & ' ** Eff. min. Space MBYTES for facto             (INFO(16)):',
-     &                TOTAL_MBYTES
-      ENDIF
+c~       IF (PROK ) THEN
+c~           WRITE(MP,'(A,I12) ')
+c~      & ' ** Eff. min. Space MBYTES for facto             (INFO(16)):',
+c~      &                TOTAL_MBYTES
+c~       ENDIF
 C     ========================(INFO(16) RELATED)===========================
 C     ---------------------------------------
 C     COMPUTE EFFECTIVE MEMORY USED (INFO(22)
@@ -2542,16 +2548,16 @@ C                   sum over all processors
 C     ----------------------------------------------------
       CALL MUMPS_MEM_CENTRALIZE( id%MYID, id%COMM,
      &                    id%INFO(22), id%INFOG(21), IRANK )
-      IF ( PROKG ) THEN
-       IF (PRINT_MAXAVG) THEN
-        WRITE( MPG,'(A,I12) ')
-     &  ' ** Memory effectively used, max in  Mbytes     (INFOG(21)):',
-     &  id%INFOG(21)
-       ENDIF
-       WRITE( MPG,'(A,I12) ')
-     &  ' ** Memory effectively used, total in Mbytes    (INFOG(22)):',
-     &  id%INFOG(22)
-      END IF
+c~       IF ( PROKG ) THEN
+c~        IF (PRINT_MAXAVG) THEN
+c~         WRITE( MPG,'(A,I12) ')
+c~      &  ' ** Memory effectively used, max in  Mbytes     (INFOG(21)):',
+c~      &  id%INFOG(21)
+c~        ENDIF
+c~        WRITE( MPG,'(A,I12) ')
+c~      &  ' ** Memory effectively used, total in Mbytes    (INFOG(22)):',
+c~      &  id%INFOG(22)
+c~       END IF
 C     ------------------------------------------------
 C     Print average size of dynamic memory (KEEP8(72)) 
 C     ------------------------------------------------
@@ -2571,16 +2577,16 @@ C                   sum over all processors
 C     -----------------------------------------------------------
       CALL MUMPS_MEM_CENTRALIZE( id%MYID, id%COMM,
      &              K72MB, K72MAXSUM, IRANK )
-      IF ( PROKG ) THEN
-       IF (PRINT_MAXAVG) THEN
-        WRITE( MPG,'(A,I12) ')
-     &  ' ** Memory dynamically allocated for CB, max in Mbytes     :',
-     &  K72MAXSUM(1)
-       ENDIF 
-       WRITE( MPG,'(A,I12) ')
-     &  ' ** Memory dynamically allocated for CB, total in Mbytes   :',
-     &  K72MAXSUM(2)
-      END IF
+c~       IF ( PROKG ) THEN
+c~        IF (PRINT_MAXAVG) THEN
+c~         WRITE( MPG,'(A,I12) ')
+c~      &  ' ** Memory dynamically allocated for CB, max in Mbytes     :',
+c~      &  K72MAXSUM(1)
+c~        ENDIF 
+c~        WRITE( MPG,'(A,I12) ')
+c~      &  ' ** Memory dynamically allocated for CB, total in Mbytes   :',
+c~      &  K72MAXSUM(2)
+c~       END IF
 #endif
 C
       IF (I_AM_SLAVE) THEN
@@ -2601,13 +2607,13 @@ C        in main working array S
       CALL MUMPS_SETI8TOI4(K67,id%INFO(21))
 C
 C
-      IF ( PROKG ) THEN
-          IF (id%INFO(1) .GE.0) THEN
-            WRITE(MPG,180) id%DKEEP(94)
-          ELSE
-            WRITE(MPG,185) id%DKEEP(94)
-          ENDIF
-      ENDIF
+c~       IF ( PROKG ) THEN
+c~           IF (id%INFO(1) .GE.0) THEN
+c~             WRITE(MPG,180) id%DKEEP(94)
+c~           ELSE
+c~             WRITE(MPG,185) id%DKEEP(94)
+c~           ENDIF
+c~       ENDIF
 *     save statistics in KEEP array.
       KEEP(33) = id%INFO(11) ! this should be the other way round
 C
@@ -2861,16 +2867,16 @@ C         fact that factors are saved in LR.
           FRONTWISE = 0
 C         WRITE gains also compute stats stored in DKEEP array
           IF (LPOK) THEN
-            IF (CNTL(7) < 0.0D0) THEN
-C           Warning : using negative values is an experimental and 
-C            non recommended setting.
-             WRITE(LP,'(/A/,A/,A/,A,A)') 
-     &  ' WARNING in BLR input setting',
-     &  '          CNTL(7) < 0 is experimental: ',
-     &  '          RRQR precision = |CNTL(7| x ||A_pre||, ',
-     &  '          where A_pre is the preprocessed matrix as defined',
-     &  ' in the Users guide '
-            ENDIF
+c~             IF (CNTL(7) < 0.0D0) THEN
+c~ C           Warning : using negative values is an experimental and 
+c~ C            non recommended setting.
+c~              WRITE(LP,'(/A/,A/,A/,A,A)') 
+c~      &  ' WARNING in BLR input setting',
+c~      &  '          CNTL(7) < 0 is experimental: ',
+c~      &  '          RRQR precision = |CNTL(7| x ||A_pre||, ',
+c~      &  '          where A_pre is the preprocessed matrix as defined',
+c~      &  ' in the Users guide '
+c~             ENDIF
           ENDIF
           CALL SAVEandWRITE_GAINS(FRONTWISE,
      &                KEEP(489), id%DKEEP, N,  id%ICNTL(36),
@@ -3050,64 +3056,64 @@ C           from MUMPS (see DMUMPS_DRIVER)
         ENDIF
       ENDIF
  490  IF (allocated(ITMP2)) DEALLOCATE(ITMP2)
-      IF ( PROKG ) THEN
-C     ---------------------------------------
-C     PRINT STATISTICS  (on master)
-C     -----------------------------
-          WRITE(MPG,99984) RINFOG(2),RINFOG(3),id%KEEP8(148),
-     &                    INFOG(10), INFOG(11), id%KEEP8(110)
-          IF (id%KEEP(50) == 1 .OR. id%KEEP(50) == 2) THEN
-            ! negative pivots
-            WRITE(MPG, 99987) INFOG(12)
-          END IF
-          IF (id%KEEP(50) == 0) THEN
-            ! off diag pivots
-            WRITE(MPG, 99985) INFOG(12)
-          END IF
-          IF (id%KEEP(50) .NE. 1) THEN
-            ! delayed pivots
-            WRITE(MPG, 99982) INFOG(13)
-          END IF
-          IF (KEEP(97) .NE. 0) THEN
-            ! tiny pivots
-            WRITE(MPG, 99986) INFOG(25)
-          ENDIF
-          IF (id%KEEP(50) == 2) THEN
-            !number of 2x2 pivots in type 1 nodes
-             WRITE(MPG, 99988) KEEP(229)
-            !number of 2x2 pivots in type 2 nodes
-             WRITE(MPG, 99989) KEEP(230)
-          ENDIF
-          !number of zero pivots
-          IF (KEEP(110) .NE.0) THEN
-              WRITE(MPG, 99991) KEEP(112)
-          ENDIF
-          !Deficiency on root
-          IF ( KEEP(17) .ne. 0 )
-     &    WRITE(MPG, 99983) KEEP(17)
-          !Total deficiency
-          IF (KEEP(110).NE.0.OR.KEEP(17).NE.0)
-     &    WRITE(MPG, 99992) KEEP(17)+KEEP(112)
-          ! Memory compress
-          WRITE(MPG, 99981) INFOG(14)
-          ! Extra copies due to ip stack in unsym case
-          ! in core case (or OLD_OOC_PANEL)
-          IF (id%KEEP8(108) .GT. 0_8) THEN
-            WRITE(MPG, 99980) id%KEEP8(108)
-          ENDIF
-          IF  ((KEEP(60).NE.0) .AND. INFOG(25).GT.0) THEN
-          !  Schur on and tiny pivots set in last level 
-          ! before the SChur
-           WRITE(MPG, '(A)') 
-     & " ** Warning Static pivoting was necessary"
-           WRITE(MPG, '(A)') 
-     & " ** to factor interior variables with Schur ON"
-          ENDIF
-          IF (KEEP(258).NE.0) THEN
-            WRITE(MPG,99978) RINFOG(12)
-            WRITE(MPG,99977) INFOG(34)
-          ENDIF
-      END IF
+c~       IF ( PROKG ) THEN
+c~ C     ---------------------------------------
+c~ C     PRINT STATISTICS  (on master)
+c~ C     -----------------------------
+c~           WRITE(MPG,99984) RINFOG(2),RINFOG(3),id%KEEP8(148),
+c~      &                    INFOG(10), INFOG(11), id%KEEP8(110)
+c~           IF (id%KEEP(50) == 1 .OR. id%KEEP(50) == 2) THEN
+c~             ! negative pivots
+c~             WRITE(MPG, 99987) INFOG(12)
+c~           END IF
+c~           IF (id%KEEP(50) == 0) THEN
+c~             ! off diag pivots
+c~             WRITE(MPG, 99985) INFOG(12)
+c~           END IF
+c~           IF (id%KEEP(50) .NE. 1) THEN
+c~             ! delayed pivots
+c~             WRITE(MPG, 99982) INFOG(13)
+c~           END IF
+c~           IF (KEEP(97) .NE. 0) THEN
+c~             ! tiny pivots
+c~             WRITE(MPG, 99986) INFOG(25)
+c~           ENDIF
+c~           IF (id%KEEP(50) == 2) THEN
+c~             !number of 2x2 pivots in type 1 nodes
+c~              WRITE(MPG, 99988) KEEP(229)
+c~             !number of 2x2 pivots in type 2 nodes
+c~              WRITE(MPG, 99989) KEEP(230)
+c~           ENDIF
+c~           !number of zero pivots
+c~           IF (KEEP(110) .NE.0) THEN
+c~               WRITE(MPG, 99991) KEEP(112)
+c~           ENDIF
+c~           !Deficiency on root
+c~           IF ( KEEP(17) .ne. 0 )
+c~      &    WRITE(MPG, 99983) KEEP(17)
+c~           !Total deficiency
+c~           IF (KEEP(110).NE.0.OR.KEEP(17).NE.0)
+c~      &    WRITE(MPG, 99992) KEEP(17)+KEEP(112)
+c~           ! Memory compress
+c~           WRITE(MPG, 99981) INFOG(14)
+c~           ! Extra copies due to ip stack in unsym case
+c~           ! in core case (or OLD_OOC_PANEL)
+c~           IF (id%KEEP8(108) .GT. 0_8) THEN
+c~             WRITE(MPG, 99980) id%KEEP8(108)
+c~           ENDIF
+c~           IF  ((KEEP(60).NE.0) .AND. INFOG(25).GT.0) THEN
+c~           !  Schur on and tiny pivots set in last level 
+c~           ! before the SChur
+c~            WRITE(MPG, '(A)') 
+c~      & " ** Warning Static pivoting was necessary"
+c~            WRITE(MPG, '(A)') 
+c~      & " ** to factor interior variables with Schur ON"
+c~           ENDIF
+c~           IF (KEEP(258).NE.0) THEN
+c~             WRITE(MPG,99978) RINFOG(12)
+c~             WRITE(MPG,99977) INFOG(34)
+c~           ENDIF
+c~       END IF
 * ==========================================
 *
 *  End of Factorization Phase
@@ -3165,7 +3171,7 @@ C       Terminate BLR module except if it is still needed for solve
            CALL MUMPS_FDM_MOD_TO_STRUC('F', id%FDM_F_ENCODING,
      &        id%INFO(1))
            IF (.NOT. associated(id%FDM_F_ENCODING)) THEN
-             WRITE(*,*) "Internal error 2 in DMUMPS_FAC_DRIVER"
+             call rwarn("Internal error 2 in DMUMPS_FAC_DRIVER")
            ENDIF
         ELSE
            CALL MUMPS_FDM_END('F')
@@ -3302,16 +3308,16 @@ C
       INTEGER, INTENT(IN) :: IRANK, NSLAVES
       INTEGER, INTENT(IN) :: KEEP(500)
 C
-      IF ( PROKG ) THEN
-        IF (PRINT_MAXAVG) THEN
-         WRITE( MPG,'(A,I12) ')
-     &   ' ** Memory allocated, max in Mbytes             (INFOG(18)):',
-     &   INFOG18
-        ENDIF
-        WRITE( MPG,'(A,I12) ')
-     &   ' ** Memory allocated, total in Mbytes           (INFOG(19)):',
-     &    INFOG19
-      END IF
+c~       IF ( PROKG ) THEN
+c~         IF (PRINT_MAXAVG) THEN
+c~          WRITE( MPG,'(A,I12) ')
+c~      &   ' ** Memory allocated, max in Mbytes             (INFOG(18)):',
+c~      &   INFOG18
+c~         ENDIF
+c~         WRITE( MPG,'(A,I12) ')
+c~      &   ' ** Memory allocated, total in Mbytes           (INFOG(19)):',
+c~      &    INFOG19
+c~       END IF
       RETURN
       END SUBROUTINE DMUMPS_PRINT_ALLOCATED_MEM
       SUBROUTINE DMUMPS_AVGMAX_STAT8(PROKG, MPG, VAL, NSLAVES,
@@ -3337,11 +3343,11 @@ C
 !     &                 MPI_SUM, MASTER, COMM, IERR )
       AVG_VAL=LOC_VAL ! ssg !
       IF (PROKG) THEN
-        IF (PRINT_MAXAVG) THEN
-          WRITE(MPG,100) " Average", MSG, int(AVG_VAL,8)
-        ELSE
-          WRITE(MPG,110)  MSG, MAX_VAL
-        ENDIF
+c~         IF (PRINT_MAXAVG) THEN
+c~           WRITE(MPG,100) " Average", MSG, int(AVG_VAL,8)
+c~         ELSE
+c~           WRITE(MPG,110)  MSG, MAX_VAL
+c~         ENDIF
       ENDIF
       RETURN
  100  FORMAT(A8,A48,I18)

@@ -126,8 +126,8 @@ C
       KEEP(266)=0
       ALLOCATE(DEJA_SEND( 0:SLAVEF-1 ), stat=allocok)
       if(allocok.ne.0) then
-         WRITE(6,*) ' Allocation error of DEJA_SEND in '
-     &        //'routine DMUMPS_SOL_S '
+         call rwarn(' Allocation error of DEJA_SEND in '
+     &        //'routine DMUMPS_SOL_S ')
          INFO(1)=-13
          INFO(2)=SLAVEF
       endif
@@ -411,7 +411,7 @@ C
               POSINDICES = IPOS + 1
            END IF
            IF ( NCB.EQ.0 ) THEN
-             write(6,*) ' Internal Error type 2 node with no CB '
+             call rwarn(' Internal Error type 2 node with no CB ')
              CALL MUMPS_ABORT()
            ENDIF
            IF ( MTYPE .EQ. 1 .AND. KEEP(50).EQ.0 ) THEN
@@ -443,7 +443,7 @@ C
      &       IW, LIW, KEEP, N, POSINRHSCOMP_BWD )
              IFR = IFR + int(J2-KEEP(253)-J1+1,8)
           ELSE
-             WRITE(*,*) "Internal error DMUMPS_SOL_S"
+             call rwarn("Internal error DMUMPS_SOL_S")
              CALL MUMPS_ABORT()
            END IF
            IF (KEEP(252).NE.0) THEN
@@ -632,7 +632,7 @@ C
               ENDDO
             ENDIF
          ELSE
-            WRITE(*,*) "Internal error DMUMPS_SOL_BWD"
+            call rwarn("Internal error DMUMPS_SOL_BWD")
             CALL MUMPS_ABORT()
           ENDIF
         END DO
@@ -667,7 +667,7 @@ C
      &       IW, LIW, KEEP, N, POSINRHSCOMP_BWD )
           IFR = IFR + int(J2-KEEP(253)-J1+1,8)
        ELSE
-          WRITE(*,*) "Internal error DMUMPS_SOL_S"
+          call rwarn("Internal error DMUMPS_SOL_S")
           CALL MUMPS_ABORT()
         ENDIF
         IF (KEEP(252).NE.0) THEN
@@ -816,7 +816,7 @@ C
      &              ONE, W(PTWCB_PANEL),LIELL)
                 ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+                  call rwarn("Internal error in DMUMPS_SOL_S")
                   CALL MUMPS_ABORT()
 #else
                   IF (NCB_PANEL - NCB .NE. 0) THEN
@@ -842,7 +842,7 @@ C
      &            LDAJ, W(PTWCB_PANEL), LIELL)
                 ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+                  call rwarn("Internal error in DMUMPS_SOL_S")
                   CALL MUMPS_ABORT()
 #else
                   CALL dtrsm('L','L','T','U',NBJ, NRHS_B, ONE,
@@ -857,7 +857,7 @@ C
      &            LDAJ, W(PTWCB_PANEL), LIELL)
                 ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+                  call rwarn("Internal error in DMUMPS_SOL_S")
                   CALL MUMPS_ABORT()
 #else
                   CALL dtrsm('L','L','T','N',NBJ, NRHS_B, ONE,
@@ -913,7 +913,7 @@ C
      &              W(PTWCB), LIELL)
             ELSE
 #if defined(RHSCOMP_BYROWS)
-              WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+              call rwarn("Internal error in DMUMPS_SOL_S")
               CALL MUMPS_ABORT()
 #else
               CALL dgemm('T','N', NPIV, NRHS_B, NCB, ALPHA,
@@ -956,7 +956,7 @@ C
      &                 ONE, W(PTWCB),LIELL)
                 ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+                  call rwarn("Internal error in DMUMPS_SOL_S")
                   CALL MUMPS_ABORT()
 #else
                   CALL dgemm( 'N', 'N', NPIV, NRHS_B, NCB, ALPHA,
@@ -990,7 +990,7 @@ C
      &                LIELL, W(PTWCB), LIELL)
            ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+                  call rwarn("Internal error in DMUMPS_SOL_S")
                   CALL MUMPS_ABORT()
 #else
              CALL dtrsm('L','L','T','N', NPIV, NRHS_B, ONE, A(APOS),
@@ -1026,7 +1026,7 @@ C
      &                   LDAJ,W(PTWCB),LIELL)
             ELSE
 #if defined(RHSCOMP_BYROWS)
-              WRITE(*,*) "Internal error in DMUMPS_SOL_S"
+              call rwarn("Internal error in DMUMPS_SOL_S")
               CALL MUMPS_ABORT()
 #else
               CALL dtrsm('L','U','N','U', NPIV, NRHS_B, ONE, A(APOS),
@@ -1059,7 +1059,7 @@ C
   150   CONTINUE
       ELSE IF (KEEP(350).EQ.1.OR.KEEP(350).EQ.2) THEN
       ELSE
-        WRITE(*,*)"Internal error in DMUMPS_SOL_S"
+        call rwarn("Internal error in DMUMPS_SOL_S")
         CALL MUMPS_ABORT()
       ENDIF
   160 CONTINUE

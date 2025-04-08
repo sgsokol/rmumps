@@ -94,7 +94,7 @@ C
         IF (root%yes) THEN
         IF ( NEW_LOCAL_M .NE. root%SCHUR_MLOC .OR.
      &          NEW_LOCAL_N .NE. root%SCHUR_NLOC ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_PROCESS_ROOT2SLAVE"
+          call rwarn("Internal error 1 in DMUMPS_PROCESS_ROOT2SLAVE")
           CALL MUMPS_ABORT()
         ENDIF
         ENDIF
@@ -112,8 +112,8 @@ C
      &           KEEP(IXSZ),COMP,DKEEP(97),
      &           MYID, SLAVEF, PROCNODE_STEPS, DAD )
            IF ( LRLU .NE. LRLUS ) THEN
-                  WRITE(*,*) 'PB1 compress root2slave:LRLU,LRLUS=',
-     &            LRLU, LRLUS
+                  call rwarn('PB1 compress root2slave:LRLU,LRLUS=')
+c~      &            LRLU, LRLUS
                   IFLAG = -9
                   CALL MUMPS_SET_IERROR(LREQA-LRLUS, IERROR)
                   GOTO 700
@@ -202,8 +202,8 @@ C
         IF ( TOT_ROOT_SIZE .eq. root%ROOT_SIZE ) THEN
           IF ( LREQA .NE. int(OLD_LOCAL_M,8) * int(OLD_LOCAL_N,8) )
      &          THEN
-             write(*,*) 'error 1 in PROCESS_ROOT2SLAVE',
-     &       OLD_LOCAL_M, OLD_LOCAL_N
+             call rwarn('error 1 in PROCESS_ROOT2SLAVE')
+c~      &       OLD_LOCAL_M, OLD_LOCAL_N
              CALL MUMPS_ABORT()
           END IF
           CALL DMUMPS_COPYI8SIZE(LREQA,

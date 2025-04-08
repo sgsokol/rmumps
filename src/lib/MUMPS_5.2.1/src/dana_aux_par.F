@@ -213,7 +213,7 @@ C
       IF (id%KEEP(245) .EQ. 0) THEN
 #if defined(ptscotch)
          IF(id%NSLAVES .LT. 2) THEN
-            IF(PROKG) WRITE(MPG,'("Warning: older versions
+c~             IF(PROKG) WRITE(MPG,'("Warning: older versions
      &of PT-SCOTCH require at least 2 processors.")')
          END IF
          ord%ORDTOOL    = 1
@@ -226,7 +226,7 @@ C
          ord%MYID       = id%MYID
          ord%IDO        = (id%MYID .GE. 1) .OR. (id%KEEP(46) .EQ. 1)
          id%KEEP(245)   = 1
-         IF(PROKG) WRITE(MPG,
+c~          IF(PROKG) WRITE(MPG,
      &           '("Parallel ordering tool set to PT-SCOTCH.")')
          RETURN
 #else
@@ -259,26 +259,26 @@ C
          ord%TOPSTRAT = 0
          ord%SUBSTRAT = 0
          ord%MYID     = id%MYID
-         IF(PROKG) WRITE(MPG,
-     &        '("Parallel ordering tool set to ParMETIS.")')
+c~          IF(PROKG) WRITE(MPG,
+c~      &        '("Parallel ordering tool set to ParMETIS.")')
          id%KEEP(245) = 2
          RETURN
 #endif         
          id%INFO(1)  = -38
          id%INFOG(1) = -38
-         IF(id%MYID .EQ.0 ) THEN
-            WRITE(LP,
-     &           '("No parallel ordering tools available.")')
-            WRITE(LP,
-     &           '("Please install PT-SCOTCH or ParMETIS.")')
-         END IF
+c~          IF(id%MYID .EQ.0 ) THEN
+c~             WRITE(LP,
+c~      &           '("No parallel ordering tools available.")')
+c~             WRITE(LP,
+c~      &           '("Please install PT-SCOTCH or ParMETIS.")')
+c~          END IF
          RETURN
       ELSE IF (id%KEEP(245) .EQ. 1) THEN
 #if defined(ptscotch)
-         IF(id%NSLAVES .LT. 2) THEN
-            IF(PROKG) WRITE(MPG,'("Warning: older versions
-     &of PT-SCOTCH require at least 2 processors.")')
-         END IF
+c~          IF(id%NSLAVES .LT. 2) THEN
+c~             IF(PROKG) WRITE(MPG,'("Warning: older versions
+c~      &of PT-SCOTCH require at least 2 processors.")')
+c~          END IF
          ord%ORDTOOL    = 1
          ord%TOPSTRAT   = 0
          ord%SUBSTRAT   = 0
@@ -288,14 +288,14 @@ C
          ord%NSLAVES    = id%NSLAVES
          ord%MYID       = id%MYID
          ord%IDO        = (id%MYID .GE. 1) .OR. (id%KEEP(46) .EQ. 1)
-         IF(PROKG) WRITE(MPG,
-     &        '("Using PT-SCOTCH for parallel ordering.")')
+c~          IF(PROKG) WRITE(MPG,
+c~      &        '("Using PT-SCOTCH for parallel ordering.")')
          RETURN
 #else
          id%INFOG(1) = -38
          id%INFO(1)  = -38
-         IF(id%MYID .EQ.0 ) WRITE(LP,
-     &        '("PT-SCOTCH not available.")')
+c~          IF(id%MYID .EQ.0 ) WRITE(LP,
+c~      &        '("PT-SCOTCH not available.")')
          RETURN
 #endif
       ELSE IF (id%KEEP(245) .EQ. 2) THEN
@@ -327,14 +327,14 @@ C
          ord%TOPSTRAT = 0
          ord%SUBSTRAT = 0
          ord%MYID     = id%MYID
-         IF(PROKG) WRITE(MPG,
-     &        '("Using ParMETIS for parallel ordering.")')
+c~          IF(PROKG) WRITE(MPG,
+c~      &        '("Using ParMETIS for parallel ordering.")')
          RETURN
 #else
          id%INFOG(1) = -38
          id%INFO(1)  = -38
-         IF(id%MYID .EQ.0 ) WRITE(LP,
-     &        '("ParMETIS not available.")')
+c~          IF(id%MYID .EQ.0 ) WRITE(LP,
+c~      &        '("ParMETIS not available.")')
          RETURN
 #endif
       END IF
@@ -353,8 +353,8 @@ C
 #else
          id%INFOG(1) = -38
          id%INFO(1)  = -38
-         WRITE(LP,*)'PT-SCOTCH not available. Aborting...'
-         CALL MUMPS_ABORT()
+c~          WRITE(LP,*)'PT-SCOTCH not available. Aborting...'
+c~          CALL MUMPS_ABORT()
 #endif
       ELSE IF (ord%ORDTOOL .EQ. 2) THEN
 #if defined(parmetis) || defined(parmetis3)
@@ -363,7 +363,7 @@ C
 #else
          id%INFOG(1) = -38
          id%INFO(1)  = -38
-         WRITE(LP,*)'ParMETIS not available. Aborting...'
+         call rwarn('ParMETIS not available. Aborting...')
          CALL MUMPS_ABORT()
 #endif
       END IF
@@ -390,7 +390,7 @@ C
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
       IERR=0
       IF(MUMPS_GETSIZE(WORK) .LT. id%N*3) THEN
-         WRITE(LP,
+         call rwarn(
      &        '("Insufficient workspace inside DMUMPS_PARMETIS_ORD")')
          CALL MUMPS_ABORT()
       END IF
@@ -435,9 +435,9 @@ C
      &           VERTLOCTAB, EDGELOCTAB, BASEVAL, OPTIONS, ORDER,
      &           SIZES, ord%COMM_NODES, IERR)
          ELSE
-              WRITE(*,*)
-     &        "Internal error in PARMETIS wrappers, METIS_IDX_SIZE=",
-     &        METIS_IDX_SIZE
+              call rwarn(
+     &        "Internal error in PARMETIS wrappers, METIS_IDX_SIZE=")
+c~      &        METIS_IDX_SIZE
               CALL MUMPS_ABORT()
          END IF
       END IF
@@ -512,7 +512,7 @@ C
       INTEGER, POINTER              :: EDGELOCTAB(:)
       nullify(FIRST, LAST, SWORK, VERTLOCTAB, EDGELOCTAB)
       IF(MUMPS_GETSIZE(WORK) .LT. id%N*3) THEN
-         WRITE(LP,
+         call rwarn(
      &      '("Insufficient workspace inside DMUMPS_PTSCOTCH_ORD")')
          CALL MUMPS_ABORT()
       END IF
@@ -893,7 +893,7 @@ C ssg
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
       IF(MUMPS_GETSIZE(WORK) .LT. 4*id%N) THEN
-         WRITE(LP,*)'Insufficient workspace in DMUMPS_PARSYMFACT'
+         call rwarn('Insufficient workspace in DMUMPS_PARSYMFACT')
          CALL MUMPS_ABORT()
       ELSE
          HEAD => WORK(       1 :   id%N)
@@ -1307,7 +1307,7 @@ C     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
       INTEGER, POINTER  :: PERM(:)
       ALLOCATE(PERM(CBLKNBR),stat=allocok)
       if(allocok.GT.0) then
-         write(*,*) "Allocation error of PERM in DMUMPS_BUILD_TREETAB"
+         call rwarn("Allocation error of PERM in DMUMPS_BUILD_TREETAB")
          return
       endif
       TREETAB(CBLKNBR) = -1
@@ -1394,7 +1394,7 @@ C     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
       IF(MUMPS_GETSIZE(WORK) .LT. id%N*2) THEN
-         WRITE(LP,
+         call rwarn(
      &        '("Insufficient workspace inside BUILD_SCOTCH_GRAPH")')
          CALL MUMPS_ABORT()
       END IF
@@ -1544,8 +1544,8 @@ C     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
          SYMMETRY = dble(TOTDUPS)/(dble(id%KEEP8(28))-dble(id%N))
          SYMMETRY = min(SYMMETRY,1.0d0)
          IF(id%KEEP(50) .GE. 1) SYMMETRY = 1.d0
-         IF(PROKG) WRITE(MPG,'("Structural symmetry is:",i3,"%")')
-     &        ceiling(SYMMETRY*100.d0)
+c~          IF(PROKG) WRITE(MPG,'("Structural symmetry is:",i3,"%")')
+c~      &        ceiling(SYMMETRY*100.d0)
          id%INFOG(8) = ceiling(SYMMETRY*100.0d0)
       END IF
       IPE(NROWS_LOC+1) = SAVEPNT
@@ -1602,7 +1602,7 @@ C     &        MPI_INTEGER, 0, MYID, id%COMM, IERR)
       CALL MPI_COMM_RANK (id%COMM, MYID, IERR)
       CALL MPI_COMM_SIZE (id%COMM, NPROCS, IERR)
       IF(MUMPS_GETSIZE(WORK) .LT. id%N*2) THEN
-         WRITE(LP,
+         call rwarn(
      &        '("Insufficient workspace inside BUILD_LOC_GRAPH")')
          CALL MUMPS_ABORT()
       END IF
@@ -1912,23 +1912,23 @@ C         END DO
       IF(INIT) THEN
          ALLOCATE(SPACE(2*BUFSIZE, 2, NPROCS), stat=allocok)
          IF(allocok.GT.0) THEN
-            write(*,*) "Allocation error of SPACE in DMUMPS_SEND_BUF"
+            call rwarn("Allocation error of SPACE in DMUMPS_SEND_BUF")
             return
          ENDIF
          ALLOCATE(RCVBUF(2*BUFSIZE), stat=allocok)
          IF(allocok.GT.0) THEN
-            write(*,*) "Allocation error of RCVBUF in DMUMPS_SEND_BUF"
+            call rwarn("Allocation error of RCVBUF in DMUMPS_SEND_BUF")
             return
          ENDIF
          ALLOCATE(PENDING(NPROCS), CPNT(NPROCS), stat=allocok)
          IF(allocok.GT.0) THEN
-            write(*,*) "Allocation error of PENDING/CPNT"
-     &           ," in DMUMPS_SEND_BUF"
+            call rwarn("Allocation error of PENDING/CPNT"//
+     &           " in DMUMPS_SEND_BUF")
             return
          ENDIF
          ALLOCATE(REQ(NPROCS), stat=allocok)
          IF(allocok.GT.0) THEN
-            write(*,*) "Allocation error of REQ in DMUMPS_SEND_BUF"
+            call rwarn("Allocation error of REQ in DMUMPS_SEND_BUF")
             return
          ENDIF
          PENDING = .FALSE.
@@ -1957,7 +1957,7 @@ C         END DO
          END DO
          ALLOCATE(RCVCNT(NPROCS), stat=allocok)
          IF(allocok.GT.0) THEN
-            write(*,*) "Allocation error of RCVCNT in DMUMPS_SEND_BUF"
+            call rwarn("Allocation error of RCVCNT in DMUMPS_SEND_BUF")
             return
          ENDIF
 !         CALL MPI_ALLTOALL(SNDCNT(1), 1, MPI_INTEGER, RCVCNT(1), 1,

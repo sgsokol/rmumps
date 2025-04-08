@@ -158,8 +158,8 @@ C
       ENDIF
       OOC_NB_FILE_TYPE=id%OOC_NB_FILE_TYPE
       IF(IERR.LT.0)THEN
-         IF (ICNTL1 > 0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1 > 0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          id%INFO(1) = IERR
          id%INFO(2) = 0
          RETURN
@@ -196,7 +196,7 @@ C
       ALLOCATE(id%OOC_NB_FILES(OOC_NB_FILE_TYPE), stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn("PB allocation in DMUMPS_INIT_OOC")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = OOC_NB_FILE_TYPE
@@ -214,7 +214,7 @@ C
      &     stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn("PB allocation in DMUMPS_INIT_OOC")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = OOC_NB_FILE_TYPE
@@ -244,7 +244,7 @@ C
      &     stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1 .GT. 0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn("PB allocation in DMUMPS_INIT_OOC")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = OOC_NB_FILE_TYPE
@@ -262,8 +262,8 @@ C
      &     FILE_FLAG_TAB,IERR)
       IF(IERR.LT.0)THEN
          IF (ICNTL1 .GT. 0 ) THEN
-           WRITE(ICNTL1,*)MYID_OOC,': PB in MUMPS_LOW_LEVEL_INIT_OOC_C'
-           WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+           call rwarn(': PB in MUMPS_LOW_LEVEL_INIT_OOC_C')
+c~            WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          ENDIF
          id%INFO(1) = IERR
          id%INFO(2) = 0
@@ -315,12 +315,12 @@ C
      &       A(PTRFAC(STEP_OOC(INODE))),SIZE_INT1,SIZE_INT2,
      &       INODE,REQUEST,TYPE,ADDR_INT1,ADDR_INT2,IERR)
         IF(IERR.LT.0)THEN
-           IF (ICNTL1.GT.0)
-     &     WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~            IF (ICNTL1.GT.0)
+c~      &     WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
            RETURN
         ENDIF
         IF(I_CUR_HBUF_NEXTPOS(OOC_FCT_TYPE).GT.KEEP_OOC(28))THEN
-             WRITE(*,*)MYID_OOC,': Internal error (37) in OOC '
+             call rwarn(": Internal error (37) in OOC ")
              CALL MUMPS_ABORT()
         ENDIF
         OOC_INODE_SEQUENCE(I_CUR_HBUF_NEXTPOS(OOC_FCT_TYPE),
@@ -356,12 +356,12 @@ C
      &           A(PTRFAC(STEP_OOC(INODE))),SIZE_INT1,SIZE_INT2,
      &           INODE,REQUEST,TYPE,ADDR_INT1,ADDR_INT2,IERR)
             IF(IERR.LT.0)THEN
-               IF (ICNTL1.GT.0)
-     &         WRITE(*,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~                IF (ICNTL1.GT.0)
+c~      &         WRITE(*,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                RETURN
             ENDIF
             IF(I_CUR_HBUF_NEXTPOS(OOC_FCT_TYPE).GT.KEEP_OOC(28))THEN
-             WRITE(*,*)MYID_OOC,': Internal error (38) in OOC '
+             call rwarn(": Internal error (38) in OOC ")
              CALL MUMPS_ABORT()
             ENDIF
             OOC_INODE_SEQUENCE(I_CUR_HBUF_NEXTPOS(OOC_FCT_TYPE),
@@ -379,8 +379,8 @@ C
          IERR=0
          CALL MUMPS_WAIT_REQUEST(REQUEST,IERR)
          IF(IERR.LT.0)THEN
-            IF (ICNTL1 .GT. 0)
-     &      WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~             IF (ICNTL1 .GT. 0)
+c~      &      WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
             RETURN
          ENDIF
       ENDIF
@@ -419,9 +419,9 @@ C
      &     TYPE,ADDR_INT1,ADDR_INT2,IERR)
       IF(IERR.LT.0)THEN
          IF (ICNTL1.GT.0) THEN
-           WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
-           WRITE(ICNTL1,*)MYID_OOC,
-     &     ': Problem in MUMPS_LOW_LEVEL_DIRECT_READ'
+c~            WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+           call rwarn(
+     &     ': Problem in MUMPS_LOW_LEVEL_DIRECT_READ')
          ENDIF
          RETURN
       ENDIF
@@ -486,8 +486,8 @@ C
       ENDIF
       CALL MUMPS_OOC_END_WRITE_C(IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1 .GT. 0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1 .GT. 0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          GOTO 500
       ENDIF
       id%OOC_MAX_NB_NODES_FOR_ZONE=max(MAX_NB_NODES_FOR_ZONE,
@@ -507,8 +507,8 @@ C
       SOLVE_OR_FACTO=0
       CALL MUMPS_CLEAN_IO_DATA_C(MYID_OOC,SOLVE_OR_FACTO,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ENDIF
       RETURN
@@ -534,8 +534,8 @@ C
                  CALL MUMPS_OOC_REMOVE_FILE_C(IERR, TMP_NAME(1))
                  IF(IERR.LT.0)THEN
                     IF (ICNTL1.GT.0)THEN
-                       WRITE(ICNTL1,*)MYID_OOC,': ',
-     &                      ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~                        WRITE(ICNTL1,*)MYID_OOC,': ',
+c~      &                      ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                        RETURN
                     ENDIF
                  ENDIF
@@ -700,7 +700,7 @@ C
      &     stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_OOC_INIT_SOLVE'
+            call rwarn("PB allocation in DMUMPS_OOC_INIT_SOLVE")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = id%KEEP(28)
@@ -730,8 +730,8 @@ C
       ENDIF
       IF(SIZE_SOLVE_EMM.LT.id%KEEP8(20))THEN
          IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': More space needed for
-     & solution step in DMUMPS_OOC_INIT_SOLVE'
+     &   call rwarn(': More space needed for
+     & solution step in DMUMPS_OOC_INIT_SOLVE')
          id%INFO(1) = -11
          CALL MUMPS_SET_IERROR(id%KEEP8(20), id%INFO(2))
       ENDIF
@@ -744,7 +744,7 @@ C
      &     stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_OOC_INIT_SOLVE'
+            call rwarn("PB allocation in DMUMPS_OOC_INIT_SOLVE")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = id%KEEP(28)+(MAX_NB_NODES_FOR_ZONE*NB_Z)
@@ -753,7 +753,7 @@ C
       ALLOCATE(OOC_STATE_NODE(KEEP_OOC(28)),stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_OOC_INIT_SOLVE'
+            call rwarn("PB allocation in DMUMPS_OOC_INIT_SOLVE")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = id%KEEP(28)
@@ -770,7 +770,7 @@ C
      &     stat=allocok)
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_OOC_INIT_SOLVE'
+            call rwarn("PB allocation in DMUMPS_OOC_INIT_SOLVE")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = 9*(NB_Z+1)
@@ -789,7 +789,7 @@ C
       REQ_ID=-9999
       IF (allocok .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_OOC_INIT_SOLVE'
+            call rwarn("PB allocation in DMUMPS_OOC_INIT_SOLVE")
          ENDIF
          id%INFO(1) = -13
          id%INFO(2) = 6*(NB_Z+1)
@@ -921,8 +921,8 @@ C
      &     DEST,SIZE_INT1,SIZE_INT2,
      &     INODE,REQUEST,TYPE,ADDR_INT1,ADDR_INT2,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ENDIF
       IF(STRAT_IO_ASYNC)THEN
@@ -994,13 +994,13 @@ C
             ENDIF
             IF(abs(PTRFAC(STEP_OOC(TMP_NODE))).LT.
      &           IDEB_SOLVE_Z(ZONE))THEN
-               WRITE(*,*)MYID_OOC,': Inernal error (42) in OOC ', 
-     &              PTRFAC(STEP_OOC(TMP_NODE)),IDEB_SOLVE_Z(ZONE)
+               call rwarn(': Inernal error (42) in OOC ')
+c~      &              PTRFAC(STEP_OOC(TMP_NODE)),IDEB_SOLVE_Z(ZONE)
                CALL MUMPS_ABORT()
             ENDIF
             IF(abs(PTRFAC(STEP_OOC(TMP_NODE))).GT.
      &           (IDEB_SOLVE_Z(ZONE)+SIZE_SOLVE_Z(ZONE)-1_8))THEN
-               WRITE(*,*)MYID_OOC,': Inernal error (43) in OOC '
+               call rwarn(": Inernal error (43) in OOC ")
                CALL MUMPS_ABORT()
             ENDIF
             IF(DONT_USE)THEN
@@ -1054,8 +1054,8 @@ C
       IF(REQ_ID(POS_REQ).NE.-9999)THEN
          CALL MUMPS_WAIT_REQUEST(REQ_ID(POS_REQ),IERR)
          IF(IERR.LT.0)THEN
-            IF (ICNTL1.GT.0)
-     &      WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~             IF (ICNTL1.GT.0)
+c~      &      WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
             RETURN
          ENDIF
          CALL DMUMPS_SOLVE_UPDATE_POINTERS(REQUEST,PTRFAC,NSTEPS)
@@ -1124,9 +1124,10 @@ C
                LOCAL_DEST=LOCAL_DEST+SIZE_OF_BLOCK(STEP_OOC(TMP_NODE),
      &              OOC_FCT_TYPE)
             ELSE
-             WRITE(*,*)MYID_OOC,': Internal error (39) in OOC ',
-     &                 ' Invalid Flag Value in ', 
-     &                 ' DMUMPS_UPDATE_READ_REQ_NODE',FLAG
+             call rwarn(': Internal error (39) in OOC ' //
+     &                 ' Invalid Flag Value in ' //
+     &                 ' DMUMPS_UPDATE_READ_REQ_NODE')
+c~      ,FLAG
              CALL MUMPS_ABORT()
             ENDIF
          ENDIF
@@ -1134,20 +1135,20 @@ C
             IF(POS_IN_MEM(CURRENT_POS_T(ZONE)).EQ.
      &           POS_IN_MEM(PDEB_SOLVE_Z(ZONE)))THEN
                IF(CURRENT_POS_T(ZONE).NE.PDEB_SOLVE_Z(ZONE))THEN
-             WRITE(*,*)MYID_OOC,': Internal error (40) in OOC ',
-     &                      CURRENT_POS_T(ZONE),
-     &                 PDEB_SOLVE_Z(ZONE),
-     &                 POS_IN_MEM(CURRENT_POS_T(ZONE)),
-     &                 POS_IN_MEM(PDEB_SOLVE_Z(ZONE))
+             call rwarn(': Internal error (40) in OOC ')
+c~      &                      CURRENT_POS_T(ZONE),
+c~      &                 PDEB_SOLVE_Z(ZONE),
+c~      &                 POS_IN_MEM(CURRENT_POS_T(ZONE)),
+c~      &                 POS_IN_MEM(PDEB_SOLVE_Z(ZONE))
              CALL MUMPS_ABORT()
                ENDIF
             ENDIF
          ENDIF
          J8=J8+LAST
          IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-             WRITE(*,*)MYID_OOC,': Internal error (41) in OOC ',
-     &           ' LRLUS_SOLVE must be (1) > 0',
-     &           LRLUS_SOLVE(ZONE)
+             call rwarn(': Internal error (41) in OOC '//
+     &           ' LRLUS_SOLVE must be (1) > 0')
+c~      &           LRLUS_SOLVE(ZONE)
              CALL MUMPS_ABORT()
          ENDIF
          I=I+1
@@ -1155,14 +1156,14 @@ C
             CURRENT_POS_T(ZONE)=CURRENT_POS_T(ZONE)+1
             IF(CURRENT_POS_T(ZONE).GT.
      &           MAX_NB_NODES_FOR_ZONE+PDEB_SOLVE_Z(ZONE))THEN
-               WRITE(*,*)MYID_OOC,': Internal error (1) in OOC '
+               call rwarn(": Internal error (1) in OOC ")
                CALL MUMPS_ABORT()
             ENDIF
             POS_HOLE_T(ZONE)=CURRENT_POS_T(ZONE)
          ELSEIF(FLAG.EQ.0)THEN
             IF(POS_HOLE_B(ZONE).LT.PDEB_SOLVE_Z(ZONE))THEN
-               WRITE(*,*)MYID_OOC,': Internal error (2) in OOC ', 
-     &              POS_HOLE_B(ZONE),LOC_I
+               call rwarn(': Internal error (2) in OOC ')
+c~      &              POS_HOLE_B(ZONE),LOC_I
                CALL MUMPS_ABORT()
             ENDIF
             CURRENT_POS_B(ZONE)=CURRENT_POS_B(ZONE)-1
@@ -1172,9 +1173,10 @@ C
                LRLU_SOLVE_B(ZONE)=0_8
             ENDIF
          ELSE
-            WRITE(*,*)MYID_OOC,': Internal error (3) in OOC ', 
-     &       ' Invalid Flag Value in ', 
-     &       ' DMUMPS_UPDATE_READ_REQ_NODE',FLAG
+            call rwarn(': Internal error (3) in OOC ' //
+     &       ' Invalid Flag Value in '//
+     &       ' DMUMPS_UPDATE_READ_REQ_NODE')
+c~      ,FLAG
             CALL MUMPS_ABORT()
          ENDIF
          IF(FLAG.EQ.0)THEN
@@ -1183,8 +1185,9 @@ C
          NB=NB+1
       ENDDO
       IF(NB.NE.NB_NODES)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (4) in OOC ',
-     &        ' DMUMPS_UPDATE_READ_REQ_NODE ',NB,NB_NODES
+         call rwarn(': Internal error (4) in OOC '//
+     &        ' DMUMPS_UPDATE_READ_REQ_NODE ')
+c~      ,NB,NB_NODES
       ENDIF
       IF(SOLVE_STEP.EQ.0)THEN
          CUR_POS_SEQUENCE=I
@@ -1210,9 +1213,9 @@ C
       IERR = 0
       WHICH=-1
       IF(INODE_TO_POS(STEP_OOC(INODE)).LE.0)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (5) in OOC ',
-     &            ' Problem in DMUMPS_FREE_FACTORS_FOR_SOLVE',
-     &        INODE, STEP_OOC(INODE), INODE_TO_POS(STEP_OOC(INODE))
+         call rwarn(': Internal error (5) in OOC '//
+     &            ' Problem in DMUMPS_FREE_FACTORS_FOR_SOLVE')
+c~      &        INODE, STEP_OOC(INODE), INODE_TO_POS(STEP_OOC(INODE))
          CALL MUMPS_ABORT()
       ENDIF
       IF(SIZE_OF_BLOCK(STEP_OOC(INODE),OOC_FCT_TYPE).EQ.0_8)THEN
@@ -1227,8 +1230,9 @@ C
       PTRFAC(STEP_OOC(INODE))=-PTRFAC(STEP_OOC(INODE))
       IF (KEEP_OOC(237).eq.0) THEN
          IF(OOC_STATE_NODE(STEP_OOC(INODE)).NE.PERMUTED)THEN
-         WRITE(*,*)MYID_OOC,': INTERNAL ERROR (53) in OOC',INODE,
-     &        OOC_STATE_NODE(STEP_OOC(INODE))
+         call rwarn(': INTERNAL ERROR (53) in OOC')
+c~          ,INODE,
+c~      &        OOC_STATE_NODE(STEP_OOC(INODE))
          CALL MUMPS_ABORT()
        ENDIF
       ENDIF
@@ -1236,8 +1240,8 @@ C
       LRLUS_SOLVE(ZONE)=LRLUS_SOLVE(ZONE)+
      &        SIZE_OF_BLOCK(STEP_OOC(INODE),OOC_FCT_TYPE)         
       IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (6) in OOC ',
-     &        ': LRLUS_SOLVE must be (2) > 0'
+         call rwarn(': Internal error (6) in OOC '//
+     &        ': LRLUS_SOLVE must be (2) > 0')
          CALL MUMPS_ABORT()
       ENDIF
       IF(ZONE.EQ.NB_Z)THEN
@@ -1347,8 +1351,8 @@ C
             CALL MUMPS_WAIT_REQUEST(IO_REQ(STEP_OOC(INODE)),IERR)
             IF(IERR.LT.0)THEN
                IF (ICNTL1.GT.0)
-     &         WRITE(ICNTL1,*)MYID_OOC,': Internal error (7) in OOC ',
-     &                   ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+     &         call rwarn(': Internal error (7) in OOC ')
+c~      &                   ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                RETURN
             ENDIF
             CALL DMUMPS_SOLVE_UPDATE_POINTERS(IO_REQ(STEP_OOC(INODE)),
@@ -1384,8 +1388,9 @@ C
       IF ( (KEEP_OOC(237).EQ.0)
      &     .AND. (KEEP_OOC(235).EQ.0) ) THEN
       IF(OOC_STATE_NODE(STEP_OOC(INODE)).NE.NOT_USED)THEN
-         WRITE(*,*)MYID_OOC,': INTERNAL ERROR (51) in OOC',INODE,
-     &        OOC_STATE_NODE(STEP_OOC(INODE))
+         call rwarn(': INTERNAL ERROR (51) in OOC')
+c~          ,INODE,
+c~      &        OOC_STATE_NODE(STEP_OOC(INODE))
          CALL MUMPS_ABORT()
        ENDIF
       ENDIF
@@ -1405,9 +1410,10 @@ C
       ELSEIF(OOC_STATE_NODE(STEP_OOC(INODE)).EQ.USED)THEN
          OOC_STATE_NODE(STEP_OOC(INODE))=PERMUTED
       ELSE
-         WRITE(*,*)MYID_OOC,': Internal error (52) in OOC',INODE,
-     &        OOC_STATE_NODE(STEP_OOC(INODE)),
-     &        INODE_TO_POS(STEP_OOC(INODE))
+         call rwarn(': Internal error (52) in OOC')
+c~          ,INODE,
+c~      &        OOC_STATE_NODE(STEP_OOC(INODE)),
+c~      &        INODE_TO_POS(STEP_OOC(INODE))
          CALL MUMPS_ABORT()
       ENDIF
       CALL DMUMPS_SEARCH_SOLVE(PTRFAC(STEP_OOC(INODE)),ZONE)
@@ -1561,16 +1567,17 @@ C
      &              KEEP,KEEP8,A,ZONE)
             ENDIF
          ELSE
-            WRITE(*,*)MYID_OOC,': Internal error (8) in OOC ',
-     &                         ' Not enough space for Solve',INODE,
-     &           SIZE_OF_BLOCK(STEP_OOC(INODE),OOC_FCT_TYPE),
-     &           LRLUS_SOLVE(ZONE)
+            call rwarn(': Internal error (8) in OOC '//
+     &                         ' Not enough space for Solve')
+c~      ,INODE,
+c~      &           SIZE_OF_BLOCK(STEP_OOC(INODE),OOC_FCT_TYPE),
+c~      &           LRLUS_SOLVE(ZONE)
             CALL MUMPS_ABORT()
          ENDIF
       ENDIF
       IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (9) in OOC ',
-     &                      ' LRLUS_SOLVE must be (3) > 0'
+         call rwarn(': Internal error (9) in OOC '//
+     &                      ' LRLUS_SOLVE must be (3) > 0')
          CALL MUMPS_ABORT()
       ENDIF
       RETURN
@@ -1636,9 +1643,9 @@ C
          ELSEIF(POS_IN_MEM(I).EQ.0)THEN
             FREE_HOLE_FLAG=1
          ELSEIF(POS_IN_MEM(I).NE.0)THEN
-            WRITE(*,*)MYID_OOC,': Internal error (10) in OOC ',
-     &            ' DMUMPS_GET_TOP_AREA_SPACE',
-     &           CURRENT_POS_T(ZONE)-1,POS_HOLE_T(ZONE),I
+            call rwarn(': Internal error (10) in OOC '//
+     &            ' DMUMPS_GET_TOP_AREA_SPACE')
+c~      &           CURRENT_POS_T(ZONE)-1,POS_HOLE_T(ZONE),I
             CALL MUMPS_ABORT()
          ENDIF
       ENDDO
@@ -1655,8 +1662,8 @@ C
                TMP_NODE=TMP_NODE-(N_OOC+1)*NB_Z
                CALL MUMPS_WAIT_REQUEST(IO_REQ(STEP_OOC(TMP_NODE)),IERR)
                IF(IERR.LT.0)THEN
-                  WRITE(*,*)MYID_OOC,': Internal error (11) in OOC ',
-     &                               ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+                  call rwarn(': Internal error (11) in OOC ')
+c~      &                               ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                   CALL MUMPS_ABORT()    
                   RETURN
                ENDIF
@@ -1671,8 +1678,8 @@ C
                   IF(POS_IN_MEM(J).NE.0) EXIT
                ENDDO
                IF(POS_IN_MEM(J).LT.0)THEN
-                  WRITE(*,*)MYID_OOC,': Internal error (12) in OOC ',
-     &                 ' DMUMPS_GET_TOP_AREA_SPACE'
+                  call rwarn(': Internal error (12) in OOC '//
+     &                 ' DMUMPS_GET_TOP_AREA_SPACE')
                   CALL MUMPS_ABORT()
                ENDIF
                IF(J.GE.PDEB_SOLVE_Z(ZONE))THEN
@@ -1684,8 +1691,8 @@ C
                   FREE_HOLE=FREE_HOLE_POS-IDEB_SOLVE_Z(ZONE)
                ENDIF
             ELSEIF(TMP_NODE.LT.0)THEN
-               WRITE(*,*)MYID_OOC,': Internal error (13) in OOC', 
-     &           ' DMUMPS_GET_TOP_AREA_SPACE'
+               call rwarn(': Internal error (13) in OOC'//
+     &           ' DMUMPS_GET_TOP_AREA_SPACE')
                CALL MUMPS_ABORT()
             ELSE
                FREE_HOLE=FREE_HOLE_POS-
@@ -1785,9 +1792,9 @@ C
             ENDIF
             POS_IN_MEM(I)=0
          ELSEIF(POS_IN_MEM(I).NE.0)THEN
-            WRITE(*,*)MYID_OOC,': Internal error (14) in OOC ',
-     &            ' DMUMPS_GET_BOTTOM_AREA_SPACE',
-     &           CURRENT_POS_T(ZONE)-1,POS_HOLE_B(ZONE),I,POS_IN_MEM(I)
+            call rwarn(': Internal error (14) in OOC '//
+     &            ' DMUMPS_GET_BOTTOM_AREA_SPACE')
+c~      &           CURRENT_POS_T(ZONE)-1,POS_HOLE_B(ZONE),I,POS_IN_MEM(I)
             CALL MUMPS_ABORT()
          ENDIF
       ENDDO
@@ -1799,8 +1806,8 @@ C
                TMP_NODE=TMP_NODE-(N_OOC+1)*NB_Z
                CALL MUMPS_WAIT_REQUEST(IO_REQ(STEP_OOC(TMP_NODE)),IERR)
                IF(IERR.LT.0)THEN
-                 WRITE(*,*)MYID_OOC,': Internal error (15) in OOC ',
-     &                               ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+                 call rwarn(': Internal error (15) in OOC ')
+c~      &                               ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                  CALL MUMPS_ABORT() 
                  RETURN
                ENDIF
@@ -1813,8 +1820,8 @@ C
                   IF(POS_IN_MEM(J).NE.0) EXIT
                ENDDO
                IF(POS_IN_MEM(J).LT.0)THEN
-                  WRITE(*,*)MYID_OOC,': Internal error (16) in OOC ',
-     &                  ' DMUMPS_GET_BOTTOM_AREA_SPACE'
+                  call rwarn(': Internal error (16) in OOC '//
+     &                  ' DMUMPS_GET_BOTTOM_AREA_SPACE')
                   CALL MUMPS_ABORT()
                ENDIF
                IF(J.LE.CURRENT_POS_T(ZONE)-1)THEN
@@ -1825,8 +1832,8 @@ C
                   FREE_HOLE=POSFAC_SOLVE(ZONE)-FREE_HOLE_POS
                ENDIF
             ELSEIF(TMP_NODE.LT.0)THEN
-               WRITE(*,*)MYID_OOC,': Internal error (17) in OOC ',
-     &           ' DMUMPS_GET_BOTTOM_AREA_SPACE'
+               call rwarn(': Internal error (17) in OOC '//
+     &           ' DMUMPS_GET_BOTTOM_AREA_SPACE')
                CALL MUMPS_ABORT()
             ELSE
                FREE_HOLE=abs(PTRFAC(STEP_OOC(TMP_NODE)))-
@@ -1844,8 +1851,8 @@ C
             TMP_NODE=abs(TMP_NODE)-(N_OOC+1)*NB_Z
             CALL MUMPS_WAIT_REQUEST(IO_REQ(STEP_OOC(TMP_NODE)),IERR)
             IF(IERR.LT.0)THEN
-               WRITE(*,*)MYID_OOC,': Internal error (18) in OOC ',
-     &                            ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+               call rwarn(': Internal error (18) in OOC ')
+c~      &                            ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                CALL MUMPS_ABORT()
                RETURN
             ENDIF
@@ -1861,8 +1868,8 @@ C
  50   CONTINUE
       IF((POS_HOLE_B(ZONE).EQ.-9999).AND.
      &     (LRLU_SOLVE_B(ZONE).NE.0_8))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (19) in OOC ',
-     &             'DMUMPS_GET_BOTTOM_AREA_SPACE'
+         call rwarn(': Internal error (19) in OOC '//
+     &             'DMUMPS_GET_BOTTOM_AREA_SPACE')
          CALL MUMPS_ABORT()
       ENDIF
       IF((REQUESTED_SIZE.LE.LRLU_SOLVE_B(ZONE)).AND.
@@ -1892,18 +1899,19 @@ C
          LRLU_SOLVE_B(ZONE)=0_8
       ENDIF
       IF(PTRFAC(STEP_OOC(INODE)).LT.IDEB_SOLVE_Z(ZONE))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (20) in OOC ',
-     &                      ' Problem avec debut (2)',INODE,
-     &              PTRFAC(STEP_OOC(INODE)),IDEB_SOLVE_Z(ZONE),ZONE
+         call rwarn(': Internal error (20) in OOC '//
+     &                      ' Problem avec debut (2)')
+c~      ,INODE,
+c~      &              PTRFAC(STEP_OOC(INODE)),IDEB_SOLVE_Z(ZONE),ZONE
          CALL MUMPS_ABORT()
       ENDIF
       INODE_TO_POS(STEP_OOC(INODE))=CURRENT_POS_T(ZONE)
       POS_IN_MEM(CURRENT_POS_T(ZONE))=INODE
       IF(CURRENT_POS_T(ZONE).GT.(PDEB_SOLVE_Z(ZONE)+
      &     MAX_NB_NODES_FOR_ZONE-1))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (21) in OOC ',
-     &                      ' Problem with CURRENT_POS_T',
-     &        CURRENT_POS_T(ZONE),ZONE
+         call rwarn(': Internal error (21) in OOC '//
+     &                      ' Problem with CURRENT_POS_T')
+c~      &        CURRENT_POS_T(ZONE),ZONE
          CALL MUMPS_ABORT()
       ENDIF
       CURRENT_POS_T(ZONE)=CURRENT_POS_T(ZONE)+1
@@ -1922,8 +1930,8 @@ C
       DOUBLE PRECISION A(FACT_AREA_SIZE)
       INTEGER ZONE
       IF(POS_HOLE_B(ZONE).EQ.-9999)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (22) in OOC ',
-     &        ' DMUMPS_SOLVE_ALLOC_PTR_UPD_B'
+         call rwarn(': Internal error (22) in OOC '//
+     &        ' DMUMPS_SOLVE_ALLOC_PTR_UPD_B')
          CALL MUMPS_ABORT()
       ENDIF
       LRLUS_SOLVE(ZONE)=LRLUS_SOLVE(ZONE)-
@@ -1934,13 +1942,13 @@ C
      &     LRLU_SOLVE_B(ZONE)
       OOC_STATE_NODE(STEP_OOC(INODE))=NOT_USED
       IF(PTRFAC(STEP_OOC(INODE)).LT.IDEB_SOLVE_Z(ZONE))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (23) in OOC ',
-     &              PTRFAC(STEP_OOC(INODE)),IDEB_SOLVE_Z(ZONE)
+         call rwarn(': Internal error (23) in OOC ')
+C     &              PTRFAC(STEP_OOC(INODE)),IDEB_SOLVE_Z(ZONE)
          CALL MUMPS_ABORT()
       ENDIF
       INODE_TO_POS(STEP_OOC(INODE))=CURRENT_POS_B(ZONE)
       IF(CURRENT_POS_B(ZONE).EQ.0)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (23b) in OOC '
+         call rwarn(": Internal error (23b) in OOC ")
          CALL MUMPS_ABORT()
       ENDIF
       POS_IN_MEM(CURRENT_POS_B(ZONE))=INODE
@@ -1984,10 +1992,11 @@ C ssg
      &     (PDEB_SOLVE_Z(ZONE).NE.CURRENT_POS_T(ZONE)-1))THEN
          IF((POS_IN_MEM(I).GT.0).OR.
      &        (POS_IN_MEM(I).LT.-((N_OOC+1)*NB_Z)))THEN
-            WRITE(*,*)MYID_OOC,': Internal error (25) in OOC ',
-     &                      ': There are no free blocks ',
-     &         'in DMUMPS_FREE_SPACE_FOR_SOLVE',PDEB_SOLVE_Z(ZONE),
-     &           CURRENT_POS_T(ZONE)
+            call rwarn(': Internal error (25) in OOC '//
+     &                      ': There are no free blocks '//
+     &         'in DMUMPS_FREE_SPACE_FOR_SOLVE')
+c~      ,PDEB_SOLVE_Z(ZONE),
+c~      &           CURRENT_POS_T(ZONE)
             CALL MUMPS_ABORT()
          ENDIF
       ENDIF
@@ -2034,9 +2043,10 @@ C ssg
      &                       IO_REQ(STEP_OOC(TMP_NODE)),PTRFAC,NSTEPS)
                         TMP_NODE=POS_IN_MEM(J)
                      ELSE
-                    WRITE(*,*)MYID_OOC,': Internal error (26) in OOC ',
-     &                      ' DMUMPS_FREE_SPACE_FOR_SOLVE',TMP_NODE,
-     &                       J,I-1,(N_OOC+1)*NB_Z
+                    call rwarn(': Internal error (26) in OOC '//
+     &                      ' DMUMPS_FREE_SPACE_FOR_SOLVE')
+c~      ,TMP_NODE,
+c~      &                       J,I-1,(N_OOC+1)*NB_Z
                     CALL MUMPS_ABORT()
                      ENDIF
                   ENDIF
@@ -2130,35 +2140,35 @@ C ssg
       CURRENT_POS_B(ZONE)=-9999
       LRLU_SOLVE_B(ZONE)=0_8
       IF(LRLU_SOLVE_T(ZONE).NE.LRLUS_SOLVE(ZONE))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (27) in OOC ',
-     &                 LRLU_SOLVE_T(ZONE),
-     &                 LRLUS_SOLVE(ZONE)
+         call rwarn(': Internal error (27) in OOC ')
+C     &                 LRLU_SOLVE_T(ZONE),
+c~      &                 LRLUS_SOLVE(ZONE)
          CALL MUMPS_ABORT()
       ENDIF
       LRLU_SOLVE_T(ZONE)=LRLUS_SOLVE(ZONE)
       IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (28) in OOC ',
-     &                      ' LRLUS_SOLVE must be (4) > 0'
+         call rwarn(': Internal error (28) in OOC '//
+     &                      ' LRLUS_SOLVE must be (4) > 0')
          CALL MUMPS_ABORT()
       ENDIF
       IF(POSFAC_SOLVE(ZONE).LT.IDEB_SOLVE_Z(ZONE))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (29) in OOC ',
-     &        POSFAC_SOLVE(ZONE),IDEB_SOLVE_Z(ZONE)
+         call rwarn(': Internal error (29) in OOC ')
+C     &        POSFAC_SOLVE(ZONE),IDEB_SOLVE_Z(ZONE)
          CALL MUMPS_ABORT()
       ENDIF
       IF(POSFAC_SOLVE(ZONE).NE.(IDEB_SOLVE_Z(ZONE)+SIZE_SOLVE_Z(ZONE)-
      &     LRLUS_SOLVE(ZONE)))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (30) in OOC ',
-     &                      ' Problem avec debut POSFAC_SOLVE',
-     &        POSFAC_SOLVE(ZONE),(SIZE_SOLVE_Z(ZONE)-
-     &     LRLUS_SOLVE(ZONE))+IDEB_SOLVE_Z(ZONE),LRLUS_SOLVE(ZONE)
+         call rwarn(': Internal error (30) in OOC ')
+C     &                      ' Problem avec debut POSFAC_SOLVE',
+c~      &        POSFAC_SOLVE(ZONE),(SIZE_SOLVE_Z(ZONE)-
+c~      &     LRLUS_SOLVE(ZONE))+IDEB_SOLVE_Z(ZONE),LRLUS_SOLVE(ZONE)
          CALL MUMPS_ABORT()
       ENDIF
       IF(POSFAC_SOLVE(ZONE).GT.
      &     (IDEB_SOLVE_Z(ZONE)+SIZE_SOLVE_Z(ZONE)-1_8))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (31) in OOC ',
-     &        POSFAC_SOLVE(ZONE),IDEB_SOLVE_Z(ZONE)+
-     &        SIZE_SOLVE_Z(ZONE)-1_8
+         call rwarn(': Internal error (31) in OOC ')
+C     &        POSFAC_SOLVE(ZONE),IDEB_SOLVE_Z(ZONE)+
+c~      &        SIZE_SOLVE_Z(ZONE)-1_8
          CALL MUMPS_ABORT()
       ENDIF
       RETURN
@@ -2169,14 +2179,14 @@ C ssg
       INTEGER (8) :: PTRFAC(NSTEPS)
       INTEGER ZONE
       IF((FLAG.LT.0).OR.(FLAG.GT.1))THEN
-         WRITE(*,*)MYID_OOC,': Internal error (32) in OOC ',
-     &        ' DMUMPS_OOC_UPDATE_SOLVE_STAT'
+         call rwarn(': Internal error (32) in OOC '//
+     &        ' DMUMPS_OOC_UPDATE_SOLVE_STAT')
          CALL MUMPS_ABORT()
       ENDIF
       CALL DMUMPS_SEARCH_SOLVE(PTRFAC(STEP_OOC(INODE)),ZONE)
       IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (33) in OOC ',
-     &        ' LRLUS_SOLVE must be (5) ++ > 0'
+         call rwarn(': Internal error (33) in OOC '//
+     &        ' LRLUS_SOLVE must be (5) ++ > 0')
          CALL MUMPS_ABORT()
       ENDIF      
       IF(FLAG.EQ.0)THEN
@@ -2187,8 +2197,8 @@ C ssg
      &        SIZE_OF_BLOCK(STEP_OOC(INODE),OOC_FCT_TYPE)         
       ENDIF
       IF(LRLUS_SOLVE(ZONE).LT.0_8)THEN
-         WRITE(*,*)MYID_OOC,': Internal error (34) in OOC ',
-     &                      ' LRLUS_SOLVE must be (5) > 0'
+         call rwarn(': Internal error (34) in OOC '//
+     &                      ' LRLUS_SOLVE must be (5) > 0')
          CALL MUMPS_ABORT()
       ENDIF
       END SUBROUTINE DMUMPS_OOC_UPDATE_SOLVE_STAT
@@ -2371,9 +2381,10 @@ C ssg
          MAX_SIZE=LRLU_SOLVE_T(ZONE)
          MAX_NB=MAX_NB_NODES_FOR_ZONE
       ELSE
-         WRITE(*,*)MYID_OOC,': Internal error (35) in OOC ',
-     &                      ' Unknown Flag value in ',
-     &         ' DMUMPS_SOLVE_COMPUTE_READ_SIZE',FLAG
+         call rwarn(': Internal error (35) in OOC '//
+     &                      ' Unknown Flag value in '//
+     &         ' DMUMPS_SOLVE_COMPUTE_READ_SIZE')
+c~      ,FLAG
          CALL MUMPS_ABORT()
       ENDIF
       CALL DMUMPS_OOC_SKIP_NULL_SIZE_NODE()
@@ -2601,8 +2612,8 @@ C ssg
       SOLVE_OR_FACTO=1
       CALL MUMPS_CLEAN_IO_DATA_C(MYID_OOC,SOLVE_OR_FACTO,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ENDIF
       END SUBROUTINE DMUMPS_OOC_END_SOLVE
@@ -2652,10 +2663,11 @@ C ssg
                   PTRFAC(STEP_OOC(J)) = SAVE_PTR
                   IF(ZONE.EQ.NB_Z)THEN
                      IF(J.NE.SPECIAL_ROOT_NODE)THEN
-                        WRITE(*,*)MYID_OOC,': Internal error 6 ', 
-     &                       ' Node ', J, 
-     &                       ' is in status USED in the
-     &                        emmergency buffer '
+                        call rwarn(': Internal error 6 '//
+     &                       ' Node '//
+c~      , J, 
+     &                       ' is in status USED in the '//
+     &                        'emmergency buffer ')
                         CALL MUMPS_ABORT()
                      ENDIF                     
                   ENDIF
@@ -2672,9 +2684,11 @@ C ssg
      &                    THEN
                     COMPRESS_TO_BE_DONE         = .TRUE.
                   ELSE
-                    WRITE(*,*)MYID_OOC,': Internal error Mila 4 ', 
-     &              ' wrong node status :', OOC_STATE_NODE(STEP_OOC(J)),
-     &              ' on node ', J
+                    call rwarn(': Internal error Mila 4 '//
+     &              ' wrong node status :'//
+c~      , OOC_STATE_NODE(STEP_OOC(J)),
+     &              ' on node ')
+c~      , J
                     CALL MUMPS_ABORT()
                   ENDIF
                  ENDIF
@@ -2692,9 +2706,9 @@ C ssg
      &         DUMMY_SIZE,PTRFAC,
      &         NSTEPS,ZONE,IERR)
                IF (IERR .LT. 0) THEN
-                    WRITE(*,*)MYID_OOC,': Internal error Mila 5 ', 
-     &              ' IERR on return to DMUMPS_FREE_SPACE_FOR_SOLVE =', 
-     &              IERR
+                    call rwarn(': Internal error Mila 5 ')
+C     &              ' IERR on return to DMUMPS_FREE_SPACE_FOR_SOLVE =', 
+c~      &              IERR
                     CALL MUMPS_ABORT()
                ENDIF
              ENDDO
@@ -2787,9 +2801,9 @@ C ssg
      &                DUMMY_SIZE,PTRFAC,
      &                NSTEPS,NB_Z,IERR)
                  IF (IERR .LT. 0) THEN
-                    WRITE(*,*)MYID_OOC,': Internal error in
-     &                   DMUMPS_FREE_SPACE_FOR_SOLVE', 
-     &                   IERR
+                    call rwarn(': Internal error in
+     &                   DMUMPS_FREE_SPACE_FOR_SOLVE')
+c~      &                   IERR
                     CALL MUMPS_ABORT()
                  ENDIF
               ENDIF
@@ -2831,8 +2845,8 @@ C ssg
       ALLOCATE(id%OOC_FILE_NAMES(SIZE,350),stat=IERR)
       IF (IERR .GT. 0) THEN
          IF (ICNTL1.GT.0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in ',
-     &           'DMUMPS_STRUC_STORE_FILE_NAME'
+            call rwarn('PB allocation in '//
+     &           'DMUMPS_STRUC_STORE_FILE_NAME')
          ENDIF
          IERR=-1
          IF(id%INFO(1).GE.0)THEN
@@ -2850,8 +2864,8 @@ C ssg
          IERR=-1
          IF(id%INFO(1).GE.0) THEN
             IF (ICNTL1.GT.0) THEN
-               WRITE(ICNTL1,*)
-     &              'PB allocation in DMUMPS_STRUC_STORE_FILE_NAME'
+               call rwarn(
+     &              'PB allocation in DMUMPS_STRUC_STORE_FILE_NAME')
             ENDIF
             id%INFO(1) = -13
             id%INFO(2) = SIZE
@@ -2884,8 +2898,8 @@ C ssg
          IERR=-1
          IF(id%INFO(1).GE.0)THEN
             IF (ICNTL1.GT.0) THEN
-               WRITE(ICNTL1,*)
-     &              'PB allocation in DMUMPS_OOC_OPEN_FILES_FOR_SOLVE'
+               call rwarn(
+     &              'PB allocation in DMUMPS_OOC_OPEN_FILES_FOR_SOLVE')
             ENDIF
             id%INFO(1) = -13
             id%INFO(2) = OOC_NB_FILE_TYPE
@@ -2900,15 +2914,15 @@ C ssg
       K211=id%KEEP(211)
       CALL MUMPS_OOC_ALLOC_POINTERS_C(OOC_NB_FILE_TYPE,NB_FILES,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          id%INFO(1)=IERR
          RETURN
       ENDIF
       CALL MUMPS_OOC_INIT_VARS_C(I,K,L,K211,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          id%INFO(1)=IERR
          RETURN
       ENDIF
@@ -2923,8 +2937,8 @@ C ssg
             CALL MUMPS_OOC_SET_FILE_NAME_C(TMP,I,DIM,IERR,TMP_NAME(1))
             IF(IERR.LT.0)THEN
                IF (ICNTL1.GT.0)
-     &         WRITE(ICNTL1,*)MYID_OOC,': ',
-     &         ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+     &         call rwarn(': ')
+C     &         ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                id%INFO(1)=IERR
                RETURN
             ENDIF
@@ -2933,8 +2947,8 @@ C ssg
       ENDDO
       CALL MUMPS_OOC_START_LOW_LEVEL(IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1.GT.0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1.GT.0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          id%INFO(1)=IERR
          RETURN
       ENDIF
@@ -3160,26 +3174,26 @@ C ssg
             EFFSIZE = -1034039740327_8
       ENDIF
       IF (MonBloc%Typenode.EQ.3.AND. MonBloc%NFS.NE.MonBloc%NCOL) THEN
-         WRITE(*,*) 'Internal error in DMUMPS_OOC_STORE_LorU for type3',
-     &   MonBloc%NFS,MonBloc%NCOL
+         call rwarn('Internal error in DMUMPS_OOC_STORE_LorU for type3')
+c~      &   MonBloc%NFS,MonBloc%NCOL
          CALL MUMPS_ABORT()
       ENDIF
       IF (MonBloc%Typenode.EQ.3.AND. TYPEF.NE.TYPEF_L) THEN
-         WRITE(*,*) 'Internal error in DMUMPS_OOC_STORE_LorU,TYPEF=',
-     &   TYPEF, 'for typenode=3'
+         call rwarn('Internal error in DMUMPS_OOC_STORE_LorU,TYPEF=')
+c~      &   TYPEF, 'for typenode=3'
          CALL MUMPS_ABORT()
       ENDIF
       IF (MonBloc%Typenode.EQ.2.AND.
      &     TYPEF.EQ.TYPEF_U.AND.
      &     .NOT. MonBloc%MASTER ) THEN
-         WRITE(*,*) 'Internal error in DMUMPS_OOC_STORE_LorU',
-     &   MonBloc%MASTER,MonBloc%Typenode, TYPEF
+         call rwarn('Internal error in DMUMPS_OOC_STORE_LorU')
+c~      &   MonBloc%MASTER,MonBloc%Typenode, TYPEF
          CALL MUMPS_ABORT()
       ENDIF
       HOLE_PROCESSED_BEFORE_CALL  = (LorUSIZE_OF_BLOCK .LT. 0_8)
       IF (HOLE_PROCESSED_BEFORE_CALL.AND.(.NOT.MonBloc%Last)) THEN
-          WRITE(6,*) ' Internal error  in DMUMPS_OOC_STORE_LorU ', 
-     &    ' last is false after earlier calls with last=true'
+          call rwarn(' Internal error  in DMUMPS_OOC_STORE_LorU '//
+     &    ' last is false after earlier calls with last=true')
           CALL MUMPS_ABORT()
       ENDIF
       IF (HOLE_PROCESSED_BEFORE_CALL) THEN
@@ -3257,8 +3271,8 @@ C ssg
       ENDIF
       IF (LAST_CALL) THEN
          IF (.NOT.MonBloc%Last) THEN
-          WRITE(6,*) ' Internal error in DMUMPS_OOC_STORE_LorU ', 
-     &               ' LAST and LAST_CALL are incompatible '
+          call rwarn(' Internal error in DMUMPS_OOC_STORE_LorU '//
+     &               ' LAST and LAST_CALL are incompatible ')
           CALL MUMPS_ABORT()
         ENDIF
         LorUSIZE_OF_BLOCK = - LorUSIZE_OF_BLOCK - 1_8
@@ -3278,8 +3292,8 @@ C ssg
      &                          OOC_VADDR(STEP_OOC(INODE_CUR),TYPEF)
           ELSE
              IF (ICUR .LE. 1) THEN
-              WRITE(*,*) "Internal error in DMUMPS_OOC_STORE_LorU"
-              WRITE(*,*) "Did not find current node in sequence"
+              call rwarn("Internal error in DMUMPS_OOC_STORE_LorU "//
+     &         "Did not find current node in sequence")
               CALL MUMPS_ABORT()
             ENDIF
             GOTO 10

@@ -134,8 +134,8 @@ C
       ALLOCATE(SLAVES_PERE(0:max(1,NSLAVES_PERE)), stat=allocok)
       if (allocok .GT. 0) THEN
          IF (LP > 0) THEN
-            write(LP,*) MYID,
-     &           ' : PB allocation SLAVES_PERE in DMUMPS_MAPLIG'
+            call rwarn(
+     &           ' : PB allocation SLAVES_PERE in DMUMPS_MAPLIG')
          ENDIF
         IFLAG  =-13
         IERROR = NSLAVES_PERE+1
@@ -148,8 +148,8 @@ C
       ALLOCATE(NBROW(0:NSLAVES_PERE), stat=allocok)
       if (allocok .GT. 0) THEN
          IF (LP>0) THEN
-            write(LP,*) MYID,
-     &           ' : PB allocation NBROW in DMUMPS_MAPLIG'
+            call rwarn(
+     &           ' : PB allocation NBROW in DMUMPS_MAPLIG')
          ENDIF
         IFLAG  =-13
         IERROR = NSLAVES_PERE+1
@@ -159,7 +159,7 @@ C
       ALLOCATE(MAP(LMAP_LOC), stat=allocok)
       if (allocok .GT. 0) THEN
         IF (LP>0) THEN
-        write(LP,*) MYID, ' : PB allocation LMAP in DMUMPS_MAPLIG'
+        call rwarn(' : PB allocation LMAP in DMUMPS_MAPLIG')
         ENDIF
         IFLAG  =-13
         IERROR = LMAP
@@ -305,7 +305,7 @@ C
       ALLOCATE(PERM(LMAP_LOC), stat=allocok)
       IF (allocok .GT. 0) THEN
           IF (LP.GT.0) THEN
-          write(LP,*) MYID,': PB allocation PERM in DMUMPS_MAPLIG'
+          call rwarn(': PB allocation PERM in DMUMPS_MAPLIG')
           ENDIF
           IFLAG  =-13
           IERROR = LMAP_LOC
@@ -404,14 +404,14 @@ C
            DO WHILE (IERR .EQ. -1)
              IF ( IW ( PTRIST(STEP(ISON) )+KEEP(IXSZ) )
      &             .GT. N + KEEP(253) ) THEN
-               WRITE(*,*) MYID,': Internal error in Maplig'
-               WRITE(*,*) MYID,': PTRIST(STEP(ISON))/N=',
-     &                            PTRIST(STEP(ISON)), N
-               WRITE(*,*) MYID,': I, NBROW(I)=',I, NBROW(I)
-               WRITE(*,*) MYID,': NSLAVES_PERE=',NSLAVES_PERE
-               WRITE(*,*) MYID,': ISON, INODE_PERE=',ISON,INODE_PERE
-               WRITE(*,*) MYID,': Son header=',
-     &         IW(PTRIST(STEP(ISON)): PTRIST(STEP(ISON))+5+KEEP(IXSZ))
+               call rwarn(': Internal error in Maplig')
+               call rwarn(': PTRIST(STEP(ISON))/N=')
+c~      &                            PTRIST(STEP(ISON)), N
+c~                WRITE(*,*) MYID,': I, NBROW(I)=',I, NBROW(I)
+c~                WRITE(*,*) MYID,': NSLAVES_PERE=',NSLAVES_PERE
+c~                WRITE(*,*) MYID,': ISON, INODE_PERE=',ISON,INODE_PERE
+c~                WRITE(*,*) MYID,': Son header=',
+c~      &         IW(PTRIST(STEP(ISON)): PTRIST(STEP(ISON))+5+KEEP(IXSZ))
                CALL MUMPS_ABORT()
              END IF
              IF (NROWS_TO_SEND .EQ. 0 .AND. PDEST.NE.PDEST_MASTER) THEN
@@ -460,8 +460,8 @@ C
              IF ( IERR .EQ. -2 ) THEN
                IFLAG  = -17
                IF (LP .GT. 0) THEN
-                 WRITE(LP,*)
-     &           "FAILURE: SEND BUFFER TOO SMALL IN DMUMPS_MAPLIG"
+                 call rwarn(
+     &           "FAILURE: SEND BUFFER TOO SMALL IN DMUMPS_MAPLIG")
                ENDIF
                IERROR =  (NROWS_TO_SEND + 3 )* KEEP( 34 ) +
      &         NROWS_TO_SEND * IW(PTRIST(STEP(ISON))+KEEP(IXSZ))
@@ -470,8 +470,8 @@ C
              END IF
              IF ( IERR .EQ. -3 ) THEN
                IF (LP .GT. 0) THEN
-                 WRITE(LP,*)
-     &           "FAILURE: RECV BUFFER TOO SMALL IN DMUMPS_MAPLIG"
+                 call rwarn(
+     &           "FAILURE: RECV BUFFER TOO SMALL IN DMUMPS_MAPLIG")
                ENDIF
                IFLAG  = -20
                IERROR =  (NROWS_TO_SEND + 3 )* KEEP( 34 ) +
@@ -484,8 +484,8 @@ C
                 IFLAG  = -13
                IERROR = NFS4FATHER
                IF (LP .GT. 0) THEN
-                 WRITE(LP, *)
-     & "FAILURE: MAX_ARRAY allocation failed IN DMUMPS_MAPLIG"
+                 call rwarn(
+     & "FAILURE: MAX_ARRAY allocation failed IN DMUMPS_MAPLIG")
                ENDIF
                GO TO 600
               END IF
@@ -719,22 +719,23 @@ C
       LP = ICNTL(1)
       IF (ICNTL(4) .LE. 0) LP = -1
       if (NSLAVES_PERE.le.0) then
-       write(6,*) ' error 2 in maplig_fils_niv1 ', NSLAVES_PERE
+       call rwarn(' error 2 in maplig_fils_niv1 ')
+c~        , NSLAVES_PERE
        CALL MUMPS_ABORT()
       endif
       ALLOCATE(NBROW(0:NSLAVES_PERE), stat=allocok)
       IF (allocok .GT. 0) THEN
         IF (LP > 0)
-     &  write(LP,*) MYID,
-     &  ' : PB allocation NBROW in DMUMPS_MAPLIG_FILS_NIV1'
+     &  call rwarn(
+     &  ' : PB allocation NBROW in DMUMPS_MAPLIG_FILS_NIV1')
         IFLAG  =-13
         IERROR = NSLAVES_PERE+1
         GOTO 700
       ENDIF
       ALLOCATE(SLAVES_PERE(0:NSLAVES_PERE), stat =allocok)
       IF ( allocok .GT. 0 ) THEN
-        IF (LP > 0) write(LP,*) MYID,
-     &  ' : PB allocation SLAVES_PERE in DMUMPS_MAPLIG_FILS_NIV1'
+        IF (LP > 0) call rwarn(
+     &  ' : PB allocation SLAVES_PERE in DMUMPS_MAPLIG_FILS_NIV1')
         IFLAG  =-13
         IERROR = NSLAVES_PERE+1
         GOTO 700
@@ -746,8 +747,8 @@ C
       LMAP_LOC = LMAP
       ALLOCATE(MAP(LMAP_LOC), stat=allocok)
       if (allocok .GT. 0) THEN
-        IF (LP > 0) write(LP,*) MYID,
-     &   ' : PB allocation LMAP in DMUMPS_MAPLIG_FILS_NIV1'
+        IF (LP > 0) call rwarn(
+     &   ' : PB allocation LMAP in DMUMPS_MAPLIG_FILS_NIV1')
         IFLAG  =-13
         IERROR = LMAP_LOC
         GOTO 700
@@ -780,8 +781,8 @@ C
       ALLOCATE(PERM(LMAP_LOC), stat=allocok)
       if (allocok .GT. 0) THEN
          IF (LP > 0) THEN
-            write(LP,*) MYID,
-     &           ': PB allocation PERM in DMUMPS_MAPLIG_FILS_NIV1'
+            call rwarn(
+     &           ': PB allocation PERM in DMUMPS_MAPLIG_FILS_NIV1')
          ENDIF
         IFLAG  =-13
         IERROR = LMAP_LOC
@@ -809,7 +810,8 @@ C
       END DO
       PDEST_MASTER = MYID
       IF ( SLAVES_PERE(0) .NE. MYID ) THEN
-        WRITE(*,*) 'Error 1 in MAPLIG_FILS_NIV1:',MYID, SLAVES_PERE
+        call rwarn('Error 1 in MAPLIG_FILS_NIV1:')
+c~         ,MYID, SLAVES_PERE
         CALL MUMPS_ABORT()
       END IF
       PDEST        = PDEST_MASTER
@@ -821,7 +823,8 @@ C
         NPIV       = IW(ISTCHK+3+KEEP(IXSZ))
         NASS       = NPIV+NELIM
         IF (NPIV.LT.0) THEN
-         write(6,*) ' Error 2 in DMUMPS_MAPLIG_FILS_NIV1 ', NPIV
+         call rwarn(' Error 2 in DMUMPS_MAPLIG_FILS_NIV1 ')
+c~          , NPIV
          CALL MUMPS_ABORT()
         ENDIF
         NSLSON     = IW(ISTCHK+5+KEEP(IXSZ))
@@ -869,7 +872,7 @@ C
             ENDIF
           ENDDO
           IF (PANEL2DECOMPRESS.EQ.-1) THEN
-            write(*,*) 'Internal error: PANEL2DECOMPRESS not found'
+            call rwarn('Internal error: PANEL2DECOMPRESS not found')
             CALL MUMPS_ABORT()
           ENDIF
           IF (KEEP(50).EQ.0) THEN
@@ -994,8 +997,8 @@ C
            ENDIF
            CALL DMUMPS_BUF_MAX_ARRAY_MINSIZE(NFS4FATHER,IERR)
            IF (IERR .NE.0) THEN
-              IF (LP > 0) WRITE(LP,*) MYID,
-     &    ": PB allocation MAX_ARRAY during DMUMPS_MAPLIG_FILS_NIV1"
+              IF (LP > 0) call rwarn(
+     &    ": PB allocation MAX_ARRAY during DMUMPS_MAPLIG_FILS_NIV1")
               IFLAG=-13
               IERROR=NFS4FATHER
               GOTO 700
@@ -1110,16 +1113,16 @@ C
      &               PACKED_CB, KEEP(253), ITYPE_SON, MYID)
            ENDIF
             IF ( IERR .EQ. -2 ) THEN
-              IF (LP > 0) WRITE(LP,*) MYID,
-     &": FAILURE, SEND BUFFER TOO SMALL DURING DMUMPS_MAPLIG_FILS_NIV1"
+              IF (LP > 0) call rwarn(
+     &": FAILURE, SEND BUFFER TOO SMALL DURING DMUMPS_MAPLIG_FILS_NIV1")
               IFLAG  = -17
               IERROR =  (NROWS_TO_SEND + 3 )* KEEP( 34 ) +
      &        NROWS_TO_SEND *  KEEP( 35 )
               GO TO 700
             END IF
             IF ( IERR .EQ. -3 ) THEN
-              IF (LP > 0) WRITE(LP,*) MYID,
-     &": FAILURE, RECV BUFFER TOO SMALL DURING DMUMPS_MAPLIG_FILS_NIV1"
+              IF (LP > 0) call rwarn(
+     &": FAILURE, RECV BUFFER TOO SMALL DURING DMUMPS_MAPLIG_FILS_NIV1")
               IFLAG  = -20
               IERROR =  (NROWS_TO_SEND + 3 )* KEEP( 34 ) +
      &        NROWS_TO_SEND *  KEEP( 35 )
@@ -1129,8 +1132,8 @@ C
              IF ( IERR .EQ. -4 ) THEN
                IFLAG  = -13
                IERROR = BUF_LMAX_ARRAY
-              IF (LP > 0) WRITE(LP,*) MYID,
-     &": FAILURE, MAX_ARRAY ALLOC FAILED DURING DMUMPS_MAPLIG_FILS_NIV1"
+              IF (LP > 0) call rwarn(
+     &":FAILURE, MAX_ARRAY ALLOC FAILED DURING DMUMPS_MAPLIG_FILS_NIV1")
                GO TO 700
              ENDIF
             ENDIF
@@ -1164,7 +1167,7 @@ C
       ISTCHK = PTRIST(STEP(ISON))
       PTRIST(STEP( ISON )) = -77777777
       IF ( IW(ISTCHK+KEEP(IXSZ)) .GE. 0 ) THEN
-         WRITE(*,*) 'error 3 in DMUMPS_MAPLIG_FILS_NIV1'
+         call rwarn('error 3 in DMUMPS_MAPLIG_FILS_NIV1')
          CALL MUMPS_ABORT()
       ENDIF
 #if ! defined(NODYNAMICCB)
@@ -1417,7 +1420,7 @@ C
                 ENDIF
               ENDDO
               IF (PANEL2DECOMPRESS.EQ.-1) THEN
-                write(*,*) 'Internal error: PANEL2DECOMPRESS not found'
+                call rwarn('Internal error: PANEL2DECOMPRESS not found')
                 CALL MUMPS_ABORT()
               ENDIF
               IF (KEEP(50).EQ.0) THEN
@@ -1436,7 +1439,7 @@ C
                   ENDIF
                 ENDDO
                 IF (NB_BLR_COLS.EQ.-1) THEN
-                  write(*,*) 'Internal error: NB_BLR_COLS not found'
+                  call rwarn('Internal error: NB_BLR_COLS not found')
                   CALL MUMPS_ABORT()
                 ENDIF
               ENDIF
@@ -1512,8 +1515,8 @@ C
                  INDICE_PERE_ARRAY_ARG(1) = INDICE_PERE
                  IF ((IS_ofType5or6).AND.(KEEP(50).EQ.0)) THEN
                     IF (CB_IS_LR) THEN
-                     write(*,*) 'Compress CB + Type5or6 fronts not',
-     &                       'coded yet!!!'
+                     call rwarn('Compress CB + Type5or6 fronts not'//
+     &                       'coded yet!!!')
                      CALL MUMPS_ABORT()
                    ENDIF
                    CALL DMUMPS_ASM_SLAVE_MASTER(N, IFATH, IW, LIW, 
@@ -1528,8 +1531,8 @@ C
                  ELSE IF ( (KEEP(50).NE.0) .AND. 
      &              (.NOT.PACKED_CB).AND.(IS_ofType5or6) ) THEN
                     IF (CB_IS_LR) THEN
-                     write(*,*) 'Compress CB + Type5or6 fronts not',
-     &                       'coded yet!!!'
+                     call rwarn('Compress CB + Type5or6 fronts not'//
+     &                       'coded yet!!!')
                      CALL MUMPS_ABORT()
                    ENDIF
                    CALL DMUMPS_ASM_SLAVE_MASTER(N, IFATH, IW, LIW, 
@@ -1590,8 +1593,8 @@ C
      &                 )
      &               ) THEN
                     IF (CB_IS_LR) THEN
-                     write(*,*) 'Compress CB + Type5or6 fronts not',
-     &                       'coded yet!!!'
+                     call rwarn('Compress CB + Type5or6 fronts not'//
+     &                       'coded yet!!!')
                      CALL MUMPS_ABORT()
                    ENDIF
                    CALL DMUMPS_ASM_SLAVE_TO_SLAVE(N, IFATH,
@@ -1660,7 +1663,7 @@ C
                  M_ARRAY_RETRIEVED = .TRUE.
                 ELSE
                   IF (PACKED_CB) THEN
-                    WRITE(*,*) "Error 1 in PARPIV/DMUMPS_MAPLIG"
+                    call rwarn("Error 1 in PARPIV/DMUMPS_MAPLIG")
                     CALL MUMPS_ABORT()
                   ELSE
                     POSROW = IACHK + SHIFTCB_SON+
@@ -1669,7 +1672,7 @@ C
                   CALL DMUMPS_BUF_MAX_ARRAY_MINSIZE(NFS4FATHER,IERR)
                   IF (IERR .NE.0) THEN
                     IF (LP .GT. 0) THEN
-                      WRITE(LP, *) "MAX_ARRAY allocation failed"
+                      call rwarn("MAX_ARRAY allocation failed")
                     ENDIF
                     IFLAG=-13
                     IERROR=NFS4FATHER
@@ -1703,9 +1706,9 @@ C
 #if ! defined(NO_XXNBPR)
                IF ( SAME_PROC ) THEN
                  INBPROCFILS_SON = PTRIST(STEP(ISON))+XXNBPR
-                 WRITE(*,*)
-     &           "Internal error 0 in DMUMPS_LOCAL_ASSEMBLY_TYPE2",
-     &           INBPROCFILS_SON, PIMASTER(STEP(ISON))
+                 call rwarn(
+     &           "Internal error 0 in DMUMPS_LOCAL_ASSEMBLY_TYPE2")
+c~      &           INBPROCFILS_SON, PIMASTER(STEP(ISON))
                  CALL MUMPS_ABORT()
                ELSE
                  INBPROCFILS_SON = PIMASTER(STEP(ISON))+XXNBPR

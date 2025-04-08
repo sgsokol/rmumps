@@ -26,7 +26,7 @@ C
             CALL DMUMPS_BUF_SEND_1INT( DATA(1), DEST, TAG, 
      &                                COMMW, KEEP, IERR )
           ELSE
-            WRITE(*,*) 'Error : bad argument to DMUMPS_MCAST2'
+            call rwarn("Error : bad argument to DMUMPS_MCAST2")
             CALL MUMPS_ABORT()
           END IF
         ENDIF

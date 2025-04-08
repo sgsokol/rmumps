@@ -28,7 +28,7 @@ C
       INTEGER, ALLOCATABLE, DIMENSION(:) :: BIG_CUT
       ALLOCATE(BIG_CUT(max(NASS,1)+NCB+1),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error of BIG_CUT in GET_CUT"
+         call rwarn("Allocation error of BIG_CUT in GET_CUT")
          CALL MUMPS_ABORT()
       ENDIF
       CURRENT_PART = LRGROUPS(IWR(1))
@@ -51,7 +51,7 @@ C
       NPARTSCB = CUTBUILDER - 1 - NPARTSASS
       ALLOCATE(CUT(max(NPARTSASS,1)+NPARTSCB+1),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error of CUT in GET_CUT"
+         call rwarn("Allocation error of CUT in GET_CUT")
          CALL MUMPS_ABORT()
       ENDIF
       IF (NPARTSASS.EQ.0) THEN
@@ -104,9 +104,9 @@ C
             ALLOCATE(PARTS(NHALO), IPTRHALO(NHALO+1),
      &      JCNHALO(HALOEDGENBR), STAT=IERR)
             IF (IERR.GT.0) THEN
-              IF (LPOK) WRITE(LP,*) 
-     &        " Error allocate integer array of size: ", 
-     &         int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR
+              call rwarn(
+     &        " Error allocate integer array of size: ")
+c~      &         int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR
               IFLAG  = -7
               CALL MUMPS_SET_IERROR 
      &         (int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR,
@@ -123,9 +123,9 @@ C
             ALLOCATE(PARTS(NHALO), IPTRHALO(NHALO+1),
      &      JCNHALO(HALOEDGENBR), STAT=IERR)
             IF (IERR.GT.0) THEN
-              IF (LPOK) WRITE(LP,*) 
-     &        " Error allocate integer array of size: ", 
-     &         int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR
+              call rwarn(
+     &        " Error allocate integer array of size: ")
+c~      &         int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR
               IFLAG  = -7
               CALL MUMPS_SET_IERROR 
      &         (int(NHALO+(KEEP10*(NHALO+1)),8) + HALOEDGENBR,
@@ -180,7 +180,7 @@ C
              END IF
 #endif
           ELSE
-            WRITE(6,*) " Internal ERROR K482=", K482
+            call rwarn(" Internal ERROR K482=")
             CALL MUMPS_ABORT()
           END IF
           IF (IFLAG.LT.0) GOTO 500
@@ -222,7 +222,7 @@ C
      &          RIGHTPART(NPARTS),
      &          PARTPTR(NPARTS+1),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GLOBAL_GROUPS"
+         call rwarn("Allocation error in GET_GLOBAL_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       NB_PARTS_WITHOUT_SEP_NODE = 0
@@ -381,27 +381,27 @@ C
       INTEGER,DIMENSION(:),ALLOCATABLE::PARTPTR
       ALLOCATE(NEWSEP(NSEP),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       ALLOCATE(PERM(NSEP),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       ALLOCATE(IPERM(NSEP),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       ALLOCATE(SIZES(NPARTS),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       ALLOCATE(PARTPTR(NPARTS+1),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       NB_PARTS_WITHOUT_SEP_NODE = 0
@@ -419,7 +419,7 @@ C
       END DO
       ALLOCATE(CUT(NPARTS-NB_PARTS_WITHOUT_SEP_NODE+1),stat=allocok)
       IF(allocok.GT.0) THEN
-         write(*,*) "Allocation error in GET_GROUPS"
+         call rwarn("Allocation error in GET_GROUPS")
          CALL MUMPS_ABORT()
       ENDIF
       CUT(1) = 1
@@ -521,8 +521,8 @@ C
      &         POOL(NA(1)), PVS(NSTEPS),
      &         STAT=IERR)
       IF (IERR.GT.0) THEN
-       IF (LPOK) WRITE(LP,*) " Error allocate integer array of size: ", 
-     *    LW+int(N,8)+int(K10*(2*N+1),8)
+c~        IF (LPOK) WRITE(LP,*) " Error allocate integer array of size: ", 
+c~      *    LW+int(N,8)+int(K10*(2*N+1),8)
         IFLAG = -7
         CALL MUMPS_SET_IERROR(LW+int(N,8)+int(K10*(2*N+1),8),IERROR)
         GOTO 500
@@ -551,8 +551,7 @@ C
       ALLOCATE(WORK(MAXFRONT), TRACE(N), WORKH(N), GEN2HALO(N), 
      &         STAT=IERR)
       IF (IERR.GT.0) THEN
-       IF (LPOK) WRITE(LP,*) " Error allocate integer array of size: ", 
-     *    3*N+MAXFRONT
+       IF (LPOK) call rwarn(" Error allocate integer array of size: ")
         IFLAG = -7
         IERROR = 3*N+MAXFRONT
         RETURN
@@ -721,8 +720,8 @@ C
      &         PVS(NSTEPS),
      &         STAT=IERR)
       IF (IERR.GT.0) THEN
-       IF (LPOK) WRITE(LP,*) " Error allocate integer array of size: ", 
-     *    LW+int(N,8)+int(K10*(2*N+1),8)
+       IF (LPOK) call rwarn(" Error allocate integer array of size: ")
+c~      *    LW+int(N,8)+int(K10*(2*N+1),8)
         IFLAG = -7
         CALL MUMPS_SET_IERROR(LW+int(N,8)+int(K10*(2*N+1),8),IERROR)
         GOTO 501
@@ -744,8 +743,8 @@ C
         ALLOCATE(TRACE(N), WORKH(N), GEN2HALO(N), 
      &          STAT=IERR)
         IF (IERR.GT.0) THEN
-          IF (LPOK) WRITE(LP,*) " Error allocate integer array of ", 
-     *    "size: ", 3*N
+          call rwarn(" Error allocate integer array of ")
+c~      *    "size: ", 3*N
           IFLAG = -7
           IERROR = 3*N
           GOTO 501
@@ -761,8 +760,8 @@ C
 !$OMP&         IF (K469_LOC.GT.1) NUM_THREADS(OMP_NUM)
       ALLOCATE(WORK(MAXFRONT), STAT=IERR_PRIV)
       IF (IERR_PRIV.GT.0) THEN
-        IF (LPOK) WRITE(LP,*) " Error allocate integer array of ", 
-     *    "size: ", MAXFRONT
+        call rwarn(" Error allocate integer array of ")
+c~      *    "size: ", MAXFRONT
 !$OMP ATOMIC WRITE
         IFLAG = -7
 !$OMP ATOMIC WRITE
@@ -773,8 +772,8 @@ C
         ALLOCATE(TRACE_PRV(N), WORKH_PRV(N), GEN2HALO_PRV(N),
      &           STAT=IERR_PRIV)
         IF (IERR_PRIV.GT.0) THEN
-          IF (LPOK) WRITE(LP,*) " Error allocate integer array of ", 
-     *    "size: ", 3*N
+          call rwarn(" Error allocate integer array of ")
+c~      *    "size: ", 3*N
 !$OMP ATOMIC WRITE
           IFLAG = -7
 !$OMP ATOMIC WRITE

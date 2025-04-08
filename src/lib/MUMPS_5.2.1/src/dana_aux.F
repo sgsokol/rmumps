@@ -134,15 +134,15 @@ C ssg
       IF (KEEP(1).LT.0) KEEP(1) = 0
       NEMIN = KEEP(1)
       IF (LDIAG.GT.2 .AND. MP.GT.0) THEN
-         WRITE (MP,99999) N, NZ8, LIW8, INFO(1)
+C         WRITE (MP,99999) N, NZ8, LIW8, INFO(1)
          J8 = min(10_8,NZ8)
          IF (LDIAG.EQ.4) J8 = NZ8
-         IF (J8.GT.0_8) WRITE (MP,99998) (IRN(I8),ICN(I8),I8=1_8,J8)
+C         IF (J8.GT.0_8) WRITE (MP,99998) (IRN(I8),ICN(I8),I8=1_8,J8)
          K = min0(10,N)
          IF (LDIAG.EQ.4) K = N
-         IF (IORD.EQ.1 .AND. K.GT.0) THEN
-            WRITE (MP,99997) (IKEEP1(I),I=1,K)
-         ENDIF
+C         IF (IORD.EQ.1 .AND. K.GT.0) THEN
+C            WRITE (MP,99997) (IKEEP1(I),I=1,K)
+C         ENDIF
       ENDIF
       NCMP    = N   
       IF (KEEP(60).NE.0) THEN
@@ -199,9 +199,9 @@ C ssg
       IF(NBQD .GT. 0) THEN
          IF( KEEP(50) .EQ. 2 .AND. ICNTL(12) .EQ. 0 ) THEN
             IF(KEEP(95) .NE. 1) THEN
-               IF ( PROK ) 
-     &              WRITE( MP,*) 
-     &              'Compressed/constrained ordering set OFF'
+c               IF ( PROK ) 
+c     &              WRITE( MP,*) 
+c     &              'Compressed/constrained ordering set OFF'
                KEEP(95) = 1   
             ENDIF
          ENDIF
@@ -220,16 +220,16 @@ C ssg
      &     PROK, MP )
       IF(KEEP(50) .EQ. 2) THEN
          IF(KEEP(95) .EQ. 3 .AND. IORD .NE. 2) THEN
-            IF (PROK) WRITE(MP,*)
-     &      'WARNING: DMUMPS_ANA_F constrained ordering not '//
-     &      ' available with selected ordering. Move to' //
-     &      ' compressed ordering.'
+c            IF (PROK) WRITE(MP,*)
+c     &      'WARNING: DMUMPS_ANA_F constrained ordering not '//
+c     &      ' available with selected ordering. Move to' //
+c     &      ' compressed ordering.'
             KEEP(95) = 2
          ENDIF
          IF(KEEP(95) .EQ. 2 .AND. IORD .EQ. 0) THEN 
-            IF (PROK) WRITE(MP,*)
-     &      'WARNING: DMUMPS_ANA_F AMD not available with ', 
-     &      ' compressed ordering -> move to QAMD'
+c            IF (PROK) WRITE(MP,*)
+c     &      'WARNING: DMUMPS_ANA_F AMD not available with ', 
+c     &      ' compressed ordering -> move to QAMD'
             IORD = 6
          ENDIF
       ELSE
@@ -244,9 +244,9 @@ C ssg
             ELSE
                NEMIN = 2*KEEP(1)
             ENDIF
-            IF (PROK) 
-     &           WRITE(MP,*) 'Setting static pivoting ON, COMPRESS =',
-     &           COMPRESS
+c~             IF (PROK) 
+c~      &           WRITE(MP,*) 'Setting static pivoting ON, COMPRESS =',
+c~      &           COMPRESS
          ENDIF
       ENDIF
       IF(MTRANS .GT. 0 .AND. KEEP(50) .EQ. 2) THEN
@@ -254,8 +254,9 @@ C ssg
       ENDIF
       IF(COMPRESS .EQ. 2) THEN
          IF (IORD.NE.2) THEN
-            WRITE(*,*) "IORD not compatible with COMPRESS:",
-     &           IORD, COMPRESS
+C            WRITE(*,*) "IORD not compatible with COMPRESS:",
+C     &           IORD, COMPRESS
+            call rwarn("IORD not compatible with COMPRESS:")
             CALL MUMPS_ABORT()
          ENDIF
          CALL  DMUMPS_SET_CONSTRAINTS(
@@ -360,19 +361,19 @@ C ssg
          ENDIF
          IF (PROK) THEN
             IF (IORD.EQ.2) THEN
-               WRITE(MP,'(A)') ' Ordering based on AMF '
-#if defined(scotch) || defined(ptscotch)
-            ELSE IF (IORD.EQ.3) THEN
-               WRITE(MP,'(A)') ' Ordering based on SCOTCH '
-#endif
-#if defined(pord)
-            ELSE IF (IORD.EQ.4) THEN
-               WRITE(MP,'(A)') ' Ordering based on PORD '
-#endif
-            ELSE IF (IORD.EQ.6) THEN
-               WRITE(MP,'(A)') ' Ordering based on QAMD '
-            ELSE
-               WRITE(MP,'(A)') ' Ordering based on AMD '
+c~                WRITE(MP,'(A)') ' Ordering based on AMF '
+c~ #if defined(scotch) || defined(ptscotch)
+c~             ELSE IF (IORD.EQ.3) THEN
+c~                WRITE(MP,'(A)') ' Ordering based on SCOTCH '
+c~ #endif
+c~ #if defined(pord)
+c~             ELSE IF (IORD.EQ.4) THEN
+c~                WRITE(MP,'(A)') ' Ordering based on PORD '
+c~ #endif
+c~             ELSE IF (IORD.EQ.6) THEN
+c~                WRITE(MP,'(A)') ' Ordering based on QAMD '
+c~             ELSE
+c~                WRITE(MP,'(A)') ' Ordering based on AMD '
             ENDIF
          ENDIF
          IF ( PROK ) THEN
@@ -417,13 +418,14 @@ C ssg
      &                   IWL1, NCMPA, N, PARENT, 
      &                   INFO(1), LP, LPOK, KEEP(10))
                   ELSE
-                     WRITE(*,*)
-     &              "Internal error in PORD wrappers, PORD_INT_SIZE=",
-     &              PORD_INT_SIZE
+c~                      WRITE(*,*)
+c~      &              "Internal error in PORD wrappers, PORD_INT_SIZE=",
+c~      &              PORD_INT_SIZE
+                     call rwarn("Internal error in PORD wrappers")
                      CALL MUMPS_ABORT()
                   ENDIF
                   IF ( NCMPA .NE. 0 ) THEN
-                     write(6,*) ' Out PORD, NCMPA=', NCMPA
+C                     write(6,*) ' Out PORD, NCMPA=', NCMPA
                      INFO( 1 ) = -9999
                      INFO( 2 ) = 4
                      GOTO 90 
@@ -451,14 +453,15 @@ C ssg
      &                 IWL1, NCMPA, PARENT, 
      &                 INFO(1), LP, LPOK, KEEP(10))
                ELSE
-                    WRITE(*,*)
-     &              "Internal error in PORD wrappers, PORD_INT_SIZE=",
-     &              PORD_INT_SIZE
+c~                     WRITE(*,*)
+c~      &              "Internal error in PORD wrappers, PORD_INT_SIZE=",
+c~      &              PORD_INT_SIZE
+                    call rwarn("Internal error in PORD wrappers")
                     CALL MUMPS_ABORT()
                   ENDIF
                ENDIF
                IF ( NCMPA .NE. 0 ) THEN
-                  write(6,*) ' Out PORD, NCMPA=', NCMPA
+C                  write(6,*) ' Out PORD, NCMPA=', NCMPA
                   INFO( 1 ) = -9999
                   INFO( 2 ) = 4
                   GOTO 90 
@@ -489,9 +492,10 @@ C ssg
      &              INPLACE64_GRAPH_COPY)
 #endif
               ELSE
-                 WRITE(*,*)
-     &           "Internal error in SCOTCH wrappers, SCOTCH_INT_SIZE=",
-     &           SCOTCH_INT_SIZE
+c~                  WRITE(*,*)
+c~      &           "Internal error in SCOTCH wrappers, SCOTCH_INT_SIZE=",
+c~      &           SCOTCH_INT_SIZE
+                 call rwarn("Internal error in SCOTCH wrappers")
                  CALL MUMPS_ABORT()
                ENDIF
                IF (INFO(1) .LT. 0) GOTO 90
@@ -528,8 +532,8 @@ C ssg
      &               IW(1), IWL1, IKEEP1(1), IKEEP2(1), NCMPA, FILS(1),
      &               IKEEP3(1), PTRAR, PTRAR(1,3), WTEMP, PARENT(1))
                ELSE
-                  IF(PROK) WRITE(MP,'(A)') 
-     &                 ' Constrained Ordering based on AMF'
+c~                   IF(PROK) WRITE(MP,'(A)') 
+c~      &                 ' Constrained Ordering based on AMF'
                   CALL MUMPS_CST_AMF(NCMP, NBBUCK, LIW8, IPE,
      &             IWFR8, PTRAR(1,2), 
      &             IW(1), IWL1, IKEEP1(1), IKEEP2(1), NCMPA, FILS(1), 
@@ -577,18 +581,18 @@ C ssg
          IF ( PROK ) THEN
           CALL MUMPS_SECFIN( TIMEB )
 #if  defined(scotch) || defined(ptscotch)
-          IF (IORD.EQ.3) THEN
-            WRITE( MP, '(A,F12.4)' )
-     &        ' ELAPSED TIME SPENT IN SCOTCH reordering =', TIMEB
-          ENDIF
+c~           IF (IORD.EQ.3) THEN
+c~             WRITE( MP, '(A,F12.4)' )
+c~      &        ' ELAPSED TIME SPENT IN SCOTCH reordering =', TIMEB
+c~           ENDIF
 #endif
          ENDIF
       ENDIF  
 #if defined(metis) || defined(parmetis) || defined(metis4) || defined(parmetis3)
       IF (IORD.EQ.5) THEN
-         IF (PROK) THEN
-            WRITE(MP,'(A)') ' Ordering based on METIS'
-         ENDIF
+c~          IF (PROK) THEN
+c~             WRITE(MP,'(A)') ' Ordering based on METIS'
+c~          ENDIF
          IF ( PROK ) THEN
             CALL MUMPS_SECDEB( TIMEB )
          ENDIF
@@ -624,9 +628,10 @@ C ssg
      &           IKEEP2, IKEEP1, INFO(1), LP, LPOK, KEEP(10),
      &           INPLACE64_GRAPH_COPY )
            ELSE
-              WRITE(*,*)
-     &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
-     &        METIS_IDX_SIZE
+c~               WRITE(*,*)
+c~      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
+c~      &        METIS_IDX_SIZE
+              call rwarn("Internal error in METIS wrappers")
               CALL MUMPS_ABORT()
             ENDIF
          ELSE
@@ -645,9 +650,10 @@ C ssg
      &           INPLACE64_RESTORE_GRAPH)
 #endif
            ELSE
-              WRITE(*,*)
-     &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
-     &        METIS_IDX_SIZE
+c~               WRITE(*,*)
+c~      &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
+c~      &        METIS_IDX_SIZE
+              call rwarn("Internal error in METIS wrappers")
               CALL MUMPS_ABORT()
             ENDIF
          ENDIF
@@ -672,17 +678,17 @@ C ssg
      &        INPLACE64_RESTORE_GRAPH)
 #endif
         ELSE
-              IF (LPOK) WRITE(LP,*)
-     &        "Internal error in METIS wrappers, METIS_IDX_SIZE=",
-     &        METIS_IDX_SIZE
+              IF (LPOK)
+     & call rwarn("Internal error in METIS wrappers, METIS_IDX_SIZE=")
+C     &        METIS_IDX_SIZE
               CALL MUMPS_ABORT()
          ENDIF
 #endif
          IF (INFO(1) .LT.0) GOTO 90
          IF ( PROK ) THEN
             CALL MUMPS_SECFIN( TIMEB )
-            WRITE( MP, '(A,F12.4)' )
-     &        ' ELAPSED TIME SPENT IN METIS reordering  =', TIMEB
+c~             WRITE( MP, '(A,F12.4)' )
+c~      &        ' ELAPSED TIME SPENT IN METIS reordering  =', TIMEB
          ENDIF
          IF ( COMPRESS_SCHUR ) THEN
             CALL DMUMPS_EXPAND_PERM_SCHUR(
@@ -698,9 +704,9 @@ C ssg
       ENDIF                     
 #endif
       IF (PROK) THEN
-         IF (IORD.EQ.1) THEN
-            WRITE(MP,'(A)') ' Ordering given is used'
-         ENDIF
+c~          IF (IORD.EQ.1) THEN
+c~             WRITE(MP,'(A)') ' Ordering given is used'
+c~          ENDIF
       ENDIF
       IF ((IORD.EQ.1) 
      &     ) THEN
@@ -871,10 +877,10 @@ C ssg
      &                       NSLAVES, KEEP,KEEP8, SPLITROOT,
      &                       MP, LDIAG, INFO(1), INFO(2))
           IF (INFO(1).LT.0) GOTO 90 
-          IF (PROK) THEN
-               WRITE(MP,*) " Number of split nodes in pre-splitting=",
-     &         KEEP(61)
-          ENDIF
+c~           IF (PROK) THEN
+c~                WRITE(MP,*) " Number of split nodes in pre-splitting=",
+c~      &         KEEP(61)
+c~           ENDIF
         ENDIF
        ENDIF
       ENDIF
@@ -897,9 +903,9 @@ C ssg
       IF (LDIAG.GT.2 .AND. MP.GT.0) THEN
          K = min0(10,N)
          IF (LDIAG.EQ.4) K = N
-         IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
-         IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
-         IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99987) (NFSIZ(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99989) (FILS(I),I=1,K)
+c~          IF (K.GT.0) WRITE (MP,99988) (FRERE(I),I=1,K)
       ENDIF
       GO TO 90
  40   INFO(1) = -4
@@ -907,8 +913,8 @@ C ssg
       GOTO 90 
  90   CONTINUE 
       IF (INFO(1) .NE. 0) THEN
-        IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) 
-     &           WRITE (LP,99996) INFO(1), INFO(2)
+c~         IF ((LP.GT.0).AND.(ICNTL(4).GE.1)) 
+c~      &           WRITE (LP,99996) INFO(1), INFO(2)
       ENDIF
       IF (allocated(IW))     DEALLOCATE(IW)
       IF (allocated(IWL1))   DEALLOCATE(IWL1)
@@ -1066,8 +1072,8 @@ C ssg
         IF (I.GE.1 .AND. I.LE.N) GO TO 80
    50   IERROR = IERROR + 1
         IW(K) = 0
-        IF (IERROR.LE.1 .AND. MP.GT.0) WRITE (MP,99999) 
-        IF (IERROR.LE.10 .AND. MP.GT.0) WRITE (MP,99998) K, I, J
+c~         IF (IERROR.LE.1 .AND. MP.GT.0) WRITE (MP,99999) 
+c~         IF (IERROR.LE.10 .AND. MP.GT.0) WRITE (MP,99998) K, I, J
         GO TO 80
    60   IF (PERM(J).GT.PERM(I)) GO TO 70
         IQ(J) = IQ(J) + 1
@@ -1902,9 +1908,9 @@ C ssg
          ENDIF
          IF(.not.associated(id%A)) THEN
             SCALINGLOC = .FALSE.
-            IF (PROK) 
-     &           WRITE(MPRINT,*) 'Analysis: auto scaling OFF because ',
-     &                           'A not provided at analysis '
+c~             IF (PROK) 
+c~      &           WRITE(MPRINT,*) 'Analysis: auto scaling OFF because ',
+c~      &                           'A not provided at analysis '
          ENDIF
       ENDIF
       IF ( (id%SYM.EQ.2).AND.(id%ICNTL(8).NE.-2).AND.
@@ -1937,8 +1943,8 @@ C ssg
         ENDIF
       ENDIF
       IF(SCALINGLOC) THEN
-         IF (PROK) WRITE(MPRINT,*) 
-     &        'Scaling will be computed during analysis'
+         IF (PROK)
+     & call rwarn('Scaling will be computed during analysis')
       ENDIF
       MTRANSLOC = MTRANS
       IF (MTRANS.LT.0 .OR. MTRANS.GT.7) GO TO 500
@@ -1954,8 +1960,8 @@ C ssg
       ENDIF
       IF(SCALINGLOC .AND. MTRANSLOC .NE. 5 .AND.
      &     MTRANSLOC .NE. 6 ) THEN
-         IF (PROK) WRITE(MPRINT,*)
-     &        'WARNING scaling required: set MTRANS option to 5'
+         IF (PROK)
+     & call rwarn('WARNING scaling required: set MTRANS option to 5')
          MTRANSLOC = 5
       ENDIF
       IF (N.EQ.1) THEN
@@ -1977,26 +1983,26 @@ C ssg
       IF (ICNTL(4).EQ.3) ICNTL64(4) = 0
       IF (ICNTL(4).EQ.4) ICNTL64(4) = 1
       ICNTL64(5) = -1
-      IF (PROK) THEN
-         WRITE(MPRINT,'(A,I3)')
-     &     'Compute maximum matching (Maximum Transversal):',
-     &        MTRANSLOC
-         IF (MTRANSLOC.EQ.1)
-     &   WRITE(MPRINT,'(A,I3)')' ... JOB =',MTRANSLOC
-         IF (MTRANSLOC.EQ.2)
-     &   WRITE(MPRINT,'(A,I3,A)')
-     &     ' ... JOB =',MTRANSLOC,': BOTTLENECK THESIS'
-         IF (MTRANSLOC.EQ.3)
-     &   WRITE(MPRINT,'(A,I3,A)')
-     &     ' ... JOB =',MTRANSLOC,': BOTTLENECK SIMAX'
-         IF (MTRANSLOC.EQ.4)
-     &   WRITE(MPRINT,'(A,I3,A)')
-     &     ' ... JOB =',MTRANSLOC,': MAXIMIZE SUM DIAGONAL'
-         IF (MTRANSLOC.EQ.5 .OR. MTRANSLOC.EQ.6)
-     &   WRITE(MPRINT,'(A,I3,A)')
-     &     ' ... JOB =',MTRANSLOC,
-     &     ': MAXIMIZE PRODUCT DIAGONAL AND SCALE'
-      ENDIF
+c~       IF (PROK) THEN
+c~          WRITE(MPRINT,'(A,I3)')
+c~      &     'Compute maximum matching (Maximum Transversal):',
+c~      &        MTRANSLOC
+c~          IF (MTRANSLOC.EQ.1)
+c~      &   WRITE(MPRINT,'(A,I3)')' ... JOB =',MTRANSLOC
+c~          IF (MTRANSLOC.EQ.2)
+c~      &   WRITE(MPRINT,'(A,I3,A)')
+c~      &     ' ... JOB =',MTRANSLOC,': BOTTLENECK THESIS'
+c~          IF (MTRANSLOC.EQ.3)
+c~      &   WRITE(MPRINT,'(A,I3,A)')
+c~      &     ' ... JOB =',MTRANSLOC,': BOTTLENECK SIMAX'
+c~          IF (MTRANSLOC.EQ.4)
+c~      &   WRITE(MPRINT,'(A,I3,A)')
+c~      &     ' ... JOB =',MTRANSLOC,': MAXIMIZE SUM DIAGONAL'
+c~          IF (MTRANSLOC.EQ.5 .OR. MTRANSLOC.EQ.6)
+c~      &   WRITE(MPRINT,'(A,I3,A)')
+c~      &     ' ... JOB =',MTRANSLOC,
+c~      &     ': MAXIMIZE PRODUCT DIAGONAL AND SCALE'
+c~       ENDIF
       id%INFOG(23) = MTRANSLOC
       CNTL64(2) = huge(CNTL64(2))
       IRNW = 1
@@ -2216,23 +2222,26 @@ C ssg
      &     IPQ8,
      &     ICNTL64, CNTL64, INFO64, INFO)
       IF (INFO(1).LT.0) THEN 
-         IF (LP.GT.0 .AND. ICNTL(4).GE.1)
-     &        WRITE(LP,'(A,I5)')
-     &   ' Not enough memory in MAXTRANS INFO(1)=',INFO(1)
+c~          IF (LP.GT.0 .AND. ICNTL(4).GE.1)
+c~      &        WRITE(LP,'(A,I5)')
+c~      &   ' Not enough memory in MAXTRANS INFO(1)=',INFO(1)
+         call rwarn(' Not enough memory in MAXTRANS INFO(1)=')
          GOTO 500 
       ENDIF
       IF (INFO64(1).LT.0) THEN
-         IF (LP.GT.0 .AND. ICNTL(4).GE.1)
-     &        WRITE(LP,'(A,I5)')
-     &   ' INTERNAL ERROR in MAXTRANS INFO(1)=',INFO64(1)
+c~          IF (LP.GT.0 .AND. ICNTL(4).GE.1)
+c~      &        WRITE(LP,'(A,I5)')
+c~      &   ' INTERNAL ERROR in MAXTRANS INFO(1)=',INFO64(1)
+         call rwarn(' INTERNAL ERROR in MAXTRANS INFO(1)=')
          INFO(1) = -9964
          INFO(2) = INFO64(1)
          GO TO 500
       ENDIF
       IF (INFO64(1).GT.0) THEN
-         IF (MP.GT.0 .AND. ICNTL(4).GE.2)
-     &        WRITE(MP,'(A,I5)')
-     &        ' WARNING in MAXTRANS INFO(1)=',INFO64(1)
+c~          IF (MP.GT.0 .AND. ICNTL(4).GE.2)
+c~      &        WRITE(MP,'(A,I5)')
+c~      &        ' WARNING in MAXTRANS INFO(1)=',INFO64(1)
+            call rwarn(' WARNING in MAXTRANS INFO(1)=')
       ENDIF
       KER_SIZE = 0
       IF(K50 .EQ. 2) THEN
@@ -2284,9 +2293,11 @@ C ssg
                id%INFO(1)=-5
                id%INFO(2)=N
                IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-                  WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-                  WRITE (LP,'(A)') 
-     &                 '** Failure during allocation of COLSCA'
+c~                   WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~                   WRITE (LP,'(A)') 
+c~      &                 '** Failure during allocation of COLSCA'
+                  call rwarn('** Error in DMUMPS_ANA_O')
+                  call rwarn('** Failure during allocation of COLSCA')
                   GOTO 500
                ENDIF
             ENDIF
@@ -2295,9 +2306,11 @@ C ssg
                id%INFO(1)=-5
                id%INFO(2)=N
                IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-                  WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-                  WRITE (LP,'(A)') 
-     &                 '** Failure during allocation of ROWSCA'
+c~                   WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~                   WRITE (LP,'(A)') 
+c~      &                 '** Failure during allocation of ROWSCA'
+                  call rwarn('** Error in DMUMPS_ANA_O')
+                  call rwarn('** Failure during allocation of ROWSCA')
                   GOTO 500
                ENDIF
             ENDIF
@@ -2341,9 +2354,10 @@ C ssg
                id%INFO(1)=-5
                id%INFO(2)=N
                IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-                  WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-                  WRITE (LP,'(A)') 
-     &                 '** Failure during allocation of COLSCA'
+c~                   WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~                   WRITE (LP,'(A)') 
+c~      &                 '** Failure during allocation of COLSCA'
+                  call rwarn('** Failure during allocation of COLSCA')
                   GOTO 500
                ENDIF
             ENDIF
@@ -2352,9 +2366,10 @@ C ssg
                id%INFO(1)=-5
                id%INFO(2)=N
                IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-                  WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-                  WRITE (LP,'(A)') 
-     &                 '** Failure during allocation of ROWSCA'
+c~                   WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~                   WRITE (LP,'(A)') 
+c~      &                 '** Failure during allocation of ROWSCA'
+                  call rwarn('** Failure during allocation of ROWSCA')
                   GOTO 500
                ENDIF
             ENDIF
@@ -2437,7 +2452,8 @@ C ssg
      &        ICNTL_SYM_MWM, S2(LSC+1),MARKED(1),FLAG(1),
      &        PIV_OUT(1), INFO_SYM_MWM)
          IF(INFO_SYM_MWM(1) .NE. 0) THEN
-            WRITE(*,*) '** Error in DMUMPS_ANA_O'
+c~             WRITE(*,*) '** Error in DMUMPS_ANA_O'
+            call rwarn('** Error in DMUMPS_ANA_O')
             RETURN
          ENDIF
          IF(INFO_SYM_MWM(3) .EQ. N) THEN
@@ -2458,29 +2474,32 @@ C ssg
       ENDIF
  390  IF(MTRANS .EQ. 0) THEN
          id%KEEP(95) = 1 
-         IF (PROK) THEN
-           WRITE (MPRINT,'(A)')
-     &  ' ... Column permutation not used'
-         ENDIF
+c~          IF (PROK) THEN
+c~            WRITE (MPRINT,'(A)')
+c~      &  ' ... Column permutation not used'
+c~          ENDIF
       ENDIF
       GO TO 500
  400  IF ((LP.GE.0).AND.(ICNTL(4).GE.1))
-     &   WRITE (LP,'(/A)') '** Error: Matrix is structurally singular'
+     & call rwarn('** Error: Matrix is structurally singular')
       INFO(1) = -6
       INFO(2) = NUMNZ
       GOTO 500
  410  IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-       WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-       WRITE (LP,'(A,I14)')
-     & '** Failure during allocation of INTEGER array of size ',
-     & LIWG
+c~        WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~        WRITE (LP,'(A,I14)')
+c~      & '** Failure during allocation of INTEGER array of size ',
+c~      & LIWG
+        call rwarn('** Failure during allocation of INTEGER '//
+     &   'array of size ')
       ENDIF
       INFO(1) = -7
       CALL MUMPS_SET_IERROR(LIWG,INFO(2))
       GOTO 500
  430  IF ((LP.GE.0).AND.(ICNTL(4).GE.1)) THEN
-       WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
-       WRITE (LP,'(A)') '** Failure during allocation of S2'
+c~        WRITE (LP,'(/A)') '** Error in DMUMPS_ANA_O'
+c~        WRITE (LP,'(A)') '** Failure during allocation of S2'
+         call rwarn('** Failure during allocation of S2')
       ENDIF
       INFO(1) = -5
       CALL MUMPS_SET_IERROR(LDW,INFO(2))
@@ -2501,17 +2520,17 @@ C ssg
       INTEGER MASTER, MPG
       PARAMETER( MASTER = 0 )
       MPG = ICNTL(3)
-      IF ( MYID.eq.MASTER.and.MPG.GT.0.AND.ICNTL(4).GE.2) THEN
-       WRITE(MPG, 99992) INFO(1), INFO(2),
-     &  KEEP8(109), KEEP8(111), INFOG(4),
-     &  INFOG(5), KEEP(28), INFOG(32), INFOG(7), KEEP(23), ICNTL(7), 
-     &  KEEP(12), KEEP(56), KEEP(61), RINFOG(1)
-       IF (KEEP(95).GT.1)             
-     &      WRITE(MPG, 99993) KEEP(95) 
-       IF (KEEP(54).GT.0) WRITE(MPG, 99994) KEEP(54)
-       IF (KEEP(60).GT.0) WRITE(MPG, 99995) KEEP(60)
-       IF (KEEP(253).GT.0)  WRITE(MPG, 99996) KEEP(253)
-      ENDIF
+c~       IF ( MYID.eq.MASTER.and.MPG.GT.0.AND.ICNTL(4).GE.2) THEN
+c~        WRITE(MPG, 99992) INFO(1), INFO(2),
+c~      &  KEEP8(109), KEEP8(111), INFOG(4),
+c~      &  INFOG(5), KEEP(28), INFOG(32), INFOG(7), KEEP(23), ICNTL(7), 
+c~      &  KEEP(12), KEEP(56), KEEP(61), RINFOG(1)
+c~        IF (KEEP(95).GT.1)             
+c~      &      WRITE(MPG, 99993) KEEP(95) 
+c~        IF (KEEP(54).GT.0) WRITE(MPG, 99994) KEEP(54)
+c~        IF (KEEP(60).GT.0) WRITE(MPG, 99995) KEEP(60)
+c~        IF (KEEP(253).GT.0)  WRITE(MPG, 99996) KEEP(253)
+c~       ENDIF
       RETURN
 99992 FORMAT(/'Leaving analysis phase with  ...'/
      &       ' INFOG(1)                                       =',I16/
@@ -2729,8 +2748,9 @@ C ssg
        NPIV_SON  = max(NPIV/2,1)
        NPIV_FATH = NPIV - NPIV_SON
        IF (SPLITROOT) THEN
-          IF (NCB .NE .0) THEN
-           WRITE(*,*) "Error splitting"
+           IF (NCB .NE .0) THEN
+c~            WRITE(*,*) "Error splitting"
+           call rwarn("Error splitting")
            CALL MUMPS_ABORT()
          ENDIF
          NPIV_FATH = min(int(sqrt(dble(K79))), int(NPIV/2))
@@ -2743,7 +2763,8 @@ C ssg
        END DO
        INODE_FATH = FILS( IN_SON )
        IF ( INODE_FATH .LT. 0 ) THEN
-       write(*,*) 'Error: INODE_FATH < 0 ', INODE_FATH
+c~        write(*,*) 'Error: INODE_FATH < 0 ', INODE_FATH
+         call rwarn('Error: INODE_FATH < 0 ')
        END IF
        IN_FATH = INODE_FATH
        DO WHILE ( FILS( IN_FATH ) > 0 )
@@ -2775,8 +2796,9 @@ C ssg
              END IF
              IN = FRERE( IN )
            END DO
-           WRITE(*,*) 'ERROR 2 in SPLIT NODE',
-     &          IN_GRANDFATH, IN, FRERE(IN)
+c~            WRITE(*,*) 'ERROR 2 in SPLIT NODE',
+c~      &          IN_GRANDFATH, IN, FRERE(IN)
+            call rwarn('ERROR 2 in SPLIT NODE')
        END IF
  10    CONTINUE
        NFSIZ(INODE_SON) = NFRONT
@@ -2908,29 +2930,29 @@ C ssg
          NBERR  = 0
          IF (mod(IFLAG,2) .EQ. 0) IFLAG = IFLAG+1
          IF ((MP.GT.0).AND.(ICNTL(4).GE.2))  THEN 
-          WRITE (MP,99999) 
+c~           WRITE (MP,99999) 
           DO 70 K8=1_8,NZ
            I = IRN(K8)
            J = ICN(K8)
            IF ((I.GT.N).OR.(J.GT.N).OR.(I.LT.1)
      &                            .OR.(J.LT.1)) THEN
             NBERR = NBERR + 1
-            IF (NBERR.LE.10)  THEN
-               IF (mod(K8,10_8).GT.3_8 .OR. mod(K8,10_8).EQ.0_8 .OR.
-     &             (10_8.LE.K8 .AND. K8.LE.20_8)) THEN
-                 WRITE (MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'th entry (in row',I,' and column',J,') ignored'
-               ELSE
-                 IF (mod(K8,10_8).EQ.1_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'st entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K8,10_8).EQ.2_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'nd entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K8,10_8).EQ.3_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'rd entry (in row',I,' and column',J,') ignored'
-               ENDIF
+             IF (NBERR.LE.10)  THEN
+c~                IF (mod(K8,10_8).GT.3_8 .OR. mod(K8,10_8).EQ.0_8 .OR.
+c~      &             (10_8.LE.K8 .AND. K8.LE.20_8)) THEN
+c~                  WRITE (MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'th entry (in row',I,' and column',J,') ignored'
+c~                ELSE
+c~                  IF (mod(K8,10_8).EQ.1_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'st entry (in row',I,' and column',J,') ignored'
+c~                  IF (mod(K8,10_8).EQ.2_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'nd entry (in row',I,' and column',J,') ignored'
+c~                  IF (mod(K8,10_8).EQ.3_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'rd entry (in row',I,' and column',J,') ignored'
+c~                ENDIF
             ELSE
                GO TO 100
             ENDIF
@@ -3291,19 +3313,19 @@ C ssg
       ENDIF
       IF (ICNTL(3).GE.0) THEN
          IF (ICNTL(4).EQ.0 .OR. ICNTL(4).EQ.1) THEN
-            WRITE(ICNTL(3),9020) JOB,M,N,NE
+C            WRITE(ICNTL(3),9020) JOB,M,N,NE
             IF (ICNTL(4).EQ.0) THEN
-               WRITE(ICNTL(3),9021) (IP(J),J=1,min(10,N+1))
-               WRITE(ICNTL(3),9022) (IRN(K),K=1_8,min(10_8,NE))
+C               WRITE(ICNTL(3),9021) (IP(J),J=1,min(10,N+1))
+C               WRITE(ICNTL(3),9022) (IRN(K),K=1_8,min(10_8,NE))
                IF (JOB.GT.1) WRITE(ICNTL(3),9023) 
      &                              (A(K),K=1_8,min(10_8,NE))
             ELSEIF (ICNTL(4).EQ.1) THEN
-               WRITE(ICNTL(3),9021) (IP(J),J=1,N+1)
-               WRITE(ICNTL(3),9022) (IRN(K),K=1_8,NE)
+c~                WRITE(ICNTL(3),9021) (IP(J),J=1,N+1)
+c~                WRITE(ICNTL(3),9022) (IRN(K),K=1_8,NE)
                IF (JOB.GT.1) WRITE(ICNTL(3),9023) (A(K),K=1_8,NE)
             ENDIF
-            WRITE(ICNTL(3),9024) (ICNTL(J),J=1,NICNTL)
-            WRITE(ICNTL(3),9025) (CNTL(J),J=1,NCNTL)
+c~             WRITE(ICNTL(3),9024) (ICNTL(J),J=1,NICNTL)
+c~             WRITE(ICNTL(3),9025) (CNTL(J),J=1,NCNTL)
          ENDIF
       ENDIF
       DO 8 I=1,NINFO
@@ -3496,30 +3518,30 @@ C ssg
       IF (INFO(1).EQ.0) THEN
          INFO(1) = WARN1 + WARN2 + WARN4
          IF (INFO(1).GT.0 .AND. ICNTL(2).GT.0) THEN
-            WRITE(ICNTL(2),9010) INFO(1)
-            IF (WARN1.EQ.1) WRITE(ICNTL(2),9011)
-            IF (WARN2.EQ.2) WRITE(ICNTL(2),9012)
-            IF (WARN4.EQ.4) WRITE(ICNTL(2),9014)
+C            WRITE(ICNTL(2),9010) INFO(1)
+c~             IF (WARN1.EQ.1) WRITE(ICNTL(2),9011)
+c~             IF (WARN2.EQ.2) WRITE(ICNTL(2),9012)
+c~             IF (WARN4.EQ.4) WRITE(ICNTL(2),9014)
          ENDIF
       ENDIF
       IF (ICNTL(3).GE.0) THEN
-         IF (ICNTL(4).EQ.0 .OR. ICNTL(4).EQ.1) THEN
-            WRITE(ICNTL(3),9030) (INFO(J),J=1,2)
-            WRITE(ICNTL(3),9031) NUM
-            IF (ICNTL(4).EQ.0) THEN
-               WRITE(ICNTL(3),9032) (PERM(J),J=1,min(10,M))
-               IF (JOB.EQ.5 .OR. JOB.EQ.6) THEN
-                  WRITE(ICNTL(3),9033) (DW(J),J=1,min(10,M))
-                  WRITE(ICNTL(3),9034) (DW(M+J),J=1,min(10,N))
-               ENDIF
-            ELSEIF (ICNTL(4).EQ.1) THEN
-               WRITE(ICNTL(3),9032) (PERM(J),J=1,M)
-               IF (JOB.EQ.5 .OR. JOB.EQ.6) THEN
-                  WRITE(ICNTL(3),9033) (DW(J),J=1,M)
-                  WRITE(ICNTL(3),9034) (DW(M+J),J=1,N)
-               ENDIF
-            ENDIF
-         ENDIF
+c~          IF (ICNTL(4).EQ.0 .OR. ICNTL(4).EQ.1) THEN
+c~             WRITE(ICNTL(3),9030) (INFO(J),J=1,2)
+c~             WRITE(ICNTL(3),9031) NUM
+c~             IF (ICNTL(4).EQ.0) THEN
+c~                WRITE(ICNTL(3),9032) (PERM(J),J=1,min(10,M))
+c~                IF (JOB.EQ.5 .OR. JOB.EQ.6) THEN
+c~                   WRITE(ICNTL(3),9033) (DW(J),J=1,min(10,M))
+c~                   WRITE(ICNTL(3),9034) (DW(M+J),J=1,min(10,N))
+c~                ENDIF
+c~             ELSEIF (ICNTL(4).EQ.1) THEN
+c~                WRITE(ICNTL(3),9032) (PERM(J),J=1,M)
+c~                IF (JOB.EQ.5 .OR. JOB.EQ.6) THEN
+c~                   WRITE(ICNTL(3),9033) (DW(J),J=1,M)
+c~                   WRITE(ICNTL(3),9034) (DW(M+J),J=1,N)
+c~                ENDIF
+c~             ENDIF
+c~          ENDIF
       ENDIF
  99   RETURN
  9001 FORMAT (' ****** Error in DMUMPS_MTRANSA. INFO(1) = ',I2,

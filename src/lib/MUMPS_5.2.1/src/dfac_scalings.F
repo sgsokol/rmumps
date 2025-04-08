@@ -35,21 +35,21 @@ C
       MPG    = ICNTL(3)
       PROK   = ((MPG.GT.0).AND.(ICNTL(4).GE.2))
       IF (PROK) THEN
-        WRITE(MPG,101)
+c~         WRITE(MPG,101)
       ELSE
         MPG = 0
       ENDIF
  101    FORMAT(/' ****** SCALING OF ORIGINAL MATRIX '/)
-        IF (NSCA.EQ.1) THEN
-         IF (PROK)
-     &    WRITE (MPG,*) ' DIAGONAL SCALING '
-        ELSEIF (NSCA.EQ.3) THEN
-         IF (PROK)
-     &   WRITE (MPG,*) ' COLUMN SCALING'
-        ELSEIF (NSCA.EQ.4) THEN
-         IF (PROK)
-     &   WRITE (MPG,*) ' ROW AND COLUMN SCALING (1 Pass)'
-       ENDIF
+c~         IF (NSCA.EQ.1) THEN
+c~          IF (PROK)
+c~      &    WRITE (MPG,*) ' DIAGONAL SCALING '
+c~         ELSEIF (NSCA.EQ.3) THEN
+c~          IF (PROK)
+c~      &   WRITE (MPG,*) ' COLUMN SCALING'
+c~         ELSEIF (NSCA.EQ.4) THEN
+c~          IF (PROK)
+c~      &   WRITE (MPG,*) ' ROW AND COLUMN SCALING (1 Pass)'
+c~        ENDIF
         DO 10 I=1,N
             COLSCA(I) = ONE
             ROWSCA(I) = ONE
@@ -70,7 +70,7 @@ C
  410  INFO(1) = -5
       INFO(2) = 5*N-LWK_REAL
       IF ((LP.GT.0).AND.(ICNTL(4).GE.1))
-     & WRITE(LP,*) '*** ERROR: Not enough space to scale matrix'
+     & call rwarn('*** ERROR: Not enough space to scale matrix')
       GOTO 500
  500  CONTINUE
       RETURN
@@ -118,10 +118,10 @@ C
         IF (ACNOR.LT.CMIN) CMIN=ACNOR
         IF (ARNOR.LT.RMIN) RMIN=ARNOR
  111   CONTINUE
-       WRITE(MPRINT,*) '**** STAT. OF MATRIX PRIOR ROW&COL SCALING'
-       WRITE(MPRINT,*) ' MAXIMUM NORM-MAX OF COLUMNS:',CMAX
-       WRITE(MPRINT,*) ' MINIMUM NORM-MAX OF COLUMNS:',CMIN
-       WRITE(MPRINT,*) ' MINIMUM NORM-MAX OF ROWS   :',RMIN
+c~        WRITE(MPRINT,*) '**** STAT. OF MATRIX PRIOR ROW&COL SCALING'
+c~        WRITE(MPRINT,*) ' MAXIMUM NORM-MAX OF COLUMNS:',CMAX
+c~        WRITE(MPRINT,*) ' MINIMUM NORM-MAX OF COLUMNS:',CMIN
+c~        WRITE(MPRINT,*) ' MINIMUM NORM-MAX OF ROWS   :',RMIN
       ENDIF
       DO 120 J=1,N
        IF (CNOR(J).LE.ZERO) THEN
@@ -141,8 +141,8 @@ C
         ROWSCA(I) = ROWSCA(I) * RNOR(I)
         COLSCA(I) = COLSCA(I) * CNOR(I)
  110   CONTINUE
-      IF (MPRINT.GT.0)
-     &  WRITE(MPRINT,*) ' END OF SCALING BY MAX IN ROW AND COL'
+c~       IF (MPRINT.GT.0)
+c~      &  WRITE(MPRINT,*) ' END OF SCALING BY MAX IN ROW AND COL'
       RETURN
       END SUBROUTINE DMUMPS_ROWCOL
       SUBROUTINE DMUMPS_FAC_Y(N,NZ8,VAL,IRN,ICN,
@@ -182,7 +182,7 @@ C
        DO 215 I=1,N
         COLSCA(I) = COLSCA(I) * CNOR(I)
  215   CONTINUE
-      IF (MPRINT.GT.0) WRITE(MPRINT,*) ' END OF COLUMN SCALING'
+c~       IF (MPRINT.GT.0) WRITE(MPRINT,*) ' END OF COLUMN SCALING'
       RETURN
       END SUBROUTINE DMUMPS_FAC_Y
       SUBROUTINE DMUMPS_FAC_V(N,NZ8,VAL,IRN,ICN,
@@ -216,7 +216,7 @@ C
        DO 110 I=1,N
         COLSCA(I) = ROWSCA(I)
  110   CONTINUE
-      IF (MPRINT.GT.0) WRITE(MPRINT,*) ' END OF DIAGONAL SCALING'
+c~       IF (MPRINT.GT.0) WRITE(MPRINT,*) ' END OF DIAGONAL SCALING'
       RETURN
       END SUBROUTINE DMUMPS_FAC_V
       SUBROUTINE DMUMPS_FAC_X(NSCA,N,NZ8,IRN,ICN,VAL,
@@ -264,8 +264,8 @@ C
           VAL(K8) = VAL(K8) * RNOR(I)
  150    CONTINUE
       ENDIF
-      IF (MPRINT.GT.0)
-     &  WRITE(MPRINT,'(A)') '  END OF ROW SCALING'
+c~       IF (MPRINT.GT.0)
+c~      &  WRITE(MPRINT,'(A)') '  END OF ROW SCALING'
       RETURN
       END SUBROUTINE DMUMPS_FAC_X
       SUBROUTINE DMUMPS_ANORMINF( id,  ANORMINF, LSCAL )

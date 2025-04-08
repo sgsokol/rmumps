@@ -64,8 +64,9 @@ C        complete buffer space can be used for a panel
          EFFECTIVE_SIZE =  min(NBCOL_MAX, K227_LOC)
       ENDIF
       IF (EFFECTIVE_SIZE.LE.0) THEN
-         write(6,*) 'Internal buffers too small to store ',
-     &        ' ONE col/row of size', NNMAX
+         call rwarn('Internal buffers too small to store '//
+     &        ' ONE col/row of size')
+c~      , NNMAX
          CALL MUMPS_ABORT()
       ENDIF
       DMUMPS_OOC_GET_PANEL_SIZE = EFFECTIVE_SIZE
@@ -216,7 +217,7 @@ C
       INTEGER IPOS_U
 C     Executable statements
       IF (K50.EQ.1) THEN
-         WRITE(*,*) "Internal error: DMUMPS_OOC_PP_SET_PTR called"
+         call rwarn("Internal error: DMUMPS_OOC_PP_SET_PTR called")
       ENDIF
       IW(IPOS)=NASS
       IW(IPOS+1)=NBPANELS_L

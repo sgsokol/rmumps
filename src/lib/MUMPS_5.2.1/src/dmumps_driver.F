@@ -621,7 +621,7 @@ C     -----------------------------------
       IF ( .NOT. FLAG ) THEN
         id%INFO(1) = -23
         id%INFO(2) =   0
-        WRITE(6,990)
+c~         WRITE(6,990)
  990  FORMAT(' Unrecoverable Error in DMUMPS initialization: ',
      &       ' MPI is not running.')
         RETURN               
@@ -796,34 +796,34 @@ C          Print basic information on MUMPS call
      &       ) THEN
 C            N, NELT, NNZ not meaningful
 C            or not defined yet (JOB=8).
-             WRITE(MPG,'(/A,A,A,A,I4)') 
-     &               'Entering DMUMPS ',
-     &               trim(adjustl(id%VERSION_NUMBER)),
-     &               trim(FROM_C_INTERFACE_STRING),
-     &               ' with JOB =', JOB
+c~              WRITE(MPG,'(/A,A,A,A,I4)') 
+c~      &               'Entering DMUMPS ',
+c~      &               trim(adjustl(id%VERSION_NUMBER)),
+c~      &               trim(FROM_C_INTERFACE_STRING),
+c~      &               ' with JOB =', JOB
            ELSE IF (id%ICNTL(5) .NE. 1) THEN
 C            Assembled format
              IF (id%ICNTL(18) .EQ. 0
      &            ) THEN
-                 WRITE(MPG,'(/A,A,A,A,I4,I12,I15)') 
-     &                 'Entering DMUMPS ',
-     &                 trim(adjustl(id%VERSION_NUMBER)),
-     &                 trim(FROM_C_INTERFACE_STRING),
-     &                 ' with JOB, N, NNZ =', JOB,id%N,id%KEEP8(28)
+c~                  WRITE(MPG,'(/A,A,A,A,I4,I12,I15)') 
+c~      &                 'Entering DMUMPS ',
+c~      &                 trim(adjustl(id%VERSION_NUMBER)),
+c~      &                 trim(FROM_C_INTERFACE_STRING),
+c~      &                 ' with JOB, N, NNZ =', JOB,id%N,id%KEEP8(28)
              ELSE
-                 WRITE(MPG,'(/A,A,A,A,I4,I12)') 
-     &                 'Entering DMUMPS ',
-     &                 trim(adjustl(id%VERSION_NUMBER)),
-     &                 trim(FROM_C_INTERFACE_STRING),
-     &                 ' with JOB, N =', JOB,id%N
+c~                  WRITE(MPG,'(/A,A,A,A,I4,I12)') 
+c~      &                 'Entering DMUMPS ',
+c~      &                 trim(adjustl(id%VERSION_NUMBER)),
+c~      &                 trim(FROM_C_INTERFACE_STRING),
+c~      &                 ' with JOB, N =', JOB,id%N
              ENDIF
            ELSE
 C            Elemental format
-             WRITE(MPG,'(/A,A,A,A,I4,I12,I15)') 
-     &                'Entering DMUMPS ',
-     &                trim(adjustl(id%VERSION_NUMBER)),
-     &                trim(FROM_C_INTERFACE_STRING),
-     &                ' driver with JOB, N, NELT =', JOB,id%N,id%NELT
+c~              WRITE(MPG,'(/A,A,A,A,I4,I12,I15)') 
+c~      &                'Entering DMUMPS ',
+c~      &                trim(adjustl(id%VERSION_NUMBER)),
+c~      &                trim(FROM_C_INTERFACE_STRING),
+c~      &                ' driver with JOB, N, NELT =', JOB,id%N,id%NELT
            ENDIF
 C          MPI and OpenMP information
 !$         IF (.TRUE.) THEN
@@ -835,11 +835,11 @@ C          MPI and OpenMP information
 !$   &         NOMPMAX, ', min ', NOMPMIN, ')'
 !$           END IF
 !$         ELSE
-             WRITE(MPG, '(A,I6,A)')    '      executing #MPI = ',
-     &                 id%NPROCS, ', without OMP'
+c~              WRITE(MPG, '(A,I6,A)')    '      executing #MPI = ',
+c~      &                 id%NPROCS, ', without OMP'
 !$         ENDIF
           IF (JOB.GE.1 .AND. JOB.LE.6) THEN
-            WRITE(MPG, '(A)')
+c~             WRITE(MPG, '(A)')
           ENDIF
         ENDIF
       END IF
@@ -962,8 +962,8 @@ C       -----------------------------
             IF (id%MYID.EQ.MASTER) THEN
                CALL MUMPS_SECFIN(TIMEG)
                IF (PROKG) THEN
-                  WRITE( MPG,'(/A,F12.4)')
-     &                 ' Elapsed time in save structure driver= ', TIMEG
+c~                   WRITE( MPG,'(/A,F12.4)')
+c~      &                 ' Elapsed time in save structure driver= ', TIMEG
                END IF
             ENDIF
          ELSE
@@ -974,9 +974,9 @@ C       -----------------------------
             IF (id%MYID.EQ.MASTER) THEN
                CALL MUMPS_SECFIN(TIMEG)
                IF (PROKG) THEN
-                  WRITE( MPG,'(/A,F12.4)')
-     &                 ' Elapsed time in restore structure driver= '
-     &                 , TIMEG
+c~                   WRITE( MPG,'(/A,F12.4)')
+c~      &                 ' Elapsed time in restore structure driver= '
+c~      &                 , TIMEG
                ENDIF
             END IF
          ENDIF
@@ -1106,7 +1106,7 @@ C             previous call to DMUMPS.
 C             --------------------------------
               id%INFO(1)=-13
               id%INFO(2)=id%N
-              IF (LPOK) WRITE(LP,99993)
+c~               IF (LPOK) WRITE(LP,99993)
               GOTO 510
           ENDIF
           DO I = 1, id%N
@@ -1222,8 +1222,8 @@ C         -------------------------------------------
           IF (IERR.gt.0) THEN
             id%INFO(1) = -7
             id%INFO(2) = id%MAXIS1
-            IF ( LPOK ) WRITE(LP,'(A)')
-     &      ' Problem in allocating work array for analysis'
+            IF ( LPOK ) call rwarn(
+     &      ' Problem in allocating work array for analysis')
             GO TO 100
           END IF
 C
@@ -1236,8 +1236,8 @@ C         ----------------------
           IF (IERR.gt.0) THEN
             id%INFO(1) = -7
             id%INFO(2) = id%N
-            IF ( LPOK ) WRITE(LP,'(A)')
-     &        'Problem in allocating work array PROCNODE'
+            IF ( LPOK ) call rwarn(
+     &        'Problem in allocating work array PROCNODE')
             GOTO 100
           END IF
           id%PROCNODE(1:id%N) = 0
@@ -1251,8 +1251,8 @@ C         ---------------------------------------
             IF (IERR.gt.0) THEN
               id%INFO(1) = -7
               id%INFO(2) = id%NELT
-              IF ( LPOK ) WRITE(LP,'(A)')
-     &          'Problem in allocating work array ELTPROC'
+              IF ( LPOK ) call rwarn(
+     &          'Problem in allocating work array ELTPROC')
               GOTO 100
             END IF
           END IF
@@ -1294,8 +1294,8 @@ C             Same as for IRN above
               END IF
             END IF
             IF ( id%INFO( 1 ) .eq. -22 ) THEN
-              IF ( LPOK ) WRITE(LP,'(A)')
-     &           'Error in analysis: IRN/JCN badly allocated.'
+              IF ( LPOK ) call rwarn(
+     &           'Error in analysis: IRN/JCN badly allocated.')
             END IF
           ELSE
             IF ( .not. associated( id%ELTPTR ) ) THEN
@@ -1334,8 +1334,8 @@ C                 Symmetric elements
               ENDIF
             END IF
             IF ( id%INFO( 1 ) .eq. -22 ) THEN
-              IF ( LPOK ) WRITE(LP,'(A)')
-     &           'Error in analysis: ELTPTR/ELTVAR badly allocated.'
+              IF ( LPOK ) call rwarn(
+     &           'Error in analysis: ELTPTR/ELTVAR badly allocated.')
             END IF
           ENDIF
  100      CONTINUE
@@ -1392,8 +1392,8 @@ C       TIMINGS:
           id%DKEEP(71) = TIMEG
         ENDIF
         IF (PROKG) THEN
-          WRITE( MPG,'(/A,F12.4)')
-     &         ' Elapsed time in analysis driver= ', TIMEG
+c~           WRITE( MPG,'(/A,F12.4)')
+c~      &         ' Elapsed time in analysis driver= ', TIMEG
         END IF 
 C       -----------------------
 C     Return in case of error
@@ -1447,15 +1447,15 @@ C              into id%SCHUR.
              ENDIF
              IF ( .NOT. associated (id%SCHUR)) THEN
               IF (LP.GT.0) 
-     &        write(LP,'(A)') 
-     &                      ' SCHUR not associated'
+     &        call rwarn(
+     &                      ' SCHUR not associated')
               id%INFO(1)=-22
               id%INFO(2)=9
              ELSE IF ( size(id%SCHUR) .LT.
      &                id%SIZE_SCHUR * id%SIZE_SCHUR ) THEN
                 IF (LP.GT.0) 
-     &          write(LP,'(A)') 
-     &                ' SCHUR allocated but too small' 
+     &          call rwarn(
+     &                ' SCHUR allocated but too small')
                 id%INFO(1)=-22
                 id%INFO(2)=9
              END IF
@@ -1555,11 +1555,9 @@ C         ========================================
           IF( id%KEEP(52) .EQ. -2 .AND. id%ICNTL(8) .NE. -2 .AND.
      &        id%ICNTL(8).NE. 77 ) THEN
              IF ( MPG .GT. 0 ) THEN
-                WRITE(MPG,'(A)') ' ** WARNING : SCALING'
-                WRITE(MPG,'(A)') 
-     &               ' ** scaling already computed during analysis'
-                WRITE(MPG,'(A)') 
-     &               ' ** keeping the scaling from the analysis'
+                call rwarn(' ** WARNING : SCALING'//
+     &               ' ** scaling already computed during analysis'//
+     &               ' ** keeping the scaling from the analysis')
              ENDIF
           ENDIF
           IF (id%KEEP(52) .NE. -2) THEN
@@ -1581,18 +1579,16 @@ C         ========================================
           ENDIF
           IF (id%KEEP(23) .NE. 0 .AND. id%ICNTL(8) .EQ. -1) THEN
              IF ( MPG .GT. 0 ) THEN
-                WRITE(MPG,'(A)') ' ** WARNING : SCALING'
-                WRITE(MPG,'(A)') 
-     &               ' ** column permutation applied:'
-                WRITE(MPG,'(A)') 
-     &               ' ** column scaling has to be permuted'
+                call rwarn(' ** WARNING : SCALING'//
+     &               ' ** column permutation applied:'//
+     &               ' ** column scaling has to be permuted')
              ENDIF 
           ENDIF
 C
           IF ( id%KEEP( 19 ) .ne. 0 .and. id%KEEP( 52 ).ne. 0 ) THEN
             IF ( MPG .GT. 0 ) THEN
-              WRITE(MPG,'(A)') ' ** Warning: Scaling not applied.'
-              WRITE(MPG,'(A)') ' ** (incompatibility with null space)'
+              call rwarn(' ** Warning: Scaling not applied.'//
+     &         ' ** (incompatibility with null space)')
             END IF
             id%KEEP(52) = 0
           END IF
@@ -1603,8 +1599,8 @@ C         ------------------------
           IF ( id%KEEP(60) .ne. 0 .and. id%KEEP(52) .ne. 0 ) THEN
             id%KEEP(52) = 0
             IF ( MPG .GT. 0 .AND. id%ICNTL(8) .NE. 0 ) THEN
-              WRITE(MPG,'(A)') ' ** Warning: Scaling not applied.'
-              WRITE(MPG,'(A)') ' ** (incompatibility with Schur)'
+              call rwarn(' ** Warning: Scaling not applied.'//
+     &         ' ** (incompatibility with Schur)')
             END IF
           END IF
 C         -------------------------------
@@ -1617,9 +1613,9 @@ C         -------------------------------
      &        id%KEEP(52) .NE. 0 ) THEN
              id%KEEP(52) = 0
              IF ( MPG .GT. 0 .and. id%ICNTL(8) .ne. 0 ) THEN
-               WRITE(MPG,'(A)')
-     &         ' ** Warning: This scaling option not available'
-               WRITE(MPG,'(A)') ' ** for distributed matrix entry'
+               call rwarn(
+     &         ' ** Warning: This scaling option not available'//
+     &          ' ** for distributed matrix entry')
              END IF
           END IF
 C         ------------------------------------
@@ -1637,8 +1633,8 @@ C         ------------------------------------
      &            id%KEEP(52).ne. -2 .and.
      &            id%KEEP(52).ne. 77) THEN
               IF ( MPG .GT. 0 ) THEN
-                WRITE(MPG,'(A)')
-     &  ' ** Warning: Scaling option n.a. for symmetric matrix'
+                call rwarn(
+     &  ' ** Warning: Scaling option n.a. for symmetric matrix')
               END IF
               id%KEEP(52) = 0
             END IF
@@ -1651,9 +1647,8 @@ C         ----------------------------------
      &        ( id%KEEP(52) .gt. 0 ) ) THEN
             id%KEEP(52) = 0
             IF ( MPG .GT. 0 ) THEN
-              WRITE(MPG,'(A)') ' ** Warning: Scaling not applied.'
-              WRITE(MPG,'(A)')
-     &        ' ** (only user scaling av. for elt. entry)'
+              call rwarn(' ** Warning: Scaling not applied.'//
+     &        ' ** (only user scaling av. for elt. entry)')
             END IF
           END IF
 C         --------------------------------------
@@ -1715,8 +1710,8 @@ C
              id%INFO(1)=-13
           ENDIF
           IF ( id%INFO(1) .eq. -13 ) THEN
-            IF ( LPOK ) WRITE(LP,'(A)')
-     &         'Problems in allocations before facto'
+            IF ( LPOK ) call rwarn(
+     &         'Problems in allocations before facto')
             GOTO 200
           END IF
           IF (id%KEEP(252) .EQ. 1) THEN
@@ -1802,28 +1797,29 @@ C             pointer and then retrieve it
             ENDIF
 C           Check that SCHUR_LLD is large enough
             IF (id%SCHUR_LLD < id%root%SCHUR_MLOC) THEN
-              IF (LP.GT.0) write(LP,*) 
-     &          ' SCHUR leading dimension SCHUR_LLD ', 
-     &          id%SCHUR_LLD, 'too small with respect to', 
-     &          id%root%SCHUR_MLOC
+              IF (LP.GT.0) call rwarn(
+     &          ' SCHUR leading dimension SCHUR_LLD '//
+c~      &          id%SCHUR_LLD,
+     &          'too small with respect to')
+c~      &          id%root%SCHUR_MLOC
               id%INFO(1)=-30
               id%INFO(2)=id%SCHUR_LLD
             ELSE IF ( .NOT. associated (id%SCHUR)) THEN
-              IF (LP.GT.0) write(LP,'(A)') 
-     &                      ' SCHUR not associated'
+              IF (LP.GT.0) call rwarn(
+     &                      ' SCHUR not associated')
               id%INFO(1)=-22
               id%INFO(2)=9
             ELSE IF (size(id%SCHUR) <
      &          id%SCHUR_LLD*(id%root%SCHUR_NLOC-1)+
      &          id%root%SCHUR_MLOC) THEN
               IF (LP.GT.0) THEN 
-                write(LP,'(A)') 
-     &                      ' SCHUR allocated but too small'
-                write(LP,*) id%MYID, ' : Size Schur=', 
-     &          size(id%SCHUR), 
-     &          ' SCHUR_LLD= ', id%SCHUR_LLD, 
-     &          ' SCHUR_MLOC=', id%root%SCHUR_NLOC, 
-     &          ' SCHUR_NLOC=', id%root%SCHUR_NLOC
+                call rwarn(
+     &                      ' SCHUR allocated but too small')
+c~                 write(LP,*) id%MYID, ' : Size Schur=', 
+c~      &          size(id%SCHUR), 
+c~      &          ' SCHUR_LLD= ', id%SCHUR_LLD, 
+c~      &          ' SCHUR_MLOC=', id%root%SCHUR_NLOC, 
+c~      &          ' SCHUR_NLOC=', id%root%SCHUR_NLOC
               ENDIF
               id%INFO(1)=-22
               id%INFO(2)= 9
@@ -1838,8 +1834,8 @@ C              we will use within DMUMPS here.
                   ENDIF
                   IF ( id%INFO(1) .eq. -13 ) THEN
                      IF ( LPOK ) THEN
-                        WRITE(LP,'(A)')
-     &                       'Problems in allocations before facto'
+                        call rwarn(
+     &                       'Problems in allocations before facto')
                      ENDIF
                   END IF
                ELSE
@@ -1890,8 +1886,8 @@ C     are not used outside of the facto
            id%DKEEP(91) = TIMEG
         ENDIF
         IF (PROKG) THEN
-            WRITE( MPG,'(/A,F12.4)')
-     &         ' Elapsed time in factorization driver= ', TIMEG
+c~             WRITE( MPG,'(/A,F12.4)')
+c~      &         ' Elapsed time in factorization driver= ', TIMEG
         END IF 
 C
 C       Check for errors after FACTO
@@ -1977,8 +1973,8 @@ C     -------------------------
             id%DKEEP(111) = TIMEG
         ENDIF
         IF (PROKG) THEN
-            WRITE( MPG,'(/A,F12.4)')
-     &         ' Elapsed time in solve driver= ', TIMEG
+c~             WRITE( MPG,'(/A,F12.4)')
+c~      &         ' Elapsed time in solve driver= ', TIMEG
         END IF 
         IF (id%MYID .eq. MASTER) THEN
            id%KEEP(235) = KEEP235SAVE
@@ -2004,8 +2000,8 @@ C
 *=================
   499 CONTINUE
 *     Print error message if PROK
-      IF (LPOK) WRITE (LP,99995) id%INFO(1)
-      IF (LPOK) WRITE (LP,99994) id%INFO(2)
+c~       IF (LPOK) WRITE (LP,99995) id%INFO(1)
+c~       IF (LPOK) WRITE (LP,99994) id%INFO(2)
 *
 500   CONTINUE
       IF (associated(id%IS1)) THEN
@@ -2099,13 +2095,13 @@ C ssg
 *===============
 * ERRORG section
 *===============
-      IF (id%MYID.EQ.MASTER.and.MPG.GT.0.and.
-     & id%INFOG(1).lt.0) THEN
-        WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(1)=',
-     &      id%INFOG(1)
-        WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(2)=',
-     &      id%INFOG(2)
-      END IF
+c~       IF (id%MYID.EQ.MASTER.and.MPG.GT.0.and.
+c~      & id%INFOG(1).lt.0) THEN
+c~         WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(1)=',
+c~      &      id%INFOG(1)
+c~         WRITE(MPG,'(A,I16)') ' On return from DMUMPS, INFOG(2)=',
+c~      &      id%INFOG(2)
+c~       END IF
 C     -------------------------
 C     Restore user communicator
 C     -------------------------
@@ -2196,74 +2192,74 @@ C
       IF (LP.LE.0) RETURN
       JOB=>id%JOB
       ICNTL=>id%ICNTL
-      IF (id%MYID.EQ.MASTER) THEN
-         SELECT CASE (JOB)
-         CASE(1);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           IF (id%SYM.EQ.2) THEN
-            WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ELSE
-            WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ENDIF
-           IF ((ICNTL(6).EQ.5).OR.(ICNTL(6).EQ.6).OR.
-     &          (ICNTL(12).NE.1) )  THEN
-              WRITE (LP,992) ICNTL(8)
-           ENDIF   
-           IF (id%ICNTL(19).NE.0)
-     &      WRITE(LP,998) id%SIZE_SCHUR
-           WRITE (LP,993) ICNTL(14)
-         CASE(2);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,992) ICNTL(8)
-           WRITE (LP,993) ICNTL(14)
-         CASE(3);
-           WRITE (LP,980)
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
-         CASE(4);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,992) ICNTL(8)
-           IF (id%ICNTL(19).NE.0)
-     &      WRITE(LP,998) id%SIZE_SCHUR
-           WRITE (LP,993) ICNTL(14)
-         CASE(5);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           IF (id%SYM.EQ.2) THEN
-            WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ELSE
-            WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ENDIF
-           WRITE (LP,992) ICNTL(8)
-           WRITE (LP,993) ICNTL(14)
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
-         CASE(6);
-           WRITE (LP,980)
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           IF (id%SYM.EQ.2) THEN
-            WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ELSE
-            WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
-     &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
-           ENDIF
-           IF (id%ICNTL(19).NE.0)
-     &      WRITE(LP,998) id%SIZE_SCHUR
-           WRITE (LP,992) ICNTL(8)
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
-           WRITE (LP,993) ICNTL(14)
-        END SELECT
-      ENDIF
+c~       IF (id%MYID.EQ.MASTER) THEN
+c~          SELECT CASE (JOB)
+c~          CASE(1);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            IF (id%SYM.EQ.2) THEN
+c~             WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ELSE
+c~             WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ENDIF
+c~            IF ((ICNTL(6).EQ.5).OR.(ICNTL(6).EQ.6).OR.
+c~      &          (ICNTL(12).NE.1) )  THEN
+c~               WRITE (LP,992) ICNTL(8)
+c~            ENDIF   
+c~            IF (id%ICNTL(19).NE.0)
+c~      &      WRITE(LP,998) id%SIZE_SCHUR
+c~            WRITE (LP,993) ICNTL(14)
+c~          CASE(2);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,992) ICNTL(8)
+c~            WRITE (LP,993) ICNTL(14)
+c~          CASE(3);
+c~            WRITE (LP,980)
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
+c~          CASE(4);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,992) ICNTL(8)
+c~            IF (id%ICNTL(19).NE.0)
+c~      &      WRITE(LP,998) id%SIZE_SCHUR
+c~            WRITE (LP,993) ICNTL(14)
+c~          CASE(5);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            IF (id%SYM.EQ.2) THEN
+c~             WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ELSE
+c~             WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ENDIF
+c~            WRITE (LP,992) ICNTL(8)
+c~            WRITE (LP,993) ICNTL(14)
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
+c~          CASE(6);
+c~            WRITE (LP,980)
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            IF (id%SYM.EQ.2) THEN
+c~             WRITE (LP,991) ICNTL(5),ICNTL(6),ICNTL(7),ICNTL(12),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ELSE
+c~             WRITE (LP,891) ICNTL(5),ICNTL(6),ICNTL(7),
+c~      &          ICNTL(13),ICNTL(18),ICNTL(19),ICNTL(22)
+c~            ENDIF
+c~            IF (id%ICNTL(19).NE.0)
+c~      &      WRITE(LP,998) id%SIZE_SCHUR
+c~            WRITE (LP,992) ICNTL(8)
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
+c~            WRITE (LP,993) ICNTL(14)
+c~         END SELECT
+c~       ENDIF
  980  FORMAT (/'***********CONTROL PARAMETERS (ICNTL)**************'/)
  990  FORMAT (
      &     'ICNTL(1)   Output stream for error messages        =',I10/
@@ -2318,70 +2314,70 @@ C--------------------------------------------------------------------
       JOB=>id%JOB
       ICNTL=>id%ICNTL
       KEEP=>id%KEEP
-      IF (id%MYID.EQ.MASTER) THEN
-         SELECT CASE (JOB)
-         CASE(1);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
-     &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
-           IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6))THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF   
-           WRITE (LP,993) KEEP(12)
-         CASE(2);
-           WRITE (LP,980)
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           IF (KEEP(23).EQ.0)THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF   
-           WRITE (LP,993) KEEP(12)
-         CASE(3);
-           WRITE (LP,980)
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4) 
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
-         CASE(4);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           IF (KEEP(23).NE.0)THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF  
-           WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
-     &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
-           WRITE (LP,993) KEEP(12)
-         CASE(5);
-           WRITE (LP,980) 
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
-     &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
-           IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6)
-     &       .OR. (KEEP(23).EQ.7)) THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF              
-           IF (KEEP(23).EQ.0)THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF   
-           WRITE (LP,993) KEEP(12)
-         CASE(6);
-           WRITE (LP,980)
-           WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
-           WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
-     &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
-           IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6)
-     &       .OR. (KEEP(23).EQ.7)) THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF   
-           IF (KEEP(23).EQ.0)THEN
-              WRITE (LP,992) KEEP(52)
-           ENDIF   
-           WRITE (LP,995)
-     &     ICNTL(9),ICNTL(10),ICNTL(11),KEEP(248),ICNTL(21)
-           WRITE (LP,993) KEEP(12)
-        END SELECT
-      ENDIF
+c~       IF (id%MYID.EQ.MASTER) THEN
+c~          SELECT CASE (JOB)
+c~          CASE(1);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
+c~      &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
+c~            IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6))THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF   
+c~            WRITE (LP,993) KEEP(12)
+c~          CASE(2);
+c~            WRITE (LP,980)
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            IF (KEEP(23).EQ.0)THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF   
+c~            WRITE (LP,993) KEEP(12)
+c~          CASE(3);
+c~            WRITE (LP,980)
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4) 
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
+c~          CASE(4);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            IF (KEEP(23).NE.0)THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF  
+c~            WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
+c~      &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),ICNTL(20),ICNTL(21)
+c~            WRITE (LP,993) KEEP(12)
+c~          CASE(5);
+c~            WRITE (LP,980) 
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
+c~      &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
+c~            IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6)
+c~      &       .OR. (KEEP(23).EQ.7)) THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF              
+c~            IF (KEEP(23).EQ.0)THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF   
+c~            WRITE (LP,993) KEEP(12)
+c~          CASE(6);
+c~            WRITE (LP,980)
+c~            WRITE (LP,990) ICNTL(1),ICNTL(2),ICNTL(3),ICNTL(4)
+c~            WRITE (LP,991) KEEP(55),KEEP(23),ICNTL(7),KEEP(95),
+c~      &          ICNTL(13),KEEP(54),KEEP(60),ICNTL(22)
+c~            IF ((KEEP(23).EQ.5).OR.(KEEP(23).EQ.6)
+c~      &       .OR. (KEEP(23).EQ.7)) THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF   
+c~            IF (KEEP(23).EQ.0)THEN
+c~               WRITE (LP,992) KEEP(52)
+c~            ENDIF   
+c~            WRITE (LP,995)
+c~      &     ICNTL(9),ICNTL(10),ICNTL(11),KEEP(248),ICNTL(21)
+c~            WRITE (LP,993) KEEP(12)
+c~         END SELECT
+c~       ENDIF
  980  FORMAT (/'******INTERNAL VALUE OF PARAMETERS (ICNTL/KEEP)****'/)
  990  FORMAT (
      &     'ICNTL(1)   Output stream for error messages        =',I10/

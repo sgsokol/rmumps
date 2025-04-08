@@ -69,7 +69,8 @@ C
         IF ( allocok .GT. 0 ) THEN
           INFO(1) = -13
           INFO(2) = LPIV
-          WRITE(*,*) MYID,': problem allocating IPIV(',LPIV,') in root'
+          call rwarn(': problem allocating IPIV(')
+c~           ,LPIV,') in root'
           CALL MUMPS_ABORT()
         END IF
         CALL DESCINIT( root%DESCRIPTOR(1), root%TOT_ROOT_SIZE,
@@ -77,16 +78,16 @@ C
      &      0, 0, root%CNTXT_BLACS, LOCAL_M, IERR )
         IF ( LDLT.EQ.2 ) THEN
            IF(root%MBLOCK.NE.root%NBLOCK) THEN
-              WRITE(*,*) ' Error: symmetrization only works for'
-              WRITE(*,*) ' square block sizes, MBLOCK/NBLOCK=',
-     &        root%MBLOCK, root%NBLOCK
+              call rwarn(' Error: symmetrization only works for')
+              call rwarn(' square block sizes, MBLOCK/NBLOCK=')
+c~      &        root%MBLOCK, root%NBLOCK
               CALL MUMPS_ABORT()
             END IF
             IF ( LWK .LT. min(
      &           int(root%MBLOCK,8) * int(root%NBLOCK,8),
      &           int(root%TOT_ROOT_SIZE,8)* int(root%TOT_ROOT_SIZE,8 )
      &           )) THEN
-               WRITE(*,*) 'Not enough workspace for symmetrization.'
+               call rwarn('Not enough workspace for symmetrization.')
                CALL MUMPS_ABORT()
             END IF
             CALL DMUMPS_SYMMETRIZE( WK, root%MBLOCK,
@@ -144,9 +145,9 @@ C
         ENDIF
         IF (KEEP(258).NE.0) THEN
            IF (root%MBLOCK.NE.root%NBLOCK) THEN
-            write(*,*) "Internal error in DMUMPS_FACTO_ROOT:",
-     &      "Block size different for rows and columns",
-     &      root%MBLOCK, root%NBLOCK
+            call rwarn("Internal error in DMUMPS_FACTO_ROOT:"//
+     &      "Block size different for rows and columns")
+c~      &      root%MBLOCK, root%NBLOCK
             CALL MUMPS_ABORT()
           ENDIF
           CALL DMUMPS_GETDETER2D(root%MBLOCK, root%IPIV(1),root%MYROW,

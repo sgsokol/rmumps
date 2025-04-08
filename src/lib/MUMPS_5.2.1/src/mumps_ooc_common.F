@@ -99,12 +99,13 @@ C
       IF ( (TYPEF_L .NE. 1 .AND. TYPEF_L .NE. TYPEF_INVALID)
      &     .OR. (TYPEF_U .NE. 1 .AND. TYPEF_U .NE. 2 .AND.
      &           TYPEF_U .NE. TYPEF_INVALID) ) THEN
-        WRITE(*,*) "Internal error 1 in MUMPS_OOC_GET_FCT_TYPE",
-     &              TYPEF_L, TYPEF_U
+        call rwarn("Internal error 1 in MUMPS_OOC_GET_FCT_TYPE")
+c~      &              TYPEF_L, TYPEF_U
         CALL MUMPS_ABORT()
       ENDIF
       IF (FWDORBWD .NE. 'F' .AND. FWDORBWD .NE. 'B') THEN
-        WRITE(*,*) "Internal error in MUMPS_OOC_GET_FCT_TYPE,",FWDORBWD
+        call rwarn("Internal error in MUMPS_OOC_GET_FCT_TYPE,")
+c~         ,FWDORBWD
         CALL MUMPS_ABORT()
       ENDIF
       IF (K201 .EQ. 1) THEN  

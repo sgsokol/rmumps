@@ -67,8 +67,8 @@ C
       IERR=0
       CALL MUMPS_WAIT_REQUEST(LAST_IOREQUEST(TYPEF_ARG),IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1>0)
-     &   WRITE(ICNTL1,*) MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1>0)
+c~      &   WRITE(ICNTL1,*) MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ENDIF
       LAST_IOREQUEST(TYPEF_ARG) = NEW_IOREQUEST
@@ -136,8 +136,8 @@ C
      &     FIRST_INODE,IOREQUEST,
      &     TYPE,ADDR_INT1,ADDR_INT2,IERR)
       IF(IERR.LT.0)THEN
-         IF (ICNTL1>0)
-     &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          IF (ICNTL1>0)
+c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ENDIF
       RETURN
@@ -171,7 +171,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -182,7 +182,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -193,7 +193,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -204,7 +204,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -215,7 +215,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -226,7 +226,7 @@ C
      &     stat=allocok)
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          I2 = OOC_NB_FILE_TYPE
@@ -237,7 +237,7 @@ C
       ALLOCATE(BUF_IO(DIM_BUF_IO), stat=allocok)      
       IF (allocok > 0) THEN
          IF (ICNTL1>0) THEN
-            WRITE(ICNTL1,*) 'PB allocation in DMUMPS_INIT_OOC'
+            call rwarn('PB allocation in DMUMPS_INIT_OOC')
          ENDIF
          I1 = -13
          CALL MUMPS_SET_IERROR(DIM_BUF_IO, I2)
@@ -253,8 +253,8 @@ C
          ALLOCATE(AddVirtLibre(OOC_NB_FILE_TYPE), stat=allocok)
          IF (allocok > 0) THEN
             IF (ICNTL1>0) THEN
-               WRITE(ICNTL1,*) 'PB allocation in ',
-     &              'DMUMPS_INIT_OOC_BUF_PANEL'
+               call rwarn('PB allocation in '//
+     &              'DMUMPS_INIT_OOC_BUF_PANEL')
             ENDIF
             IERR=-1
             I1=-13
@@ -268,8 +268,8 @@ C
          ALLOCATE(NextAddVirtBuffer(OOC_NB_FILE_TYPE), stat=allocok)
          IF (allocok > 0) THEN
             IF (ICNTL1>0) THEN
-               WRITE(ICNTL1,*) 'PB allocation in ',
-     &              'DMUMPS_INIT_OOC_BUF_PANEL'
+               call rwarn('PB allocation in '//
+     &              'DMUMPS_INIT_OOC_BUF_PANEL')
             ENDIF
             IERR=-1
             I1=-13
@@ -283,8 +283,8 @@ C
          ALLOCATE(FIRST_VADDR_IN_BUF(OOC_NB_FILE_TYPE), stat=allocok)
          IF (allocok > 0) THEN
             IF (ICNTL1>0) THEN
-               WRITE(ICNTL1,*) 'PB allocation in ',
-     &              'DMUMPS_INIT_OOC_BUF_PANEL'
+               call rwarn('PB allocation in '//
+     &              'DMUMPS_INIT_OOC_BUF_PANEL')
             ENDIF
             IERR=-1
             I1=-13
@@ -428,7 +428,7 @@ C
          NextAddVirtBuffer(TYPEF)=BufferEmpty
          RETURN
       ELSE IF(IFLAG.LT.0)THEN
-         WRITE(*,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
+c~          WRITE(*,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          RETURN
       ELSE
          IERR = 1
@@ -462,7 +462,7 @@ C
       INTEGER   :: StrideIPOS
       IERR=0
       IF (STRAT.NE.STRAT_WRITE_MAX.AND.STRAT.NE.STRAT_TRY_WRITE) THEN
-         write(6,*) ' DMUMPS_COPY_LU_TO_BUFFER: STRAT Not implemented '
+         call rwarn(' DMUMPS_COPY_LU_TO_BUFFER: STRAT Not implemented ')
          CALL MUMPS_ABORT()
       ENDIF
       NBPIVeff = IPIVEND - IPIVBEG + 1
@@ -488,7 +488,8 @@ C
             CALL DMUMPS_OOC_TRYIO_CHBUF_PANEL(TYPEF,IERR) 
             IF (IERR.EQ.1) RETURN
          ELSE
-            write(6,*) 'DMUMPS_COPY_LU_TO_BUFFER: STRAT Not implemented'
+            call rwarn('DMUMPS_COPY_LU_TO_BUFFER: '//
+     &        'STRAT Not implemented')
          ENDIF
       ENDIF
       IF (IERR < 0 ) THEN

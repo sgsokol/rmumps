@@ -313,15 +313,15 @@ C
         INITSCORE = ONE
       ENDIF
       IF(ICNTL(2) .GT. 2 .OR. ICNTL(2) .LE. 0) THEN
-         WRITE(*,*)
-     &        'ERROR: WRONG VALUE FOR ICNTL(2) = ',ICNTL(2)
+         call rwarn(
+     &        'ERROR: WRONG VALUE FOR ICNTL(2) = ')
          INFO(1) = -1
          RETURN
       ENDIF
       T22 = ICNTL(1)
       IF(ICNTL(1) .LT. 0 .OR. ICNTL(1) .GT. 2) THEN
-         WRITE(*,*)
-     &        'ERROR: WRONG VALUE FOR ICNTL(1) = ',ICNTL(1)
+         call rwarn(
+     &        'ERROR: WRONG VALUE FOR ICNTL(1) = ')
          INFO(1) = -1
          RETURN
       ENDIF
@@ -690,7 +690,7 @@ C
          NBERR  = 0
          IF (mod(IFLAG,2) .EQ. 0) IFLAG = IFLAG+1
          IF ((MP.GT.0).AND.(ICNTL(4).GE.2))  THEN 
-          WRITE (MP,99999) 
+c~           WRITE (MP,99999) 
           DO 70 K8=1_8,NZ
            I = IRN(K8)
            J = ICN(K8)
@@ -698,21 +698,21 @@ C
      &                            .OR.(J.LT.1)) THEN
             NBERR = NBERR + 1
             IF (NBERR.LE.10)  THEN
-               IF (mod(K8,10_8).GT.3_8 .OR. mod(K8,10_8).EQ.0_8 .OR.
-     &             (10_8.LE.K8 .AND. K8.LE.20_8)) THEN
-                 WRITE (MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'th entry (in row',I,' and column',J,') ignored'
-               ELSE
-                 IF (mod(K8,10_8).EQ.1_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'st entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K8,10_8).EQ.2_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'nd entry (in row',I,' and column',J,') ignored'
-                 IF (mod(K8,10_8).EQ.3_8) 
-     &             WRITE(MP,'(I16,A,I10,A,I10,A)')
-     &             K8,'rd entry (in row',I,' and column',J,') ignored'
-               ENDIF
+c~                IF (mod(K8,10_8).GT.3_8 .OR. mod(K8,10_8).EQ.0_8 .OR.
+c~      &             (10_8.LE.K8 .AND. K8.LE.20_8)) THEN
+c~                  WRITE (MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'th entry (in row',I,' and column',J,') ignored'
+c~                ELSE
+c~                  IF (mod(K8,10_8).EQ.1_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'st entry (in row',I,' and column',J,') ignored'
+c~                  IF (mod(K8,10_8).EQ.2_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'nd entry (in row',I,' and column',J,') ignored'
+c~                  IF (mod(K8,10_8).EQ.3_8) 
+c~      &             WRITE(MP,'(I16,A,I10,A,I10,A)')
+c~      &             K8,'rd entry (in row',I,' and column',J,') ignored'
+c~                ENDIF
             ELSE
                GO TO 100
             ENDIF
@@ -902,16 +902,16 @@ C
       IF ((KEEP265.EQ.0) .AND. (NZOFFA - (IWFR-1_8)).EQ.0_8) THEN
       ENDIF
       symmetry = nint (100.0D0*RSYM)
-         IF ((MPG .GT. 0).AND.(ICNTL(4).GE.2) )
-     &  write(MPG,'(A,A,I5)') 
-     & ' Case of Schur:',
-     & ' structural symmetry (in percent) of interior block=', 
-     &   symmetry
-        IF (MP.GT.0 .AND. MPG.NE.MP.AND. (ICNTL(4).GE.2) )
-     &  write(MP,'(A,A,I5)') 
-     & ' Case of Schur:',
-     & ' structural symmetry (in percent) of interior block=', 
-     &   symmetry
+c~          IF ((MPG .GT. 0).AND.(ICNTL(4).GE.2) )
+c~      &  write(MPG,'(A,A,I5)') 
+c~      & ' Case of Schur:',
+c~      & ' structural symmetry (in percent) of interior block=', 
+c~      &   symmetry
+c~         IF (MP.GT.0 .AND. MPG.NE.MP.AND. (ICNTL(4).GE.2) )
+c~      &  write(MP,'(A,A,I5)') 
+c~      & ' Case of Schur:',
+c~      & ' structural symmetry (in percent) of interior block=', 
+c~      &   symmetry
       ELSE
        symmetry = 100
       ENDIF
@@ -925,12 +925,12 @@ C
           IF (J.GT.THRESH) NBQD = NBQD+1
         ENDDO
       ENDIF
-      IF (MPG .GT. 0.AND.(ICNTL(4).GE.2))
-     &  write(MPG,'(A,1I5)') 
-     &  ' Average density of rows/columns =', AvgDens
-        IF (MP.GT.0 .AND. MPG.NE.MP.AND.(ICNTL(4).GE.2))
-     &  write(MPG,'(A,1I5)') 
-     &  ' Average density of rows/columns =', AvgDens
+c~       IF (MPG .GT. 0.AND.(ICNTL(4).GE.2))
+c~      &  write(MPG,'(A,1I5)') 
+c~      &  ' Average density of rows/columns =', AvgDens
+c~         IF (MP.GT.0 .AND. MPG.NE.MP.AND.(ICNTL(4).GE.2))
+c~      &  write(MPG,'(A,1I5)') 
+c~      &  ' Average density of rows/columns =', AvgDens
       RETURN
 99999 FORMAT (/'*** Warning message from analysis routine ***')
       END SUBROUTINE DMUMPS_GNEW_SCHUR

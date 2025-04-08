@@ -128,13 +128,14 @@ C
        INTEGER, INTENT(IN) :: INFO1
        INTEGER :: I, IWHANDLER
        IF (.NOT. associated(FDBD_ARRAY)) THEN
-         WRITE(*,*) "Internal error 1 in MUMPS_FAC_FDBD_END"
+         call rwarn("Internal error 1 in MUMPS_FAC_FDBD_END")
          CALL MUMPS_ABORT()
        ENDIF
        DO I=1, size(FDBD_ARRAY)
          IF (FDBD_ARRAY(I)%INODE .GE. 0) THEN
            IF (INFO1 .GE.0) THEN
-             WRITE(*,*) "Internal error 2 in MUMPS_FAC_FDBD_END",I
+             call rwarn("Internal error 2 in MUMPS_FAC_FDBD_END")
+c~              ,I
              CALL MUMPS_ABORT()
            ELSE
              IWHANDLER=I

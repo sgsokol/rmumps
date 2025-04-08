@@ -52,7 +52,8 @@ C
          MUMPS_FMRD_IS_MAPROW_STORED =
      &                           (FMRD_ARRAY(IWHANDLER)%INODE .GE. 0 )
          IF (FMRD_ARRAY(IWHANDLER)%INODE .EQ.0) THEN
-           WRITE(*,*) " Internal error 1 in MUMPS_FMRD_IS_MAPROW_STORED"
+           call rwarn(" Internal error 1 in "//
+     & "MUMPS_FMRD_IS_MAPROW_STORED")
            CALL MUMPS_ABORT()
          ENDIF
        ENDIF
@@ -298,7 +299,7 @@ C      ===============
        INTEGER :: I, IWHANDLER
 C
        IF (.NOT. associated(FMRD_ARRAY)) THEN
-         WRITE(*,*) "Internal error 1 in MUMPS_FAC_FMRD_END"
+         call rwarn("Internal error 1 in MUMPS_FAC_FMRD_END")
          CALL MUMPS_ABORT()
        ENDIF
        DO I=1, size(FMRD_ARRAY)
@@ -307,7 +308,8 @@ C          Node is not free: possible only in
 C          case of fatal error (INFO1 < 0)
             IF (INFO1 .GE.0) THEN
 C            Should have been freed earlier while consuming MAPLIG
-             WRITE(*,*) "Internal error 2 in MUMPS_FAC_FMRD_END",I
+             call rwarn("Internal error 2 in MUMPS_FAC_FMRD_END")
+c~              ,I
              CALL MUMPS_ABORT()
            ELSE
 C            May happen in case an error has forced finishing

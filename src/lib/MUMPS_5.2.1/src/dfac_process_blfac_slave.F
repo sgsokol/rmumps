@@ -135,7 +135,7 @@ C ssg
      &                 MPI_INTEGER, COMM, IERR )
       IF ( NPIV .LE. 0 ) THEN
         NPIV = - NPIV
-        WRITE(*,*) MYID,':error, received negative NPIV in BLFAC'
+        call rwarn(':error, received negative NPIV in BLFAC')
         CALL MUMPS_ABORT()
       END IF
       CALL MPI_UNPACK( BUFR, LBUFR_BYTES, POSITION, FPERE, 1,
@@ -206,8 +206,8 @@ C ssg
       IF (DYNAMIC)  THEN
         ALLOCATE(UDYNAMIC(LAELL), stat=allocok)
         if (allocok .GT. 0) THEN
-          write(*,*) MYID, ' : PB allocation U in blfac_slave '
-     &     , LAELL
+          call rwarn(' : PB allocation U in blfac_slave ')
+c~      &     , LAELL
           IFLAG = -13 
           CALL MUMPS_SET_IERROR(LAELL,IERROR)
           GOTO 700
@@ -385,7 +385,7 @@ C ssg
          CALL DMUMPS_BUF_SEND_1INT( INODE, DEST, END_NIV2_LDLT,
      &                             COMM, KEEP, IERR )
          IF ( IERR .LT. 0 ) THEN
-           write(*,*) ' Internal error in PROCESS_BLFAC_SLAVE.'
+           call rwarn(' Internal error in PROCESS_BLFAC_SLAVE.')
            IFLAG = -99
            GOTO 700
          END IF

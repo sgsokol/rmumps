@@ -89,10 +89,11 @@ C
      &   COMP, LRLUS, IFLAG, IERROR
      &      )
        IF ( IFLAG .LT. 0 ) THEN
-         WRITE(*,*) ' Failure in int space allocation in CB area ',
-     &    ' during assembly of root : DMUMPS_PROCESS_RTNELIND',
-     &    ' size required was :', NOINT,
-     &    'INODE=',INODE,' NELIM=',NELIM, ' NSLAVES=', NSLAVES
+         call rwarn(' Failure in int space allocation in CB area '//
+     &    ' during assembly of root : DMUMPS_PROCESS_RTNELIND'//
+     &    ' size required was :')
+c~      , NOINT,
+c~      &    'INODE=',INODE,' NELIM=',NELIM, ' NSLAVES=', NSLAVES
          RETURN
         ENDIF
         PIMASTER(STEP( INODE )) = IWPOSCB + 1

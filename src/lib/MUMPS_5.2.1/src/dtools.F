@@ -46,11 +46,11 @@ C
       LDLT = KEEP(50)
       IOLDSHIFT = IOLDPS + KEEP(IXSZ)
       IF ( IW( IOLDSHIFT ) < 0 ) THEN
-        write(*,*) ' ERROR 1 compressLU:Should not point to a band.'
+        call rwarn(' ERROR 1 compressLU:Should not point to a band.')
         CALL MUMPS_ABORT()
       ELSE IF ( IW( IOLDSHIFT + 2 ) < 0 ) THEN
-        write(*,*) ' ERROR 2 compressLU:Stack not performed yet',
-     &  IW(IOLDSHIFT + 2)
+        call rwarn(' ERROR 2 compressLU:Stack not performed yet')
+c~      &  IW(IOLDSHIFT + 2)
         CALL MUMPS_ABORT()
       ENDIF
       LCONT  = IW( IOLDSHIFT )
@@ -64,7 +64,7 @@ C
       LRCOMPRESS_PANEL = (IW(IOLDPS+XXLR).GE.2)
       IF ( (NSLAVES > 0  .AND. TYPE .NE. 2) .OR. 
      &     (NSLAVES .eq. 0 .AND. TYPE .EQ. 2 ) ) THEN
-          WRITE(*,*) ' ERROR 3 compressLU: problem with level of inode'
+          call rwarn(' ERROR 3 compressLU: problem with level of inode')
           CALL MUMPS_ABORT()
       END IF
       IF (LDLT.EQ.0) THEN
@@ -105,7 +105,7 @@ C
          CALL DMUMPS_NEW_FACTOR(INODE,PTRFAC,KEEP,KEEP8,
      &        A,LA,SIZELU, IERR)
          IF(IERR.LT.0)THEN
-            WRITE(*,*)MYID,': Internal error in DMUMPS_NEW_FACTOR'
+            call rwarn(': Internal error in DMUMPS_NEW_FACTOR')
             CALL MUMPS_ABORT()
          ENDIF
       ENDIF
@@ -266,8 +266,8 @@ C
      &        KEEP(IXSZ), COMP, DKEEP(97),
      &        MYID, SLAVEF, PROCNODE_STEPS, DAD )
         IF ( LRLU .NE. LRLUS ) THEN
-               WRITE(*,*) 'PB compress DMUMPS_STACK_BAND:LRLU,LRLUS=',
-     &         LRLU, LRLUS
+               call rwarn('PB compress DMUMPS_STACK_BAND:LRLU,LRLUS=')
+c~      &         LRLU, LRLUS
                IFLAG = -9
                CALL MUMPS_SET_IERROR(LREQA - LRLUS, IERROR)
                GOTO 700
@@ -345,7 +345,7 @@ C
       IF (KEEP(201).EQ.2) THEN 
         CALL DMUMPS_NEW_FACTOR(ISON,PTRFAC,KEEP,KEEP8,A,LA,LREQA,IFLAG)
         IF(IFLAG.LT.0)THEN
-          WRITE(*,*)MYID,': Internal error in DMUMPS_NEW_FACTOR'
+          call rwarn(': Internal error in DMUMPS_NEW_FACTOR')
           IERROR=0
           GOTO 700
         ENDIF
@@ -451,11 +451,10 @@ C
       EFF       = .FALSE.    
       COMPUTE_MAXAVG = .NOT.(NSLAVES.EQ.1 .AND. KEEP(46).EQ.1)
       IF ( PROKG.AND.SUM_OF_PEAKS) THEN
-       WRITE( MPG,'(A)') 
-     & ' Estimations with BLR compression of LU factors:'
-       WRITE( MPG,'(A,I6,A) ')
-     & ' ICNTL(38) Estimated compression rate of LU factors =', 
-     &   KEEP(464), '/1000'
+       call rwarn(
+     & ' Estimations with BLR compression of LU factors:'//
+     & ' ICNTL(38) Estimated compression rate of LU factors =')
+c~      &   KEEP(464), '/1000'
       ENDIF
       OOC_STAT  =  0  
       BLR_STRAT =  1  
@@ -481,13 +480,13 @@ C
       ENDIF
       IF ( PROKG.AND.SUM_OF_PEAKS ) THEN
        IF (COMPUTE_MAXAVG) THEN
-         WRITE( MPG,'(A,I12) ')
-     & '    Maximum estim. space in Mbytes, IC facto.    (INFOG(36)):',
-     &        INFOG(36)
+         call rwarn(
+     & '    Maximum estim. space in Mbytes, IC facto.    (INFOG(36)):')
+c~      &        INFOG(36)
        ENDIF
-       WRITE(MPG,'(A,I12) ')
-     & '    Total space in MBytes, IC factorization      (INFOG(37)):'
-     &        ,INFOG(37)
+       call rwarn(
+     & '    Total space in MBytes, IC factorization      (INFOG(37)):')
+c~      &        ,INFOG(37)
       END IF
       OOC_STAT  =  1  
       BLR_STRAT =  1  
@@ -513,13 +512,13 @@ C
       ENDIF
       IF ( PROKG.AND.SUM_OF_PEAKS  ) THEN
        IF (COMPUTE_MAXAVG) THEN
-         WRITE( MPG,'(A,I12) ')
-     & '    Maximum estim. space in Mbytes, OOC facto.   (INFOG(38)):',
-     &        INFOG(38)
+         call rwarn(
+     & '    Maximum estim. space in Mbytes, OOC facto.   (INFOG(38)):')
+c~      &        INFOG(38)
        ENDIF
-       WRITE(MPG,'(A,I12) ')
-     & '    Total space in MBytes, OOC factorization     (INFOG(39)):'
-     &        ,INFOG(39)
+       call rwarn(
+     & '    Total space in MBytes, OOC factorization     (INFOG(39)):')
+c~      &        ,INFOG(39)
       END IF
       END SUBROUTINE DMUMPS_MEM_ESTIM_BLR_ALL
       SUBROUTINE DMUMPS_MAX_MEM( KEEP, KEEP8,

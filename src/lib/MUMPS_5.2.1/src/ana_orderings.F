@@ -2906,8 +2906,9 @@ C       -------------------------------------------------------------
    50   MINDEG = DEG
 C begin HALO
         IF (ME.LE.0) THEN
-          write (*,*) ' Error 1 in HALO_AMD '
+C          write (*,*) ' Error 1 in HALO_AMD '
 C         return to calling program with error return
+          call rwarn(" Error 1 in HALO_AMD ")
           NCMPA = -N
           GOTO 500
         ENDIF
@@ -3505,8 +3506,10 @@ C          2/ perform mass elimination of all dense rows
    51      MINDEG = DEG
 C
            IF (ME.NE.LISTVAR_SCHUR(1)) THEN
-             write(6,*) ' error 1 in MUMPS_HAMD '
-             write(6,*) ' wrong principal var for Schur !!'
+C             write(6,*) ' error 1 in MUMPS_HAMD '
+C             write(6,*) ' wrong principal var for Schur !!'
+             call rwarn(" error 1 in MUMPS_HAMD ")
+             call rwarn(" wrong principal var for Schur !!")
              NCMPA = -N - 2
              CALL MUMPS_ABORT()
            ENDIF
@@ -3535,7 +3538,8 @@ C end HALO V2
 C
 C begin HALO
            IF (NEL.NE.N) THEN
-         write(*,*) ' Error 2 in MUMPS_HAMD NEL, N=', NEL,N
+C         write(*,*) ' Error 2 in MUMPS_HAMD NEL, N=', NEL,N
+         call rwarn(" Error 2 in MUMPS_HAMD ")
          NCMPA = -N - 1
          CALL MUMPS_ABORT()
         ENDIF
@@ -5819,7 +5823,8 @@ C         -------------------------------------------------------------
 C         we have only  exactly "dense" rows that we
 C         amalgamate at the root node
              IF (NBD.NE.NBED) THEN
-                write(6,*) ' Internal ERROR quasi dense rows remains'
+C                write(6,*) ' Internal ERROR quasi dense rows remains'
+                call rwarn(" Internal ERROR quasi dense rows remains")
                 CALL MUMPS_ABORT()
              ENDIF
 C          1/ Go through all
@@ -5846,8 +5851,10 @@ C          ME is the root node
            NV(ME)   = NBD
            PE(ME)   = 0_8
            IF (NEL.NE.TOTEL) THEN
-            write(6,*) 'Internal ERROR 2 detected in QAMD'
-            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+C            write(6,*) 'Internal ERROR 2 detected in QAMD'
+C            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+            call rwarn("Internal ERROR 2 detected in QAMD")
+            call rwarn(" NEL not equal to N")
             CALL MUMPS_ABORT()
            ENDIF
            GOTO 265
@@ -7552,6 +7559,7 @@ C                 i is at the head of the degree list
 C             set tree pointer and flag to indicate element e is
 C             absorbed into new element me (the parent of e is me)
 C               write(*,*) 'ME father of E',ME,E
+               call rwarn("ME father of E")
               PE (E) = int(-ME,8)
               W (E) = 0
             ENDIF
@@ -9024,7 +9032,8 @@ C         -------------------------------------------------------------
 C         we have only  exactly "dense" rows that we
 C         amalgamate at the root node
              IF (NBD.NE.NBED) THEN
-          write(6,*) ' ERROR in MUMPS_SYMQAMD quasi dense rows remains'
+C          write(6,*) ' ERROR in MUMPS_SYMQAMD quasi dense rows remains'
+          call rwarn(" ERROR in MUMPS_SYMQAMD quasi dense rows remains")
           CALL MUMPS_ABORT()
            ENDIF
            NbSchur = 0   ! Only for checking
@@ -9047,8 +9056,10 @@ C            X is a dense row, absorb it in ME (mass elimination)
             ENDIF
    59      CONTINUE
            IF (NbSchur.NE.SIZE_SCHUR_LOC) then
-             write(6,*) ' Internal error 2 in QAMD :',
-     &         ' Schur size expected:',SIZE_SCHUR_LOC, 'Real:', NbSchur
+C             write(6,*) ' Internal error 2 in QAMD :',
+C     &         ' Schur size expected:',SIZE_SCHUR_LOC, 'Real:', NbSchur
+             call rwarn(" Internal error 2 in QAMD")
+             call rwarn("  Schur size expected is different from real")
              CALL MUMPS_ABORT()
            ENDIF
 C          ME is the root node
@@ -9056,8 +9067,10 @@ C          ME is the root node
            NV(ME)   = NBD
            PE(ME)   = 0_8
            IF (NEL.NE.N) THEN
-            write(6,*) 'Internal ERROR 2 detected in QAMD'
-            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+C            write(6,*) 'Internal ERROR 2 detected in QAMD'
+C            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+            call rwarn("Internal ERROR 2 detected in QAMD")
+            call rwarn(" NEL not equal to N")
             CALL MUMPS_ABORT()
            ENDIF
            IF (ME.NE. LISTVAR_SCHUR(1)) THEN

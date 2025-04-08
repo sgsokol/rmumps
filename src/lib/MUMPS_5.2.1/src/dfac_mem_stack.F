@@ -155,13 +155,13 @@ C
       IF (TYPEF.EQ.2) NBROW_SEND = NELIM 
       POSELT = PTRAST(STEP(INODE))
       IF (POSELT .ne. PTRFAC(STEP(INODE))) THEN
-        WRITE(*,*) MYID,":Error 1 in DMUMPS_FAC_STACK:"
-        WRITE(*,*) "INODE,  PTRAST, PTRFAC =", 
-     &  INODE, PTRAST(STEP(INODE)), PTRFAC(STEP(INODE))
-        WRITE(*,*) "PACKED_CB, NFRONT, NPIV, NASS, NSLAVES",
-     &  PACKED_CB, NFRONT, NPIV, NASS, NSLAVES
-        WRITE(*,*) "TYPE, TYPEF, FPERE ", 
-     & TYPE, TYPEF, FPERE
+        call rwarn(":Error 1 in DMUMPS_FAC_STACK:")
+        call rwarn("INODE,  PTRAST, PTRFAC =")
+c~      &  INODE, PTRAST(STEP(INODE)), PTRFAC(STEP(INODE))
+        call rwarn("PACKED_CB, NFRONT, NPIV, NASS, NSLAVES")
+c~      &  PACKED_CB, NFRONT, NPIV, NASS, NSLAVES
+        call rwarn("TYPE, TYPEF, FPERE ")
+c~      & TYPE, TYPEF, FPERE
         CALL MUMPS_ABORT()
       END IF
       NELVAW = NELVAW + NASS - NPIV
@@ -400,17 +400,19 @@ C
           IF (IERR .EQ. -2) THEN
             IFLAG = -17
             IF ( LP  >  0 ) THEN
-              WRITE(LP, *) MYID,
+              call rwarn(
      & ": FAILURE, SEND BUFFER TOO SMALL DURING
-     & DMUMPS_FAC_STACK", TYPE, TYPEF
+     & DMUMPS_FAC_STACK")
+c~      , TYPE, TYPEF
             ENDIF
           ENDIF
           IF (IERR .EQ. -3) THEN
             IFLAG = -20
             IF ( LP  >  0 ) THEN
-              WRITE(LP, *) MYID,
+              call rwarn(
      & ": FAILURE, RECV BUFFER TOO SMALL DURING
-     & DMUMPS_FAC_STACK", TYPE, TYPEF
+     & DMUMPS_FAC_STACK")
+c~      , TYPE, TYPEF
             ENDIF
           ENDIF
           GOTO 600

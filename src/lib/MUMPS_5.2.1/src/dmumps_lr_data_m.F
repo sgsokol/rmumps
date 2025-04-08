@@ -104,7 +104,7 @@ C
        LOGICAL :: IS_FIXME_ALREADY_PRINTED  
        IS_FIXME_ALREADY_PRINTED = .FALSE.
        IF (.NOT. associated(BLR_ARRAY)) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_END_MODULE"
+         call rwarn("Internal error 1 in DMUMPS_BLR_END_MODULE")
          CALL MUMPS_ABORT()
        ENDIF
        DO I=1, size(BLR_ARRAY)
@@ -138,14 +138,14 @@ C
        INTEGER :: CHAR_LENGTH, IERR
        TYPE(BLR_ARRAY_T) :: BLR_ARRAY_VAR
        IF (associated(id_BLRARRAY_ENCODING)) THEN
-         WRITE(*,*) "Internal error 1 in MUMPS_BLR_MOD_TO_STRUC"
+         call rwarn("Internal error 1 in MUMPS_BLR_MOD_TO_STRUC")
          CALL MUMPS_ABORT()
        ENDIF
        BLR_ARRAY_VAR%BLR_ARRAY => BLR_ARRAY
        CHAR_LENGTH=size(transfer(BLR_ARRAY_VAR,CHAR_ARRAY))
        ALLOCATE(id_BLRARRAY_ENCODING(CHAR_LENGTH), stat=IERR)
        IF (IERR > 0 ) THEN
-          WRITE(*,*) "Allocation error in MUMPS_BLR_MOD_TO_STRUC"
+          call rwarn("Allocation error in MUMPS_BLR_MOD_TO_STRUC")
           CALL MUMPS_ABORT()
        ENDIF
        id_BLRARRAY_ENCODING=transfer(BLR_ARRAY_VAR,CHAR_ARRAY)
@@ -161,7 +161,7 @@ C
 #      endif
        TYPE (BLR_ARRAY_T) :: BLR_ARRAY_VAR
        IF (.NOT.associated(id_BLRARRAY_ENCODING)) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_STRUC_TO_MOD"
+         call rwarn("Internal error 1 in DMUMPS_BLR_STRUC_TO_MOD")
        ENDIF
        BLR_ARRAY_VAR = transfer(id_BLRARRAY_ENCODING,BLR_ARRAY_VAR)
        BLR_ARRAY => BLR_ARRAY_VAR%BLR_ARRAY
@@ -225,12 +225,12 @@ C
        INTEGER :: I
        INTEGER :: IERR
        IF (NB_PANELS.EQ.0) THEN
-        WRITE(6,*) " Internal error 1 in DMUMPS_BLR_SAVE_INIT ", 
-     &    NB_PANELS
+        call rwarn(" Internal error 1 in DMUMPS_BLR_SAVE_INIT ")
+c~      &    NB_PANELS
        ENDIF
        IF (IWHANDLER .LE.0 ) THEN
-        WRITE(6,*) " Internal error 2 in DMUMPS_BLR_SAVE_INIT ", 
-     &     IWHANDLER
+        call rwarn(" Internal error 2 in DMUMPS_BLR_SAVE_INIT ")
+c~      &     IWHANDLER
        ENDIF
        IF (associated(BEGS_BLR_COL)) THEN
          ALLOCATE(
@@ -351,11 +351,11 @@ C
              IF (INFO1 .GE. 0 
      &            .AND..NOT.LRSOLVE_ACT
      &           ) THEN
-               WRITE(*,*) " Internal Error 2a in MUMPS_BLR_END_FRONT ",
-     &          IWHANDLER, "NB_ACCESSES_INIT=", 
-     &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
-     &          "Pointer to panel number ",IPANEL," still associated",
-     &          "NB_ACCESSES_LEFT= ",THEPANEL%NB_ACCESSES_LEFT
+               call rwarn(" Internal Error 2a in MUMPS_BLR_END_FRONT ")
+c~      &          IWHANDLER, "NB_ACCESSES_INIT=", 
+c~      &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
+c~      &          "Pointer to panel number ",IPANEL," still associated",
+c~      &          "NB_ACCESSES_LEFT= ",THEPANEL%NB_ACCESSES_LEFT
                CALL MUMPS_ABORT()
              ELSE
                CALL DEALLOC_BLR_PANEL(THEPANEL%LRB_PANEL,
@@ -377,10 +377,10 @@ C
              IF (INFO1 .GE. 0 
      &            .AND..NOT.LRSOLVE_ACT
      &          ) THEN
-             WRITE(*,*) " Internal Error 2b in MUMPS_BLR_END_FRONT ",
-     &          IWHANDLER, "NB_ACCESSES_INIT=", 
-     &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
-     &          "Pointer to panel number ",IPANEL," still associated"
+             call rwarn(" Internal Error 2b in MUMPS_BLR_END_FRONT ")
+c~      &          IWHANDLER, "NB_ACCESSES_INIT=", 
+c~      &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
+c~      &          "Pointer to panel number ",IPANEL," still associated"
              CALL MUMPS_ABORT()
              ELSE
                CALL DEALLOC_BLR_PANEL(THEPANEL%LRB_PANEL,
@@ -403,10 +403,10 @@ C
              IF (INFO1 .GE. 0 
      &            .AND..NOT.LRSOLVE_ACT
      &          ) THEN
-             WRITE(*,*) " Internal Error 3 in MUMPS_BLR_END_FRONT ",
-     &          IWHANDLER, "NB_ACCESSES_INIT=", 
-     &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
-     &          "Pointer to panel number ",IPANEL," still associated"
+             call rwarn(" Internal Error 3 in MUMPS_BLR_END_FRONT ")
+c~      &          IWHANDLER, "NB_ACCESSES_INIT=", 
+c~      &          BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT, 
+c~      &          "Pointer to panel number ",IPANEL," still associated"
              CALL MUMPS_ABORT()
             ELSE
               KEEP8(71) = KEEP8(71) - int(size(THEBLOCK%DIAG_BLOCK),8)
@@ -425,10 +425,10 @@ C
      &           BLR_ARRAY(IWHANDLER)%IsSLAVE) THEN
           IF (associated(BLR_ARRAY(IWHANDLER)%CB_LRB)) THEN
              IF (INFO1 .GE. 0) THEN
-             WRITE(*,*) " Internal Error 4 in MUMPS_BLR_END_FRONT ",
-     &          IWHANDLER, "CB block still associated", 
-     &          BLR_ARRAY(IWHANDLER)%IsT2,
-     &          BLR_ARRAY(IWHANDLER)%IsSLAVE
+             call rwarn(" Internal Error 4 in MUMPS_BLR_END_FRONT ")
+c~      &          IWHANDLER, "CB block still associated", 
+c~      &          BLR_ARRAY(IWHANDLER)%IsT2,
+c~      &          BLR_ARRAY(IWHANDLER)%IsSLAVE
              CALL MUMPS_ABORT()
             ELSE
               DO IPANEL = 1, size(BLR_ARRAY(IWHANDLER)%CB_LRB,1)
@@ -476,7 +476,7 @@ C
        INTEGER, INTENT(IN) :: LORU
        TYPE(blr_panel_type), POINTER  :: THEPANEL
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_PANEL_LORU"
+         call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_PANEL_LORU")
          CALL MUMPS_ABORT()
        ENDIF
        IF (LORU.EQ.0) THEN
@@ -498,7 +498,7 @@ C
 #endif       
        INTEGER, INTENT(IN) :: IWHANDLER
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_CB_LRB"
+         call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_CB_LRB")
          CALL MUMPS_ABORT()
        ENDIF
        BLR_ARRAY(IWHANDLER)%CB_LRB => CB_LRB
@@ -509,11 +509,11 @@ C
        DOUBLE PRECISION,POINTER :: D(:)
        INTEGER, INTENT(IN) :: IWHANDLER, IPANEL
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_DIAG_BLOCK"
+         call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_DIAG_BLOCK")
          CALL MUMPS_ABORT()
        ENDIF
        IF ( BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT.LT.0) THEN
-         WRITE(*,*) "Internal error 2 in DMUMPS_BLR_SAVE_DIAG_BLOCK"
+         call rwarn("Internal error 2 in DMUMPS_BLR_SAVE_DIAG_BLOCK")
          CALL MUMPS_ABORT()
        ENDIF
        BLR_ARRAY(IWHANDLER)%DIAG_BLOCKS(IPANEL)%DIAG_BLOCK => D
@@ -526,11 +526,11 @@ C
        INTEGER, INTENT(INOUT) :: INFO(2)
        INTEGER :: I, IERR
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_BEGS_BLR_C"
+          call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_BEGS_BLR_C")
           CALL MUMPS_ABORT()
        ENDIF
        IF ( BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT.LT.0) THEN
-          WRITE(*,*) "Internal error 2 in DMUMPS_BLR_SAVE_BEGS_BLR_C"
+          call rwarn("Internal error 2 in DMUMPS_BLR_SAVE_BEGS_BLR_C")
           CALL MUMPS_ABORT()
        ENDIF
        ALLOCATE(BLR_ARRAY(IWHANDLER)%BEGS_BLR_COL(size(BEGS_BLR_COL)),
@@ -551,11 +551,11 @@ C
        INTEGER, INTENT(IN) :: IWHANDLER
        INTEGER :: I
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_BEGS_BLR_DYN"
+          call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_BEGS_BLR_DYN")
           CALL MUMPS_ABORT()
        ENDIF
        IF ( BLR_ARRAY(IWHANDLER)%NB_ACCESSES_INIT.LT.0) THEN
-          WRITE(*,*) "Internal error 2 in DMUMPS_BLR_SAVE_BEGS_BLR_DYN"
+          call rwarn("Internal error 2 in DMUMPS_BLR_SAVE_BEGS_BLR_DYN")
           CALL MUMPS_ABORT()
        ENDIF
        DO I=1,size(BEGS_BLR_DYNAMIC)
@@ -572,8 +572,8 @@ C
        INTEGER, POINTER, DIMENSION(:) :: BEGS_BLR_L
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGS_BLR_L"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGS_BLR_L")
          CALL MUMPS_ABORT()
        ENDIF
        BEGS_BLR_L => BLR_ARRAY(IWHANDLER)%BEGS_BLR_L
@@ -588,8 +588,8 @@ C
        INTEGER, POINTER, DIMENSION(:) :: BEGS_BLR_STATIC
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGSBLR_STA"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGSBLR_STA")
          CALL MUMPS_ABORT()
        ENDIF
        BEGS_BLR_STATIC => BLR_ARRAY(IWHANDLER)%BEGS_BLR_STATIC
@@ -604,8 +604,8 @@ C
        INTEGER, POINTER, DIMENSION(:) :: BEGS_BLR_DYNAMIC
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGSBLR_DYN"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_BEGSBLR_DYN")
          CALL MUMPS_ABORT()
        ENDIF
        BEGS_BLR_DYNAMIC => BLR_ARRAY(IWHANDLER)%BEGS_BLR_DYNAMIC
@@ -621,8 +621,8 @@ C
        INTEGER, POINTER, DIMENSION(:) :: BEGS_BLR_COL
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &   "Internal error 1 in  DMUMPS_BLR_RETRIEVE_BEGS_BLR_C"
+         call rwarn(
+     &"Internal error 1 in  DMUMPS_BLR_RETRIEVE_BEGS_BLR_C")
          CALL MUMPS_ABORT()
        ENDIF
        BEGS_BLR_COL => BLR_ARRAY(IWHANDLER)%BEGS_BLR_COL
@@ -634,8 +634,8 @@ C
        INTEGER, INTENT(IN)  :: IWHANDLER
        INTEGER, INTENT(OUT) :: NB_PANELS
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_NB_PANELS"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_NB_PANELS")
          CALL MUMPS_ABORT()
        ENDIF
        NB_PANELS = BLR_ARRAY(IWHANDLER)%NB_PANELS
@@ -653,20 +653,20 @@ C
        TYPE(LRB_TYPE), POINTER, DIMENSION(:) :: THELRBPANEL
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_RETRIEVE_PANEL_L",
-     &    "IPANEL=", IPANEL
+         call rwarn("Internal error 1 in DMUMPS_BLR_RETRIEVE_PANEL_L")
+c~      &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%PANELS_L)) THEN
-         WRITE(*,*) "Internal error 2 in DMUMPS_BLR_RETRIEVE_PANEL_L",
-     &    "IPANEL=", IPANEL
+         call rwarn("Internal error 2 in DMUMPS_BLR_RETRIEVE_PANEL_L")
+c~      &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        IF ( .NOT.
      & associated(BLR_ARRAY(IWHANDLER)%PANELS_L(IPANEL)%LRB_PANEL) )
      &      THEN
-         WRITE(*,*) "Internal error 3 in DMUMPS_BLR_RETRIEVE_PANEL_L",
-     &    "IPANEL=", IPANEL
+         call rwarn("Internal error 3 in DMUMPS_BLR_RETRIEVE_PANEL_L")
+c~      &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        CALL DMUMPS_BLR_RETRIEVE_BEGS_BLR_L( IWHANDLER, BEGS_BLR_L )
@@ -680,25 +680,25 @@ C
      & (IWHANDLER, LorU, IPANEL)
        INTEGER, INTENT(IN) :: LorU, IPANEL, IWHANDLER
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &    "Internal error 1 in DMUMPS_BLR_EMPTY_PANEL_LORU, ",
-     &    "IWHANDLER=", IWHANDLER
+         call rwarn(
+     &    "Internal error 1 in DMUMPS_BLR_EMPTY_PANEL_LORU, ")
+c~      &    "IWHANDLER=", IWHANDLER
          CALL MUMPS_ABORT()
        ENDIF
        IF (LorU.EQ.0) THEN
          IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%PANELS_L)) THEN
-           WRITE(*,*) 
-     &     "Internal error 2 in DMUMPS_BLR_EMPTY_PANEL_LORU, ",
-     &     "IWHANDLER=", IWHANDLER
+           call rwarn(
+     &     "Internal error 2 in DMUMPS_BLR_EMPTY_PANEL_LORU, ")
+c~      &     "IWHANDLER=", IWHANDLER
            CALL MUMPS_ABORT()
          ENDIF
          DMUMPS_BLR_EMPTY_PANEL_LORU = .NOT.
      &   associated(BLR_ARRAY(IWHANDLER)%PANELS_L(IPANEL)%LRB_PANEL)
        ELSE
          IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%PANELS_U)) THEN
-           WRITE(*,*) 
-     &     "Internal error 3 in DMUMPS_BLR_EMPTY_PANEL_LORU, ",
-     &     "IWHANDLER=", IWHANDLER
+           call rwarn(
+     &     "Internal error 3 in DMUMPS_BLR_EMPTY_PANEL_LORU, ")
+c~      &     "IWHANDLER=", IWHANDLER
            CALL MUMPS_ABORT()
          ENDIF
          DMUMPS_BLR_EMPTY_PANEL_LORU = .NOT.
@@ -718,24 +718,24 @@ C
        TYPE(LRB_TYPE), POINTER, DIMENSION(:) :: THELRBPANEL
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &    "Internal error 1 in DMUMPS_BLR_RETRIEVE_PANEL_LORU",
-     &    "IWHANDLER=", IWHANDLER
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_PANEL_LORU")
+C     &    "IWHANDLER=", IWHANDLER
          CALL MUMPS_ABORT()
        ENDIF
        IF (LORU.EQ.0) THEN
           IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%PANELS_L)) THEN
-         WRITE(*,*) 
-     &    "Internal error 2 in DMUMPS_BLR_RETRIEVE_PANEL_LORU",
-     &    "IWHANDLER=", IWHANDLER
+         call rwarn(
+     &"Internal error 2 in DMUMPS_BLR_RETRIEVE_PANEL_LORU")
+C     &    "IWHANDLER=", IWHANDLER
          CALL MUMPS_ABORT()
         ENDIF
         IF ( .NOT.
      &  associated(BLR_ARRAY(IWHANDLER)%PANELS_L(IPANEL)%LRB_PANEL) )
      &       THEN
-         WRITE(*,*) 
-     &    "Internal error 3 in DMUMPS_BLR_RETRIEVE_PANEL_LORU",
-     &    "IPANEL=", IPANEL
+         call rwarn(
+     &"Internal error 3 in DMUMPS_BLR_RETRIEVE_PANEL_LORU")
+C     &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
         ENDIF
         THELRBPANEL =>
@@ -744,17 +744,17 @@ C
      &  BLR_ARRAY(IWHANDLER)%PANELS_L(IPANEL)%NB_ACCESSES_LEFT - 1
        ELSE
           IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%PANELS_U)) THEN
-         WRITE(*,*) 
-     &    "Internal error 4 in DMUMPS_BLR_RETRIEVE_PANEL_LORU",
-     &    "IWHANDLER=", IWHANDLER
+         call rwarn(
+     &"Internal error 4 in DMUMPS_BLR_RETRIEVE_PANEL_LORU")
+C     &    "IWHANDLER=", IWHANDLER
          CALL MUMPS_ABORT()
         ENDIF
         IF ( .NOT.
      &  associated(BLR_ARRAY(IWHANDLER)%PANELS_U(IPANEL)%LRB_PANEL) )
      &       THEN
-         WRITE(*,*) 
-     &    "Internal error 5 in DMUMPS_BLR_RETRIEVE_PANEL_LORU",
-     &    "IPANEL=", IPANEL
+         call rwarn(
+     &"Internal error 5 in DMUMPS_BLR_RETRIEVE_PANEL_LORU")
+C     &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
         ENDIF
         THELRBPANEL =>
@@ -775,23 +775,23 @@ C
        DOUBLE PRECISION, POINTER :: THEBLOCK(:)
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &    "Internal error 1 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK",
-     &    "IPANEL=", IPANEL
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK")
+C     &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%DIAG_BLOCKS)) THEN
-         WRITE(*,*) 
-     &    "Internal error 2 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK",
-     &    "IPANEL=", IPANEL
+         call rwarn(
+     &"Internal error 2 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK")
+C     &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        IF ( .NOT.
      &  associated(BLR_ARRAY(IWHANDLER)%DIAG_BLOCKS(IPANEL)%DIAG_BLOCK))
      &      THEN
-         WRITE(*,*) 
-     &    "Internal error 3 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK",
-     &    "IPANEL=", IPANEL
+         call rwarn(
+     &"Internal error 3 in DMUMPS_BLR_RETRIEVE_DIAG_BLOCK")
+C     &    "IPANEL=", IPANEL
          CALL MUMPS_ABORT()
        ENDIF
        THEBLOCK =>
@@ -807,11 +807,11 @@ C
        TYPE(LRB_TYPE), POINTER :: THECB(:,:)
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) "Internal error 1 in DMUMPS_BLR_RETRIEVE_CB_LRB"
+         call rwarn("Internal error 1 in DMUMPS_BLR_RETRIEVE_CB_LRB")
          CALL MUMPS_ABORT()
        ENDIF
        IF ( .NOT. associated(BLR_ARRAY(IWHANDLER)%CB_LRB)) THEN
-         WRITE(*,*) "Internal error 2 in DMUMPS_BLR_RETRIEVE_CB_LRB"
+         call rwarn("Internal error 2 in DMUMPS_BLR_RETRIEVE_CB_LRB")
          CALL MUMPS_ABORT()
        ENDIF
        THECB => BLR_ARRAY(IWHANDLER)%CB_LRB
@@ -822,8 +822,8 @@ C
        INTEGER, INTENT(IN) :: IWHANDLER
        INTEGER, INTENT(IN) :: NFS4FATHER 
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_NFS4FATHER"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_NFS4FATHER")
          CALL MUMPS_ABORT()
        ENDIF
        BLR_ARRAY(IWHANDLER)%NFS4FATHER = NFS4FATHER
@@ -834,8 +834,8 @@ C
        INTEGER, INTENT(IN)  :: IWHANDLER
        INTEGER, INTENT(OUT) :: NFS4FATHER 
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-         WRITE(*,*) 
-     &       "Internal error 1 in DMUMPS_BLR_RETRIEVE_NFS4FATHER"
+         call rwarn(
+     &"Internal error 1 in DMUMPS_BLR_RETRIEVE_NFS4FATHER")
          CALL MUMPS_ABORT()
        ENDIF
        NFS4FATHER = BLR_ARRAY(IWHANDLER)%NFS4FATHER
@@ -848,7 +848,7 @@ C
        INTEGER, INTENT(INOUT) :: INFO(2)
        INTEGER :: I, IERR
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_BLR_SAVE_M_ARRAY"
+          call rwarn("Internal error 1 in DMUMPS_BLR_SAVE_M_ARRAY")
           CALL MUMPS_ABORT()
        ENDIF
        ALLOCATE(BLR_ARRAY(IWHANDLER)%M_ARRAY(size(M_ARRAY)),
@@ -873,7 +873,7 @@ C
        DOUBLE PRECISION, DIMENSION(:), POINTER :: M_ARRAY
 #endif
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_BLR_RETRIEVE_M_ARRAY"
+          call rwarn("Internal error 1 in DMUMPS_BLR_RETRIEVE_M_ARRAY")
           CALL MUMPS_ABORT()
        ENDIF
        M_ARRAY =>  BLR_ARRAY(IWHANDLER)%M_ARRAY
@@ -883,7 +883,7 @@ C
        IMPLICIT NONE
        INTEGER, INTENT(IN) ::  IWHANDLER
        IF ( IWHANDLER .GT. size(BLR_ARRAY) .OR. IWHANDLER .LE. 0 ) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_BLR_FREE_M_ARRAY"
+          call rwarn("Internal error 1 in DMUMPS_BLR_FREE_M_ARRAY")
           CALL MUMPS_ABORT()
        ENDIF
        IF (associated(BLR_ARRAY(IWHANDLER)%M_ARRAY)) THEN
@@ -941,12 +941,12 @@ C
        TYPE(LRB_TYPE), POINTER  :: THELRB 
        IF (BLR_ARRAY(IWHANDLER)%IsT2.AND.
      &      .NOT.BLR_ARRAY(IWHANDLER)%IsSLAVE) THEN
-         write(*,*) 'Internal error 1 in DMUMPS_BLR_FREE_CB_LRB'
+         call rwarn("Internal error 1 in DMUMPS_BLR_FREE_CB_LRB")
          CALL MUMPS_ABORT()
        ENDIF
        CB_LRB => BLR_ARRAY(IWHANDLER)%CB_LRB
        IF (.NOT.associated(CB_LRB)) THEN
-         write(*,*) 'Internal error 2 in DMUMPS_BLR_FREE_CB_LRB'
+         call rwarn("Internal error 2 in DMUMPS_BLR_FREE_CB_LRB")
          CALL MUMPS_ABORT()
        ENDIF
        IF (.NOT.FREE_ONLY_STRUCT) THEN
@@ -1136,7 +1136,7 @@ C
             NbRecords=1
             SIZE_GEST=SIZE_INT
             SIZE_VARIABLES=0
-            write(unit,iostat=err) size(BLR_ARRAY,1)
+c~             write(unit,iostat=err) size(BLR_ARRAY,1)
             if(err.ne.0) then
                INFO(1) = -72
                CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1159,14 +1159,14 @@ C
             NbRecords=2
             SIZE_GEST=SIZE_INT*2
             SIZE_VARIABLES=0
-            write(unit,iostat=err) -999
+c~             write(unit,iostat=err) -999
             if(err.ne.0) then
                INFO(1) = -72
                CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &              INFO(2))
             endif
             IF ( INFO(1) .LT. 0 ) GOTO 100
-            write(unit,iostat=err) -999
+c~             write(unit,iostat=err) -999
             if(err.ne.0) then
                INFO(1) = -72
                CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1332,7 +1332,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               write(unit,iostat=err) BLR_STRUC%IsSYM
+c~                write(unit,iostat=err) BLR_STRUC%IsSYM
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1355,7 +1355,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               write(unit,iostat=err) BLR_STRUC%IsT2
+c~                write(unit,iostat=err) BLR_STRUC%IsT2
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1378,7 +1378,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               write(unit,iostat=err) BLR_STRUC%IsSLAVE
+c~                write(unit,iostat=err) BLR_STRUC%IsSLAVE
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1411,26 +1411,26 @@ C
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=
      &                 size(BLR_STRUC%BEGS_BLR_STATIC,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%BEGS_BLR_STATIC,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%BEGS_BLR_STATIC,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) BLR_STRUC%BEGS_BLR_STATIC
+c~                   write(unit,iostat=err) BLR_STRUC%BEGS_BLR_STATIC
                ELSE
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -1488,26 +1488,26 @@ C
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=
      &                 size(BLR_STRUC%BEGS_BLR_DYNAMIC,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%BEGS_BLR_DYNAMIC,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%BEGS_BLR_DYNAMIC,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) BLR_STRUC%BEGS_BLR_DYNAMIC
+c~                   write(unit,iostat=err) BLR_STRUC%BEGS_BLR_DYNAMIC
                ELSE
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -1565,26 +1565,26 @@ C
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=
      &                 size(BLR_STRUC%BEGS_BLR_L,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%BEGS_BLR_L,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%BEGS_BLR_L,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) BLR_STRUC%BEGS_BLR_L
+c~                   write(unit,iostat=err) BLR_STRUC%BEGS_BLR_L
                ELSE
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -1642,26 +1642,26 @@ C
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=
      &                 size(BLR_STRUC%BEGS_BLR_COL,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%BEGS_BLR_COL,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%BEGS_BLR_COL,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) BLR_STRUC%BEGS_BLR_COL
+c~                   write(unit,iostat=err) BLR_STRUC%BEGS_BLR_COL
                ELSE
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -1709,7 +1709,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               write(unit,iostat=err) BLR_STRUC%NB_ACCESSES_INIT
+c~                write(unit,iostat=err) BLR_STRUC%NB_ACCESSES_INIT
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1732,7 +1732,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               write(unit,iostat=err) BLR_STRUC%NB_PANELS
+c~                write(unit,iostat=err) BLR_STRUC%NB_PANELS
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1780,8 +1780,8 @@ C
                   NbRecords_BLR_STRUC_T(i1)=1
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%PANELS_L,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%PANELS_L,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1803,14 +1803,14 @@ C
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1898,8 +1898,8 @@ C
                   NbRecords_BLR_STRUC_T(i1)=1
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%PANELS_U,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%PANELS_U,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -1921,14 +1921,14 @@ C
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2018,8 +2018,8 @@ C
                   NbRecords_BLR_STRUC_T(i1)=1
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%CB_LRB,1),size(BLR_STRUC%CB_LRB,2)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%CB_LRB,1),size(BLR_STRUC%CB_LRB,2)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2043,14 +2043,14 @@ C
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*3
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999,-998
+c~                   write(unit,iostat=err) -999,-998
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2141,8 +2141,8 @@ C
                   NbRecords_BLR_STRUC_T(i1)=1
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err)
-     &                 size(BLR_STRUC%DIAG_BLOCKS,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(BLR_STRUC%DIAG_BLOCKS,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2164,14 +2164,14 @@ C
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2235,7 +2235,7 @@ C
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               write(unit,iostat=err) BLR_STRUC%NFS4FATHER
+c~                write(unit,iostat=err) BLR_STRUC%NFS4FATHER
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2361,25 +2361,25 @@ C
                   SIZE_VARIABLES_LRB_TYPE(i1)=
      &                 size(LRB_T%Q,1)*size(LRB_T%Q,2)
      &                 *     SIZE_ARITH_DEP
-                  write(unit,iostat=err) size(LRB_T%Q,1),size(LRB_T%Q,2)
+c~                   write(unit,iostat=err) size(LRB_T%Q,1),size(LRB_T%Q,2)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 300
-                  write(unit,iostat=err) LRB_T%Q
+c~                   write(unit,iostat=err) LRB_T%Q
                ELSE
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*3
                   SIZE_VARIABLES_LRB_TYPE(i1)=0
-                  write(unit,iostat=err) -999,-998
+c~                   write(unit,iostat=err) -999,-998
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 300
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -2440,25 +2440,25 @@ C
                   SIZE_VARIABLES_LRB_TYPE(i1)=
      &                 size(LRB_T%R,1)*size(LRB_T%R,2)
      &                 *     SIZE_ARITH_DEP
-                  write(unit,iostat=err) size(LRB_T%R,1),size(LRB_T%R,2)
+c~                   write(unit,iostat=err) size(LRB_T%R,1),size(LRB_T%R,2)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 300
-                  write(unit,iostat=err) LRB_T%R
+c~                   write(unit,iostat=err) LRB_T%R
                ELSE
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*3
                   SIZE_VARIABLES_LRB_TYPE(i1)=0
-                  write(unit,iostat=err) -999,-998
+c~                   write(unit,iostat=err) -999,-998
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 300
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -2507,7 +2507,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) LRB_T%LRFORM
+c~                write(unit,iostat=err) LRB_T%LRFORM
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2530,7 +2530,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) LRB_T%K
+c~                write(unit,iostat=err) LRB_T%K
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2553,7 +2553,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) LRB_T%M
+c~                write(unit,iostat=err) LRB_T%M
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2576,7 +2576,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) LRB_T%N
+c~                write(unit,iostat=err) LRB_T%N
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2599,7 +2599,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) LRB_T%KSVD
+c~                write(unit,iostat=err) LRB_T%KSVD
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2622,7 +2622,7 @@ C
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_LOGICAL
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_LOGICAL
-               write(unit,iostat=err) LRB_T%ISLR
+c~                write(unit,iostat=err) LRB_T%ISLR
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2725,7 +2725,7 @@ C
                SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=SIZE_INT
-               write(unit,iostat=err) BLR_PANEL_T%NB_ACCESSES_LEFT
+c~                write(unit,iostat=err) BLR_PANEL_T%NB_ACCESSES_LEFT
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2773,7 +2773,7 @@ C
                   NbRecords_BLR_PANEL_TYPE(i1)=1
                   SIZE_GEST_BLR_PANEL_TYPE(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=0
-                  write(unit,iostat=err) size(BLR_PANEL_T%LRB_PANEL,1)
+c~                   write(unit,iostat=err) size(BLR_PANEL_T%LRB_PANEL,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2796,14 +2796,14 @@ C
                   NbRecords_BLR_PANEL_TYPE(i1)=2
                   SIZE_GEST_BLR_PANEL_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 400
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -2953,25 +2953,25 @@ C
                   SIZE_VARIABLES_DIAG_BLOCK_TYPE(i1)=
      &                 size(DIAG_BLOCK_T%DIAG_BLOCK,1)
      &                 *     SIZE_ARITH_DEP
-                  write(unit,iostat=err) size(DIAG_BLOCK_T%DIAG_BLOCK,1)
+c~                   write(unit,iostat=err) size(DIAG_BLOCK_T%DIAG_BLOCK,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 200
-                  write(unit,iostat=err) DIAG_BLOCK_T%DIAG_BLOCK
+c~                   write(unit,iostat=err) DIAG_BLOCK_T%DIAG_BLOCK
                ELSE
                   SIZE_GEST_DIAG_BLOCK_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_DIAG_BLOCK_TYPE(i1)=0
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 200
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72

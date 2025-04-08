@@ -38,8 +38,9 @@ C
       IF (allocok > 0) THEN
         INFO(1)=-7
         INFO(2)=NCMP+1
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in METIS_NODEWND_MIXEDto32"
+         IF (LPOK)
+    &     call rwarn("ERROR memory allocation in "//
+    &  "METIS_NODEWND_MIXEDto32")
         RETURN
       ENDIF
       CALL MUMPS_ICOPY_64TO32(IPE8, NCMP+1, IPE)
@@ -71,8 +72,9 @@ C
       IF (allocok > 0) THEN
         INFO(1)=-7
         INFO(2)=NCMP+1
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in METIS_NODEND_MIXEDto32"
+        IF (LPOK)
+      &  call rwarn("ERROR memory allocation in "//
+      &  "METIS_NODEND_MIXEDto32")
         RETURN
       ENDIF
       CALL MUMPS_ICOPY_64TO32(IPE8, NCMP+1, IPE)
@@ -106,8 +108,9 @@ C
       IF (allocok > 0) THEN
         INFO(1)=-7
         INFO(2)=NCMP+1
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in METIS_NODEND_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     &     "METIS_NODEND_MIXEDto32")
         RETURN
       ENDIF
       CALL MUMPS_ICOPY_64TO32(IPE8, NCMP+1, IPE)
@@ -152,8 +155,9 @@ C
      &     int(KEEP10,8)* ( IPE8(NCMP+1)-1_8 )
      &             , INFO(2)
      &                      )
-          IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in METIS_NODEWND_MIXEDto64"
+          IF (LPOK)
+     &     call rwarn("ERROR memory allocation in "//
+     &        "METIS_NODEWND_MIXEDto64")
           RETURN
          ENDIF
          CALL MUMPS_ICOPY_32TO64_64C(IW   , IPE8(NCMP+1)-1_8, IW8   )
@@ -166,8 +170,9 @@ C
      &     int(KEEP10,8)* ( 3_8*int(NCMP,8) )
      &             , INFO(2)
      &                      )
-          IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in METIS_NODEWND_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "METIS_NODEWND_MIXEDto64")
           RETURN
        ENDIF
        CALL MUMPS_ICOPY_32TO64    (FRERE, NCMP        , FRERE8)
@@ -223,8 +228,9 @@ C
             CALL MUMPS_SET_IERROR(  int(KEEP10,8)*
      &         ( IPE8(NCMP+1)-1_8+2_8*int(NCMP,8) )
      &         , INFO(2) )
-            IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR 1 memory allocation in METIS_METIS_NODEND_MIXEDto64"
+            IF (LPOK)
+     & call rwarn("ERROR 1 memory allocation in "//
+     & "METIS_METIS_NODEND_MIXEDto64")
             RETURN
           ENDIF
           CALL MUMPS_ICOPY_32TO64_64C(IW, IPE8(NCMP+1)-1_8, IW8 )
@@ -234,8 +240,9 @@ C
             INFO(1)=-7
             CALL MUMPS_SET_IERROR(  int(KEEP10,8)*
      &         2_8*int(NCMP,8), INFO(2) )
-            IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR 2 memory allocation in METIS_METIS_NODEND_MIXEDto64"
+            IF (LPOK)
+     & call rwarn("ERROR 2 memory allocation in "//
+     & "METIS_METIS_NODEND_MIXEDto64")
             RETURN
         ENDIF
         IF (INPLACE64_GRAPH_COPY)  THEN
@@ -294,8 +301,9 @@ C
             INFO(1)=-7
             CALL MUMPS_SET_IERROR( int(KEEP10,8) * (IPE8(NCMP+1)-1_8)
      &         , INFO(2) )
-            IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR 1 memory allocation in METIS_METIS_NODEND_MIXEDto64"
+            IF (LPOK)
+     & call rwarn("ERROR 1 memory allocation in "//
+     & "METIS_METIS_NODEND_MIXEDto64")
             RETURN
           ENDIF
           CALL MUMPS_ICOPY_32TO64_64C(IW, IPE8(NCMP+1)-1_8, IW8 )
@@ -309,8 +317,9 @@ C
      &       int(KEEP10,8)*
      &           (3_8*int(NCMP,8)+int(LOPTIONS_METIS,8))
      &            , INFO(2))
-          IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR 2 memory allocation in METIS_NODEND_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR 2 memory allocation in "//
+     & "METIS_NODEND_MIXEDto64")
           RETURN
         ENDIF
         CALL MUMPS_ICOPY_32TO64    (FRERE(1), NCMP, FRERE8)
@@ -366,8 +375,9 @@ C
       ENDIF
       ALLOCATE(IPE(NCMP+1), stat=allocok)
       IF (allocok > 0) THEN
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in MUMPS_SCOTCH_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_SCOTCH_MIXEDto32")
         INFO(1) = -7
         INFO(2) = NCMP+1
         RETURN
@@ -421,8 +431,9 @@ C
         ELSE
          ALLOCATE( IW8(LIW8), stat=allocok )
          IF (allocok > 0) THEN
-          IF (LPOK) WRITE(LP,*)
-     &    "ERROR memory allocation in MUMPS_SCOTCH_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_SCOTCH_MIXEDto64")
           INFO(1) = -7
           CALL MUMPS_SET_IERROR( int(KEEP10,8) * LIW8
      &                        , INFO(2) )
@@ -434,8 +445,9 @@ C
      &     PTRAR8(NCMP), IWL18(NCMP), IKEEP18(NCMP), IKEEP28(NCMP),
      &     stat=allocok )
         IF (allocok > 0) THEN
-          IF (LPOK) WRITE(LP,*)
-     &    "ERROR memory allocation in MUMPS_SCOTCH_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_SCOTCH_MIXEDto64")
           INFO(1) = -7
           CALL MUMPS_SET_IERROR( int(KEEP10,8) *
      &                            ( int(NCMP,8)*4_8 )
@@ -457,8 +469,8 @@ C
      &                        IKEEP1(1), IKEEP2(1), NCMPA )
         ENDIF
         IF (NCMPA .LT. 0) THEN
-           IF (LPOK) WRITE(LP,*) 
-     &               ' Error on output from SCOTCH, NCMPA=', NCMPA
+           IF (LPOK)
+     & call rwarn(' Error on output from SCOTCH, NCMPA=')
            INFO( 1 ) = -9999
            INFO( 2 ) = 3
            GOTO 500 
@@ -505,8 +517,9 @@ C
       IF (allocok > 0) THEN
         IFLAG   = -7
         IERROR  = size(IPTRHALO)
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in MUMPS_SCOTCH_KWAY_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_SCOTCH_KWAY_MIXEDto32")
         RETURN
       END IF
       CALL MUMPS_ICOPY_64TO32(IPTRHALO,
@@ -554,8 +567,9 @@ C
      &   int(KEEP10,8)* (IPTRHALO(NHALO+1)-1_8
      &  +int(size(PARTS),8)),
      &   IERROR)
-        IF (LPOK) WRITE(LP,'(A)') 
-     &       "ERROR memory allocation in MUMPS_SCOTCH_KWAY_MIXEDto64 "
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_SCOTCH_KWAY_MIXEDto64 ")
        ENDIF
       CALL MUMPS_ICOPY_32TO64_64C(JCNHALO,
      &     IPTRHALO(NHALO+1)-1, JCNHALO_I8)
@@ -604,8 +618,9 @@ C
       IF (allocok > 0) THEN
         IFLAG   = -7
         IERROR  = size(IPTRHALO)
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in MUMPS_METIS_KWAY_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_METIS_KWAY_MIXEDto32")
         RETURN
       END IF
       CALL MUMPS_ICOPY_64TO32(IPTRHALO,
@@ -637,8 +652,9 @@ C
         CALL MUMPS_SET_IERROR(
      &   int(KEEP10,8)* (IPTRHALO(NHALO+1)-1_8+int(size(PARTS),8)),
      &   IERROR)
-        IF (LPOK) WRITE(LP,'(A)') 
-     &       "ERROR memory allocation in MUMPS_METIS_KWAY_MIXEDto64 "
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_METIS_KWAY_MIXEDto64 ")
        ENDIF
       CALL MUMPS_ICOPY_32TO64_64C(JCNHALO,
      &     IPTRHALO(NHALO+1)-1, JCNHALO_I8)
@@ -679,8 +695,9 @@ C
       IF (allocok > 0) THEN
         INFO(1)=-7
         INFO(2)=NVTX+1
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in MUMPS_PORD_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORD_MIXEDto32")
         RETURN
       ENDIF
       CALL MUMPS_ICOPY_64TO32(XADJ8, NVTX+1, XADJ)
@@ -726,8 +743,9 @@ C
          IF (allocok > 0) THEN
           INFO(1)=-7
           CALL MUMPS_SET_IERROR(NEDGES8,INFO(2))
-          IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in MUMPS_PORD_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORD_MIXEDto64")
           RETURN
          ENDIF
          CALL MUMPS_ICOPY_32TO64_64C(IW, NEDGES8, IW8)
@@ -736,8 +754,9 @@ C
         IF (allocok > 0) THEN
           INFO(1)=-7
           CALL MUMPS_SET_IERROR(int(NVTX,8),INFO(2))
-          IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in MUMPS_PORD_MIXEDto64"
+          IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORD_MIXEDto64")
           RETURN
         ENDIF
         IF (INPLACE64_GRAPH_COPY)  THEN
@@ -782,8 +801,9 @@ C
       IF (allocok > 0) THEN
         INFO(1)=-7
         INFO(2)=NVTX+1
-        IF (LPOK) WRITE(LP,'(A)') 
-     &    "ERROR memory allocation in MUMPS_PORDF_WND_MIXEDto32"
+        IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORDF_WND_MIXEDto32")
         RETURN
       ENDIF
       CALL MUMPS_ICOPY_64TO32(XADJ8,N+1,XADJ)
@@ -830,8 +850,9 @@ C
           IF (allocok > 0) THEN
             INFO(1)=-7
             CALL MUMPS_SET_IERROR(NEDGES8,INFO(2))
-            IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in MUMPS_PORDF_WND_MIXEDto64"
+            IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORDF_WND_MIXEDto64")
             RETURN
           ENDIF
           CALL MUMPS_ICOPY_32TO64_64C(IW, NEDGES8, IW8)
@@ -840,8 +861,9 @@ C
         IF (allocok > 0) THEN
             INFO(1)=-7
             CALL MUMPS_SET_IERROR(int(NVTX,8),INFO(2))
-            IF (LPOK) WRITE(LP,'(A)') 
-     &      "ERROR memory allocation in MUMPS_PORDF_WND_MIXEDto64"
+            IF (LPOK)
+     & call rwarn("ERROR memory allocation in "//
+     & "MUMPS_PORDF_WND_MIXEDto64")
             RETURN
         ENDIF
         CALL MUMPS_ICOPY_32TO64(NV, NVTX, NV8)

@@ -191,12 +191,12 @@ C
       IF ( ( (INFO(1).EQ.-10 .OR. INFO(1).EQ.-40)
      &       .AND. (NTOTPVTOT.EQ.N) )
      &     .OR. ( NTOTPVTOT.GT.N ) ) THEN
-       write(*,*) ' Error 1 NTOTPVTOT=', NTOTPVTOT,N
+      call rwarn(' Error 1 NTOTPVTOT=')
        CALL MUMPS_ABORT()
       ENDIF
       IF ( (KEEP(19).NE.0 ) .AND. (NTOTPVTOT.NE.N) .AND. 
      &     (INFO(1).GE.0) )  THEN
-       write(*,*) ' Error 2 NTOTPVTOT=', NTOTPVTOT 
+       call rwarn(" Error 2 NTOTPVTOT=")
        CALL MUMPS_ABORT()
       ENDIF
       IF ( (INFO(1) .GE. 0 ) 
@@ -207,16 +207,16 @@ C
          INFO(2) = NTOTPVTOT
       ENDIF
       IF (PROK) THEN
-        WRITE (MPRINT,99980) INFO(1), INFO(2),
-     &       KEEP(28), KEEP8(31), INFO(10), INFO(11)
-        IF(KEEP(50) .EQ. 0) THEN
-          WRITE(MPRINT,99982) INFO(12)
-        ENDIF
-        IF (KEEP(50) .NE. 0) THEN
-          WRITE(MPRINT,99984) INFO(12)
-        ENDIF
-        WRITE (MPRINT, 99986)
-     &       INFO(13), INFO(14), INFO(25), RINFO(2), RINFO(3)
+c~         WRITE (MPRINT,99980) INFO(1), INFO(2),
+c~      &       KEEP(28), KEEP8(31), INFO(10), INFO(11)
+c~         IF(KEEP(50) .EQ. 0) THEN
+c~           WRITE(MPRINT,99982) INFO(12)
+c~         ENDIF
+c~         IF (KEEP(50) .NE. 0) THEN
+c~           WRITE(MPRINT,99984) INFO(12)
+c~         ENDIF
+c~         WRITE (MPRINT, 99986)
+c~      &       INFO(13), INFO(14), INFO(25), RINFO(2), RINFO(3)
       ENDIF
       RETURN
 99980 FORMAT (/' LEAVING FACTORIZATION PHASE WITH ...'/

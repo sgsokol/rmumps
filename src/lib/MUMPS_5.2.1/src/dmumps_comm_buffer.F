@@ -208,8 +208,8 @@ C
           CALL MPI_TEST(BUF%CONTENT( BUF%HEAD + REQ ), FLAG,
      &                  STATUS, IERR)
           IF ( .not. FLAG ) THEN
-            WRITE(*,*) '** Warning: trying to cancel a request.'
-            WRITE(*,*) '** This might be problematic'
+            call rwarn('** Warning: trying to cancel a request.')
+            call rwarn('** This might be problematic')
             CALL MPI_CANCEL( BUF%CONTENT( BUF%HEAD + REQ ), IERR )
             CALL MPI_REQUEST_FREE( BUF%CONTENT( BUF%HEAD + REQ ), IERR )
           END IF
@@ -402,8 +402,9 @@ C
         CALL MPI_ISEND( BUF_CB%CONTENT( IPOS ), POSITION, MPI_PACKED,
      &                DEST, TAG, COMM, BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE_PACK .LT. POSITION ) THEN
-          WRITE(*,*) 'Error Try_send_cb: SIZE, POSITION=',SIZE_PACK,
-     &               POSITION
+          call rwarn('Error Try_send_cb: SIZE, POSITION=')
+c~           ,SIZE_PACK,
+c~      &               POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE_PACK .NE. POSITION )
@@ -485,8 +486,8 @@ C
      &                  DEST, Master2Slave, COMM,
      &                  BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) 'Try_send_master2slave: SIZE, POSITION = ',
-     &               SIZE, POSITION
+          call rwarn('Try_send_master2slave: SIZE, POSITION = ')
+c~      &               SIZE, POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION ) CALL BUF_ADJUST( BUF_CB, POSITION )
@@ -563,7 +564,7 @@ C
           IF (NODE2.EQ.0.AND.KEEP(350).NE.0) THEN
             DO K=1, NRHS_B
 #if defined(RHSCOMP_BYROWS)
-              WRITE(*,*) "Internal error in DMUMPS_BUF_SEND_VCB"
+              call rwarn("Internal error in DMUMPS_BUF_SEND_VCB")
               CALL MUMPS_ABORT()
 #else
               IF (NPIV.GT.0) THEN
@@ -613,8 +614,9 @@ C
      &                 IONE , DEST2
      &               )
         IF ( IERR .LT. 0 ) THEN
-         write(6,*) ' Internal error in DMUMPS_BUF_SEND_1INT',
-     &       ' Buf size (bytes)= ',BUF_SMALL%LBUF
+         call rwarn(' Internal error in DMUMPS_BUF_SEND_1INT'//
+     &       ' Buf size (bytes)= ')
+c~      ,BUF_SMALL%LBUF
       RETURN
         ENDIF
         POSITION=0
@@ -843,8 +845,8 @@ C ssg
         POSITION = POSITION + NCOL
         POSITION = POSITION - IPOS
         IF ( POSITION * SIZEofINT .NE. SIZE_BYTES ) THEN
-          WRITE(*,*) 'Error in DMUMPS_BUF_SEND_DESC_BANDE :',
-     &               ' wrong estimated size'
+         call rwarn('Error in DMUMPS_BUF_SEND_DESC_BANDE :'//
+     &               ' wrong estimated size')
           CALL MUMPS_ABORT()
         END IF
         KEEP(266)=KEEP(266)+1
@@ -884,7 +886,8 @@ C ssg
         DEST2(1) = DEST
         IERR = 0
         IF ( NELIM .NE. NROW ) THEN
-          WRITE(*,*) 'Error in TRY_SEND_MAITRE2:',NELIM, NROW
+          call rwarn('Error in TRY_SEND_MAITRE2:')
+c~           ,NELIM, NROW
           CALL MUMPS_ABORT()
         END IF
         IF (NBROWS_ALREADY_SENT .EQ. 0) THEN
@@ -1016,8 +1019,8 @@ C ssg
      &                  DEST, MAITRE2, COMM,
      &                  BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE_PACK .LT. POSITION ) THEN
-          write(*,*) 'Try_send_maitre2, SIZE,POSITION=',
-     &                SIZE_PACK,POSITION
+          call rwarn('Try_send_maitre2, SIZE,POSITION=')
+c~      &                SIZE_PACK,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE_PACK .NE. POSITION )
@@ -1160,7 +1163,7 @@ C ssg
           ENDIF
         ENDDO
         IF (PANEL2SEND.EQ.-1) THEN
-          write(*,*) 'Internal error: PANEL2SEND not found'
+          call rwarn('Internal error: PANEL2SEND not found')
           CALL MUMPS_ABORT()
         ENDIF
         IF (KEEP(50).EQ.0) THEN
@@ -1179,7 +1182,7 @@ C ssg
             ENDIF
           ENDDO
           IF (NB_BLR_COLS.EQ.-1) THEN
-            write(*,*) 'Internal error: NB_BLR_COLS not found'
+            call rwarn('Internal error: NB_BLR_COLS not found')
             CALL MUMPS_ABORT()
           ENDIF
           MAX_ROW_LENGTH = BEGS_BLR_ROW(PANEL2SEND+1)-1+NROW_SHIFT
@@ -1521,7 +1524,7 @@ C ssg
                  ELSE
                     IF (PACKED_CB) THEN
                       IF (NPIV.NE.0) THEN
-         WRITE(*,*) "Error in PARPIV/DMUMPS_BUF_SEND_CONTRIB_TYPE2"
+         call rwarn("Error in PARPIV/DMUMPS_BUF_SEND_CONTRIB_TYPE2")
          CALL MUMPS_ABORT()
                       ENDIF
                       LROW1=LROW-NROW+PS1
@@ -1558,8 +1561,9 @@ C ssg
      &                  PDEST, CONTRIB_TYPE2, COMM,
      &                  BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE_PACK.LT. POSITION ) THEN
-          WRITE(*,*) ' contniv2: SIZE, POSITION =',SIZE_PACK, POSITION
-          WRITE(*,*) ' NBROW, LROW = ', NBROW, LROW
+          call rwarn(' contniv2: SIZE, POSITION =')
+c~           ,SIZE_PACK, POSITION
+c~           WRITE(*,*) ' NBROW, LROW = ', NBROW, LROW
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE_PACK .NE. POSITION )
@@ -1699,8 +1703,8 @@ C ssg
               POSITION = POSITION + NCBSON
               POSITION = POSITION - IPOS
               IF ( POSITION * SIZEofINT .NE. SIZE ) THEN
-                WRITE(*,*) 'Error in DMUMPS_BUF_SEND_MAPLIG :',
-     &                     ' wrong estimated size'
+                call rwarn('Error in DMUMPS_BUF_SEND_MAPLIG :'//
+     &                     ' wrong estimated size')
                 CALL MUMPS_ABORT()
               END IF
               KEEP(266)=KEEP(266)+1
@@ -1743,8 +1747,9 @@ C ssg
               CALL BUF_LOOK( BUF_CB, IPOS, IREQ, SIZE, IERR,
      &                       IONE, DEST(IDEST) )
               IF ( IERR .LT. 0 )  THEN
-                WRITE(*,*) 'Internal error DMUMPS_BUF_SEND_MAPLIG',
-     &                     'IERR after BUF_LOOK=',IERR
+                call rwarn('Internal error DMUMPS_BUF_SEND_MAPLIG'//
+     &                     'IERR after BUF_LOOK=')
+c~      ,IERR
                 CALL MUMPS_ABORT()
               END IF
               POSITION = IPOS
@@ -1778,8 +1783,8 @@ C ssg
               POSITION = POSITION + TROW_SIZE
               POSITION = POSITION - IPOS
               IF ( POSITION * SIZEofINT .NE. SIZE ) THEN
-               WRITE(*,*) ' ERROR 1 in TRY_SEND_MAPLIG:',
-     &          'Wrong estimated size'
+               call rwarn(' ERROR 1 in TRY_SEND_MAPLIG:'//
+     &          'Wrong estimated size')
                CALL MUMPS_ABORT()
               END IF
               KEEP(266)=KEEP(266)+1
@@ -2023,8 +2028,9 @@ C ssg
         END DO
         SIZET = SIZET - ( NBMSGS - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZET .LT. POSITION ) THEN
-          WRITE(*,*) ' Error sending blocfacto : size < position'
-          WRITE(*,*) ' Size,position=',SIZET,POSITION
+          call rwarn(' Error sending blocfacto : size < position')
+          call rwarn(' Size,position=')
+c~           ,SIZET,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZET .NE. POSITION ) CALL BUF_ADJUST( BUF_CB, POSITION )
@@ -2145,8 +2151,8 @@ C ssg
         END DO
         SIZET = SIZET - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZET .LT. POSITION ) THEN
-          WRITE(*,*) ' Error sending blfac slave : size < position'
-          WRITE(*,*) ' Size,position=',SIZET,POSITION
+          call rwarn(' Error sending blfac slave : size < position')
+c~           WRITE(*,*) ' Size,position=',SIZET,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZET .NE. POSITION ) CALL BUF_ADJUST( BUF_CB, POSITION )
@@ -2485,8 +2491,8 @@ C ssg
         CALL MPI_ISEND( BUF_CB%CONTENT( IPOS ), POSITION, MPI_PACKED,
      &                PDEST, TAG, COMM, BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE_PACK .LT. POSITION ) THEN
-          WRITE(*,*) ' Error sending contribution to root:Size<positn'
-          WRITE(*,*) ' Size,position=',SIZE_PACK,POSITION
+          call rwarn(' Error sending contribution to root:Size<positn')
+c~           WRITE(*,*) ' Size,position=',SIZE_PACK,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE_PACK .NE. POSITION )
@@ -2540,8 +2546,8 @@ C ssg
         POSITION = POSITION + NSLAVES
         POSITION = POSITION - IPOS
         IF ( POSITION * SIZEofINT .NE. SIZE ) THEN
-          WRITE(*,*) 'Error in DMUMPS_BUF_SEND_ROOT_NELIM_INDICES:',
-     &               'wrong estimated size'
+          call rwarn('Error in DMUMPS_BUF_SEND_ROOT_NELIM_INDICES:'//
+     &               'wrong estimated size')
           CALL MUMPS_ABORT()
         END IF
         KEEP(266)=KEEP(266)+1
@@ -2569,7 +2575,7 @@ C ssg
      &                 IONE, DEST2
      &               )
         IF ( IERR .LT. 0 ) THEN
-          WRITE(*,*) 'Internal error 1 with small buffers '
+          call rwarn('Internal error 1 with small buffers ')
           CALL MUMPS_ABORT()
         END IF
         IF ( IERR .LT. 0 ) THEN
@@ -2602,7 +2608,7 @@ C ssg
      &                 IONE, DEST2
      &               )
         IF ( IERR .LT. 0 ) THEN
-          WRITE(*,*) 'Internal error 2 with small buffers '
+          call rwarn('Internal error 2 with small buffers ')
           CALL MUMPS_ABORT()
         END IF
         IF ( IERR .LT. 0 ) THEN
@@ -2666,8 +2672,8 @@ C ssg
      &                  DEST, MSGTAG, COMM,
      &                  BUF_CB%CONTENT( IREQ ), IERR )
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) 'Try_update: SIZE, POSITION = ',
-     &               SIZE, POSITION
+          call rwarn('Try_update: SIZE, POSITION = ')
+c~      &               SIZE, POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION ) CALL BUF_ADJUST( BUF_CB, POSITION )
@@ -2783,8 +2789,8 @@ C ssg
         END DO
         SIZE = SIZE - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) ' Error in DMUMPS_BUF_SEND_UPDATE_LOAD'
-          WRITE(*,*) ' Size,position=',SIZE,POSITION
+          call rwarn(' Error in DMUMPS_BUF_SEND_UPDATE_LOAD')
+c~           WRITE(*,*) ' Size,position=',SIZE,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION )
@@ -2816,8 +2822,9 @@ C ssg
         IF (WHAT .NE. 2 .AND. WHAT .NE. 3 .AND.
      &       WHAT.NE.6.AND. WHAT.NE.8 .AND.WHAT.NE.9.AND.
      &       WHAT.NE.17) THEN
-          WRITE(*,*)
-     &          "Internal error 1 in DMUMPS_BUF_BROADCAST",WHAT
+          call rwarn(
+     &          "Internal error 1 in DMUMPS_BUF_BROADCAST")
+c~      ,WHAT
         END IF
         MYID2(1) = MYID
         NDEST = NPROCS - 1
@@ -2887,8 +2894,8 @@ C ssg
         END DO
         SIZE = SIZE - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) ' Error in DMUMPS_BUF_BROADCAST'
-          WRITE(*,*) ' Size,position=',SIZE,POSITION
+          call rwarn(' Error in DMUMPS_BUF_BROADCAST')
+c~           WRITE(*,*) ' Size,position=',SIZE,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION )
@@ -2961,8 +2968,8 @@ C ssg
      &                 IERR )
         SIZE = SIZE - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) ' Error in DMUMPS_BUF_SEND_FILS'
-          WRITE(*,*) ' Size,position=',SIZE,POSITION
+          call rwarn(' Error in DMUMPS_BUF_SEND_FILS')
+c~           WRITE(*,*) ' Size,position=',SIZE,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION )
@@ -3030,8 +3037,8 @@ C ssg
         END DO
         SIZE = SIZE - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) ' Error in DMUMPS_BUF_BCAST_ARRAY'
-          WRITE(*,*) ' Size,position=',SIZE,POSITION
+          call rwarn(' Error in DMUMPS_BUF_BCAST_ARRAY')
+c~           WRITE(*,*) ' Size,position=',SIZE,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION )
@@ -3154,8 +3161,8 @@ C ssg
         END DO
         SIZE = SIZE - ( NDEST - 1 ) * OVHSIZE * SIZEofINT
         IF ( SIZE .LT. POSITION ) THEN
-          WRITE(*,*) ' Error in DMUMPS_BUF_BCAST_ARRAY'
-          WRITE(*,*) ' Size,position=',SIZE,POSITION
+          call rwarn(' Error in DMUMPS_BUF_BCAST_ARRAY')
+c~           WRITE(*,*) ' Size,position=',SIZE,POSITION
           CALL MUMPS_ABORT()
         END IF
         IF ( SIZE .NE. POSITION )
@@ -3289,8 +3296,8 @@ C ssg
      &           IFLAG, IERROR, KEEP8 )
       IF (IFLAG.LT.0) RETURN
       IF (LRFORM .NE. LRB%LRFORM) THEN
-        WRITE(*,*) "Internal error 2 in ALLOC_LRB",
-     &        LRFORM, LRB%LRFORM
+        call rwarn("Internal error 2 in ALLOC_LRB")
+c~      &        LRFORM, LRB%LRFORM
       ENDIF
       IF (ISLR) THEN
         IF (K .GT. 0) THEN
@@ -3323,13 +3330,13 @@ C ssg
       IERR = 0
       allocate(BLOCK(MAXI_CLUSTER), STAT=ALLOCOK )
       IF ( ALLOCOK .GT. 0 ) THEN
-             WRITE(*,*) 'pb allocation in mumps_mpi_pack_scale_lr'
+             call rwarn('pb allocation in mumps_mpi_pack_scale_lr')
              IERR = -1
              GOTO 500
       END IF
       allocate(SCALED(MAXI_CLUSTER,2), STAT=ALLOCOK )
       IF ( ALLOCOK .GT. 0 ) THEN
-             WRITE(*,*) 'pb allocation in mumps_mpi_pack_scale_lr'
+             call rwarn('pb allocation in mumps_mpi_pack_scale_lr')
              IERR = -1
              GOTO 500
       END IF

@@ -56,13 +56,14 @@ C
       IF (IWPOSCB.EQ.LIW) THEN
         IF (LREQ.NE.KEEP(IXSZ).OR.LREQCB.NE.0_8
      &      .OR. .NOT. SET_HEADER) THEN
-          WRITE(*,*) "Internal error in DMUMPS_ALLOC_CB ",
-     &      SET_HEADER, LREQ, LREQCB
+          call rwarn("Internal error in DMUMPS_ALLOC_CB ")
+c~      &      SET_HEADER, LREQ, LREQCB
           CALL MUMPS_ABORT()
         ENDIF
         IF (IWPOSCB-IWPOS+1 .LT. KEEP(IXSZ)) THEN
-          WRITE(*,*) "Problem with integer stack size",IWPOSCB,
-     &               IWPOS, KEEP(IXSZ)
+          call rwarn("Problem with integer stack size")
+c~           ,IWPOSCB,
+c~      &               IWPOS, KEEP(IXSZ)
           IFLAG  = -8
           IERROR = LREQ
           RETURN
@@ -143,10 +144,12 @@ C
       IF (IFLAG.LT.0) GOTO 650
       IXXP=IWPOSCB+XXP+1
       IF (IXXP.GT.LIW) THEN
-        WRITE(*,*) "Internal error 3 in DMUMPS_ALLOC_CB ",IXXP
+        call rwarn("Internal error 3 in DMUMPS_ALLOC_CB ")
+c~         ,IXXP
       ENDIF
       IF (IW(IXXP).GT.0) THEN
-        WRITE(*,*) "Internal error 2 in DMUMPS_ALLOC_CB ",IW(IXXP),IXXP
+        call rwarn("Internal error 2 in DMUMPS_ALLOC_CB ")
+c~         ,IW(IXXP),IXXP
       ENDIF
       IWPOSCB = IWPOSCB - LREQ
       IF (SET_HEADER) THEN

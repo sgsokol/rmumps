@@ -342,8 +342,8 @@ C      ROWSCA =>id%ROWSCA
       PRINT_MAXAVG = .NOT.(id%NSLAVES.EQ.1 .AND. KEEP(46).EQ.1)
       IF (.not.PROK)  MP =0
       IF (.not.PROKG) MPG=0
-      IF ( PROK  ) WRITE(MP,100)
-      IF ( PROKG ) WRITE(MPG,100)
+c~       IF ( PROK  ) WRITE(MP,100)
+c~       IF ( PROKG ) WRITE(MPG,100)
       NB_BYTES       = 0_8
       NB_BYTES_MAX   = 0_8
       NB_BYTES_EXTRA = 0_8
@@ -615,8 +615,8 @@ C     ------------------------------
 C          Maximum transversal permutation
 C          has not been saved (KEEP(23)>0 and UNS_PERM allocated)
 C          when matrix is symmetric.
-           IF (PROKG) WRITE(MPG,'(A)')
-     &       ' Internal Error 1 in solution driver '
+           IF (PROKG) call rwarn(
+     &       ' Internal Error 1 in solution driver ')
            id%INFO(1)=-444
            id%INFO(2)=KEEP(23)
           ENDIF
@@ -630,8 +630,8 @@ C         negative pivots or determinant)
 C         ------------------------------------
           IF (KEEP(201) .EQ. -1) THEN
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: Solve impossible because factors not kept'
+                call rwarn(
+     &              ' ERROR: Solve impossible because factors not kept')
              ENDIF
              id%INFO(1)=-44
              id%INFO(2)=KEEP(251)
@@ -639,8 +639,8 @@ C         ------------------------------------
           ELSE IF (KEEP(221).EQ.0 .AND. KEEP(251) .EQ. 2
      &            .AND. KEEP(252).EQ.0) THEN
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: Solve impossible because factors not kept'
+                call rwarn(
+     & ' ERROR: Solve impossible because factors not kept')
              ENDIF
              id%INFO(1)=-44
              id%INFO(2)=KEEP(251)
@@ -654,9 +654,9 @@ C            Error: id%NRHS is not allowed to change since analysis
 C            because fwd has been performed during facto with
 C            KEEP(253) RHS
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: id%NRHS not allowed to change when',
-     &               ' ICNTL(32)=1'
+                call rwarn(
+     &               ' ERROR: id%NRHS not allowed to change when'//
+     &               ' ICNTL(32)=1')
              ENDIF
              id%INFO(1)=-42
              id%INFO(2)=id%KEEP(253)
@@ -668,10 +668,10 @@ C            Fwd in facto is not compatible with transpose system
              INFO(1) = -43
              INFO(2) = 9
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: Transpose system (ICNTL(9).NE.0) not ',
-     &               ' compatible with forward performed during',
-     &               ' factorization (ICNTL(32)=1)'
+                call rwarn(
+     &               ' ERROR: Transpose system (ICNTL(9).NE.0) not '//
+     &               ' compatible with forward performed during'//
+     &               ' factorization (ICNTL(32)=1)')
              ENDIF
              GOTO 333
           ENDIF
@@ -683,26 +683,26 @@ C            Sparse RHS may be due to A-1 (ICNTL(30)
              IF (KEEP(237).NE.0) THEN
                INFO(2) = 30 ! ICNTL(30)
                IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     &                 ' ERROR: A-1 functionality incompatible with',
-     &                 ' forward performed during factorization',
-     &                 ' (ICNTL(32)=1)'
+                  call rwarn(
+     &                 ' ERROR: A-1 functionality incompatible with'//
+     &                 ' forward performed during factorization'//
+     &                 ' (ICNTL(32)=1)')
                ENDIF
              ELSE
                INFO(2) = 20      ! ICNTL(20)
                IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     &         ' ERROR: sparse RHS incompatible with forward',
-     &         ' elimination during factorization (ICNTL(32)=1)'
+                  call rwarn(
+     &         ' ERROR: sparse RHS incompatible with forward'//
+     &         ' elimination during factorization (ICNTL(32)=1)')
                ENDIF
              ENDIF
              GOTO 333
           ENDIF
           IF (KEEP(237) .NE. 0 .AND. ICNTL21.NE.0) THEN
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: A-1 functionality is incompatible',
-     &               ' with distributed solution.'
+                call rwarn(
+     & ' ERROR: A-1 functionality is incompatible'//
+     & ' with distributed solution.')
              ENDIF
              INFO(1)=-48
              INFO(2)=21
@@ -710,9 +710,9 @@ C            Sparse RHS may be due to A-1 (ICNTL(30)
           ENDIF
           IF (KEEP(237) .NE. 0 .AND. KEEP(60) .NE.0) THEN
              IF (PROKG)  THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: A-1 functionality is incompatible',
-     &               ' with Schur.'
+                call rwarn(
+     & ' ERROR: A-1 functionality is incompatible'//
+     & ' with Schur.')
              ENDIF
              INFO(1)=-48
              INFO(2)=19
@@ -720,9 +720,9 @@ C            Sparse RHS may be due to A-1 (ICNTL(30)
           ENDIF
           IF (KEEP(237) .NE. 0 .AND. KEEP(111) .NE.0) THEN
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: A-1 functionality is incompatible',
-     &               ' with null space.'
+                call rwarn(
+     & ' ERROR: A-1 functionality is incompatible'//
+     & ' with null space.')
              ENDIF
              INFO(1)=-48
              INFO(2)=25
@@ -802,11 +802,11 @@ C           compare with dble to prevent overflow
             IF (dble(id%N)*dble(id%NRHS).LT.dble(id%NZ_RHS)) THEN
 C             Possible in case of dupplicate entries in Sparse RHS
               IF (PROKG) THEN
-                 write(MPG,*)
-     &              " WARNING: many dupplicate entries in ", 
-     &              " sparse RHS  provided by the user ",
-     &              " id%NZ_RHS,id%N,id%NRHS =",
-     &              id%NZ_RHS,id%N,id%NRHS
+                 call rwarn(
+     &              " WARNING: many dupplicate entries in "//
+     &              " sparse RHS  provided by the user "//
+     &              " id%NZ_RHS,id%N,id%NRHS =")
+c~      &              id%NZ_RHS,id%N,id%NRHS
               ENDIF
             END IF
             IF (id%IRHS_PTR(1).ne.1) THEN
@@ -844,23 +844,23 @@ C         --------------------------------
 C             Ignore sparse RHS in case we compute
 C             vectors of the null space (KEEP(111)).NE.0.)
              IF (PROKG) THEN
-                WRITE(MPG,'(A)')
-     &               ' ERROR: ICNTL(20) and ICNTL(30) functionalities ',
-     &               ' incompatible with null space'
+                call rwarn(
+     & ' ERROR: ICNTL(20) and ICNTL(30) functionalities '//
+     & ' incompatible with null space')
              ENDIF
              INFO(1) = -37
              IF (KEEP(237).NE.0) THEN
                 INFO(2) = 30    ! icntl(30)
                 IF (PROKG) THEN
-                   WRITE(MPG,'(A)')
-     &               ' ERROR: ICNTL(30) functionality ',
-     &                  ' incompatible with null space'
+                   call rwarn(
+     & ' ERROR: ICNTL(30) functionality '//
+     & ' incompatible with null space')
                 ENDIF
              ELSE
                 IF (PROKG) THEN
-                   WRITE(MPG,'(A)')
-     &                  ' ERROR: ICNTL(20) functionality ',
-     &                  ' incompatible with null space'
+                   call rwarn(
+     & ' ERROR: ICNTL(20) functionality '//
+     & ' incompatible with null space')
                 ENDIF
                 INFO(2) = 20    ! inclt(20)
              ENDIF
@@ -1029,20 +1029,20 @@ C       ----------------------------
         ENDIF
 C
 C       print solve phase stats if requested
-        IF ( PROKG )  THEN
-C          write(6,*) " NZ_RHS is zero "
-           WRITE( MPG, 150 )
+c~         IF ( PROKG )  THEN
+C          call rwarn(" NZ_RHS is zero ")
+c~            WRITE( MPG, 150 )
 C             ICNTL(35) should not been accessed during SOLVE thus
 C             print KEEP(486) value set during factorization
-     &        id%NRHS, ICNTL(27), ICNTL(9), ICNTL(10), ICNTL(11),
-     &        ICNTL(20), ICNTL(21), ICNTL(30), KEEP(486)
-           IF (KEEP(221).NE.0) THEN
-            WRITE (MPG, 152) KEEP(221)
-           ENDIF
-           IF (KEEP(252).GT.0) THEN   ! Fwd during facto
-            WRITE (MPG, 153) KEEP(252)
-           ENDIF
-        ENDIF
+c~      &        id%NRHS, ICNTL(27), ICNTL(9), ICNTL(10), ICNTL(11),
+c~      &        ICNTL(20), ICNTL(21), ICNTL(30), KEEP(486)
+c~            IF (KEEP(221).NE.0) THEN
+c~             WRITE (MPG, 152) KEEP(221)
+c~            ENDIF
+c~            IF (KEEP(252).GT.0) THEN   ! Fwd during facto
+c~             WRITE (MPG, 153) KEEP(252)
+c~            ENDIF
+c~         ENDIF
 C
 C       --------
         GOTO 90 ! end of solve deallocate what is needed
@@ -1062,9 +1062,9 @@ C        Case of pruned elimination tree or selected entries in A-1
 C         When A-1 is requested (keep(237).ne.0)
 C         sparse RHS has been forced to be on.
           IF (LPOK) THEN
-           WRITE(LP,'(A,I4,I4)')
-     &     ' Internal Error 2 in solution driver (A-1) ',
-     &       id%KEEP(237), id%KEEP(248)
+           call rwarn(
+     &     ' Internal Error 2 in solution driver (A-1) ')
+c~      &       id%KEEP(237), id%KEEP(248)
           ENDIF
           CALL MUMPS_ABORT()
          ENDIF
@@ -1139,9 +1139,9 @@ C       -- When computing entries of A-1 (or SparseRHS only)
            IF (NRHS_NONEMPTY.LE.0) THEN
 C           Internal error: tested before in mumps_driver
             IF (LPOK)
-     &        WRITE(LP,*) " Internal Error 3 in solution driver ",
-     &                    " NRHS_NONEMPTY= ",
-     &        NRHS_NONEMPTY
+     &        call rwarn(" Internal Error 3 in solution driver "//
+     &                    " NRHS_NONEMPTY= ")
+c~      &        NRHS_NONEMPTY
             CALL MUMPS_ABORT()
            ENDIF
         ELSE
@@ -1203,10 +1203,12 @@ C       Avoid to have overflows in NFRONT * NBRHS
 C       32-bit integer compuitations.
 C       Should be hopefully large-enough for a while.
         IF(huge(NBRHS)/id%KEEP(133).LT.NBRHS) THEN
-          IF (PROKG) WRITE(MPG,'(A,I6,A)')'Warning: NBRHS = ',NBRHS,
-     &   ' might be too large.'
+          IF (PROKG) call rwarn('Warning: NBRHS = '//
+c~           ,NBRHS,
+     &   ' might be too large.')
           NBRHS = huge(NBRHS)/id%KEEP(133)-1 ! -1 to avoid rounding pbs
-          IF (PROKG) WRITE(MPG,'(A,I6)')'NBRHS reset to ',NBRHS
+          IF (PROKG) call rwarn('NBRHS reset to ')
+c~           ,NBRHS
         END IF
       ENDIF
 #if defined(V_T)
@@ -1344,8 +1346,8 @@ C          will only be available with Fortran 2003 compilers.
         ELSE
           ! S not allocated and WK_USER not provided ==> must be in OOC
            IF (KEEP(201).EQ.0) THEN ! incore
-            WRITE(*,*) ' Working array S not allocated ',
-     &                ' on entry to solve phase (in core) '
+            call rwarn(' Working array S not allocated '//
+     &                ' on entry to solve phase (in core) ')
             CALL MUMPS_ABORT()
           ELSE
 C         -- OOC and WK_USER not provided:
@@ -1371,8 +1373,8 @@ C             Use suggested value of MAXS provided in KEEP(209)
             KEEP8(23)=MAXS
             IF ( allocok .GT. 0 ) THEN
               IF (LPOK) THEN
-                 WRITE(LP,*) id%MYID,': problem allocation of S ',
-     &                'at solve'
+                 call rwarn(': problem allocation of S '//
+     &                'at solve')
               ENDIF
               INFO(1) = -13
               CALL MUMPS_SET_IERROR(MAXS, INFO(2))
@@ -1448,8 +1450,8 @@ C
 CC#if defined(MUMPS_USE_BLAS2)
 C         Potentially compatible
 CC#else
-         WRITE(*,*) " Internal error RHSCOMP_BYROWS not compatible", 
-     &              " with LRSOLVE"
+         call rwarn(" Internal error RHSCOMP_BYROWS not compatible"//
+     &              " with LRSOLVE")
          CALL MUMPS_ABORT()
 C#endif
 #endif
@@ -1457,11 +1459,11 @@ C#endif
         IF (KEEP(485).EQ.1) THEN
           IF (KEEP(350).EQ.0) KEEP(350)= 1 ! default value
           IF (.NOT. (associated(id%FDM_F_ENCODING))) THEN
-            WRITE(*,*) "Internal error 18 in DMUMPS_SOL_DRIVER"
+            call rwarn("Internal error 18 in DMUMPS_SOL_DRIVER")
             CALL MUMPS_ABORT()
           ENDIF
           IF (.NOT. (associated(id%BLRARRAY_ENCODING))) THEN
-            WRITE(*,*) "Internal error 19 in DMUMPS_SOL_DRIVER"
+            call rwarn("Internal error 19 in DMUMPS_SOL_DRIVER")
             CALL MUMPS_ABORT()
           ENDIF
 C         Access to OOC data in module during solve
@@ -1471,22 +1473,22 @@ C         Access to OOC data in module during solve
         ENDIF
       ENDIF
       IF (id%MYID.EQ.MASTER) THEN
-        IF ( PROKG )  THEN
-          WRITE( MPG, 150 )
+c~         IF ( PROKG )  THEN
+c~           WRITE( MPG, 150 )
 C             ICNTL(35) should not been accessed during SOLVE thus
 C             print KEEP(486) value set during factorization
-     &        id%NRHS, NBRHS, ICNTL(9), ICNTL(10), ICNTL(11),
-     &        ICNTL(20), ICNTL(21), ICNTL(30), KEEP(486)
-          IF (KEEP(111).NE.0) THEN
-            WRITE (MPG, 151) KEEP(111)
-          ENDIF
-          IF (KEEP(221).NE.0) THEN
-            WRITE (MPG, 152) KEEP(221)
-          ENDIF
-          IF (KEEP(252).GT.0) THEN   ! Fwd during facto
-            WRITE (MPG, 153) KEEP(252)
-          ENDIF
-        ENDIF
+c~      &        id%NRHS, NBRHS, ICNTL(9), ICNTL(10), ICNTL(11),
+c~      &        ICNTL(20), ICNTL(21), ICNTL(30), KEEP(486)
+c~           IF (KEEP(111).NE.0) THEN
+c~             WRITE (MPG, 151) KEEP(111)
+c~           ENDIF
+c~           IF (KEEP(221).NE.0) THEN
+c~             WRITE (MPG, 152) KEEP(221)
+c~           ENDIF
+c~           IF (KEEP(252).GT.0) THEN   ! Fwd during facto
+c~             WRITE (MPG, 153) KEEP(252)
+c~           ENDIF
+c~         ENDIF
 C
 C     ====================================
 C       Define LSCAL, ICNTL10 and ICNTL11
@@ -1499,8 +1501,8 @@ C
 C       Values of ICNTL(11) out of range
         IF ((ICNTL11 .LT. 0).OR.(ICNTL11 .GE. 3)) THEN
            ICNTL11 = 0
-           IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: ICNTL(11) out of range'
+           IF (PROKG) call rwarn(
+     & ' WARNING: ICNTL(11) out of range')
         ENDIF
         POSTPros = .FALSE.
         IF (ICNTL11.NE.0 .OR. ICNTL10.NE.0) THEN
@@ -1515,31 +1517,31 @@ C       -When only one columns of A-1 is requested then
 C        we could try to reactivate IR even if
 C          -code need be updated
 C          -accuracy could be # when one or more columns are requested
-              IF (PROKG) WRITE(MPG,'(A,A)')
-     &       ' WARNING: Incompatible features: null space basis ',
-     &       '          and Iter. Ref and/or Err. Anal.'
+              IF (PROKG) call rwarn(
+     & ' WARNING: Incompatible features: null space basis '//
+     & '          and Iter. Ref and/or Err. Anal.')
               POSTPros = .FALSE.
            ELSE IF (KEEP(221).NE.0) THEN
 C       Forbid error analysis and iterative refinement
 C       in case of reduced rhs/solution
-              IF (PROKG) WRITE(MPG,'(A,A)')
-     &       ' WARNING: Incompatible features: reduced RHS ',
-     &       '          and Iter. Ref and/or Err. Anal.'
+              IF (PROKG) call rwarn(
+     & ' WARNING: Incompatible features: reduced RHS '//
+     & '          and Iter. Ref and/or Err. Anal.')
               POSTPros = .FALSE.
             ELSE IF  (NBRHS.GT. 1 .OR. ICNTL(21) .GT. 0) THEN
 C          Forbid error analysis and iterative refinement if
 C       the solution is distributed or
 C       in the case where nrhs > 1
-              IF (PROKG) WRITE(MPG,'(A,A)')
-     &       ' WARNING:  Incompatible features: nrhs>1 or distrib sol',
-     &       '           and Iter. Ref and/or Err. Anal.'
+              IF (PROKG) call rwarn(
+     & ' WARNING:  Incompatible features: nrhs>1 or distrib sol'//
+     & '           and Iter. Ref and/or Err. Anal.')
               POSTPros = .FALSE.
             ELSE IF ( KEEP(248) .EQ. -1 ) THEN
 C          Forbid error analysis and iterative refinement
 C          in case of distributed RHS
-              IF (PROKG) WRITE(MPG,'(A,A)')
-     &       ' WARNING:  Incompatible features: distrib rhs',
-     &       '           and Iter. Ref and/or Err. Anal.'
+              IF (PROKG) call rwarn(
+     & ' WARNING:  Incompatible features: distrib rhs'//
+     & '           and Iter. Ref and/or Err. Anal.')
               POSTPros = .FALSE.
             ENDIF  
             IF (.NOT.POSTPros) THEN
@@ -1549,13 +1551,13 @@ C          in case of distributed RHS
         ENDIF
 C   Write a warning.
         IF ((ICNTL(10) .NE. 0) .AND. (ICNTL10 .EQ. 0)) THEN
-            IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: ICNTL(10) treated as if set to 0 '
+            IF (PROKG) call rwarn(
+     & ' WARNING: ICNTL(10) treated as if set to 0 ')
         ENDIF
         IF ((ICNTL(11) .NE. 0)
      &        .AND.(ICNTL11 .EQ. 0)) THEN
-            IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: ICNTL(11) treated as if set to 0 '
+            IF (PROKG) call rwarn(
+     & ' WARNING: ICNTL(11) treated as if set to 0 ')
         ENDIF
 C     -- end of test master
       END IF
@@ -1576,9 +1578,9 @@ C            Case of matrix assembled centralized
              IF (.NOT.associated(id%A) .OR. 
      &          (.NOT.associated(id%IRN)) .OR. 
      &                  ( .NOT.associated(id%JCN))) THEN
-               IF (PROKG) WRITE(MPG,'(A)')
-     &           ' WARNING: original centralized assembled', 
-     &           ' matrix is not allocated '
+               IF (PROKG) call rwarn(
+     & ' WARNING: original centralized assembled'//
+     & ' matrix is not allocated ')
                 MAT_ALLOC_LOC = 0
              ENDIF
             ELSE 
@@ -1586,8 +1588,8 @@ C            Case of matrix in elemental format
              IF (.NOT.associated(id%A_ELT).OR. 
      &           .NOT.associated(id%ELTPTR).OR.
      &           .NOT.associated(id%ELTVAR)) THEN
-              IF (PROKG) WRITE(MPG,'(A)')
-     &        ' WARNING: original elemental matrix is not allocated '
+              IF (PROKG) call rwarn(
+     & ' WARNING: original elemental matrix is not allocated ')
               MAT_ALLOC_LOC = 0
              ENDIF
             ENDIF
@@ -1600,9 +1602,9 @@ C        allocated, otherwise MAT_ALLOC_LOC = 0
            IF ((.NOT.associated(id%A_loc)) .OR. 
      &        (.NOT.associated(id%IRN_loc)) .OR. 
      &        (.NOT.associated(id%JCN_loc))) THEN
-             IF (PROKG) WRITE(MPG,'(A)')
-     &           ' WARNING: original distributed assembled', 
-     &           '  matrix is not allocated '
+             IF (PROKG) call rwarn(
+     & ' WARNING: original distributed assembled'//
+     & '  matrix is not allocated ')
              MAT_ALLOC_LOC = 0
            ENDIF
          ENDIF
@@ -1618,21 +1620,21 @@ C        allocated, otherwise MAT_ALLOC_LOC = 0
               ICNTL10 = 0
 C   Write a warning.
            IF ((ICNTL(10) .NE. 0) .AND. (ICNTL10 .EQ. 0)) THEN
-            IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: ICNTL(10) treated as if set to 0 '
+            IF (PROKG) call rwarn(
+     & ' WARNING: ICNTL(10) treated as if set to 0 ')
            ENDIF
            IF ((ICNTL(11) .EQ. 1).OR.(ICNTL(11) .EQ. 2) 
      &        .AND.(ICNTL11 .EQ. 0)) THEN
-            IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: ICNTL(11) treated as if set to 0 '
+            IF (PROKG) call rwarn(
+     & ' WARNING: ICNTL(11) treated as if set to 0 ')
           ENDIF
         ENDIF
         IF (POSTPros) THEN
             ALLOCATE(SAVERHS(id%N*NBRHS),stat = allocok)
             IF ( allocok .GT. 0 ) THEN
               IF (LPOK) THEN
-                 WRITE(LP,*) id%MYID,
-     &                ':Problem in solve: error allocating SAVERHS'
+                 call rwarn(
+     &                ':Problem in solve: error allocating SAVERHS')
               ENDIF
               INFO(1) = -13
               INFO(2) = id%N*NBRHS
@@ -1648,8 +1650,8 @@ c
 C         Ignore ENTRIES IN A-1 in case we compute
 C         vectors of the null space (KEEP(111)).NE.0.)
 C         We should still allocate IRHS_SPARSE
-          IF (PROKG) WRITE(MPG,'(A)')
-     &    ' WARNING: KEEP(237) treated as if set to 0 (null space)'
+          IF (PROKG) call rwarn(
+     & ' WARNING: KEEP(237) treated as if set to 0 (null space)')
           KEEP(237)=0
         ENDIF
 C     -- end of test master
@@ -1692,8 +1694,8 @@ C          (note also that KEEP(243).NE.0 only when PERMUTE_RHS is on)
            INTERLEAVE_PAR= .TRUE.
         ELSE
           IF (PROKG) THEN
-            write(MPG,*) ' Warning incompatible options ',
-     &      ' interleave RHS reset to false '
+            call rwarn(' Warning incompatible options '//
+     &      ' interleave RHS reset to false ')
           ENDIF
         ENDIF
       ENDIF
@@ -1742,8 +1744,8 @@ C       The buffer is used both for solve and for DMUMPS_GATHER_SOLUTION
         ALLOCATE (id%BUFR(id%LBUFR),stat=allocok)
         IF ( allocok .GT. 0 ) THEN
             IF (LPOK) THEN
-               WRITE(LP,*) id%MYID,
-     &              ' Problem in solve: error allocating BUFR'
+               call rwarn(
+     &              ' Problem in solve: error allocating BUFR')
             ENDIF
             INFO(1) = -13
             INFO(2) = id%LBUFR
@@ -1762,8 +1764,9 @@ C       ------------------------------------------------------
           INFO(1) = -13
           INFO(2) = DMUMPS_LBUF_INT
           IF ( LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ':Error allocating small Send buffer:IERR=',IERR
+            call rwarn(
+     &      ':Error allocating small Send buffer:IERR=')
+c~      ,IERR
           END IF
           GOTO 111
         END IF
@@ -1801,8 +1804,9 @@ C       to enable computation of integer size.
           INFO(1) = -13
           INFO(2) = DMUMPS_LBUF/KEEP(34) + 1
           IF ( LPOK) THEN
-            WRITE(LP,*) id%MYID,
-     &      ':Error allocating Send buffer:IERR=', IERR
+            call rwarn(
+     &      ':Error allocating Send buffer:IERR=')
+c~      , IERR
           END IF
           GOTO 111
         END IF
@@ -1824,7 +1828,7 @@ C
             INFO(1)=-13
             INFO(2)=id%N
             IF (LPOK) THEN
-               WRITE(LP,*) 'ERROR while allocating RHS on a slave'
+               call rwarn('ERROR while allocating RHS on a slave')
             ENDIF
             GOTO 111
           END IF
@@ -1850,8 +1854,8 @@ c         --- ALLOCATE outside loop RHS_BOUNDS is needed
             INFO(1)=-13
             INFO(2)=LPTR_RHS_BOUNDS
             IF (LPOK) THEN
-               WRITE(LP,*) 'ERROR while allocating RHS_BOUNDS on',
-     &              ' a slave'
+               call rwarn('ERROR while allocating RHS_BOUNDS on'//
+     &              ' a slave')
             ENDIF
             GOTO 111
           END IF
@@ -2105,7 +2109,7 @@ C         arrays needed to do that on each processor.
             ENDIF
             IF (allocok > 0) THEN
               IF (LPOK) THEN
-               WRITE(LP,*) 'Error allocating temporary scaling array'
+               call rwarn('Error allocating temporary scaling array')
               ENDIF
               INFO(1)=-13
               INFO(2)=id%N
@@ -2122,7 +2126,7 @@ C         arrays needed to do that on each processor.
      &               stat=allocok)
             IF (allocok > 0) THEN
               IF (LPOK) THEN
-                WRITE(LP,*) 'Error allocating local scaling array'
+                call rwarn('Error allocating local scaling array')
               ENDIF
               INFO(1)=-13
               INFO(2)=id%KEEP(89)
@@ -2353,24 +2357,24 @@ c     - for NS thus is to apply permutation to PIVNUL_LIST
 C     NOTE:
 C        when host not working both master and slaves have
 C        in this case the complete list
-            WRITE(*,*) id%MYID, ':INTERNAL ERROR 1 : ',
-     &                 ' PERMUTE RHS during null space computation ',
-     &                 ' not available yet '
+            call rwarn(':INTERNAL ERROR 1 : '//
+     &                 ' PERMUTE RHS during null space computation '//
+     &                 ' not available yet ')
             CALL MUMPS_ABORT()
        ENDIF                     ! End Permute_RHS
       ELSE
          IF (DO_PERMUTE_RHS .AND. KEEP(111).NE.0 ) THEN
-            WRITE(*,*) id%MYID, ':INTERNAL ERROR 2 : ',
-     &                 ' PERMUTE RHS during null space computation ',
-     &                 ' not available yet '
+            call rwarn(':INTERNAL ERROR 2 : '//
+     &                 ' PERMUTE RHS during null space computation '//
+     &                 ' not available yet ')
             CALL MUMPS_ABORT()
 C
 C
          ENDIF                  !  End DO_PERMUTE_RHS
          IF (INTERLEAVE_PAR.AND. (KEEP(111).NE.0)) THEN
-            WRITE(*,*) id%MYID, ':INTERNAL ERROR 3 : ',
-     &        ' INTERLEAVE RHS during null space computation ',
-     &        ' not available yet '
+            call rwarn(':INTERNAL ERROR 3 : '//
+     &        ' INTERLEAVE RHS during null space computation '//
+     &        ' not available yet ')
             CALL MUMPS_ABORT()
          ENDIF
          IF (INTERLEAVE_PAR.AND.KEEP(111).EQ.0) THEN
@@ -2692,14 +2696,14 @@ C           set REDRHS, RHSCOMP will be set later
                 ENDDO
               ENDDO
            ELSE
-              WRITE(*,*) "Internal error 15 is sol_driver"
+              call rwarn("Internal error 15 is sol_driver")
               CALL MUMPS_ABORT()
             ENDIF
           ENDIF
 #else
           IF (NZ_THIS_BLOCK.EQ.0) THEN
-           WRITE(*,*) " Internal Error 16 in sol driver NZ_THIS_BLOCK=",
-     &               NZ_THIS_BLOCK
+           call rwarn(" Internal Error 16 in sol driver NZ_THIS_BLOCK=")
+c~      &               NZ_THIS_BLOCK
            CALL MUMPS_ABORT()
           ENDIF
 #endif
@@ -2713,8 +2717,8 @@ C           maximum size NBRHS_EFF except if we reach another empty
 C           column. (We are not sure to have a copy allocated
 C           and thus cannot compress on the fly, as done naturally
 C           for A-1). Thus NBCOL might be smaller than NBRHS_EFF
-            WRITE(6,*) ' Internal Error 8 in solution driver ',
-     &            NBCOL, NBRHS_EFF
+            call rwarn(' Internal Error 8 in solution driver ')
+c~      &            NBCOL, NBRHS_EFF
             call MUMPS_ABORT()
           ENDIF
 C         -------------------------------------------------------------
@@ -2761,7 +2765,7 @@ C           compute local copy (compressed) of id%IRHS_PTR on Master
             ENDIF                 ! End DO_PERMUTE_RHS.OR.INTERLEAVE_PAR
             IRHS_PTR_COPY(NBCOL_INBLOC+1)= IPOS
             IF ( IPOS-1 .NE. NZ_THIS_BLOCK ) THEN
-                WRITE(*,*) "Error in compressed copy of IRHS_PTR"
+                call rwarn("Error in compressed copy of IRHS_PTR")
                 IERR = 99
                 call MUMPS_ABORT()
             ENDIF
@@ -2989,7 +2993,7 @@ C ======================================================================
      &             MPI_INTEGER,
      &             MASTER, id%COMM,IERR)
             IF (IERR.GT.0) THEN
-               WRITE (*,*)'NOT OK FOR ALLOC PTR ON SLAVES'
+               call rwarn('NOT OK FOR ALLOC PTR ON SLAVES')
                call MUMPS_ABORT()
             ENDIF
           ENDIF
@@ -3239,8 +3243,8 @@ C               =========
                   INFO(1)=-13
                   INFO(2)=id%N
                   IF ( LPOK) THEN
-                    WRITE(LP,*) id%MYID,
-     &              ':Error allocating C_RW2 in DMUMPS_SOLVE_DRIVE'
+                    call rwarn(
+     &              ':Error allocating C_RW2 in DMUMPS_SOLVE_DRIVE')
                   END IF
                   GOTO 30
                 END IF
@@ -3533,8 +3537,8 @@ C
                     ENDIF
                   ENDDO
                   IF (K.NE.NBRHS_EFF+1) THEN
-                    WRITE(6,*) 'Internal Error 9 in solution driver ',
-     &              K,NBRHS_EFF
+                    call rwarn('Internal Error 9 in solution driver ')
+c~      &              K,NBRHS_EFF
                     call MUMPS_ABORT()
                   ENDIF
                 ENDIF ! I_AM_SLAVE
@@ -3549,7 +3553,7 @@ C               -- reset to zero RHSCOMP for skipped columns (if any)
                 IF ((KEEP(221).EQ.1).AND.(NB_RHSSKIPPED.GT.0)
      &            .AND.I_AM_SLAVE) THEN
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*) "Internal error 17 is sol driver"
+                  call rwarn("Internal error 17 is sol driver")
                   CALL MUMPS_ABORT()
 #else
                   DO K = JBEG_RHS-NB_RHSSKIPPED, JBEG_RHS-1
@@ -3965,14 +3969,14 @@ C       Change error code.
         IF (INFO(1).eq.-2) then
           INFO(1)=-11
           IF (LPOK)
-     &    write(LP,*)
-     &   ' WARNING : -11 error code obtained in solve'
+     &    call rwarn(
+     & ' WARNING : -11 error code obtained in solve')
         END IF
         IF (INFO(1).eq.-3) then
           INFO(1)=-14
           IF (LPOK)
-     &    write(LP,*)
-     &    ' WARNING : -14 error code obtained in solve'
+     &    call rwarn(
+     & ' WARNING : -14 error code obtained in solve')
         END IF
 C
 C       Return in case of error.
@@ -4083,7 +4087,7 @@ C             (no need to reset it between columns
               ALLOCATE (MAP_RHS(id%N), stat = allocok)
               IF ( allocok .GT. 0 ) THEN
                 IF (LPOK) THEN
-                 WRITE(LP,*) ' Problem allocation of MAP_RHS at solve'
+                 call rwarn(' Problem allocation of MAP_RHS at solve')
                 ENDIF
                 INFO(1) = -13
                 INFO(2) = id%N
@@ -4274,7 +4278,7 @@ C         Multiple RHS: apply a fixed number
 C         of iterative refinement steps
 C         ----------------------------------
 C         DO I = 1, ICNTL10
-            write(6,*) ' Internal ERROR 15 in sol_driver '
+            call rwarn(' Internal ERROR 15 in sol_driver ')
 C           Compute residual:  Y <- SAVERHS - A * RHS
 C           Solve RHS <- A^-1 Y, Y modified
 C           Assemble in RHS(REDUCE)
@@ -4335,8 +4339,8 @@ C         Initializations and allocations
               GOTO 777
             ENDIF
             NB_BYTES = NB_BYTES + int(2*id%N,8)*K16_8
-            IF ( PROKG .AND. ICNTL10 .GT. 0 )
-     &      WRITE( MPG, 240) 'MAXIMUM NUMBER OF STEPS =', NITREF
+c~             IF ( PROKG .AND. ICNTL10 .GT. 0 )
+c~      &      WRITE( MPG, 240) 'MAXIMUM NUMBER OF STEPS =', NITREF
 C           end allocations on Master
           END IF
           ALLOCATE(C_LOCWK54(id%N),stat = allocok)
@@ -4617,11 +4621,11 @@ C                   IR :  we print the EA of the 1st sol.
 C                   IR with fixed n. of steps:  we print the EA
 C                                               of the last sol.
                     IF ( MPG .GT. 0 ) THEN
-                      WRITE( MPG, 81 )
-                      WRITE( MPG, * )
-                      WRITE( MPG, 141 ) 
-     &          'NUMBER OF STEPS OF ITERATIVE REFINEMENT REQUESTED =', 
-     &          NOITER
+c~                       WRITE( MPG, 81 )
+c~                       WRITE( MPG, * )
+c~                       WRITE( MPG, 141 ) 
+c~      &          'NUMBER OF STEPS OF ITERATIVE REFINEMENT REQUESTED =', 
+c~      &          NOITER
                     ENDIF
                   ENDIF
                   GIVSOL = .TRUE.
@@ -4632,12 +4636,12 @@ C                                               of the last sol.
      &            KEEP(1),KEEP8(1))
                   IF ( MPG .GT. 0 ) THEN
 C                   Error analysis before iterative refinement
-                    WRITE( MPG, 115 )
-     &              'RINFOG(7):COMPONENTWISE SCALED RESIDUAL(W1)=',
-     &              RINFOG(7)
-                    WRITE( MPG, 115 )
-     &              '------(8):---------------------------- (W2)=',
-     &              RINFOG(8)
+c~                     WRITE( MPG, 115 )
+c~      &              'RINFOG(7):COMPONENTWISE SCALED RESIDUAL(W1)=',
+c~      &              RINFOG(7)
+c~                     WRITE( MPG, 115 )
+c~      &              '------(8):---------------------------- (W2)=',
+c~      &              RINFOG(8)
                   END IF
                   CALL MUMPS_SECFIN(TIMEEA)
                   id%DKEEP(120)=id%DKEEP(120)+TIMEEA
@@ -4695,7 +4699,7 @@ C           --------------
 C           If Kase= 0 we quit the IR process
             IF (KASE.LE.0) GOTO 666
             IF (KASE.LT.0) THEN
-              WRITE(*,*) "Internal error 17 in DMUMPS_SOL_DRIVER"
+              call rwarn("Internal error 17 in DMUMPS_SOL_DRIVER")
             ENDIF
 C  =========================================================
 C   COMPUTE the solution of Ay = r
@@ -4735,11 +4739,11 @@ C            IR has been requested
           END IF
           IF ( PROKG ) THEN
               IF (ICNTL10.GT.0) THEN
-                WRITE( MPG, 81 )
-                WRITE( MPG, * )
-                WRITE( MPG, 141 )
-     &          'NUMBER OF STEPS OF ITERATIVE REFINEMENTS PERFORMED  =',
-     &          NOITER
+c~                 WRITE( MPG, 81 )
+c~                 WRITE( MPG, * )
+c~                 WRITE( MPG, 141 )
+c~      &          'NUMBER OF STEPS OF ITERATIVE REFINEMENTS PERFORMED  =',
+c~      &          NOITER
               ENDIF
           ENDIF
 C
@@ -4891,28 +4895,28 @@ C    End ICNTL11 = 1
           IF ((id%MYID .EQ. MASTER).AND.(ICNTL11.GT.0)) THEN
             IF (ICNTL10.GT.0) THEN
 C             If ICNTL10<0 these stats have been printed before IR
-              IF ( MPG .GT. 0 ) THEN
-                WRITE( MPG, 115 )
-     &          'RINFOG(7):COMPONENTWISE SCALED RESIDUAL(W1)=',
-     &          RINFOG(7)
-                WRITE( MPG, 115 )
-     &          '------(8):---------------------------- (W2)=',
-     &          RINFOG(8)
-              ENDIF
+c~               IF ( MPG .GT. 0 ) THEN
+c~                 WRITE( MPG, 115 )
+c~      &          'RINFOG(7):COMPONENTWISE SCALED RESIDUAL(W1)=',
+c~      &          RINFOG(7)
+c~                 WRITE( MPG, 115 )
+c~      &          '------(8):---------------------------- (W2)=',
+c~      &          RINFOG(8)
+c~               ENDIF
             END IF
             IF (ICNTL11.EQ.1) THEN
 C           If ICNTL11/=1 these stats haven't been computed
-              IF (MPG.GT.0) THEN
-               WRITE( MPG, 115 )
-     &         '------(9):Upper bound ERROR ...............=',
-     &         RINFOG(9)
-               WRITE( MPG, 115 )
-     &         '-----(10):CONDITION NUMBER (1) ............=',
-     &         RINFOG(10)
-               WRITE( MPG, 115 )
-     &         '-----(11):CONDITION NUMBER (2) ............=',
-     &         RINFOG(11)
-              END IF
+c~               IF (MPG.GT.0) THEN
+c~                WRITE( MPG, 115 )
+c~      &         '------(9):Upper bound ERROR ...............=',
+c~      &         RINFOG(9)
+c~                WRITE( MPG, 115 )
+c~      &         '-----(10):CONDITION NUMBER (1) ............=',
+c~      &         RINFOG(10)
+c~                WRITE( MPG, 115 )
+c~      &         '-----(11):CONDITION NUMBER (2) ............=',
+c~      &         RINFOG(11)
+c~               END IF
             END IF
           END IF ! MASTER && ICNTL11.GT.0
           IF ( PROKG .AND. abs(ICNTL10) .GT.0 ) WRITE( MPG, 131 )
@@ -4976,7 +4980,8 @@ C
             IF ( allocok .GT. 0 ) THEN
               INFO(1)=-13
               INFO(2)=id%N
-              WRITE(*,*) 'could not allocate ', id%N, 'integers.'
+              call rwarn('could not allocate ')
+c~               , id%N, 'integers.')
               CALL MUMPS_ABORT()
             END IF
             DO K = 1, NBRHS_EFF
@@ -5012,11 +5017,11 @@ C  ========================
             IF (ICNTL(4) .eq. 4 ) K = id%N
             J = min0(10,NBRHS_EFF)
             IF (ICNTL(4) .eq. 4 ) J = NBRHS_EFF
-            DO II=1, J
-              WRITE(ICNTL(3),110) BEG_RHS+II-1
-              WRITE(ICNTL(3),160)
-     &      (id%RHS(IBEG+(II-1)*LD_RHS+I-1),I=1,K)
-            ENDDO
+c~             DO II=1, J
+c~               WRITE(ICNTL(3),110) BEG_RHS+II-1
+c~               WRITE(ICNTL(3),160)
+c~      &      (id%RHS(IBEG+(II-1)*LD_RHS+I-1),I=1,K)
+c~             ENDDO
           END IF
         END IF
 #if defined(RHSCOMP_BYROWS)
@@ -5145,29 +5150,29 @@ C                   sum over all processors
 C     ----------------------------------------------------
       CALL MUMPS_MEM_CENTRALIZE( id%MYID, id%COMM,
      &                           id%INFO(26), id%INFOG(30), IRANK )
-      IF ( PROKG ) THEN
-       IF (PRINT_MAXAVG) THEN
-        WRITE( MPG,'(A,I10) ')
-     &  ' ** Rank of processor needing largest memory in solve     :',
-     &  IRANK
-        WRITE( MPG,'(A,I10) ')
-     &  ' ** Space in MBYTES used by this processor for solve      :',
-     &  id%INFOG(30)
-        IF ( KEEP(46) .eq. 0 ) THEN
-        WRITE( MPG,'(A,I10) ')
-     &  ' ** Avg. Space in MBYTES per working proc during solve    :',
-     &  ( id%INFOG(31)-id%INFO(26) ) / id%NSLAVES
-        ELSE
-        WRITE( MPG,'(A,I10) ')
-     &  ' ** Avg. Space in MBYTES per working proc during solve    :',
-     &  id%INFOG(31) / id%NSLAVES
-        END IF
-       ELSE
-        WRITE( MPG,'(A,I10) ')
-     &  ' ** Space in MBYTES used for solve                        :',
-     &  id%INFOG(30)
-       ENDIF
-      END IF
+c~       IF ( PROKG ) THEN
+c~        IF (PRINT_MAXAVG) THEN
+c~         WRITE( MPG,'(A,I10) ')
+c~      &  ' ** Rank of processor needing largest memory in solve     :',
+c~      &  IRANK
+c~         WRITE( MPG,'(A,I10) ')
+c~      &  ' ** Space in MBYTES used by this processor for solve      :',
+c~      &  id%INFOG(30)
+c~         IF ( KEEP(46) .eq. 0 ) THEN
+c~         WRITE( MPG,'(A,I10) ')
+c~      &  ' ** Avg. Space in MBYTES per working proc during solve    :',
+c~      &  ( id%INFOG(31)-id%INFO(26) ) / id%NSLAVES
+c~         ELSE
+c~         WRITE( MPG,'(A,I10) ')
+c~      &  ' ** Avg. Space in MBYTES per working proc during solve    :',
+c~      &  id%INFOG(31) / id%NSLAVES
+c~         END IF
+c~        ELSE
+c~         WRITE( MPG,'(A,I10) ')
+c~      &  ' ** Space in MBYTES used for solve                        :',
+c~      &  id%INFOG(30)
+c~        ENDIF
+c~       END IF
 *===============================
 *End of Solve Phase
 *===============================
@@ -5179,29 +5184,29 @@ C  Store and print timings
       id%DKEEP(116)=TIMEGATHER2
       id%DKEEP(122)=TIMECOPYSCALE2
       IF (PROKG) THEN
-        WRITE ( MPG, *)
-        WRITE ( MPG, *) "Leaving solve with ..."
-        WRITE( MPG, 434 ) id%DKEEP(115)
-        WRITE( MPG, 432 ) id%DKEEP(113)
-        WRITE( MPG, 435 ) id%DKEEP(117)
-        IF ((KEEP(38).NE.0).OR.(KEEP(20).NE.0))
-     &     WRITE( MPG, 437 ) id%DKEEP(119)
-        WRITE( MPG, 436 ) id%DKEEP(118)
-        WRITE( MPG, 433 ) id%DKEEP(116) ! non-zero if gather
-        WRITE( MPG, 431 ) id%DKEEP(122) ! Distributed solution
+c~         WRITE ( MPG, *)
+c~         call rwarn("Leaving solve with ...")
+c~         WRITE( MPG, 434 ) id%DKEEP(115)
+c~         WRITE( MPG, 432 ) id%DKEEP(113)
+c~         WRITE( MPG, 435 ) id%DKEEP(117)
+c~         IF ((KEEP(38).NE.0).OR.(KEEP(20).NE.0))
+c~      &     WRITE( MPG, 437 ) id%DKEEP(119)
+c~         WRITE( MPG, 436 ) id%DKEEP(118)
+c~         WRITE( MPG, 433 ) id%DKEEP(116) ! non-zero if gather
+c~         WRITE( MPG, 431 ) id%DKEEP(122) ! Distributed solution
       ENDIF
-      IF ( PROK ) THEN
-        WRITE ( MP, *)
-        WRITE ( MP, *) "Local statistics"
-        WRITE( MP, 434 ) id%DKEEP(115)
-        WRITE( MP, 432 ) id%DKEEP(113)
-        WRITE( MP, 435 ) id%DKEEP(117)
-        IF ((KEEP(38).NE.0).OR.(KEEP(20).NE.0))
-     &     WRITE( MP, 437 ) id%DKEEP(119)
-        WRITE( MP, 436 ) id%DKEEP(118)
-        WRITE( MP, 433 ) id%DKEEP(116)
-        WRITE( MP, 431 ) id%DKEEP(122)
-      END IF
+c~       IF ( PROK ) THEN
+c~         WRITE ( MP, *)
+c~         call rwarn("Local statistics")
+c~         WRITE( MP, 434 ) id%DKEEP(115)
+c~         WRITE( MP, 432 ) id%DKEEP(113)
+c~         WRITE( MP, 435 ) id%DKEEP(117)
+c~         IF ((KEEP(38).NE.0).OR.(KEEP(20).NE.0))
+c~      &     WRITE( MP, 437 ) id%DKEEP(119)
+c~         WRITE( MP, 436 ) id%DKEEP(118)
+c~         WRITE( MP, 433 ) id%DKEEP(116)
+c~         WRITE( MP, 431 ) id%DKEEP(122)
+c~       END IF
  90   CONTINUE
       IF (INFO(1) .LT.0 ) THEN
       ENDIF
@@ -5426,7 +5431,7 @@ C       in this routine have the scope of DMUMPS_SOL_DRIVER.
 C
 C
         IF (KASE .NE. 1 .AND. KASE .NE. 2) THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_PP_SOLVE"
+          call rwarn("Internal error 1 in DMUMPS_PP_SOLVE")
           CALL MUMPS_ABORT()
         ENDIF
         IF ( id%MYID .eq. MASTER ) THEN

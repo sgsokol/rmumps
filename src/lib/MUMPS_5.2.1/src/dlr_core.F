@@ -217,8 +217,9 @@ C FIXME: return IFLAG and IERROR
         IF (allocok > 0) THEN
            IFLAG  = -13
            IERROR = max(NPARTSASS,1)+NPARTSCB+1
-           write(*,*) 'Allocation problem in BLR routine REGROUPING2:',
-     &          ' not enough memory? memory requested = ' , IERROR
+        call rwarn('Allocation problem in BLR routine REGROUPING2:'//
+     &          ' not enough memory? memory requested = ')
+c~       , IERROR
            RETURN
         ENDIF
         CALL COMPUTE_BLR_VCS(K472, IBCKSZ2, IBCKSZ, NASS)
@@ -280,8 +281,9 @@ C FIXME: return IFLAG and IERROR
         IF (allocok > 0) THEN
            IFLAG  = -13
            IERROR = NPARTSASS+NPARTSCB+1
-           write(*,*) 'Allocation problem in BLR routine REGROUPING2:',
-     &          ' not enough memory? memory requested = ' , IERROR
+        call rwarn('Allocation problem in BLR routine REGROUPING2:'//
+     &          ' not enough memory? memory requested = ')
+c~       , IERROR
            RETURN
         ENDIF
         DO I=1,NPARTSASS+NPARTSCB+1
@@ -338,8 +340,8 @@ C               Now apply D scaling
             DO
             IF(I .GT. N) EXIT
             IF (.NOT.present(OFFSET_IW)) THEN
-              write(*,*) 'Internal error in ',
-     &             'DMUMPS_LRTRSM' 
+              call rwarn('Internal error in '//
+     &             'DMUMPS_LRTRSM' )
               CALL MUMPS_ABORT()
             ENDIF
             IF(IW(OFFSET_IW+I-1) .GT. 0) THEN
@@ -454,13 +456,14 @@ CC
         PARAMETER (ONE = 1.0D0, MONE=-1.0D0)
         PARAMETER (ZERO=0.0D0)
         IF (LRB2%M.EQ.0) THEN
-          write(*,*) "Internal error in DMUMPS_LRGEMM3, LRB2%M=0"
+          call rwarn("Internal error in DMUMPS_LRGEMM3, LRB2%M=0")
           CALL MUMPS_ABORT()
         ENDIF
         IF ((SYM.NE.0).AND.((TRANSB1.NE.'N').OR.(TRANSB2.NE.'T'))) THEN
-            WRITE(*,*) "SYM > 0 and (", TRANSB1, ",", TRANSB2,
-     &                ") parameters found. Symmetric LRGEMM is only ",
-     &                 "compatible with (N,T) parameters"
+            call rwarn("SYM > 0 and ("//
+c~             , TRANSB1, ",", TRANSB2,
+     &                ") parameters found. Symmetric LRGEMM is only "//
+     &                 "compatible with (N,T) parameters")
             CALL MUMPS_ABORT()
         ENDIF
         RANK = 0
@@ -790,8 +793,9 @@ C                   large enough for dorgqr
         GOTO 870
   860 CONTINUE        
 C       Alloc NOT ok!!        
-        write(*,*) 'Allocation problem in BLR routine DMUMPS_LRGEMM3: ',
-     &    'not enough memory? memory requested = ' , MREQ        
+      call rwarn('Allocation problem in BLR routine DMUMPS_LRGEMM3: '//
+     &    'not enough memory? memory requested = ')
+c~       , MREQ        
         IFLAG  = -13
         IERROR = MREQ
         RETURN
@@ -860,13 +864,14 @@ C ssg
         PARAMETER (ONE = 1.0D0, MONE=-1.0D0)
         PARAMETER (ZERO=0.0D0)
         IF (LRB2%M.EQ.0) THEN
-          write(*,*) "Internal error in DMUMPS_LRGEMM3_LUA, LRB2%M=0"
+          call rwarn("Internal error in DMUMPS_LRGEMM3_LUA, LRB2%M=0")
           CALL MUMPS_ABORT()
         ENDIF
         IF ((SYM.NE.0).AND.((TRANSB1.NE.'N').OR.(TRANSB2.NE.'T'))) THEN
-            WRITE(*,*) "SYM > 0 and (", TRANSB1, ",", TRANSB2,
-     &                ") parameters found. Symmetric LRGEMM is only ",
-     &                 "compatible with (N,T) parameters"
+            call rwarn("SYM > 0 and ("//
+c~             , TRANSB1, ",", TRANSB2,
+     &                ") parameters found. Symmetric LRGEMM is only "//
+     &                 "compatible with (N,T) parameters")
             CALL MUMPS_ABORT()
         ENDIF
         RANK = 0
@@ -1172,13 +1177,15 @@ C                   large enough for dorgqr
               LDXY_YZ = M_X
             ELSE
                IF (SAVE_K+K_YZ.GT.MAXI_RANK) THEN
-                write(*,*) 'Internal error in DMUMPS_LRGEMM3_LUA 1a',
-     &           'K_ACC+K_CUR>K_MAX:',SAVE_K,K_YZ,MAXI_RANK
+                call rwarn('Internal error in DMUMPS_LRGEMM3_LUA 1a'//
+     &           'K_ACC+K_CUR>K_MAX:')
+c~      ,SAVE_K,K_YZ,MAXI_RANK
                 CALL MUMPS_ABORT()
               ENDIF
               IF (LRB3%M.NE.M_X) THEN
-                write(*,*) 'Internal error in DMUMPS_LRGEMM3_LUA 1b',
-     &           'M_X =/= LRB3%M',M_X,LRB3%M
+                call rwarn('Internal error in DMUMPS_LRGEMM3_LUA 1b'//
+     &           'M_X =/= LRB3%M')
+c~      ,M_X,LRB3%M
                 CALL MUMPS_ABORT()
               ENDIF
               XY_YZ => LRB3%Q(1:M_X,SAVE_K+1:SAVE_K+K_YZ)
@@ -1215,13 +1222,15 @@ C                   large enough for dorgqr
               LDXY_YZ = K_XY
             ELSE
                IF (SAVE_K+K_XY.GT.MAXI_RANK) THEN
-                write(*,*) 'Internal error in DMUMPS_LRGEMM3_LUA 2a',
-     &           'K_ACC+K_CUR>K_MAX:',SAVE_K,K_XY,MAXI_RANK
+                call rwarn('Internal error in DMUMPS_LRGEMM3_LUA 2a'//
+     &           'K_ACC+K_CUR>K_MAX:')
+c~      ,SAVE_K,K_XY,MAXI_RANK
                 CALL MUMPS_ABORT()
               ENDIF
               IF (LRB3%N.NE.N_Z) THEN
-                write(*,*) 'Internal error in DMUMPS_LRGEMM3_LUA 2b',
-     &           'N_Z =/= LRB3%N',N_Z,LRB3%N
+                call rwarn('Internal error in DMUMPS_LRGEMM3_LUA 2b'//
+     &           'N_Z =/= LRB3%N')
+c~      ,N_Z,LRB3%N
                 CALL MUMPS_ABORT()
               ENDIF
               XY_YZ => LRB3%R(SAVE_K+1:SAVE_K+K_XY,1:N_Z)
@@ -1256,9 +1265,10 @@ C                   large enough for dorgqr
         GOTO 1580
  1570 CONTINUE        
 C       Alloc NOT ok!!        
-        write(*,*) 'Allocation problem in BLR routine 
-     &    DMUMPS_LRGEMM3_LUA: ',
-     &    'not enough memory? memory requested = ' , MREQ        
+        call rwarn('Allocation problem in BLR routine 
+     &    DMUMPS_LRGEMM3_LUA: '//
+     &    'not enough memory? memory requested = ')
+c~       , MREQ        
         IFLAG  = -13
         IERROR = MREQ
         RETURN
@@ -1390,9 +1400,10 @@ C       Alloc ok!!
               RETURN
  100        CONTINUE        
 C     Alloc NOT ok!!
-            write(*,*) 'Allocation problem in BLR routine 
-     &        DMUMPS_COMPRESS_FR_UPDATES: ',
-     &        'not enough memory? memory requested = ' , MREQ
+            call rwarn('Allocation problem in BLR routine 
+     &        DMUMPS_COMPRESS_FR_UPDATES: '//
+     &        'not enough memory? memory requested = ')
+c~       , MREQ
             CALL MUMPS_ABORT()
             RETURN
       END SUBROUTINE DMUMPS_COMPRESS_FR_UPDATES
@@ -1579,9 +1590,10 @@ C     Alloc NOT ok!!
               RETURN
  100          CONTINUE
 C     Alloc NOT ok!!
-              write(*,*) 'Allocation problem in BLR routine 
-     &          DMUMPS_RECOMPRESS_ACC: ',
-     &          'not enough memory? memory requested = ' , MREQ        
+              call rwarn('Allocation problem in BLR routine 
+     &          DMUMPS_RECOMPRESS_ACC: '//
+     &          'not enough memory? memory requested = ')
+c~       , MREQ        
               CALL MUMPS_ABORT()             
               RETURN
       END SUBROUTINE DMUMPS_RECOMPRESS_ACC
@@ -1625,8 +1637,8 @@ C     Alloc NOT ok!!
         ALLOCATE(RANK_LIST_NEW(NB_NODES_NEW),POS_LIST_NEW(NB_NODES_NEW),
      &       stat=allocok)
         IF (allocok > 0) THEN
-           write(*,*) 'Allocation error of RANK_LIST_NEW/POS_LIST_NEW ',
-     &      'in DMUMPS_RECOMPRESS_ACC_NARYTREE'
+        call rwarn('Allocation error of RANK_LIST_NEW/POS_LIST_NEW '//
+     &      'in DMUMPS_RECOMPRESS_ACC_NARYTREE')
            call MUMPS_ABORT()
         ENDIF
         DO J=1,NB_NODES_NEW
@@ -1676,8 +1688,8 @@ C     Alloc NOT ok!!
             ALLOCATE(ACC_NEW%Q(MAXI_CLUSTER,MAXI_RANK),
      &           ACC_NEW%R(MAXI_RANK,MAXI_CLUSTER), stat=allocok)
             IF (allocok > 0) THEN
-               write(*,*) 'Allocation error of ACC_NEW%Q/ACC_NEW%R ',
-     &              'in DMUMPS_RECOMPRESS_ACC_NARYTREE'
+              call rwarn('Allocation error of ACC_NEW%Q/ACC_NEW%R '//
+     &              'in DMUMPS_RECOMPRESS_ACC_NARYTREE')
                call MUMPS_ABORT()
             ENDIF
             CALL MUMPS_SORT_INT(NB_NODES_NEW, RANK_LIST_NEW,
@@ -1716,8 +1728,9 @@ C     Alloc NOT ok!!
           ENDIF
         ELSE
           IF (POS_LIST_NEW(1).NE.1) THEN
-            write(*,*) 'Internal error in ',
-     &      'DMUMPS_RECOMPRESS_ACC_NARYTREE', POS_LIST_NEW(1) 
+            call rwarn('Internal error in '//
+     &      'DMUMPS_RECOMPRESS_ACC_NARYTREE')
+c~      , POS_LIST_NEW(1) 
           ENDIF
           ACC_LRB%K = RANK_LIST_NEW(1)
           IF (RESORT.AND.LEVEL.GT.0) THEN
@@ -1836,9 +1849,10 @@ C     Alloc NOT ok!!
               RETURN
  100          CONTINUE
 C     Alloc NOT ok!!
-              write(*,*) 'Allocation problem in BLR routine 
-     &          DMUMPS_RECOMPRESS_ACC_V2: ',
-     &          'not enough memory? memory requested = ' , MREQ        
+              call rwarn('Allocation problem in BLR routine 
+     &          DMUMPS_RECOMPRESS_ACC_V2: '//
+     &          'not enough memory? memory requested = ')
+c~       , MREQ        
               CALL MUMPS_ABORT()
               RETURN
       END SUBROUTINE DMUMPS_RECOMPRESS_ACC_V2
@@ -1878,8 +1892,9 @@ C     -----------
           LBANDSLAVE = .FALSE.
         ENDIF
         IF ((SYM.NE.0).AND.(FS_OR_CB.EQ.0).AND.(J.NE.0)) THEN
-          write(6,*) 'Internal error in DMUMPS_GET_LUA_ORDER',
-     &     'SYM, FS_OR_CB, J = ',SYM,FS_OR_CB,J
+          call rwarn('Internal error in DMUMPS_GET_LUA_ORDER'//
+     &     ' SYM, FS_OR_CB, J = ')
+c~      ,SYM,FS_OR_CB,J
           CALL MUMPS_ABORT()
         ENDIF
         FR_BLOCKS = 0
@@ -2038,8 +2053,9 @@ C           No need to perform extend-add
           allocate(SON_A(SON_LA),stat=allocok)
           IF (allocok.GT.0) THEN
 C     FIXME propagate error
-            write(*,*) 'Not enough memory in DMUMPS_BLR_ASM_NIV1',
-     &     ", Memory requested = ", SON_LA
+           call rwarn('Not enough memory in DMUMPS_BLR_ASM_NIV1'//
+     &     ", Memory requested = ")
+c~      , SON_LA
             CALL MUMPS_ABORT()
           ENDIF
 C         decompress block        
@@ -2250,8 +2266,8 @@ C ssg
       CASE(2)
 C      TOLEPS_EFF will be computed at step K=1 below        
       CASE DEFAULT
-        write(*,*) 'Internal error in DMUMPS_TRUNCATED_RRQR: TOL_OPT =',
-     &        TOL_OPT
+        call rwarn('Internal error in DMUMPS_TRUNCATED_RRQR: TOL_OPT =')
+c~      &        TOL_OPT
         CALL MUMPS_ABORT()
       END SELECT
       TOLEPS_EFF = TOLEPS

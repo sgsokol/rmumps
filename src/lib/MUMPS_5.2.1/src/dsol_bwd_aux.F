@@ -204,8 +204,8 @@ C
       if(allocok.ne.0) then
          INFO(1)=-13
          INFO(2)=SLAVEF
-         WRITE(6,*) MYID,' Allocation error of DEJA_SEND '
-     &        //'in bwd solve COMPSO'
+         call rwarn(' Allocation error of DEJA_SEND '
+     &        //'in bwd solve COMPSO')
          GOTO 260
       END IF
       DUMMY(1)=0
@@ -232,14 +232,14 @@ C
             IF (POSIWCB - LONG .LT. 0) THEN
               INFO(1)=-14
               INFO(2)=-POSIWCB + LONG
-              WRITE(6,*) MYID,' Internal error in bwd solve COMPSO'
+              call rwarn(' Internal error in bwd solve COMPSO')
               GOTO 260
             END IF
             IF ( POSWCB - PLEFTW + 1_8 .LT. LONG ) THEN
               INFO(1) = -11
               CALL MUMPS_SET_IERROR(LONG + PLEFTW - POSWCB - 1_8,
      &                             INFO(2))
-              WRITE(6,*) MYID,' Internal error in bwd solve COMPSO'
+              call rwarn(' Internal error in bwd solve COMPSO')
               GOTO 260
             END IF
           ENDIF
@@ -316,7 +316,8 @@ C
         NPIV   = - IW( IPOS     )
         NROW_L =   IW( IPOS + 1 )
         IF ( NROW_L .NE. NROW_RECU ) THEN
-          WRITE(*,*) 'Error1 : NROW L/RECU=',NROW_L, NROW_RECU
+          call rwarn('Error1 : NROW L/RECU=')
+c~           ,NROW_L, NROW_RECU
           CALL MUMPS_ABORT()
         END IF
         LONG = NROW_L + NPIV
@@ -327,7 +328,7 @@ C
            IF ( POSWCB - LONG*NRHS_B .LT. PLEFTW - 1_8 ) THEN
              INFO(1) = -11
              CALL MUMPS_SET_IERROR(LONG * NRHS_B- POSWCB,INFO(2))
-             WRITE(6,*) MYID,' Internal error in bwd solve COMPSO'
+             call rwarn(' Internal error in bwd solve COMPSO')
              GOTO 260
            END IF
         END IF
@@ -524,8 +525,8 @@ C
              NROW_L   = NPIV+NELIM 
              PANEL_SIZE = DMUMPS_OOC_PANEL_SIZE(NROW_L)
              IF (PANEL_SIZE.LT.0) THEN
-               WRITE(6,*) ' Internal error in bwd solve PANEL_SIZE=',
-     &         PANEL_SIZE
+               call rwarn(' Internal error in bwd solve PANEL_SIZE=')
+C     &         PANEL_SIZE
                CALL MUMPS_ABORT()
              ENDIF
           ENDIF 
@@ -573,7 +574,7 @@ C
              END DO
            ELSE IF (KEEP(350).eq.1.OR.KEEP(350).EQ.2) THEN
            ELSE
-             WRITE(*,*) "Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE"
+             call rwarn("Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE")
              CALL MUMPS_ABORT()
            ENDIF
            IFR8 = PTRACB(STEP(INODE))+NPIV-1
@@ -604,7 +605,7 @@ C
      &       IW, LIW, KEEP, N, POSINRHSCOMP_BWD )
              IFR8 = IFR8 + J2-KEEP(253)-J1+1
           ELSE
-             WRITE(*,*) "Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE"
+             call rwarn("Internal error DMUMPS_BACKSLV_TRAITER_MESSAGE")
              CALL MUMPS_ABORT()
            ENDIF
        IF ( KEEP(201).EQ.1 .AND. OOCWRITE_COMPATIBLE_WITH_BLR .AND.
@@ -721,8 +722,8 @@ C
      &              ONE, W(PTWCB_PANEL),LIELL)
                 ELSE
 #if defined(RHSCOMP_BYROWS)
-                  WRITE(*,*)
-     &            "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+                  call rwarn(
+     &            "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE")
                   CALL MUMPS_ABORT()
 #else
                   IF (NCB_PANEL - NCB .NE. 0) THEN
@@ -747,8 +748,8 @@ C
      &          LDAJ, W(PTWCB_PANEL), LIELL)
               ELSE
 #if defined(RHSCOMP_BYROWS)
-                WRITE(*,*)
-     &          "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+                call rwarn(
+     &          "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE")
                 CALL MUMPS_ABORT()
 #else
                 CALL dtrsm('L','L','T','U',NBJ, NRHS_B, ONE,
@@ -805,8 +806,8 @@ C
      &                ONE, W(PTRACB(STEP(INODE))),LIELL)
               ELSE
 #if defined(RHSCOMP_BYROWS)
-                WRITE(*,*)
-     &          "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+                call rwarn(
+     & "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE")
                 CALL MUMPS_ABORT()
 #else
                 CALL dgemm( 'N', 'N', NPIV, NRHS_B, NELIM, ALPHA,
@@ -837,8 +838,8 @@ C
      &                   W(PTRACB(STEP(INODE))),LIELL)
              ELSE
 #if defined(RHSCOMP_BYROWS)
-                WRITE(*,*)
-     &          "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+                call rwarn(
+     & "Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE")
                 CALL MUMPS_ABORT()
 #else
                 CALL dtrsm( 'L','U', 'N', 'U', NPIV, NRHS_B, ONE,
@@ -872,13 +873,14 @@ C
 #else
                 RHSCOMP( IPOSINRHSCOMP_TMP , K ) = 
      &           W( PTRACB(STEP(INODE))+I-1 + (K-JBDEB)*LIELL )
-#endif
+#endifß
               ENDDO
               IPOSINRHSCOMP_TMP =  IPOSINRHSCOMP_TMP + 1
             END DO
           ELSE IF (KEEP(350).EQ.1.OR.KEEP(350).EQ.2) THEN
           ELSE
-            WRITE(*,*)"Internal error in DMUMPS_BACKSLV_TRAITER_MESSAGE"
+            call rwarn("Internal error in "//
+     &       "DMUMPS_BACKSLV_TRAITER_MESSAGE")
             CALL MUMPS_ABORT()
           ENDIF
           IN = INODE
@@ -1028,8 +1030,8 @@ C
       NBENTRIES_ALLPANELS = 0_8
       NPANELS_MAX = (NPIV+PANEL_SIZE-1)/PANEL_SIZE
       IF (LEN_PANEL_POS .LT. NPANELS_MAX + 1) THEN
-        WRITE(*,*) "Error 1 in DMUMPS_BUILD_PANEL_POS",
-     &              LEN_PANEL_POS,NPANELS_MAX
+        call rwarn("Error 1 in DMUMPS_BUILD_PANEL_POS")
+C     &              LEN_PANEL_POS,NPANELS_MAX
         CALL MUMPS_ABORT()
       ENDIF
       I = 1

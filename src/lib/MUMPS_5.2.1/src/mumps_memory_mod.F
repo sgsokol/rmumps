@@ -88,7 +88,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+c~                   WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -102,7 +102,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ISIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -111,8 +111,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -123,7 +123,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ISIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -133,7 +133,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+c~             WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -187,7 +187,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+c~                   WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -201,7 +201,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*I8SIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -210,8 +210,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -222,7 +222,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*I8SIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -232,7 +232,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+c~             WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -288,7 +288,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((int(size(ARRAY),8).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+c~                   WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -301,7 +301,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ISIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -310,8 +310,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -322,7 +322,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ISIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -332,7 +332,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+c~             WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -387,7 +387,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((ASIZE.NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+c~                   WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -401,7 +401,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              ASIZE*I8SIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -410,8 +410,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -422,7 +422,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              ASIZE*I8SIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+c~                   WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -432,7 +432,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+c~             WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -486,7 +486,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+c~                   WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -500,7 +500,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*SSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -509,8 +509,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -521,7 +521,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*SSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -531,7 +531,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+C            WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -584,7 +584,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+C                  WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -598,7 +598,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*DSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -607,8 +607,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -619,7 +619,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*DSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -629,7 +629,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+C            WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -683,7 +683,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+C                  WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -697,7 +697,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*CSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -706,8 +706,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -718,7 +718,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*CSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -728,7 +728,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+C            WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE
@@ -782,7 +782,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &           ((size(ARRAY).NE.MINSIZE) .AND. IFORCE)) THEN
                allocate(TEMP(MINSIZE), STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTA)
+C                  WRITE(LP,FMTA)
                   INFO(1:2) = ERRTPL
                   RETURN
                ELSE
@@ -795,7 +795,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ZSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -804,8 +804,8 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
                NULLIFY(TEMP)
             END IF
          ELSE
-            WRITE(LP,
-     &      '("Input array is not associated. nothing to copy here")')
+c~             WRITE(LP,
+c~      &      '("Input array is not associated. nothing to copy here")')
             RETURN
          END IF
       ELSE
@@ -816,7 +816,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
      &              int(size(ARRAY),8)*ZSIZE
                deallocate(ARRAY, STAT=IERR)
                IF(IERR .LT. 0) THEN
-                  WRITE(LP,FMTD)
+C                  WRITE(LP,FMTD)
                   INFO(1:2) = ERRTPL
                   RETURN
                END IF
@@ -826,7 +826,7 @@ c      CALL MUMPS_SIZE_C(C_LOC(I8(1)), C_LOC(I8(2)), I8SIZE)
          END IF
          allocate(ARRAY(MINSIZE), STAT=IERR)
          IF(IERR .LT. 0) THEN
-            WRITE(LP,FMTA)
+C            WRITE(LP,FMTA)
             INFO(1:2) = ERRTPL
             RETURN
          ELSE

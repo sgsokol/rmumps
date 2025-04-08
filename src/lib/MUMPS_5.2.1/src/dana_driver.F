@@ -179,40 +179,40 @@ C     MP     : INFO
       PROK  = (( MP  .GT. 0 ).AND.(ICNTL(4).GE.2))
       PROKG = ( MPG .GT. 0 .and. id%MYID .eq. MASTER )
       PROKG = (PROKG.AND.(ICNTL(4).GE.2))
-      IF ( PROK ) THEN
-         IF ( KEEP(50) .eq. 0 ) THEN
-            WRITE(MP, '(A)') 'L U Solver for unsymmetric matrices'
-         ELSE IF ( KEEP(50) .eq. 1 ) THEN
-            WRITE(MP, '(A)') 
-     & 'L D L^T Solver for symmetric positive definite matrices'
-         ELSE
-            WRITE(MP, '(A)') 
-     &           'L D L^T Solver for general symmetric matrices'
-         END IF
-         IF ( KEEP(46) .eq. 1 ) THEN
-            WRITE(MP, '(A)') 'Type of parallelism: Working host'
-         ELSE
-            WRITE(MP, '(A)') 'Type of parallelism: Host not working'
-         END IF
-      END IF
-      IF ( PROKG .AND. (MP.NE.MPG)) THEN
-         IF ( KEEP(50) .eq. 0 ) THEN
-            WRITE(MPG, '(A)') 'L U Solver for unsymmetric matrices'
-         ELSE IF ( KEEP(50) .eq. 1 ) THEN
-            WRITE(MPG, '(A)') 
-     & 'L D L^T Solver for symmetric positive definite matrices'
-         ELSE
-            WRITE(MPG, '(A)') 
-     &           'L D L^T Solver for general symmetric matrices'
-         END IF
-         IF ( KEEP(46) .eq. 1 ) THEN
-            WRITE(MPG, '(A)') 'Type of parallelism: Working host'
-         ELSE
-            WRITE(MPG, '(A)') 'Type of parallelism: Host not working'
-         END IF
-      END IF      
-      IF (PROK) WRITE( MP, 110 )
-      IF (PROKG .AND. (MPG.NE.MP)) WRITE( MPG, 110 )
+c~       IF ( PROeK ) THEN
+c~          IF ( KEEP(50) .eq. 0 ) THEN
+c~             WRITE(MP, '(A)') 'L U Solver for unsymmetric matrices'
+c~          ELSE IF ( KEEP(50) .eq. 1 ) THEN
+c~             WRITE(MP, '(A)') 
+c~      & 'L D L^T Solver for symmetric positive definite matrices'
+c~          ELSE
+c~             WRITE(MP, '(A)') 
+c~      &           'L D L^T Solver for general symmetric matrices'
+c~          END IF
+c~          IF ( KEEP(46) .eq. 1 ) THEN
+c~             WRITE(MP, '(A)') 'Type of parallelism: Working host'
+c~          ELSE
+c~             WRITE(MP, '(A)') 'Type of parallelism: Host not working'
+c~          END IF
+c~        END IF
+c~       IF ( PROKG .AND. (MP.NE.MPG)) THEN
+c~          IF ( KEEP(50) .eq. 0 ) THEN
+c~             WRITE(MPG, '(A)') 'L U Solver for unsymmetric matrices'
+c~          ELSE IF ( KEEP(50) .eq. 1 ) THEN
+c~             WRITE(MPG, '(A)') 
+c~      & 'L D L^T Solver for symmetric positive definite matrices'
+c~          ELSE
+c~             WRITE(MPG, '(A)') 
+c~      &           'L D L^T Solver for general symmetric matrices'
+c~          END IF
+c~          IF ( KEEP(46) .eq. 1 ) THEN
+c~             WRITE(MPG, '(A)') 'Type of parallelism: Working host'
+c~          ELSE
+c~             WRITE(MPG, '(A)') 'Type of parallelism: Host not working'
+c~          END IF
+c~       END IF      
+c~       IF (PROK) WRITE( MP, 110 )
+c~       IF (PROKG .AND. (MPG.NE.MP)) WRITE( MPG, 110 )
 C
 C     BEGIN CASE OF ALLOCATED DATA FROM PREVIOUS CALLS
 C     ----------------------------------------
@@ -361,9 +361,9 @@ C     Broadcast NA_ELT <=> KEEP8(30) for elemental entry
       IF ( IERR .GT. 0 ) THEN
          INFO(1) = -7
          INFO(2) = id%NSLAVES
-         IF ( LPOK ) THEN
-            WRITE(LP, 150) 'MEM_DIST'
-         END IF
+c~          IF ( LPOK ) THEN
+c~             WRITE(LP, 150) 'MEM_DIST'
+c~          END IF
       END IF
       CALL MUMPS_PROPINFO( ICNTL(1), INFO(1),
      &     id%COMM, id%MYID )
@@ -409,8 +409,8 @@ C           "GOTO 1234" statement)
                LISTVAR_SCHUR_2BE_FREED=.TRUE.
                allocate( id%LISTVAR_SCHUR( 1 ), STAT=allocok )
                IF ( allocok .GT. 0 ) THEN
-                  WRITE(*,*)
-     &                 'PB allocating an array of size 1 in Schur '
+                  call rwarn(
+     &                 'PB allocating an array of size 1 in Schur ')
                   CALL MUMPS_ABORT()
                END IF
             ELSE
@@ -596,9 +596,9 @@ C                 -- Perform max trans
                IF ( IERR .GT. 0 ) THEN
                   INFO( 1 ) = -7
                   INFO( 2 ) = id%N + 1
-                  IF ( LPOK ) THEN
-                     WRITE(LP, 150) 'XNODEL'
-                  END IF
+c~                   IF ( LPOK ) THEN
+c~                      WRITE(LP, 150) 'XNODEL'
+c~                   END IF
                   GOTO 10
                ENDIF
                IF (LELTVAR.ne.id%ELTPTR(NELT+1)-1)  THEN
@@ -611,9 +611,9 @@ C     -- internal error
                IF ( IERR .GT. 0 ) THEN
                   INFO( 1 ) = -7
                   INFO( 2 ) = LELTVAR
-                  IF ( LPOK ) THEN
-                     WRITE(LP, 150) 'NODEL'
-                  END IF
+c~                   IF ( LPOK ) THEN
+c~                      WRITE(LP, 150) 'NODEL'
+c~                   END IF
                   GOTO 10
                ENDIF
                CALL DMUMPS_ANA_F_ELT(id%N, NELT,
@@ -776,7 +776,7 @@ C     Map nodes and assign candidates for dynamic scheduling
      &           )
             NULLIFY(SSARBR)
             if(IERR.eq.-999) then 
-               write(6,*) ' Internal error during static mapping '
+               call rwarn(' Internal error during static mapping ')
                INFO(1) = IERR
                GOTO 11
             ENDIF
@@ -805,9 +805,9 @@ C     computed after id%DAD_STEPS
          if (associated(id%FRTELT)) DEALLOCATE(id%FRTELT)
          allocate( id%FRTPTR(1), id%FRTELT(1) ,STAT=allocok)
          IF (allocok .GT. 0) THEN
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'FRTPTR,FRTELT'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'FRTPTR,FRTELT'
+c~             END IF
             INFO(1)= -7
             INFO(2)= 2
          END IF
@@ -880,9 +880,9 @@ C
             IF (allocok .GT.0) then
                INFO(1)= -7
                INFO(2)= NB_NIV2
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'PAR2_NODES'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'PAR2_NODES'
+c~                END IF
                GOTO 12
             END IF
          ENDIF
@@ -897,8 +897,8 @@ C
                END IF
  777        CONTINUE
             IF ( INIV2 .NE. NB_NIV2 ) THEN
-               WRITE(*,*) "Internal Error 2 in DMUMPS_ANA_DRIVER",
-     &              INIV2, NB_NIV2
+               call rwarn("Internal Error 2 in DMUMPS_ANA_DRIVER")
+c~      &              INIV2, NB_NIV2
                CALL MUMPS_ABORT()
             ENDIF
          ENDIF
@@ -911,9 +911,9 @@ C           for each level two nodes
             if (allocok .gt.0) then
                INFO(1)= -7
                INFO(2)= NB_NIV2*(id%NSLAVES+1)
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'CANDIDATES'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'CANDIDATES'
+c~                END IF
                GOTO 12
             END IF
             CALL MUMPS_RETURN_CANDIDATES
@@ -935,9 +935,9 @@ C     deallocation of variables of module mumps_static_mapping
             IF (allocok .NE. 0) THEN
                INFO(1)= -7
                INFO(2)= 1
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'CANDIDATES'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'CANDIDATES'
+c~                END IF
                GOTO 12
             ENDIF
          ENDIF
@@ -1058,9 +1058,9 @@ C     This one is only on the master
          IF ( allocok .ne. 0) THEN
             INFO(1) = -7
             INFO(2) = id%N
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%UNS_PERM'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%UNS_PERM'
+c~             END IF
             GOTO 94
          ENDIF
 C     
@@ -1169,11 +1169,11 @@ C     Keep root nodes list in NA
             ENDIF
          END DO
          IF ( LEAF - 1 .NE. 2+NBROOT + NBLEAF ) THEN
-            WRITE(*,*) 'Internal error 2 in DMUMPS_ANA_DRIVER'
+            call rwarn('Internal error 2 in DMUMPS_ANA_DRIVER')
             CALL MUMPS_ABORT()
          ENDIF
          IF ( ISTEP .NE. id%KEEP(28) ) THEN
-            write(*,*) 'Internal error 3 in DMUMPS_ANA_DRIVER'
+            call rwarn('Internal error 3 in DMUMPS_ANA_DRIVER')
             CALL MUMPS_ABORT()
          ENDIF
 C     ============
@@ -1273,17 +1273,17 @@ C                 Only one processor, NA(2) is the number of leaves
             IF (allocok .NE.0) THEN
                INFO(1)= -7
                INFO(2)= SIZE_TEMP_MEM*id%NSLAVES
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'TEMP_MEM'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'TEMP_MEM'
+c~                END IF
                GOTO 80
             END IF
             allocate(TEMP_LEAF(SIZE_TEMP_MEM,id%NSLAVES),
      &           stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'TEMP_LEAF'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'TEMP_LEAF'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_TEMP_MEM*id%NSLAVES
                GOTO 80
@@ -1291,9 +1291,9 @@ C                 Only one processor, NA(2) is the number of leaves
             allocate(TEMP_SIZE(SIZE_TEMP_MEM,id%NSLAVES),
      &           stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'TEMP_SIZE'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'TEMP_SIZE'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_TEMP_MEM*id%NSLAVES
                GOTO 80
@@ -1301,36 +1301,36 @@ C                 Only one processor, NA(2) is the number of leaves
             allocate(TEMP_ROOT(SIZE_TEMP_MEM,id%NSLAVES),
      &           stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'TEMP_ROOT'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'TEMP_ROOT'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_TEMP_MEM*id%NSLAVES
                GOTO 80
             end if
             allocate(DEPTH_FIRST(SIZE_DEPTH_FIRST),stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'DEPTH_FIRST'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'DEPTH_FIRST'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_DEPTH_FIRST
                GOTO 80
             end if
             ALLOCATE(DEPTH_FIRST_SEQ(SIZE_DEPTH_FIRST),stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'DEPTH_FIRST_SEQ'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'DEPTH_FIRST_SEQ'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_DEPTH_FIRST
                GOTO 80
             end if
             ALLOCATE(SBTR_ID(SIZE_DEPTH_FIRST),stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'SBTR_ID'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'SBTR_ID'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_DEPTH_FIRST
                GOTO 80
@@ -1343,9 +1343,9 @@ C     We reuse the same variable as before
             ENDIF
             allocate(COST_TRAV_TMP(SIZE_COST_TRAV),stat=allocok) 
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'COST_TRAV_TMP'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'COST_TRAV_TMP'
+c~                END IF
                INFO(1)= -7
                INFO(2)= SIZE_COST_TRAV
                GOTO 80
@@ -1532,9 +1532,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= id%KEEP(28)
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST'
+c~             END IF
             GOTO 87
          END IF
          IF(associated(id%DEPTH_FIRST_SEQ)) THEN
@@ -1544,9 +1544,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= id%KEEP(28)
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
+c~             END IF
             GOTO 87
          END IF
          IF(associated(id%SBTR_ID)) THEN
@@ -1556,9 +1556,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= id%KEEP(28)
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
+c~             END IF
             GOTO 87
          END IF
          IF(id%MYID.EQ.MASTER)THEN
@@ -1581,9 +1581,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= 1
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST'
+c~             END IF
             GOTO 87
          END IF
          IF(associated(id%DEPTH_FIRST_SEQ)) THEN
@@ -1593,9 +1593,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= 1
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
+c~             END IF
             GOTO 87
          END IF
          IF(associated(id%SBTR_ID)) THEN
@@ -1605,9 +1605,9 @@ C     of the sequential subtree.
          IF (allocok .ne.0) then
             INFO(1)= -7
             INFO(2)= 1
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%DEPTH_FIRST_SEQ'
+c~             END IF
             GOTO 87
          END IF
          id%SBTR_ID(1)=0
@@ -1620,9 +1620,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%COST_TRAV(id%KEEP(28)),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%COST_TRAV'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%COST_TRAV'
+c~             END IF
             INFO(1)= -7
             INFO(2)= id%KEEP(28)
             GOTO 87
@@ -1639,9 +1639,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%COST_TRAV(1),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%COST_TRAV(1)'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%COST_TRAV(1)'
+c~             END IF
             INFO(1)= -7
             INFO(2)= 1
             GOTO 87
@@ -1679,9 +1679,9 @@ C     of the sequential subtree.
                   ENDIF
                   allocate(id%MEM_SUBTREE(J),stat=allocok)
                   IF (allocok .ne.0) then
-                     IF ( LPOK ) THEN
-                        WRITE(LP, 150) 'id%MEM_SUBTREE'
-                     END IF
+c~                      IF ( LPOK ) THEN
+c~                         WRITE(LP, 150) 'id%MEM_SUBTREE'
+c~                      END IF
                      INFO(1)= -7
                      INFO(2)= J
                      GOTO 87
@@ -1693,9 +1693,9 @@ C     of the sequential subtree.
                   ENDIF
                   allocate(id%MY_ROOT_SBTR(J),stat=allocok)
                   IF (allocok .ne.0) then
-                     IF ( LPOK ) THEN
-                        WRITE(LP, 150) 'id%MY_ROOT_SBTR'
-                     END IF
+c~                      IF ( LPOK ) THEN
+c~                         WRITE(LP, 150) 'id%MY_ROOT_SBTR'
+c~                      END IF
                      INFO(1)= -7
                      INFO(2)= J
                      GOTO 87
@@ -1706,9 +1706,9 @@ C     of the sequential subtree.
                   ENDIF
                   allocate(id%MY_FIRST_LEAF(J),stat=allocok)
                   IF (allocok .ne.0) then
-                     IF ( LPOK ) THEN
-                        WRITE(LP, 150) 'id%MY_FIRST_LEAF'
-                     END IF
+c~                      IF ( LPOK ) THEN
+c~                         WRITE(LP, 150) 'id%MY_FIRST_LEAF'
+c~                      END IF
                      INFO(1)= -7
                      INFO(2)= J
                      GOTO 87
@@ -1719,9 +1719,9 @@ C     of the sequential subtree.
                   ENDIF
                   allocate(id%MY_NB_LEAF(J),stat=allocok)
                   IF (allocok .ne.0) then
-                     IF ( LPOK ) THEN
-                        WRITE(LP, 150) 'id%MY_NB_LEAF'
-                     END IF
+c~                      IF ( LPOK ) THEN
+c~                         WRITE(LP, 150) 'id%MY_NB_LEAF'
+c~                      END IF
                      INFO(1)= -7
                      INFO(2)= J
                      GOTO 87
@@ -1737,9 +1737,9 @@ C     of the sequential subtree.
             ENDIF
             allocate(id%MEM_SUBTREE(id%NBSA_LOCAL),stat=allocok)
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'id%MEM_SUBTREE'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'id%MEM_SUBTREE'
+c~                END IF
                INFO(1)= -7
                INFO(2)= id%NBSA_LOCAL
                GOTO 87
@@ -1749,9 +1749,9 @@ C     of the sequential subtree.
             ENDIF
             allocate(id%MY_ROOT_SBTR(id%NBSA_LOCAL),stat=allocok)
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'id%MY_ROOT_SBTR'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'id%MY_ROOT_SBTR'
+c~                END IF
                INFO(1)= -7
                INFO(2)= id%NBSA_LOCAL
                GOTO 87
@@ -1761,9 +1761,9 @@ C     of the sequential subtree.
             ENDIF
             allocate(id%MY_FIRST_LEAF(id%NBSA_LOCAL),stat=allocok)
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'MY_FIRST_LEAF'
-               END IF
+c~                IF ( LPOK ) THEN
+c~                   WRITE(LP, 150) 'MY_FIRST_LEAF'
+c~                END IF
                INFO(1)= -7
                INFO(2)= id%NBSA_LOCAL
                GOTO 87
@@ -1773,9 +1773,9 @@ C     of the sequential subtree.
             ENDIF
             allocate(id%MY_NB_LEAF(id%NBSA_LOCAL),stat=allocok)
             IF (allocok .ne.0) then
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'MY_NB_LEAF'
-               END IF
+C               IF ( LPOK ) THEN
+C                  WRITE(LP, 150) 'MY_NB_LEAF'
+C               END IF
                INFO(1)= -7
                INFO(2)= id%NBSA_LOCAL
                GOTO 87
@@ -1800,9 +1800,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%MEM_SUBTREE(1),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%MEM_SUBTREE(1)'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'id%MEM_SUBTREE(1)'
+C            END IF
             INFO(1)= -7
             INFO(2)= 1
             GOTO 87
@@ -1812,9 +1812,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%MY_ROOT_SBTR(1),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%MY_ROOT_SBTR(1)'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'id%MY_ROOT_SBTR(1)'
+C            END IF
             INFO(1)= -7
             INFO(2)= 1
             GOTO 87
@@ -1824,9 +1824,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%MY_FIRST_LEAF(1),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%MY_FIRST_LEAF(1)'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'id%MY_FIRST_LEAF(1)'
+C            END IF
             INFO(1)= -7
             INFO(2)= 1
             GOTO 87
@@ -1836,9 +1836,9 @@ C     of the sequential subtree.
          ENDIF
          allocate(id%MY_NB_LEAF(1),stat=allocok)
          IF (allocok .ne.0) then
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%MY_NB_LEAF(1)'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'id%MY_NB_LEAF(1)'
+C            END IF
             INFO(1)= -7
             INFO(2)= 1
             GOTO 87
@@ -1875,9 +1875,9 @@ C        Allocate arrays on slaves
             IF (allocok .ne.0) then
                INFO(1)= -7
                INFO(2)= NB_NIV2*(id%NSLAVES+1)
-               IF ( LPOK ) THEN
-                  WRITE(LP, 150) 'PAR2_NODES/id%CANDIDATES'
-               END IF
+C               IF ( LPOK ) THEN
+C                  WRITE(LP, 150) 'PAR2_NODES/id%CANDIDATES'
+C               END IF
             end if
          end if
          CALL MUMPS_PROPINFO( ICNTL(1), INFO(1),
@@ -1912,10 +1912,10 @@ C     it always available in a keep(71)
      &     id%I_AM_CAND(max(NB_NIV2,1)),
      &     stat=allocok)
       IF (allocok .gt.0) THEN
-         IF ( LPOK ) THEN
-            WRITE(LP, 150) 'id%ISTEP_TO_INIV2'
-            WRITE(LP, 150) 'id%TAB_POS_IN_PERE'
-         END IF
+c~          IF ( LPOK ) THEN
+c~             WRITE(LP, 150) 'id%ISTEP_TO_INIV2'
+c~             WRITE(LP, 150) 'id%TAB_POS_IN_PERE'
+c~          END IF
          INFO(1)= -7
          IF (NB_NIV2.EQ.0) THEN
             INFO(2)= 2
@@ -1945,9 +1945,9 @@ C
          ENDIF
          allocate(id%FUTURE_NIV2(id%NSLAVES), stat=allocok)
          IF (allocok .gt.0) THEN
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'FUTURE_NIV2'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'FUTURE_NIV2'
+C            END IF
             INFO(1)= -7
             INFO(2)= id%NSLAVES
             GOTO 321
@@ -1970,10 +1970,10 @@ C     where NB_NIV2 is the number of type 2 nodes in the tree.
          allocate(id%TAB_POS_IN_PERE(id%NSLAVES+2,max(NB_NIV2,1)),
      &        stat=allocok)
          IF (allocok .gt.0) THEN
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%ISTEP_TO_INIV2'
-               WRITE(LP, 150) 'id%TAB_POS_IN_PERE'
-            END IF
+c~             IF ( LPOK ) THEN
+c~                WRITE(LP, 150) 'id%ISTEP_TO_INIV2'
+c~                WRITE(LP, 150) 'id%TAB_POS_IN_PERE'
+c~             END IF
             INFO(1)= -7
             IF (NB_NIV2.EQ.0) THEN
                INFO(2)= 2
@@ -2043,11 +2043,11 @@ C     -----------------------------------------------
             INFO(1) = -25
             INFO(2) = 0
          END IF
-         IF ( LPOK .AND. INFO(1) == -25 ) THEN
-            WRITE(LP, '(A)')
-     &           'Problem with your version of the BLACS.'
-            WRITE(LP, '(A)') 'Try using a BLACS version from netlib.'
-         ENDIF
+c~          IF ( LPOK .AND. INFO(1) == -25 ) THEN
+c~             WRITE(LP, '(A)')
+c~      &           'Problem with your version of the BLACS.'
+c~             WRITE(LP, '(A)') 'Try using a BLACS version from netlib.'
+c~          ENDIF
       END IF
 C     ----------------
 C     Check for errors
@@ -2113,9 +2113,9 @@ C     Also store them in root structure for convenience
                IF ( .NOT. associated(id%CANDIDATES)) THEN
                   ALLOCATE(id%CANDIDATES(id%NSLAVES+1,1), stat=allocok)
                   IF (allocok .gt.0) THEN
-                     IF ( LPOK ) THEN
-                        WRITE(LP, 150) 'CANDIDATES'
-                     END IF
+C                     IF ( LPOK ) THEN
+C                        WRITE(LP, 150) 'CANDIDATES'
+C                     END IF
                      INFO(1)= -7
                      INFO(2)= id%NSLAVES+1
                      goto 93
@@ -2221,29 +2221,29 @@ C
          KEEP(380) = max(KEEP(380), MIN_BUF_SIZE)
          KEEP(43)  = max(KEEP(43), MIN_BUF_SIZE)
          KEEP(379) = max(KEEP(379), MIN_BUF_SIZE)
-            IF ( PROK ) THEN
-               WRITE(MP,'(A,I16) ') 
-     &              ' Estimated INTEGER space for factors         :',
-     &              KEEP(26)
-               WRITE(MP,'(A,I16) ') 
-     &              ' INFO(3), est. real space to store factors   :',
-     &              KEEP8(11)
-               WRITE(MP,'(A,I16) ') 
-     &              ' Estimated number of entries in factors      :',
-     &              KEEP8(9)
-               WRITE(MP,'(A,I16) ') 
-     &              ' Current value of space relaxation parameter :',
-     &              KEEP(12)
-               WRITE(MP,'(A,I16) ') 
-     &              ' Estimated size of IS (In Core factorization):',
-     &              KEEP(29)
-               WRITE(MP,'(A,I16) ') 
-     &              ' Estimated size of S  (In Core factorization):',
-     &              KEEP8(13)
-               WRITE(MP,'(A,I16) ') 
-     &              ' Estimated size of S  (OOC factorization)    :',
-     &              KEEP8(17)
-            END IF
+c~             IF ( PROK ) THEN
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Estimated INTEGER space for factors         :',
+c~      &              KEEP(26)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' INFO(3), est. real space to store factors   :',
+c~      &              KEEP8(11)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Estimated number of entries in factors      :',
+c~      &              KEEP8(9)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Current value of space relaxation parameter :',
+c~      &              KEEP(12)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Estimated size of IS (In Core factorization):',
+c~      &              KEEP(29)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Estimated size of S  (In Core factorization):',
+c~      &              KEEP8(13)
+c~                WRITE(MP,'(A,I16) ') 
+c~      &              ' Estimated size of S  (OOC factorization)    :',
+c~      &              KEEP8(17)
+c~             END IF
  93      continue
       ELSE
 C     ---------------------
@@ -2321,8 +2321,8 @@ C
      &     INFO(1), INFOG(1), RINFO(1), RINFOG(1), ICNTL(1))
 C     --------------------------
 C     COMPUTE MEMORY ESTIMATIONS
-      IF (PROK) WRITE( MP, 112 )
-      IF (PROKG .AND. (MPG.NE.MP)) WRITE( MPG, 112 )
+c~       IF (PROK) WRITE( MP, 112 )
+c~       IF (PROKG .AND. (MPG.NE.MP)) WRITE( MPG, 112 )
 C     --------------------------
 C     =========================
 C     IN-CORE MEMORY STATISTICS
@@ -2345,11 +2345,11 @@ C     =========================
      &        id%NSLAVES, TOTAL_MBYTES, .FALSE.,
      &        OOC_STRAT, BLR_STRAT, PERLU_ON, TOTAL_BYTES, 
      &        IDUMMY, BDUMMY, .FALSE.)
-         IF ( PROK ) THEN
-            WRITE(MP,'(A,I10) ')
-     & ' Estimated space in MBytes for IC factorization            :',
-     &           TOTAL_MBYTES
-         END IF
+c~          IF ( PROK ) THEN
+c~             WRITE(MP,'(A,I10) ')
+c~      & ' Estimated space in MBytes for IC factorization            :',
+c~      &           TOTAL_MBYTES
+c~          END IF
          id%INFO(15) = TOTAL_MBYTES
 C     
 C     Centralize memory statistics on the host
@@ -2362,16 +2362,16 @@ C     INFOG(18/19) = idem at facto.
 C     
       CALL MUMPS_MEM_CENTRALIZE( id%MYID, id%COMM,
      &     id%INFO(15), id%INFOG(16), IRANK )
-      IF ( PROKG ) THEN
-       IF (PRINT_MAXAVG) THEN
-         WRITE( MPG,'(A,I12) ')
-     & '    Maximum estim. space in Mbytes, IC facto.    (INFOG(16)):',
-     &        id%INFOG(16)
-       ENDIF
-       WRITE(MPG,'(A,I12) ')
-     & '    Total space in MBytes, IC factorization      (INFOG(17)):'
-     &        ,id%INFOG(17)
-      END IF
+c~       IF ( PROKG ) THEN
+c~        IF (PRINT_MAXAVG) THEN
+c~          WRITE( MPG,'(A,I12) ')
+c~      & '    Maximum estim. space in Mbytes, IC facto.    (INFOG(16)):',
+c~      &        id%INFOG(16)
+c~        ENDIF
+c~        WRITE(MPG,'(A,I12) ')
+c~      & '    Total space in MBytes, IC factorization      (INFOG(17)):'
+c~      &        ,id%INFOG(17)
+c~       END IF
 C        =========================================
 C        NOW COMPUTE OUT-OF-CORE MEMORY STATISTICS
 C        (except when OOC_STRAT is equal to -1 in
@@ -2404,16 +2404,16 @@ C     Used to compute KEEP8(3) (minimum number of bytes for OOC)
          id%INFO(17) = TOTAL_MBYTES
       CALL MUMPS_MEM_CENTRALIZE( id%MYID, id%COMM,
      &     id%INFO(17), id%INFOG(26), IRANK )
-      IF ( PROKG  ) THEN
-       IF (PRINT_MAXAVG) THEN
-         WRITE( MPG,'(A,I12) ')
-     & '    Maximum estim. space in Mbytes, OOC facto.   (INFOG(26)):',
-     &        id%INFOG(26)
-       ENDIF
-       WRITE(MPG,'(A,I12) ')
-     & '    Total space in MBytes,  OOC factorization    (INFOG(27)):'
-     &        ,id%INFOG(27)
-      END IF
+c~       IF ( PROKG  ) THEN
+c~        IF (PRINT_MAXAVG) THEN
+c~          WRITE( MPG,'(A,I12) ')
+c~      & '    Maximum estim. space in Mbytes, OOC facto.   (INFOG(26)):',
+c~      &        id%INFOG(26)
+c~        ENDIF
+c~        WRITE(MPG,'(A,I12) ')
+c~      & '    Total space in MBytes,  OOC factorization    (INFOG(27)):'
+c~      &        ,id%INFOG(27)
+c~       END IF
       IF (KEEP(494).NE.0) THEN
 C        =========================================
 C        NOW COMPUTE BLR statistics 
@@ -2439,18 +2439,18 @@ C     -------------------------
          IF ( allocok .GT. 0 ) THEN
             INFO(1) = -7
             CALL MUMPS_SETI8TOI4(id%KEEP8(28), INFO(2))
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'id%MAPPING'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'id%MAPPING'
+C            END IF
             GOTO 92
          END IF
          allocate(IWtemp( id%N ), stat=allocok)
          IF ( allocok .GT. 0 ) THEN
             INFO(1)=-7
             INFO(2)=id%N
-            IF ( LPOK ) THEN
-               WRITE(LP, 150) 'IWtemp(N)'
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP, 150) 'IWtemp(N)'
+C            END IF
             GOTO 92
          END IF
          CALL DMUMPS_BUILD_MAPPING(
@@ -2586,38 +2586,38 @@ C        matrix on entry) in id%KEEP(54)
 C        ----------------------------
          id%KEEP(54) = id%ICNTL(18)
          IF ( id%KEEP(54) .LT. 0 .or. id%KEEP(54).GT.3 ) THEN
-            IF ( PROKG ) THEN
-               WRITE(MPG, *) ' Out-of-range value for id%ICNTL(18).'
-               WRITE(MPG, *) ' Used 0 ie matrix not distributed'
-            END IF
+c~             IF ( PROKG ) THEN
+c~                WRITE(MPG, *) ' Out-of-range value for id%ICNTL(18).'
+c~                WRITE(MPG, *) ' Used 0 ie matrix not distributed'
+c~             END IF
             id%KEEP(54) = 0
          END IF
-         IF ( id%KEEP(54) .EQ. 1 ) THEN
-            IF ( PROKG ) THEN
-               WRITE(MPG, *) ' Option id%ICNTL(18)=1 is obsolete.'
-               WRITE(MPG, *) ' We recommend not to use it.'
-               WRITE(MPG, *) ' It will disappear in a future release'
-            END IF
-         END IF
+c~          IF ( id%KEEP(54) .EQ. 1 ) THEN
+c~             IF ( PROKG ) THEN
+c~                WRITE(MPG, *) ' Option id%ICNTL(18)=1 is obsolete.'
+c~                WRITE(MPG, *) ' We recommend not to use it.'
+c~                WRITE(MPG, *) ' It will disappear in a future release'
+c~             END IF
+c~          END IF
 C     -----------------------------------------
 C     Save id%ICNTL(5) (matrix format) in id%KEEP(55)
 C     -----------------------------------------
          id%KEEP(55) = id%ICNTL(5)
          IF ( id%KEEP(55) .LT. 0 .OR. id%KEEP(55) .GT. 1 ) THEN
-            IF ( PROKG ) THEN
-               WRITE(MPG, *) ' Out-of-range value for id%ICNTL(5).'
-               WRITE(MPG, *) ' Used 0 ie matrix is assembled'
-            END IF
+c~             IF ( PROKG ) THEN
+c~                WRITE(MPG, *) ' Out-of-range value for id%ICNTL(5).'
+c~                WRITE(MPG, *) ' Used 0 ie matrix is assembled'
+c~             END IF
             id%KEEP(55) = 0
          END IF
          id%KEEP(60) = id%ICNTL(19)
          IF ( id%KEEP( 60 ) .LE. 0 ) id%KEEP( 60 ) = 0
          IF ( id%KEEP( 60 ) .GT. 3 ) id%KEEP( 60 ) = 0
          IF (id%KEEP(60) .NE. 0 .AND. id%SIZE_SCHUR == 0 ) THEN
-            IF (PROKG) THEN
-              WRITE(MPG,'(A)')
-     &        ' ** Schur option ignored because SIZE_SCHUR=0'
-            ENDIF
+c~             IF (PROKG) THEN
+c~               WRITE(MPG,'(A)')
+c~      &        ' ** Schur option ignored because SIZE_SCHUR=0'
+c~             ENDIF
             id%KEEP(60)=0
          END IF
 C        ---------------------------------------
@@ -2664,18 +2664,18 @@ C     other control parameters
 #if ! defined(parmetis) && ! defined(parmetis3)        
          IF ((id%KEEP(244) .EQ. 2) .AND. (id%KEEP(245) .EQ. 2)) THEN
             id%INFO(1)  = -38
-            IF ( LPOK ) THEN
-               WRITE(LP,'("ParMETIS not available.")')
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP,'("ParMETIS not available.")')
+C            END IF
             RETURN
          END IF
 #endif
 #if ! defined(ptscotch)         
          IF ((id%KEEP(244) .EQ. 2) .AND. (id%KEEP(245) .EQ. 1)) THEN
             id%INFO(1)  = -38
-            IF ( LPOK ) THEN
-               WRITE(LP,'("PT-SCOTCH not available.")')
-            END IF
+C            IF ( LPOK ) THEN
+C               WRITE(LP,'("PT-SCOTCH not available.")')
+C            END IF
             RETURN
          END IF
 #endif
@@ -2694,43 +2694,43 @@ C           Current strategy for automatic is sequential analysis
          ELSE IF (id%KEEP(244) .EQ. 2) THEN
             IF(id%KEEP(55) .NE. 0) THEN
                id%INFO(1)  = -39
-               IF (LPOK) THEN
-               WRITE(LP,
-     &              '("Incompatible values for ICNTL(5), ICNTL(28)")')
-               WRITE(LP,
-     &              '("Parallel analysis is not possible if the")')
-               WRITE(LP,
-     &              '("matrix is not assembled")')
-               ENDIF
+c~                IF (LPOK) THEN
+c~                WRITE(LP,
+c~      &              '("Incompatible values for ICNTL(5), ICNTL(28)")')
+c~                WRITE(LP,
+c~      &              '("Parallel analysis is not possible if the")')
+c~                WRITE(LP,
+c~      &              '("matrix is not assembled")')
+c~                ENDIF
                RETURN
             ELSE IF(id%KEEP(60) .NE. 0) THEN
                id%INFO(1)  = -39
-               IF (LPOK) THEN
-               WRITE(LP,
-     &              '("Incompatible values for ICNTL(19), ICNTL(28)")')
-               WRITE(LP,
-     &              '("Parallel analysis is not possible if SCHUR")')
-               WRITE(LP,
-     &              '("complement must be returned")')
-               ENDIF
+c~                IF (LPOK) THEN
+c~                WRITE(LP,
+c~      &              '("Incompatible values for ICNTL(19), ICNTL(28)")')
+c~                WRITE(LP,
+c~      &              '("Parallel analysis is not possible if SCHUR")')
+c~                WRITE(LP,
+c~      &              '("complement must be returned")')
+c~                ENDIF
                RETURN
             END IF
 C     In the case where there are too few processes to do
 C     the parallel analysis we simply revert to sequential version
             IF(id%NSLAVES .LT. 2) THEN
                id%KEEP(244) = 1
-               IF(PROKG) WRITE(MPG,
-     &              '("Too few processes.
-     & Reverting to sequential analysis")',advance='no')
+c~                IF(PROKG) WRITE(MPG,
+c~      &              '("Too few processes.
+c~      & Reverting to sequential analysis")',advance='no')
                IF(id%KEEP(245) .EQ. 1) THEN
 C                 Scotch necessarily available because pt-scotch
 C                 is, otherwise an error would have occurred
-                  IF(PROKG) WRITE(MPG, '(" with SCOTCH.")')
+c~                   IF(PROKG) WRITE(MPG, '(" with SCOTCH.")')
                   id%KEEP(256) = 3
                ELSE IF(id%KEEP(245) .EQ. 2) THEN
 C                 Metis necessarily available because parmetis
 C                 is, otherwise an error would have occurred
-                  IF(PROKG) WRITE(MPG, '(" with Metis.")')
+c~                   IF(PROKG) WRITE(MPG, '(" with Metis.")')
                   id%KEEP(256) = 5
                ELSE
                   IF(PROKG) WRITE(MPG, '(".")')
@@ -2798,11 +2798,11 @@ C              -------------------------------
                id%INFO(1) = -4
                id%INFO(2) = id%LISTVAR_SCHUR(I)
                RETURN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Ignoring user-ordering, because incompatible with Schur.'
-                  WRITE(MPG,'(A)') ' ** id%ICNTL(7) treated as 0.'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Ignoring user-ordering, because incompatible with Schur.'
+c~                   WRITE(MPG,'(A)') ' ** id%ICNTL(7) treated as 0.'
+c~                END IF
                EXIT
             ENDDO
          END IF
@@ -2845,95 +2845,95 @@ C     --------------------------------------------
 C        still forbid max trans for SYM=1 case
          IF ( id%KEEP(50) .EQ. 1 ) THEN
             IF (id%KEEP(23) .NE. 0) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Max-trans not needed with SYM=1 factorization'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Max-trans not needed with SYM=1 factorization'
+c~                END IF
                id%KEEP(23) = 0
             ENDIF
             IF (id%KEEP(95) .GT. 1) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** ICNTL(12) ignored: not needed with SYM=1 factorization'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** ICNTL(12) ignored: not needed with SYM=1 factorization'
+c~                END IF
             ENDIF
             id%KEEP(95) = 1
          END IF
 C     
          IF  (id%KEEP(60) .GT. 0) THEN
             IF (id%KEEP(23) .NE. 0) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     &                 ' ** Max-trans not allowed because of Schur'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      &                 ' ** Max-trans not allowed because of Schur'
+c~                END IF
                id%KEEP(23) = 0
             ENDIF
             IF (id%KEEP(52).NE.0) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Scaling during analysis not allowed because of Schur'
-               ENDIF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Scaling during analysis not allowed because of Schur'
+c~                ENDIF
                id%KEEP(52) = 0
             ENDIF
 C     also forbid compressed/constrained ordering...
             IF (id%KEEP(95) .GT. 1) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** ICNTL(12) option not allowed because of Schur'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** ICNTL(12) option not allowed because of Schur'
+c~                END IF
             ENDIF
             id%KEEP(95) = 1
          END IF
          IF ( (id%KEEP(23) .NE. 0) .AND. (id%KEEP(256).EQ.1)) THEN
             id%KEEP(23) = 0
-            IF (PROKG) THEN
-               WRITE(MPG,'(A)')
-     & ' ** Max-trans not allowed because ordering is given'
-            END IF
+c~             IF (PROKG) THEN
+c~                WRITE(MPG,'(A)')
+c~      & ' ** Max-trans not allowed because ordering is given'
+c~             END IF
          END IF
          IF ( id%KEEP(256) .EQ. 1 ) THEN
-            IF (id%KEEP(95) > 1 .AND. PROKG) THEN
-               WRITE(MPG,'(A)')
-     & ' ** ICNTL(12) option incompatible with given ordering'
-            END IF
+c~             IF (id%KEEP(95) > 1 .AND. PROKG) THEN
+c~                WRITE(MPG,'(A)')
+c~      & ' ** ICNTL(12) option incompatible with given ordering'
+c~             END IF
             id%KEEP(95) = 1
          END IF
          IF (id%KEEP(54) .NE. 0) THEN
             IF( id%KEEP(23) .NE. 0 ) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Max-trans not allowed because matrix is distributed'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Max-trans not allowed because matrix is distributed'
+c~                END IF
                id%KEEP(23) = 0
             ENDIF
             IF (id%KEEP(52).EQ.-2) THEN
 C           Only Ruiz & Bora scaling available for dist format 
 C           (Work supported by ANR-SOLSTICE (ANR-06-CIS6-010))
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Scaling during analysis not allowed (matrix is distributed)'
-               ENDIF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Scaling during analysis not allowed (matrix is distributed)'
+c~                ENDIF
             ENDIF
             id%KEEP(52) = 0
-            IF (id%KEEP(95) .GT. 1 .AND. MPG.GT.0) THEN
-               WRITE(MPG,'(A)')
-     & ' ** ICNTL(12) option not allowed because matrix is
-     &distributed'
-            ENDIF
+c~             IF (id%KEEP(95) .GT. 1 .AND. MPG.GT.0) THEN
+c~                WRITE(MPG,'(A)')
+c~      & ' ** ICNTL(12) option not allowed because matrix is
+c~      &distributed'
+c~             ENDIF
             id%KEEP(95) = 1
          END IF
          IF ( id%KEEP(55) .NE. 0 ) THEN
             IF( id%KEEP(23) .NE. 0 ) THEN
-               IF (PROKG) THEN
-                  WRITE(MPG,'(A)')
-     & ' ** Max-trans not allowed for element matrix'
-               END IF
+c~                IF (PROKG) THEN
+c~                   WRITE(MPG,'(A)')
+c~      & ' ** Max-trans not allowed for element matrix'
+c~                END IF
                id%KEEP(23) = 0
             ENDIF
-            IF (PROKG .AND. id%KEEP(52).EQ.-2) THEN
-               WRITE(MPG,'(A)')
-     & ' ** Scaling not allowed at analysis for element matrix'
-            ENDIF
+c~             IF (PROKG .AND. id%KEEP(52).EQ.-2) THEN
+c~                WRITE(MPG,'(A)')
+c~      & ' ** Scaling not allowed at analysis for element matrix'
+c~             ENDIF
             id%KEEP(52) = 0
             id%KEEP(95) = 1
          ENDIF
@@ -2946,13 +2946,13 @@ C     Automatic hoice: set it to 0
             ELSE IF (id%KEEP(23) .GT. 0) THEN
                id%INFO(1)  = -39
                id%KEEP(23) = 0
-               IF (LPOK) THEN
-               WRITE(LP,
-     &              '("Incompatible values for ICNTL(6), ICNTL(28)")')
-               WRITE(LP,
-     &              '("Maximum transversal not allowed
-     &                 in parallel analysis")')
-               ENDIF
+c~                IF (LPOK) THEN
+c~                WRITE(LP,
+c~      &              '("Incompatible values for ICNTL(6), ICNTL(28)")')
+c~                WRITE(LP,
+c~      &              '("Maximum transversal not allowed
+c~      &                 in parallel analysis")')
+c~                ENDIF
                RETURN
             END IF
          END IF
@@ -2961,10 +2961,10 @@ C     Avoid distributed entry for element matrix.
 C     --------------------------------------------
          IF ( id%KEEP(54) .NE. 0 .AND. id%KEEP(55) .NE. 0 ) THEN
             id%KEEP(54) = 0
-            IF (PROKG) THEN
-               WRITE(MPG,'(A)')
-     & ' ** Distributed entry not available for element matrix'
-            END IF
+c~             IF (PROKG) THEN
+c~                WRITE(MPG,'(A)')
+c~      & ' ** Distributed entry not available for element matrix'
+c~             END IF
          ENDIF
 C     ----------------------------------
 C     Choice of symbolic analysis option
@@ -2996,9 +2996,9 @@ C     given to analysis
             ENDIF
             IF(id%KEEP(95) .EQ. 3 .AND. id%KEEP(256) .NE. 2) THEN
 C     if constraint and ordering is not AMF then use compress
-               IF (PROK) WRITE(MP,*)
-     &              'WARNING: DMUMPS_ANA_O constrained ordering not ', 
-     &              'available with selected ordering'
+c~                IF (PROK) WRITE(MP,*)
+c~      &              'WARNING: DMUMPS_ANA_O constrained ordering not ', 
+c~      &              'available with selected ordering'
                id%KEEP(95) = 2
             ENDIF 
             IF(id%KEEP(95) .EQ. 3) THEN
@@ -3082,9 +3082,9 @@ C          Out of range values treated as 0
           ENDIF
 C         LR is incompatible with elemental matrices, forbid it at analysis
           IF (id%KEEP(55).NE.0) THEN
-            IF (LPOK) WRITE(LP,*)
-     &           " *** BLR feature currently incompatible "
-     &           ,"with elemental matrices"
+c~             IF (LPOK) WRITE(LP,*)
+c~      &           " *** BLR feature currently incompatible "
+c~      &           ,"with elemental matrices"
 C           BLR for elt entry might be developed in the future
             id%INFO(1)=-800
             id%INFO(2)=5
@@ -3093,9 +3093,9 @@ C           BLR for elt entry might be developed in the future
 C
 C         LR incompatible with forward in facto 
           IF (id%KEEP(252).NE.0) THEN
-            IF (LPOK) WRITE(LP,*)
-     &        " *** BLR feature currently incompatible"
-     &       ," with forward during factorization"
+c~             IF (LPOK) WRITE(LP,*)
+c~      &        " *** BLR feature currently incompatible"
+c~      &       ," with forward during factorization"
              id%INFO(1) = -43
              id%INFO(2) = 35
              RETURN
@@ -3215,18 +3215,18 @@ C     -----------------------------------
          IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -7
             id%INFO(2) =  id%NPROCS
-            IF ( LP .GT. 0 ) THEN
-               WRITE(LP, 150) ' array MATPTR'
-            END IF
+C            IF ( LP .GT. 0 ) THEN
+C               WRITE(LP, 150) ' array MATPTR'
+C            END IF
             GOTO 13
          END IF
          ALLOCATE( MATPTR_cp( id%NPROCS ), STAT = IERR )
          IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -7
             id%INFO(2) =  id%NPROCS
-            IF ( LP .GT. 0 ) THEN
-               WRITE(LP, 150) ' array MATPTR'
-            END IF
+C            IF ( LP .GT. 0 ) THEN
+C               WRITE(LP, 150) ' array MATPTR'
+C            END IF
             GOTO 13
          END IF
 C     -----------------------------------
@@ -3236,9 +3236,9 @@ C     -----------------------------------
          IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -7
             id%INFO(2) = 2 * (id%NPROCS-1)
-            IF ( LP .GT. 0 ) THEN
-               WRITE(LP, 150) 'array REQPTR'
-            END IF
+C            IF ( LP .GT. 0 ) THEN
+C               WRITE(LP, 150) 'array REQPTR'
+C            END IF
             GOTO 13
          END IF
 C     --------------------
@@ -3248,18 +3248,18 @@ C     --------------------
          IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -7
             CALL MUMPS_SETI8TOI4(id%KEEP8(28),id%INFO(2))
-            IF ( LP .GT. 0 ) THEN
-               WRITE(LP, 150) 'array IRN'
-            END IF
+C            IF ( LP .GT. 0 ) THEN
+C               WRITE(LP, 150) 'array IRN'
+C            END IF
             GOTO 13
          END IF
          ALLOCATE( id%JCN( id%KEEP8(28) ), STAT = IERR )
          IF ( IERR .GT. 0 ) THEN
             id%INFO(1) = -7
             CALL MUMPS_SETI8TOI4(id%KEEP8(28),id%INFO(2))
-            IF ( LP .GT. 0 ) THEN
-               WRITE(LP, 150) 'array JCN'
-            END IF
+C            IF ( LP .GT. 0 ) THEN
+C               WRITE(LP, 150) 'array JCN'
+C            END IF
             GOTO 13
          END IF
       END IF

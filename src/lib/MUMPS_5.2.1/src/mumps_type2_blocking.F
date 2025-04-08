@@ -46,7 +46,7 @@ C
         END IF
       ELSE IF (K48 .EQ. 4 ) THEN
          IF ( K821 > 0_8 ) THEN
-           WRITE(*,*) 'Internal Error 1 in MUMPS_BLOC2_GET_NSLAVESMIN'
+           call rwarn('Internal Error 1 in MUMPS_BLOC2_GET_NSLAVESMIN')
            CALL MUMPS_ABORT()
          ENDIF
          CALL MUMPS_ABORT_ON_OVERFLOW(K821,
@@ -131,7 +131,7 @@ C
       IF ( WHAT .NE. 1 .and. WHAT .NE. 2 ) THEN
         IF (WHAT .NE. 4 .and. WHAT .NE. 5 .AND.
      &        KEEP(48).NE.5 ) THEN
-        WRITE(*,*) "Internal error 1 in MUMPS_MAX_SURFCB_NBROWS"
+        call rwarn("Internal error 1 in MUMPS_MAX_SURFCB_NBROWS")
         CALL MUMPS_ABORT()
         END IF
       ENDIF
@@ -163,7 +163,7 @@ C
         ENDIF
       ELSE IF ( KEEP(48) == 4 ) THEN
          IF (KEEP8(21) > 0_8) THEN
-            WRITE(*,*) "Internal error 2 in MUMPS_MAX_SURFCB_NBROWS"
+            call rwarn("Internal error 2 in MUMPS_MAX_SURFCB_NBROWS")
             CALL MUMPS_ABORT()
          END IF
          IF(KEEP(50).EQ.0)THEN
@@ -393,7 +393,7 @@ C
          FIRST_INDEX = TAB_POS_IN_PERE (ISLAVE,J)
          SIZE = TAB_POS_IN_PERE (ISLAVE+1,J) - FIRST_INDEX 
       ELSE
-       WRITE(*,*) 'Error in MUMPS_BLOC2 undef strat'  
+       call rwarn('Error in MUMPS_BLOC2 undef strat')
        CALL MUMPS_ABORT()
       ENDIF
       RETURN
@@ -492,7 +492,7 @@ C
       ENDIF
       IF (KEEP(48).NE.0.and.KEEP(48).NE.3.and.KEEP(48).NE.4
      &     .and.KEEP(48).NE.5) THEN
-        WRITE(*,*) 'Error in MUMPS_BLOC2_GET_ISLAVE: undef strat'  
+        call rwarn('Error in MUMPS_BLOC2_GET_ISLAVE: undef strat')
         CALL MUMPS_ABORT()
       ENDIF
       IF (KEEP(48).ne.0) THEN

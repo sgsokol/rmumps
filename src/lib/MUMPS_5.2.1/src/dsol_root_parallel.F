@@ -35,8 +35,8 @@ C
       LOCAL_N_RHS = max(1,LOCAL_N_RHS)
       ALLOCATE(RHS_PAR(LOCAL_M, LOCAL_N_RHS),stat=allocok)
       IF (allocok > 0 ) THEN
-        WRITE(*,*) ' Problem during solve of the root.'
-        WRITE(*,*) ' Reduce number of right hand sides.'
+        call rwarn(' Problem during solve of the root.')
+        call rwarn(' Reduce number of right hand sides.')
         CALL MUMPS_ABORT()
       ENDIF
       CALL DMUMPS_SCATTER_ROOT( MYID, SIZE_ROOT, NRHS, RHS_SEQ,
@@ -75,7 +75,8 @@ C
      &      NRHS, MBLOCK, NBLOCK, 0, 0,
      &      CNTXT_PAR, LOCAL_M, IERR )
             IF (IERR.NE.0) THEN
-              WRITE(*,*) 'After DESCINIT, IERR = ', IERR
+              call rwarn('After DESCINIT, IERR = ')
+c~               , IERR
               CALL MUMPS_ABORT()
             END IF
       IF ( LDLT .eq. 0 .OR. LDLT .eq. 2 ) THEN
@@ -91,7 +92,7 @@ C
      &    RHS_PAR, 1, 1, DESCB_PAR, IERR )
       END IF
       IF ( IERR .LT. 0 ) THEN
-        WRITE(*,*) ' Problem during solve of the root'
+        call rwarn(' Problem during solve of the root')
         CALL MUMPS_ABORT()
       END IF
       RETURN

@@ -250,11 +250,11 @@ C
       NBROWF  = IW(IOLDPS+2+KEEP(IXSZ))
       NASS    = IW(IOLDPS+1+KEEP(IXSZ))
       IF ( NBROWS .GT. NBROWF ) THEN
-          WRITE(*,*) ' ERR: ERROR : NBROWS > NBROWF'
-          WRITE(*,*) ' ERR: INODE =', INODE
-          WRITE(*,*) ' ERR: NBROW=',NBROWS,'NBROWF=',NBROWF
-          WRITE(*,*) ' ERR: ROW_LIST=', ROWLIST
-          WRITE(*,*) ' ERR: NBCOLF/NASS=', NBCOLF, NASS
+          call rwarn(" ERR: ERROR : NBROWS > NBROWF")
+c~           WRITE(*,*) ' ERR: INODE =', INODE
+c~           WRITE(*,*) ' ERR: NBROW=',NBROWS,'NBROWF=',NBROWF
+c~           WRITE(*,*) ' ERR: ROW_LIST=', ROWLIST
+c~           WRITE(*,*) ' ERR: NBCOLF/NASS=', NBCOLF, NASS
           CALL MUMPS_ABORT()
        END IF
       NSLAVES = IW(IOLDPS+5+KEEP(IXSZ))

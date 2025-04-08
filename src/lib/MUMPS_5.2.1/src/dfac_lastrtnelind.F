@@ -92,8 +92,8 @@ C
            CALL DMUMPS_BUF_SEND_ROOT2SLAVE(NFRONT, 
      &     NB_CONTRI_GLOBAL, PDEST, COMM, KEEP, IERR)
            if (IERR.lt.0) then
-                write(6,*) ' error detected by ',
-     &          'DMUMPS_BUF_SEND_ROOT2SLAVE'
+                call rwarn(' error detected by ' //
+     &          'DMUMPS_BUF_SEND_ROOT2SLAVE')
                 CALL MUMPS_ABORT()
                endif
            ENDIF
@@ -136,7 +136,7 @@ C
           IF (IPOS_SON .EQ. 0) GOTO 100
           NELIM_SON   = IW(IPOS_SON+1+KEEP(IXSZ))
           if (NELIM_SON.eq.0) then
-                write(6,*) ' error 1 in process_last_rtnelind'
+                call rwarn(' error 1 in process_last_rtnelind')
                 CALL MUMPS_ABORT()
               endif
           NSLAVES_SON = IW(IPOS_SON+5+KEEP(IXSZ))
@@ -160,8 +160,8 @@ C
              CALL DMUMPS_BUF_SEND_ROOT2SON(IN, NELIM_SENT,
      &        PDEST, COMM, KEEP, IERR )
              if (IERR.lt.0) then
-                write(6,*) ' error detected by ',
-     &          'DMUMPS_BUF_SEND_ROOT2SLAVE'
+                call rwarn(' error detected by ' //
+     &          'DMUMPS_BUF_SEND_ROOT2SLAVE')
                 CALL MUMPS_ABORT()
                endif
             ELSE

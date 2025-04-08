@@ -164,12 +164,12 @@ C ssg
         END IF
       END DO
       IF ( IPTRI - 1_8 .NE. KEEP8(27) ) THEN
-        WRITE(*,*) 'Error 1 in ana_arrowheads',  
-     &      ' IPTRI - 1, KEEP8(27)=', IPTRI - 1, KEEP8(27)
+        call rwarn('Error 1 in ana_arrowheads') 
+c~      &      ' IPTRI - 1, KEEP8(27)=', IPTRI - 1, KEEP8(27)
         CALL MUMPS_ABORT()
       END IF
       IF ( IPTRR - 1_8 .NE. KEEP8(26) ) THEN
-        WRITE(*,*) 'Error 2 in ana_arrowheads'
+        call rwarn("Error 2 in ana_arrowheads")
         CALL MUMPS_ABORT()
       END IF
       RETURN
@@ -239,7 +239,7 @@ C ssg
         NBUFS = SLAVEF - 1
         ALLOCATE( IW4( N, 2 ), stat = allocok )
         IF ( allocok .GT. 0 ) THEN
-          WRITE(*,*) 'Error allocating IW4'
+          call rwarn("Error allocating IW4")
           CALL MUMPS_ABORT()
         END IF
         DO I = 1, N
@@ -275,12 +275,12 @@ C ssg
       IF (NBUFS.GT.0) THEN
        ALLOCATE( BUFI(NBRECORDS*2+1,NBUFS),stat=allocok )
        IF ( allocok .GT. 0 ) THEN
-        WRITE(*,*) 'Error allocating BUFI'
+        call rwarn("Error allocating BUFI")
         CALL MUMPS_ABORT()
        END IF
        ALLOCATE( BUFR( NBRECORDS, NBUFS ), stat=allocok )
        IF ( allocok .GT. 0 ) THEN
-         WRITE(*,*) 'Error allocating BUFR'
+         call rwarn("Error allocating BUFR")
          CALL MUMPS_ABORT()
        END IF
        DO I = 1, NBUFS
@@ -411,9 +411,9 @@ C ssg
      &          + VAL
              ENDIF
             ELSE
-              WRITE(*,*) MYID,':INTERNAL Error: root arrowhead '
-              WRITE(*,*) MYID,':is not belonging to me. IARR,JARR='
-     &        ,IARR,JARR
+              call rwarn(':INTERNAL Error: root arrowhead ')
+              call rwarn(':is not belonging to me. IARR,JARR=')
+c~      &        ,IARR,JARR
               CALL MUMPS_ABORT()
             END IF
           ELSE IF ( IARR .GE. 0 ) THEN
@@ -669,21 +669,21 @@ C ssg
       IF ( allocok .GT. 0 ) THEN
         INFO1 = -13
         INFO2 = NBRECORDS * 2 + 1
-        WRITE(*,*) MYID,': Could not allocate BUFI: goto 500'
+        call rwarn(': Could not allocate BUFI: goto 500')
         GOTO 500
       END IF
       ALLOCATE( BUFR( NBRECORDS )        , stat = allocok )
       IF ( allocok .GT. 0 ) THEN
         INFO1 = -13
         INFO2 = NBRECORDS
-        WRITE(*,*) MYID,': Could not allocate BUFR: goto 500'
+        call rwarn(': Could not allocate BUFR: goto 500')
         GOTO 500
       END IF
       ALLOCATE( IW4(N,2), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
         INFO1 = -13
         INFO2 = 2 * N
-        WRITE(*,*) MYID,': Could not allocate IW4: goto 500'
+        call rwarn(': Could not allocate IW4: goto 500')
         GOTO 500
       END IF
       IF ( KEEP(38).NE.0) THEN

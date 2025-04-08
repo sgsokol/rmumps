@@ -175,7 +175,7 @@ C
       NBPROCFILS(STEP(IN)) = 0
       LEVEL = MUMPS_TYPENODE(PROCNODE_STEPS(STEP(INODE)),SLAVEF)
       IF (LEVEL.NE.1) THEN
-       WRITE(*,*) 'INTERNAL ERROR 1 in DMUMPS_FAC_ASM_NIV1_ELT '
+       call rwarn("INTERNAL ERROR 1 in DMUMPS_FAC_ASM_NIV1_ELT ")
        CALL MUMPS_ABORT()
       END IF
       NSLAVES = 0
@@ -251,8 +251,8 @@ C
      &        KEEP(IXSZ), COMP, DKEEP(97), MYID, SLAVEF,
      &        PROCNODE_STEPS, DAD)
           IF (LRLU .NE. LRLUS) THEN
-            WRITE( *, * ) 'PB compress DMUMPS_FAC_ASM_NIV1_ELT'
-            WRITE( *, * ) 'LRLU,LRLUS=',LRLU,LRLUS
+            call rwarn("PB compress DMUMPS_FAC_ASM_NIV1_ELT")
+c~             WRITE( *, * ) 'LRLU,LRLUS=',LRLU,LRLUS
             GOTO 270
           END IF
           IF ((IWPOS + LREQ -1) .GT. IWPOSCB) GOTO 270
@@ -294,8 +294,8 @@ C
         LREQ = HF + 2 * NFRONT + LREQ_OOC   
         ELSE
          IF (LPOK) THEN
-          WRITE(LP,*) 
-     &     ' ERROR 1 during ass_niv1_ELT', NFRONT, NFRONT_EFF
+          call rwarn(
+     &     ' ERROR 1 during ass_niv1_ELT')
          ENDIF
          GOTO 270
         ENDIF
@@ -726,14 +726,14 @@ C
       INFO(1) = -8
       INFO(2) = LREQ
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &' FAILURE IN INTEGER ALLOCATION DURING DMUMPS_ASM_NIV1_ELT'
+        call rwarn(
+     &' FAILURE IN INTEGER ALLOCATION DURING DMUMPS_ASM_NIV1_ELT')
       ENDIF
       GOTO 490
   290 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &  ' FAILURE, SEND BUFFER TOO SMALL DURING DMUMPS_ASM_NIV1_ELT'
+        call rwarn(
+     &  ' FAILURE, SEND BUFFER TOO SMALL DURING DMUMPS_ASM_NIV1_ELT')
       ENDIF
       INFO(1) = -17
       LREQ = NCBSON + 6+NSLSON+KEEP(IXSZ)
@@ -741,8 +741,8 @@ C
       GOTO 490
   295 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &  ' FAILURE, RECV BUFFER TOO SMALL DURING DMUMPS_ASM_NIV1_ELT'
+        call rwarn(
+     &  ' FAILURE, RECV BUFFER TOO SMALL DURING DMUMPS_ASM_NIV1_ELT')
       ENDIF
       INFO(1) = -20
       LREQ = NCBSON + 6+NSLSON+KEEP(IXSZ)
@@ -751,8 +751,8 @@ C
   300 CONTINUE
       IF (INFO(1).EQ.-13) THEN
        IF (LPOK) THEN
-        WRITE( LP, * ) ' FAILURE IN INTEGER',
-     &                 ' DYNAMIC ALLOCATION DURING DMUMPS_ASM_NIV1_ELT'
+        call rwarn(' FAILURE IN INTEGER'//
+     &                ' DYNAMIC ALLOCATION DURING DMUMPS_ASM_NIV1_ELT')
        ENDIF
        INFO(2)  = NUMSTK 
       ENDIF
@@ -989,8 +989,8 @@ C ssg
             NMB_OF_CAND = NMB_OF_CAND +1
            ENDDO
            SIZE_TMP_SLAVES_LIST = NSLSON-1
-          WRITE(6,*) "NMB_OF_CAND, SIZE_TMP_SLAVES_LIST ", 
-     & NMB_OF_CAND, SIZE_TMP_SLAVES_LIST
+c~           WRITE(6,*) "NMB_OF_CAND, SIZE_TMP_SLAVES_LIST ", 
+c~      & NMB_OF_CAND, SIZE_TMP_SLAVES_LIST
            IF (INODE.EQ.-999999) THEN
               SPLIT_MAP_RESTART = .TRUE.
            ENDIF
@@ -1095,8 +1095,8 @@ C ssg
      &        PROCNODE_STEPS, DAD)
           IF (LRLU .NE. LRLUS) THEN
            IF (LPOK) THEN
-            WRITE(LP, * ) 'PB compress DMUMPS_FAC_ASM_NIV2_ELT',
-     &                    'LRLU,LRLUS=',LRLU,LRLUS
+           call rwarn('PB compress DMUMPS_FAC_ASM_NIV2_ELT')
+c~      &                    'LRLU,LRLUS=',LRLU,LRLUS
            ENDIF
            GOTO 270
           ENDIF
@@ -1124,9 +1124,9 @@ C ssg
       IF ( NFRONT .NE. NFRONT_EFF ) THEN
         IF (
      &        (TYPESPLIT.EQ.5) .OR. (TYPESPLIT.EQ.6)) THEN
-          WRITE(6,*) ' Internal error 1 in fac_ass due to splitting ',
-     &     ' INODE, NFRONT, NFRONT_EFF =', INODE, NFRONT, NFRONT_EFF 
-          WRITE(6,*) ' SPLITTING NOT YET READY FOR THAT'
+          call rwarn(' Internal error 1 in fac_ass due to splitting ')
+c~      &     ' INODE, NFRONT, NFRONT_EFF =', INODE, NFRONT, NFRONT_EFF 
+          call rwarn(" SPLITTING NOT YET READY FOR THAT")
           CALL MUMPS_ABORT()
         ENDIF
         IF (NFRONT.GT.NFRONT_EFF) THEN
@@ -1189,7 +1189,7 @@ C ssg
             LREQ = HF + 2 * NFRONT + LREQ_OOC
         ELSE
           IF (LPOK) THEN
-           WRITE(LP,*) ' INTERNAL ERROR 2 during ass_niv2'
+           call rwarn(" INTERNAL ERROR 2 during ass_niv2")
           ENDIF
           GOTO 270
         ENDIF
@@ -1794,25 +1794,25 @@ C ssg
   250 CONTINUE
       IF (INFO(1).EQ.-13) THEN
        IF (LPOK) THEN
-        WRITE( LP, * )
+        call rwarn(
      &' FAILURE IN INTEGER DYNAMIC ALLOCATION DURING
-     & DMUMPS_FAC_ASM_NIV2_ELT'
+     & DMUMPS_FAC_ASM_NIV2_ELT')
        ENDIF
        INFO(2)   = NUMSTK + 1
       ENDIF
       GOTO 490
   245 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * ) ' FAILURE ALLOCATING COPY_CAND',
-     &                 ' DURING DMUMPS_FAC_ASM_NIV2_ELT'
+        call rwarn(' FAILURE ALLOCATING COPY_CAND'//
+     &                 ' DURING DMUMPS_FAC_ASM_NIV2_ELT')
       ENDIF
       INFO(1)  = -13
       INFO(2)  = SLAVEF+1
       GOTO 490
   265 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * ) ' FAILURE ALLOCATING TMP_SLAVES_LIST',
-     &                 ' DURING DMUMPS_FAC_ASM_NIV2_ELT'
+        call rwarn(' FAILURE ALLOCATING TMP_SLAVES_LIST'//
+     &                 ' DURING DMUMPS_FAC_ASM_NIV2_ELT')
       ENDIF
       INFO(1)   = -13
       INFO(2)   = SIZE_TMP_SLAVES_LIST
@@ -1821,22 +1821,22 @@ C ssg
       INFO(1) = -8
       INFO(2) = LREQ
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &  ' FAILURE IN INTEGER ALLOCATION DURING DMUMPS_ASM_NIV2_ELT'
+        call rwarn(
+     &  ' FAILURE IN INTEGER ALLOCATION DURING DMUMPS_ASM_NIV2_ELT')
       ENDIF
       GOTO 490
   275 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * ) ' FAILURE ALLOCATING SONROWS_PER_ROW',
-     &                 ' DURING DMUMPS_ASM_NIV2_ELT'
+        call rwarn(' FAILURE ALLOCATING SONROWS_PER_ROW'//
+     &                 ' DURING DMUMPS_ASM_NIV2_ELT')
       ENDIF
       INFO(1)  = -13
       INFO(2)  = NFRONT-NASS1
       GOTO 490
   290 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &' FAILURE, SEND BUFFER TOO SMALL (1) DURING DMUMPS_ASM_NIV2_ELT'
+        call rwarn(
+     &' FAILURE, SEND BUFFER TOO SMALL (1) DURING DMUMPS_ASM_NIV2_ELT')
       ENDIF
       INFO(1) = -17
       LREQ = NCBSON + 6 + NSLSON+KEEP(IXSZ)
@@ -1844,8 +1844,8 @@ C ssg
       GOTO 490
   295 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &' FAILURE, RECV BUFFER TOO SMALL (1) DURING DMUMPS_ASM_NIV2_ELT'
+        call rwarn(
+     &' FAILURE, RECV BUFFER TOO SMALL (1) DURING DMUMPS_ASM_NIV2_ELT')
       ENDIF
       INFO(1) = -20
       LREQ = NCBSON + 6 + NSLSON+KEEP(IXSZ)
@@ -1853,9 +1853,9 @@ C ssg
       GOTO 490
   300 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &' FAILURE, SEND BUFFER TOO SMALL (2)',
-     &' DURING DMUMPS_FAC_ASM_NIV2_ELT'
+        call rwarn(
+     &' FAILURE, SEND BUFFER TOO SMALL (2)'//
+     &' DURING DMUMPS_FAC_ASM_NIV2_ELT')
       ENDIF
       INFO(1) = -17
       LREQ = NBLIG + NBCOL + 4 + KEEP(IXSZ)
@@ -1863,9 +1863,9 @@ C ssg
       GOTO 490
   305 CONTINUE
       IF (LPOK) THEN
-        WRITE( LP, * )
-     &' FAILURE, RECV BUFFER TOO SMALL (2)',
-     &' DURING DMUMPS_FAC_ASM_NIV2_ELT'
+        call rwarn(
+     &' FAILURE, RECV BUFFER TOO SMALL (2)'//
+     &' DURING DMUMPS_FAC_ASM_NIV2_ELT')
       ENDIF
       INFO(1) = -20
       LREQ = NBLIG + NBCOL + 4 + KEEP(IXSZ)

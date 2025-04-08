@@ -24,22 +24,22 @@ C
       PARAMETER (SMALLUNS=5000, SMALLSYM=10000)
 #if ! defined(metis) && ! defined(parmetis) && ! defined(metis4) && ! defined(parmetis3)
       IF ( IORD .EQ. 5 ) THEN
-        IF (PROK) WRITE(MP,*)
-     &  'WARNING: METIS not available. Ordering set to default.'
+        IF (PROK)
+     & rwarn('WARNING: METIS not available. Ordering set to default.')
         IORD = 7
       END IF
 #endif
 #if ! defined(pord)
       IF ( IORD .EQ. 4 ) THEN
-        IF (PROK) WRITE(MP,*)
-     &  'WARNING: PORD not available. Ordering set to default.'
+        IF (PROK)
+     & rwarn('WARNING: PORD not available. Ordering set to default.')
         IORD = 7
       END IF
 #endif
 #if ! defined(scotch) && !  defined(ptscotch)
       IF ( IORD .EQ. 3 ) THEN
-        IF (PROK) WRITE(MP,*)
-     &  'WARNING: SCOTCH not available. Ordering set to default.'
+        IF (PROK)
+     & rwarn('WARNING: SCOTCH not available. Ordering set to default.')
         IORD = 7
       END IF
 #endif

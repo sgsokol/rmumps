@@ -485,9 +485,9 @@ C
       NELIM  = IEND_BLOCK - NPIV
       NEL1   = LAST_ROW - IEND_BLOCK
       IF ( NEL1 < 0 ) THEN
-        WRITE(*,*)
-     &  "Internal error 1 in DMUMPS_FAC_SQ,IEND_BLOCK>LAST_ROW",
-     &  IEND_BLOCK, LAST_ROW
+        call rwarn(
+     &  "Internal error 1 in DMUMPS_FAC_SQ,IEND_BLOCK>LAST_ROW")
+c~      &  IEND_BLOCK, LAST_ROW
         CALL MUMPS_ABORT()
       ENDIF
       LKJIW  = NPIV - IBEG_BLOCK + 1
@@ -1207,8 +1207,8 @@ C ssg
            ELSEIF (PIVOT_OPTION.EQ.1) THEN
              LIM = IEND_BLR
            ELSE
-             write(*,*) 'Internal error in FAC_I_LDLT: PIVOT_OPTION=',
-     &                  PIVOT_OPTION
+            call rwarn('Internal error in FAC_I_LDLT: PIVOT_OPTION=')
+c~      &                  PIVOT_OPTION
              CALL MUMPS_ABORT()
            ENDIF
            J1_ini = J1
@@ -1303,8 +1303,8 @@ C ssg
            ELSEIF (PIVOT_OPTION.EQ.1) THEN
              LIM = IEND_BLR
            ELSE
-             write(*,*) 'Internal error in FAC_I_LDLT: PIVOT_OPTION=',
-     &                  PIVOT_OPTION
+             call rwarn('Internal error in FAC_I_LDLT: PIVOT_OPTION=')
+c~      &                  PIVOT_OPTION
              CALL MUMPS_ABORT()
            ENDIF
            APOSJ = POSELT + int(JMAX-1,8)*LDA8 + int(NPIV,8)
@@ -2042,10 +2042,10 @@ C ssg
       INTEGER LastPanelonDisk, LastPIVRPTRIndexFilled
       INTEGER I
       IF ( LastPanelonDisk+1 > NBPANELS ) THEN
-           WRITE(*,*) "INTERNAL ERROR IN DMUMPS_STORE_PERMINFO!"
-           WRITE(*,*) "NASS=",NASS,"PIVRPTR=",PIVRPTR(1:NBPANELS)
-           WRITE(*,*) "K=",K, "P=",P, "LastPanelonDisk=",LastPanelonDisk
-           WRITE(*,*) "LastPIVRPTRIndexFilled=", LastPIVRPTRIndexFilled
+           call rwarn("INTERNAL ERROR IN DMUMPS_STORE_PERMINFO!")
+c~            WRITE(*,*) "NASS=",NASS,"PIVRPTR=",PIVRPTR(1:NBPANELS)
+c~            WRITE(*,*) "K=",K, "P=",P, "LastPanelonDisk=",LastPanelonDisk
+c~            WRITE(*,*) "LastPIVRPTRIndexFilled=", LastPIVRPTRIndexFilled
            CALL MUMPS_ABORT()
       ENDIF
       PIVRPTR(LastPanelonDisk+1) = K + 1

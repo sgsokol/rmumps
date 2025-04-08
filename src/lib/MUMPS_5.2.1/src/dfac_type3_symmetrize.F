@@ -63,7 +63,7 @@ C
      &                  + mod( JGLOB - 1, BLOCK_SIZE ) + 1
             IF ( IBLOCK .eq. JBLOCK ) THEN
                IF ( IBLOCK_SIZE .ne. JBLOCK_SIZE ) THEN
-                WRITE(*,*) MYID,': Error in calling transdiag:unsym'
+                call rwarn(': Error in calling transdiag:unsym')
                 CALL MUMPS_ABORT()
               END IF
               CALL DMUMPS_TRANS_DIAG( A( IROW_LOC_SOURCE,

@@ -282,7 +282,7 @@ C
      &         NBSONS(NSTEPS),
      &         STAT=IERR)
       IF (IERR.NE.0) THEN
-         WRITE(6,*)'Allocation problem in DMUMPS_PROPAGATE_RHS_BOUNDS'
+         call rwarn('Allocation problem in DMUMPS_PROPAGATE_RHS_BOUNDS')
          CALL MUMPS_ABORT()
       END IF
       size_pool = nb_pruned_leaves
@@ -485,9 +485,10 @@ C
       IF ((PERM_STRAT.NE.-1).AND.(PERM_STRAT.NE.1)) THEN
        IERR=-1
        IF (LPOK)
-     & WRITE(LP,*) " INTERNAL ERROR -1 in ",
-     &       " DMUMPS_PERMUTE_RHS_GS, PERM_STRAT =", PERM_STRAT, 
-     &       " is out of range "
+     & call rwarn(" INTERNAL ERROR -1 in "//
+     &       " DMUMPS_PERMUTE_RHS_GS, PERM_STRAT =")
+c~      , PERM_STRAT, 
+c~      &       " is out of range "
        RETURN
       ENDIF
       IF (PERM_STRAT.EQ.-1) THEN
@@ -500,9 +501,9 @@ C
       IF (IERR.GT.0) THEN
        IERR=-1
        IF (LPOK) THEN
-          WRITE(LP,*) " ERROR -2 : ", 
-     &         " ALLOCATE IN DMUMPS_PERMUTE_RHS_GS OF SIZE :",
-     &         NRHS
+          call rwarn(" ERROR -2 : "//
+     &         " ALLOCATE IN DMUMPS_PERMUTE_RHS_GS OF SIZE :")
+c~      &         NRHS
        ENDIF
        RETURN
       ENDIF
@@ -533,8 +534,8 @@ C
        IF (JJ.EQ.0) THEN
          IERR = -3 
          IF (LPOK)
-     &   WRITE(LP,*) " INTERNAL ERROR -3 in ",
-     &       " DMUMPS_PERMUTE_RHS_GS "
+     &   call rwarn(" INTERNAL ERROR -3 in "//
+     &       " DMUMPS_PERMUTE_RHS_GS ")
          GOTO 500
        ENDIF
        POSINPERMRHS           = POSINPERMRHS + 1
@@ -543,8 +544,9 @@ C
       END DO
       IF (POSINPERMRHS.NE.NRHS) THEN
          IF (LPOK)
-     &   WRITE(LP,*) " INTERNAL ERROR -4 in ",
-     &       " DMUMPS_PERMUTE_RHS_GS ", maxval(ROW_REFINDEX)
+     &   call rwarn(" INTERNAL ERROR -4 in "//
+     &       " DMUMPS_PERMUTE_RHS_GS ")
+c~      , maxval(ROW_REFINDEX)
          IERR = -4
          GOTO 500
       ENDIF
@@ -573,8 +575,8 @@ C
      &    (STRAT.NE. 1).AND.
      &    (STRAT.NE. 2).AND.
      &    (STRAT.NE. 6) ) THEN
-        WRITE(*,*)"Warning: incorrect value for the RHS permutation; ",
-     &            "defaulting to post-order"
+      call rwarn("Warning: incorrect value for the RHS permutation; "//
+     &            "defaulting to post-order")
         STRAT = 1
       END IF
       IF (STRAT .EQ. -3) THEN
@@ -668,7 +670,7 @@ C
      &         MYTYPENODE(NSTEPS),
      &         STAT=IERR)
       IF(IERR.GT.0) THEN
-        WRITE(*,*)'Allocation error in DMUMPS_INTERLEAVE_RHS_AM1'
+        call rwarn('Allocation error in DMUMPS_INTERLEAVE_RHS_AM1')
         CALL MUMPS_ABORT()
       END IF
       MYTYPENODE= (PROCNODE-1+2*SLAVEF)/SLAVEF-1
@@ -698,7 +700,7 @@ C
       ALLOCATE(PERM_WORKING(SIZE_PERM_WORKING),
      &         STAT=IERR)
       IF(IERR.GT.0) THEN
-        WRITE(*,*)'Allocation error in DMUMPS_INTERLEAVE_RHS_AM1'
+        call rwarn('Allocation error in DMUMPS_INTERLEAVE_RHS_AM1')
         CALL MUMPS_ABORT()
       END IF
       K = 0
@@ -783,7 +785,7 @@ C
         posintmprhs = 0 
         ALLOCATE(PERM_PO(N),STAT=IERR)
         IF(IERR.GT.0) THEN
-          WRITE(*,*)'Allocation error in INTERLEAVE_RHS_AM1'
+          call rwarn('Allocation error in INTERLEAVE_RHS_AM1')
           CALL MUMPS_ABORT()
         END IF
         DO J=1,N

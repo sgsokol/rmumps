@@ -260,8 +260,8 @@ C
        IF (MUMPS_FMRD_IS_MAPROW_STORED( IW(IOLDPS+XXA) )) THEN
         CALL MUMPS_FMRD_RETRIEVE_MAPROW( IW(IOLDPS+XXA), MRS )
         IF (FPERE .NE. MRS%INODE) THEN
-          WRITE(*,*) " Internal error 1 in DMUMPS_END_FACTO_SLAVE",
-     &               INODE, MRS%INODE, FPERE
+          call rwarn(" Internal error 1 in DMUMPS_END_FACTO_SLAVE")
+c~      &               INODE, MRS%INODE, FPERE
           CALL MUMPS_ABORT()
         ENDIF
         MRS_INODE        = MRS%INODE

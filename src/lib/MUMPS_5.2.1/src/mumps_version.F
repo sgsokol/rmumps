@@ -16,7 +16,7 @@ C
       CHARACTER(LEN=*) :: V;
       PARAMETER (V = "5.2.1" )
       IF ( len(V) .GT. 30 ) THEN
-         WRITE(*,*) "Version string too long ( >30 characters )"
+         call rwarn("Version string too long ( >30 characters )")
          CALL MUMPS_ABORT()
       END IF
       VERSION_STR = V

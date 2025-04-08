@@ -153,7 +153,8 @@ C
          cv_info(1) = cv_error_memalloc
          cv_info(2) = 2*cv_maxnsteps+cv_maxnodenmb
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)'memory allocation error in ',subname
+     &   call rwarn('memory allocation error in ')
+c~      ,subname
          ierr = cv_error_memalloc
          goto 99999
       end if
@@ -243,7 +244,8 @@ C
                endif
             else
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Unknown mapalgo in ',subname
+     &         call rwarn('Unknown mapalgo in ')
+c~      ,subname
                return
             endif
       endif
@@ -274,7 +276,7 @@ C
       deallocate(thislayer,STAT=ierr)
       if (ierr.ne.0) then
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)'Memory deallocation error in ',subname
+     &   call rwarn('Memory deallocation error in '//subname)
          ierr = cv_error_memdeloc
          goto 99999
       endif
@@ -285,8 +287,10 @@ C
       return
 99999 continue
       if(cv_lp.gt.0) then
-         write(cv_lp,*)'Error in ',subname,', layernmb=',layernmb
-         write(cv_lp,*)'procedure reporting the error: ',err_rep
+         call rwarn('Error in '//subname//
+c~          ,', layernmb=',layernmb
+     &    'procedure reporting the error: ')
+c~      ,err_rep
       endif
       if(ierr.eq.cv_error_memalloc) then
          info(1) = cv_info(1)
@@ -381,7 +385,7 @@ C
       if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
      &   then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:tcost must be allocated in ',subname
+     &        call rwarn('Error:tcost must be allocated in '//subname)
          return
       end if
       if((map_strat.ne.cv_equilib_flops).and.
@@ -409,7 +413,9 @@ C
             procnode(nodenumber)=proc
          else
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &   call rwarn('Error reported by '//
+c~      ,err_rep,
+     &     ' in '//subname)
             do j=1,cv_slavef
                workload(j)=cv_proc_workload(j)
                memused(j)=cv_proc_memused(j)
@@ -506,7 +512,7 @@ C
                cv_info(2) = (3+cv_slavef+1)*par_nodes_in_layer
                istat = cv_error_memalloc
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'memory allocation error in ',subname
+     &         call rwarn('memory allocation error in '//subname)
                return
             end if
             cv_layer_p2node(layernmb)%nmb_t2s=par_nodes_in_layer
@@ -583,8 +589,8 @@ C
       if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
      &   then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)
-     &        'Error: tcost must be allocated in MUMPS_CALCCOSTS'
+     &       call rwarn(
+     &        'Error: tcost must be allocated in MUMPS_CALCCOSTS')
          return
       end if
       maxcostw_root = 0D0
@@ -617,7 +623,7 @@ C
       else
          if((cv_keep(494).ne.0).and.(cv_keep(471).ge.0).and.
      &     (npiv.ge.cv_keep(490)).and.(nfront.ge.cv_keep(491))) then
-           WRITE(*,*) " *** Temp internal error in MUMPS_CALCNODECOSTS:"
+      call rwarn(" *** Temp internal error in MUMPS_CALCNODECOSTS:")
            CALL MUMPS_ABORT()
            call MUMPS_CALCNODECOSTS_BLR(npiv, nfront, costw, costm,
      &              cv_keep(471), cv_keep(472), cv_keep(475), 
@@ -657,7 +663,8 @@ C
         ELSEIF (K471.EQ.1) THEN
           R = SQRT(DBLE(N))
        ELSE
-          WRITE(*,*) 'Internal error in MUMPS_CALCNODECOSTS_BLR', K471
+          call rwarn('Internal error in MUMPS_CALCNODECOSTS_BLR')
+c~           , K471
           CALL MUMPS_ABORT()
         ENDIF
         R = MIN(R,B/2)
@@ -717,8 +724,9 @@ C ssg
         ELSEIF (K471.EQ.1) THEN
           R = SQRT(DBLE(N))
        ELSE
-          WRITE(*,*) 'Internal error in ',
-     &       'MUMPS_COSTS_BLR_T2_MASTER', K471
+          call rwarn('Internal error in '//
+     &       'MUMPS_COSTS_BLR_T2_MASTER')
+c~      , K471
           CALL MUMPS_ABORT()
         ENDIF
         R = MIN(R,B/2)
@@ -780,8 +788,9 @@ C ssg
         ELSEIF (K471.EQ.1) THEN
           R = SQRT(DBLE(N))
        ELSE
-          WRITE(*,*) 'Internal error in ',
-     &       'MUMPS_COSTS_BLR_T2_SLAVE', K471
+          call rwarn('Internal error in '//
+     &       'MUMPS_COSTS_BLR_T2_SLAVE')
+c~      , K471
           CALL MUMPS_ABORT()
         ENDIF
         R = MIN(R,B/2)
@@ -826,7 +835,7 @@ C ssg
       subname='COSTS_LAYER_T2'
       if (cv_keep(24).lt.1) then
           if(cv_lp.gt.0)
-     &    write(cv_lp,*)'Error in ',subname,'. Wrong keep24'
+     &    call rwarn('Error in '//subname//'. Wrong keep24')
          return
       endif
       force_cand=(mod(cv_keep(24),2).eq.0)
@@ -840,7 +849,7 @@ C ssg
          end do
          if(cv_relax.le.0.0D0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Error in ',subname,'. Wrong cv_relax'
+     &           call rwarn('Error in '//subname//'. Wrong cv_relax')
             return
          endif
          total_cand_layer=int(cv_relax*dble(cv_slavef))
@@ -886,7 +895,7 @@ C ssg
                   more_than_needed=cv_slavef-1-min_needed
                else
                   if(cv_lp.gt.0)
-     &            write(cv_lp,*)'Unknown cand. strategy in ',subname
+     &            call rwarn('Unknown cand. strategy in '//subname)
                   return
                endif
                total_nmb_cand=min(min_needed+more_than_needed,
@@ -977,7 +986,7 @@ C ssg
      &    .AND.(cv_keep(24).ne.12).AND.(cv_keep(24).ne.14)
      &    .AND.(cv_keep(24).ne.16).AND.(cv_keep(24).ne.18)) then
           if(cv_lp.gt.0)
-     &    write(cv_lp,*)'Error in ',subname,'. Wrong keep24'
+     &    call rwarn('Error in '//subname//'. Wrong keep24')
          return
       endif
       nmb_type2_thislayer=cv_layer_p2node(layernmb)%nmb_t2s
@@ -1025,7 +1034,7 @@ C ssg
      &           cv_keep(375), cv_keep(119))
             if(min_needed.lt.1) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Error in ',subname,'.NEG min_needed'
+     &         call rwarn('Error in '//subname//'.NEG min_needed')
                return
             endif
             if ((cv_keep(24).eq.8).OR.(cv_keep(24).eq.14).OR.
@@ -1047,10 +1056,10 @@ C ssg
                total_nmb_cand=max(total_nmb_cand-1,min_needed)
             elseif((cv_keep(24).eq.12).OR.(cv_keep(24).eq.16)) then
                if(layernmb.lt.cv_dist_L0_mixed_strat_bound) then
-                  if(cv_mp.gt.0)then
-                     write(cv_mp,*)'Strat', cv_keep(24),
-     &                             ': use 8 on layer',layernmb
-                  endif
+c~                   if(cv_mp.gt.0)then
+c~                      write(cv_mp,*)'Strat', cv_keep(24),
+c~      &                             ': use 8 on layer',layernmb
+c~                   endif
                   npropmap=0
                   do jj=1,cv_slavef
                      if( MUMPS_BIT_GET4PROC(inode,jj))
@@ -1058,10 +1067,10 @@ C ssg
                   end do
                   total_nmb_cand=max(npropmap-1,min_needed)
                else
-                  if(cv_mp.gt.0)then
-                     write(cv_mp,*)'Strat', cv_keep(24),
-     &                             ': use 10 on layer',layernmb
-                  endif
+c~                   if(cv_mp.gt.0)then
+c~                      write(cv_mp,*)'Strat', cv_keep(24),
+c~      &                             ': use 10 on layer',layernmb
+c~                   endif
                   if(work_type2_thislayer.gt.0.0D0) then
                   relative_weight=cv_ncostw(inode)/work_type2_thislayer
                   else
@@ -1073,7 +1082,7 @@ C ssg
                endif
             else
                if(cv_lp.gt.0)
-     &              write(cv_lp,*)'Unknown cand. strategy in ',subname
+     &              call rwarn('Unknown cand. strategy in '//subname)
                return
             endif
             total_nmb_cand=max(total_nmb_cand,1)
@@ -1192,7 +1201,7 @@ C ssg
         cv_info(2) = lnpivsplit
         istat = cv_error_memalloc
         if(cv_lp.gt.0)
-     &       write(cv_lp,*)'memory allocation error in ',subname
+     &       call rwarn('memory allocation error in '//subname)
         return
       endif
       do i=1,nmb_thislayer
@@ -1236,7 +1245,8 @@ C ssg
         ENDIF
         if (ierr.eq.0) then
            if (lnpivsplit < k1) then
-            write(*,*) 'error in', subname, lnpivsplit, k1, cv_keep(108)
+            call rwarn('error in'//subname)
+c~             , lnpivsplit, k1, cv_keep(108)
             call MUMPS_ABORT()
           endif
           do j = 1, k1-1
@@ -1247,8 +1257,9 @@ C ssg
  200    CONTINUE
         if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Error reported by ',
-     &           err_rep,' in ',subname
+     &           call rwarn('Error reported by '//
+c~      &           err_rep,
+     &              ' in '//subname)
             istat =ierr
             goto 100
         endif
@@ -1262,8 +1273,9 @@ C ssg
      &        cv_nsteps, cv_nodetype, ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Error reported by ',err_rep,
-     &           ' in ',subname
+     &      call rwarn('Error reported by '//
+c~      err_rep,
+     &           ' in '//subname)
             istat = ierr
             goto 100
          endif
@@ -1273,8 +1285,9 @@ C ssg
      &        ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Error reported by ',err_rep,
-     &           ' in ',subname
+     &      call rwarn('Error reported by '//
+c~      ,err_rep,
+     &           ' in '//subname)
             istat = ierr
             goto 100
          endif
@@ -1529,7 +1542,7 @@ C ssg
             call MUMPS_PROPMAP4SPLIT(inode,ison,ierr)
             if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &              write(cv_lp,*)'PROPMAP4SPLIT error in ',subname
+     &              call rwarn('PROPMAP4SPLIT error in '//subname)
                istat = ierr
                return
             endif
@@ -1539,13 +1552,13 @@ C ssg
          ison = ifather
       enddo
       if (npivk .ne. npiv_father) then
-        write(*,*) "Error 1 in MUMPS_SPLITNODE_UPDATE"
+        call rwarn("Error 1 in MUMPS_SPLITNODE_UPDATE")
         call MUMPS_ABORT()
       endif
       call MUMPS_PROPMAP4SPLIT(inode,ifather,ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'PROPMAP4SPLIT error in ',subname
+     &        call rwarn('PROPMAP4SPLIT error in '//subname)
          istat = ierr
          return
       endif
@@ -1596,7 +1609,7 @@ C ssg
          if (cv_frere(i).lt.cv_n+1) then
             if(cv_nodetype(i).eq.cv_invalid) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Error in ',subname
+     &         call rwarn('Error in '//subname)
                return
             endif
             if (i.eq.cv_keep(38)) then
@@ -1670,8 +1683,8 @@ C ssg
      &     cv_layerl0_sorted_costw(oldl0end+1:cv_layerl0_end))
            if(ierr.ne.0) then
               if(cv_lp.gt.0)
-     &           write(cv_lp,*) 'Error reported by MUMPS_SORT_MSORT in',
-     &           subname
+     &           call rwarn('Error reported by MUMPS_SORT_MSORT in'//
+     &           subname)
               istat = ierr
               return
            endif
@@ -1682,9 +1695,9 @@ C ssg
      &        cv_layerl0_sorted_costw(1:cv_layerl0_end),ierr)
            if(ierr.ne.0) then
               if(cv_lp.gt.0)
-     &           write(cv_lp,*)
-     &           'Error reported by MUMPS_SORT_MMERGE in',
-     &           subname
+     &           call rwarn(
+     &           'Error reported by MUMPS_SORT_MMERGE in'//
+     &           subname)
               istat = ierr
               return
            endif
@@ -1764,7 +1777,7 @@ C ssg
             nmb_thislayer=nmb_thislayer+1
             if(nmb_thislayer.gt.cv_maxnodenmb) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Problem with nmb_thislayer in ',subname
+     &         call rwarn('Problem with nmb_thislayer in '//subname)
                return
             endif
             thislayer(nmb_thislayer)=i
@@ -1816,7 +1829,7 @@ C ssg
                   cv_nodelayer (in) = current
                   exit
                else
-                 write(6,*) ' Internal error 1 in MUMPS_HIGHER_LAYER'
+                 call rwarn(' Internal error 1 in MUMPS_HIGHER_LAYER')
                  call MUMPS_ABORT()
                 endif
               end do
@@ -1838,8 +1851,8 @@ C ssg
                   in = ifather
                   exit
                else
-                 write(6,*) ' Internal error 1 in MUMPS_HIGHER_LAYER',
-     &           cv_nodetype(ifather)
+                 call rwarn(' Internal error 1 in MUMPS_HIGHER_LAYER')
+c~      &           cv_nodetype(ifather)
                  call MUMPS_ABORT()
                 endif
               end do
@@ -1933,13 +1946,13 @@ C ssg
       cv_keep=>keep
       cv_keep8=>KEEP8
       if(cv_keep(82) .lt. 0) then
-         write(cv_lp,*)
-     &        'Warning in mumps_static_mapping : splitting is set off'
+         call rwarn(
+     &        'Warning in mumps_static_mapping : splitting is set off')
          cv_keep(82) = 0
       endif
       if(cv_keep(83) .lt. 0) then
-         write(cv_lp,*)
-     &        'warning in mumps_static_mapping : keep(83) reset to 0'
+         call rwarn(
+     &        'warning in mumps_static_mapping : keep(83) reset to 0')
          cv_keep(83) = 0
       endif
       if(slavef.gt.1) then
@@ -1952,7 +1965,7 @@ C ssg
       cv_bitsize_of_int = bit_size(n)
       if(cv_bitsize_of_int.le.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Problem with bit size in ',subname
+     &        call rwarn('Problem with bit size in '//subname)
          return
       endif
       rest = mod(cv_slavef,cv_bitsize_of_int)
@@ -1970,12 +1983,12 @@ C ssg
          cv_info(2) = 8*n+2*cv_slavef
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          return
       end if
       if(cv_keep(82) .eq. 0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)' No splitting during static mapping '
+     &           call rwarn(' No splitting during static mapping ')
       endif
       cv_frere=>frere
       cv_fils=>fils
@@ -1990,7 +2003,7 @@ C ssg
       cv_nsteps=keep(28)
       if((keep(28).gt.n).OR.(keep(28).lt.0)) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'problem with nsteps in ',subname
+     &        call rwarn('problem with nsteps in '//subname)
          return
       end if
       cv_costw_upper=0.0D0
@@ -2036,13 +2049,13 @@ C ssg
       deallocate(cv_depth,cv_tcostw,cv_tcostm,STAT=ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)'Memory deallocation error in ',subname
+     &   call rwarn('Memory deallocation error in '//subname)
          istat = cv_error_memdeloc
          return
       end if
       if(cv_maxnsteps.lt.1) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'problem with maxnsteps in ',subname
+     &        call rwarn('problem with maxnsteps in '//subname)
          return
       end if
       cv_maxnodenmb=cv_maxnsteps
@@ -2078,7 +2091,7 @@ C ssg
       nullify(cv_layer_p2node)
       if(cv_maxnodenmb.lt.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'problem with maxnodenmb in ',subname
+     &        call rwarn('problem with maxnodenmb in '//subname)
          return
       elseif(cv_maxnodenmb.lt.1) then
          cv_maxnodenmb = 1
@@ -2089,7 +2102,7 @@ C ssg
          cv_info(2) = cv_maxnodenmb
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          return
       end if
       do i=1,cv_maxnodenmb
@@ -2146,7 +2159,7 @@ C ssg
      &                           cv_procnode,ierr)
           if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &      call rwarn('Error reported by '//err_rep//'in '//subname)
             istat = ierr
             return
           end if
@@ -2156,7 +2169,7 @@ C ssg
      &                           accepted,ierr)
           if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &      call rwarn('Error reported by '//err_rep//'in '//subname)
             istat = ierr
             return
           end if
@@ -2177,8 +2190,8 @@ C ssg
                   accepted=.TRUE.
                elseif(ierr.ne.0) then
                   if(cv_lp.gt.0)
-     &            write(cv_lp,*)
-     &            'Error rep. by ',err_rep,' in ',subname
+     &            call rwarn(
+     &            'Error rep. by '//err_rep//' in '//subname)
                   istat = ierr
                   return
                endif
@@ -2196,7 +2209,7 @@ C ssg
       call MUMPS_LIST2LAYER(ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &        call rwarn('Error reported by '//err_rep//'in '//subname)
          istat = ierr
          return
       end if
@@ -2204,7 +2217,7 @@ C ssg
       call MUMPS_MAKE_PROPMAP(ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &        call rwarn('Error reported by '//err_rep//'in '//subname)
          istat = ierr
          return
       end if
@@ -2214,7 +2227,7 @@ C ssg
      &                     cv_procnode,ierr, respect_prop=.TRUE.)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Error reported by ',err_rep,' in ',subname
+     &      call rwarn('Error reported by '//err_rep//'in '//subname)
             istat = ierr
             return
          end if
@@ -2268,7 +2281,7 @@ C ssg
         cv_info(2) = cv_maxnodenmb
         istat = cv_error_memalloc
         if(cv_lp.gt.0)
-     &       write(cv_lp,*) 'Memory allocation error in ',subname
+     &       call rwarn('Memory allocation error in '//subname)
         return
       ENDIF
       pctr=cv_n
@@ -2288,8 +2301,8 @@ C ssg
                call MUMPS_PROPMAP_INIT(i,ierr)
                if(ierr.ne.0) then
                   if(cv_lp.gt.0)
-     &                 write(cv_lp,*)'PROPMAP_INIT signalled error to'
-     &                 ,subname
+     &                 call rwarn('PROPMAP_INIT signalled error to'//
+     &                 subname)
                   istat = ierr
                   GOTO 999
                end if
@@ -2351,7 +2364,7 @@ C ssg
          cv_info(2) = 7*nmb_thislayer+2*cv_slavef
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          goto 999
       end if
       do i=1,nmb_thislayer
@@ -2389,7 +2402,7 @@ C ssg
             if((sorted_costw(nmb).eq.cv_d_invalid).OR.
      &           (sorted_costm(nmb).eq.cv_d_invalid)) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Error in ',subname
+     &         call rwarn('Error in '//subname)
                goto 999
             end if
             if(sorted_costw(nmb).lt.cv_ncostw(inode))then
@@ -2403,7 +2416,7 @@ C ssg
             cycle
          else
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Unknown node type. Error in ',subname
+     &      call rwarn('Unknown node type. Error in '//subname)
             goto 999
          end if
       end do
@@ -2416,8 +2429,8 @@ C ssg
       endif
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)
-     &   'Error reported by MUMPS_SORT_MSORT in ',subname
+     &   call rwarn(
+     &   'Error reported by MUMPS_SORT_MSORT in '//subname)
          istat = ierr
          goto 999
       endif
@@ -2440,8 +2453,8 @@ C ssg
             end if
             if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)
-     &         'Error reported by ',err_rep,' in ',subname
+     &         call rwarn(
+     &         'Error reported by '//err_rep//' in '//subname)
                istat = ierr
                goto 999
             endif
@@ -2458,7 +2471,7 @@ C ssg
             enddo
             if(nmb_cand_needed.eq.cv_invalid) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Error in ',subname
+     &         call rwarn('Error in '//subname)
                goto 999
             endif
             do while((k.le.cv_slavef).and.(nmb_cand_needed.gt.0))
@@ -2487,14 +2500,14 @@ C ssg
                   k=k+1
                   if(k.gt.cv_slavef) then
                      if(cv_lp.gt.0)
-     &                    write(cv_lp,*)'Error in ',subname
+     &                    call rwarn('Error in '//subname)
                      goto 999
                   endif
                end if
             end do
             if(nmb_cand_needed.gt.0) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Error in ',subname
+     &         call rwarn('Error in '//subname)
                goto 999
             endif
             aux_flop=cv_ncostw(inode)
@@ -2525,7 +2538,7 @@ C ssg
                   k=k+1
                   if(k.gt.cv_slavef) then
                      if(cv_lp.gt.0)
-     &                    write(cv_lp,*)'Error in ',subname
+     &                    call rwarn('Error in '//subname)
                      goto 999
                   endif
                end if
@@ -2544,8 +2557,8 @@ C ssg
             endif
             if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &          write(cv_lp,*)
-     &          'Error reported by ',err_rep,' in ',subname
+     &          call rwarn(
+     &          'Error reported by '//err_rep//' in '//subname)
                istat = ierr
                goto 999
             endif
@@ -2571,7 +2584,7 @@ C ssg
                      k=k+1
                      if(k.gt.cv_slavef) then
                         if(cv_lp.gt.0)
-     &                  write(cv_lp,*)'Inconsist data in ',subname
+     &                  call rwarn('Inconsist data in '//subname)
                         goto 999
                      endif
                   end if
@@ -2611,7 +2624,7 @@ C ssg
                      k=k+1
                      if(k.gt.cv_slavef) then
                         if(cv_lp.gt.0)
-     &                       write(cv_lp,*)'Error in ',subname
+     &                       call rwarn('Error in '//subname)
                         goto 999
                      endif
                   end if
@@ -2631,7 +2644,7 @@ C ssg
                enddo
                if(nmb_cand_needed.eq.cv_invalid) then
                   if(cv_lp.gt.0)
-     &                 write(cv_lp,*)'Error in ',subname
+     &                 call rwarn('Error in '//subname)
                   goto 999
                endif
                aux_flop=
@@ -2666,14 +2679,14 @@ C ssg
                      k=k+1
                      if(k.gt.cv_slavef) then
                         if(cv_lp.gt.0)
-     &                       write(cv_lp,*)'Error in ',subname
+     &                       call rwarn('Error in '//subname)
                         goto 999
                      endif
                   end if
                end do
                if(nmb_cand_needed.gt.0) then
                   if(cv_lp.gt.0)
-     &                 write(cv_lp,*)'Error in ',subname
+     &                 call rwarn('Error in '//subname)
                   goto 999
                endif
             end if
@@ -2693,7 +2706,7 @@ C ssg
          end do
          if (k.ne.nmb_cand_needed) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Error in ',subname
+     &           call rwarn('Error in '//subname)
             goto 999
          endif
       enddo
@@ -2759,7 +2772,7 @@ C ssg
                call MUMPS_FIX_ACCEPTED_MASTER(layernmb,i)
                node_of_master = mem_distribmpi(master-1)
                if (node_of_master .lt. 0 ) then
-                if(cv_mp.gt.0) write(cv_mp,*)'node_of_master_not found'
+                if(cv_mp.gt.0) call rwarn('node_of_master_not found')
                endif
                node_of_swapper = node_of_master
             endif
@@ -2773,8 +2786,8 @@ C ssg
                if(ke69 .gt. 1) then
                   node_of_candid = mem_distribmpi(candid-1)
                   if (node_of_candid .lt. 0 ) then
-                     if(cv_mp.gt.0) write(cv_mp,*)
-     &               'node_of_candid_not found'
+                     if(cv_mp.gt.0) call rwarn(
+     &               'node_of_candid_not found')
                   endif
                endif
                if(ke69 .le. 1) then
@@ -2881,7 +2894,7 @@ C ssg
          cv_info(2) = 2*cv_slavef
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          return
       end if
       allocate(work_per_proc(cv_slavef),id_son(cv_slavef),STAT=allocok)
@@ -2890,7 +2903,7 @@ C ssg
          cv_info(2) = 2*cv_slavef
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          return
       end if
       do i=1,cv_slavef
@@ -2948,7 +2961,7 @@ C      intrinsic random_number
          cv_info(2) = cv_size_ind_proc + cv_slavef
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'memory allocation error in ',subname
+     &        call rwarn('memory allocation error in '//subname)
          return
       end if
       procs_inode=-1
@@ -2973,14 +2986,12 @@ C      intrinsic random_number
       end do
       if(i.ne.nmb_procs_inode)then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname
-     &        ,subname
+     &        call rwarn('Error in '//subname)
          goto 999
       endif
       if(nmb_procs_inode.eq.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname
-     &        ,subname
+     &        call rwarn('Error in '//subname)
          goto 999
       end if
       if ((cv_nodelayer(inode).eq.0).AND.
@@ -3005,8 +3016,9 @@ C      intrinsic random_number
          nmb_sons_inode = nmb_sons_inode + 1
          if(cv_tcostw(in).le.0.0D0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Subtree costs for ',in,
-     &                         ' should be positive in ',subname
+     &           call rwarn('Subtree costs for '//
+c~      ,in,
+     &                         ' should be positive in '//subname)
             goto 999
          endif
          costs_sons = costs_sons + cv_tcostw(in)
@@ -3014,8 +3026,7 @@ C      intrinsic random_number
       enddo
       if(costs_sons.le.0D0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname
-     &        ,subname
+     &        call rwarn('Error in '//subname)
          goto 999
       endif
       depth= max(cv_mixed_strat_bound - ctr,0)
@@ -3089,8 +3100,8 @@ C      intrinsic random_number
                i=i+1
             enddo
             if(share2.ne.0) then
-               if(cv_lp.gt.0) write(cv_lp,*)
-     &           'Error reported in ',subname
+               if(cv_lp.gt.0) call rwarn(
+     &           'Error reported in '//subname)
                goto 999
             end if
          end if
@@ -3103,8 +3114,8 @@ C      intrinsic random_number
           call MUMPS_MOD_PROPMAP(in1,ctr,ierr)
          ENDIF
          if(ierr.ne.0) then
-            if(cv_lp.gt.0) write(cv_lp,*)
-     &           'Error reported in ',subname
+            if(cv_lp.gt.0) call rwarn(
+     &           'Error reported in '//subname)
             istat=ierr
             goto 999
          endif
@@ -3157,8 +3168,7 @@ C      intrinsic random_number
       end do
       if(nmb_procs_inode.eq.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname
-     &        ,subname
+     &        call rwarn('Error in '//subname)
          return
       end if
       if ((cv_nodelayer(inode).eq.0).AND.
@@ -3187,8 +3197,9 @@ C      intrinsic random_number
          nmb_sons_inode = nmb_sons_inode + 1
          if(cv_tcostw(in).le.0.0D0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Subtree costs for ',in,
-     &                         ' should be positive in ',subname
+     &           call rwarn('Subtree costs for '//
+c~      ,in,
+     &                         ' should be positive in '//subname)
             return
          endif
          costs_sons = costs_sons + cv_tcostw(in)
@@ -3213,13 +3224,12 @@ C      intrinsic random_number
       ENDIF
       if(costs_sons.le.0.0D0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname
-     &        ,subname
+     &        call rwarn('Error in '//subname)
          return
       endif
       if(cv_relax.le.0.0D0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error in ',subname,'. Wrong cv_relax'
+     &        call rwarn('Error in '//subname//'. Wrong cv_relax')
          return
       endif
       ALLOCATE(procs4son(cv_size_ind_proc),stat=allocok)
@@ -3228,8 +3238,8 @@ C      intrinsic random_number
          cv_info(2) = cv_size_ind_proc
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &           write(cv_lp,*)
-     &           'Memory allocation error in ',subname
+     &           call rwarn(
+     &           'Memory allocation error in '//subname)
          return
       ENDIF
       depth= max(cv_n - ctr,0)
@@ -3289,8 +3299,8 @@ C      intrinsic random_number
               if( MUMPS_BIT_GET4PROC(inode,k69onid)) then
                   call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                   if(ierr.ne.0) then
-                     if(cv_lp.gt.0)write(cv_lp,*)
-     &               'BIT_SET signalled error to',subname
+                     if(cv_lp.gt.0) call rwarn(
+     &               'BIT_SET signalled error to'//subname)
                      istat = ierr
                      goto 999
                   end if
@@ -3319,16 +3329,16 @@ C      intrinsic random_number
                enddo
               endif
               if(share.ne.0) then
-                 if(cv_lp.gt.0) write(cv_lp,*)
-     &              'Error reported in ',subname
+                 if(cv_lp.gt.0) call rwarn(
+     &              'Error reported in '//subname)
                  goto 999
               end if
               if(.NOT.associated(cv_prop_map(in)%ind_proc)) then
                  call MUMPS_PROPMAP_INIT(in,ierr)
               if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &              write(cv_lp,*)'PROPMAP_INIT signalled error to'
-     &              ,subname
+     &              call rwarn('PROPMAP_INIT signalled error to'//
+     &              subname)
                istat = ierr
                goto 999
               end if
@@ -3357,8 +3367,8 @@ C      intrinsic random_number
                if( MUMPS_BIT_GET4PROC(inode,k69onid)) then
                   call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                   if(ierr.ne.0) then
-                     if(cv_lp.gt.0)write(cv_lp,*)
-     &               'BIT_SET signalled error to',subname
+                     if(cv_lp.gt.0)call rwarn(
+     &               'BIT_SET signalled error to'//subname)
                      istat = ierr
                      goto 999
                   end if
@@ -3395,8 +3405,8 @@ C      intrinsic random_number
                end do
             endif
             if(share.ne.0) then
-               if(cv_lp.gt.0) write(cv_lp,*)
-     &              'Error reported in ',subname
+               if(cv_lp.gt.0) call rwarn(
+     &              'Error reported in '//subname)
                goto 999
             end if
             if(.not.upper_round_off)then
@@ -3410,8 +3420,9 @@ C      intrinsic random_number
      &                    work_per_proc)
                      if(ierr.ne.0) then
                        if(cv_lp.gt.0)
-     &                   write(cv_lp,*)
-     &                  'Error reported by MUMPS_SORT_MSORT in ',subname
+     &                   call rwarn(
+     &                  'Error reported by MUMPS_SORT_MSORT in '//
+     & subname)
                          istat = ierr
                          goto 999
                        endif
@@ -3442,8 +3453,8 @@ C      intrinsic random_number
             call MUMPS_PROPMAP_INIT(in,ierr)
             if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &              write(cv_lp,*)'PROPMAP_INIT signalled error to'
-     &              ,subname
+     &              call rwarn('PROPMAP_INIT signalled error to'//
+     &              subname)
                istat = ierr
                goto 999
             end if
@@ -3545,8 +3556,8 @@ C      intrinsic random_number
                   if(nb_free_procs.ge.current2)then
                      call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                      if(ierr.ne.0) then
-                        if(cv_lp.gt.0)write(cv_lp,*)
-     &                       'BIT_SET signalled error to',subname
+                        if(cv_lp.gt.0) call rwarn(
+     &                       'BIT_SET signalled error to'//subname)
                         istat = ierr
                         goto 999
                      end if
@@ -3567,8 +3578,8 @@ C      intrinsic random_number
      &              (.NOT.MUMPS_BIT_GET(procs4son,k69onid))) then
                         call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                         if(ierr.ne.0) then
-                           if(cv_lp.gt.0)write(cv_lp,*)
-     &                          'BIT_SET signalled error to',subname
+                           if(cv_lp.gt.0) call rwarn(
+     &                          'BIT_SET signalled error to'//subname)
                            istat = ierr
                            goto 999
                         end if
@@ -3577,8 +3588,8 @@ C      intrinsic random_number
                end do
             endif
             if(share2.ne.0) then
-               if(cv_lp.gt.0) write(cv_lp,*)
-     &              'Error reported in ',subname
+               if(cv_lp.gt.0) call rwarn(
+     &              'Error reported in '//subname)
                goto 999
             end if
          endif
@@ -3587,8 +3598,8 @@ C      intrinsic random_number
          cv_prop_map(in1)%ind_proc = procs4son
          call MUMPS_PROPMAP(in1,ctr-1,ierr)
          if(ierr.ne.0) then
-            if(cv_lp.gt.0) write(cv_lp,*)
-     &         'Error reported in ',subname
+            if(cv_lp.gt.0) call rwarn(
+     &         'Error reported in '//subname)
             istat=ierr
             goto 999
          endif
@@ -3617,8 +3628,8 @@ C      intrinsic random_number
             cv_info(2) = cv_size_ind_proc
             istat = cv_error_memalloc
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)
-     &           'memory allocation error in ',subname
+     &           call rwarn(
+     &           'memory allocation error in '//subname)
             return
          end if
       end if
@@ -3642,7 +3653,7 @@ C      intrinsic random_number
         deallocate(cv_prop_map(inode)%ind_proc, STAT=ierr)
         if(ierr.ne.0) then
            if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Memory deallocation error in ', subname
+     &         call rwarn('Memory deallocation error in '//subname)
                istat = cv_error_memdeloc
                return
         endif
@@ -3661,16 +3672,16 @@ C      intrinsic random_number
       if((cv_frere(inode).eq.cv_n+1).OR.(cv_frere(ifather).eq.cv_n+1)
      &     .OR.(.NOT.associated(cv_prop_map(inode)%ind_proc))) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'tototo signalled error to'
-     &        ,subname
+     &        call rwarn('tototo signalled error to'//
+     &        subname)
          return
       endif
       if(.NOT.associated(cv_prop_map(ifather)%ind_proc)) then
          call MUMPS_PROPMAP_INIT(ifather,ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'PROPMAP_INIT signalled error to '
-     &           ,subname
+     &           call rwarn('PROPMAP_INIT signalled error to '//
+     &           subname)
             istat = ierr
             return
          end if
@@ -3694,8 +3705,8 @@ C      intrinsic random_number
          cv_info(2) = 12*cv_maxnsteps
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)
-     &        'memory allocation error in ',subname
+     &        call rwarn(
+     &        'memory allocation error in '//subname)
          return
       end if
       do i=1,cv_maxnsteps
@@ -3708,7 +3719,7 @@ C      intrinsic random_number
       if ((.NOT.associated(cv_tcostw)).OR.(.NOT.associated(cv_tcostm)))
      &   then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:tcost must be allocated in ',subname
+     &        call rwarn('Error:tcost must be allocated in '//subname)
          return
       end if
       cv_nbsa=0
@@ -3727,7 +3738,7 @@ C      intrinsic random_number
       end do
       if(cv_nbsa.eq.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Error:no root nodes in ',subname
+     &        call rwarn('Error:no root nodes in '//subname)
          return
       end if
       call MUMPS_SORT_MSORT(ierr,cv_layerl0_end-cv_layerl0_start+1,
@@ -3735,8 +3746,8 @@ C      intrinsic random_number
      &     cv_layerl0_sorted_costw(cv_layerl0_start:cv_layerl0_end))
       IF (ierr .ne.0) then
         if(cv_lp.gt.0)
-     &    write(cv_lp,*)
-     &    'Error reported by MUMPS_SORT_MSORT in ',subname
+     &    call rwarn(
+     &    'Error reported by MUMPS_SORT_MSORT in '//subname)
         istat = ierr
         return
       ENDIF
@@ -3755,8 +3766,8 @@ C ssg
      &     cv_keep, cv_frere, cv_nfsiz, istat)
       IF (istat .NE. 0) THEN
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)
-     &           'Error: Can''t select type 3 node in ',subname
+     &           call rwarn(
+     &           'Error: Can''t select type 3 node in '//subname)
       ELSE IF (cv_keep(38) .ne. 0) then
         IF(cv_nodelayer(cv_keep(38)).eq.0.and.
      &                            (cv_keep(60).EQ.0)) then
@@ -3788,8 +3799,8 @@ C ssg
             cv_info(2) = cv_nb_niv2*(cv_slavef+2)
             istat = cv_error_memalloc
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)
-     &           'memory allocation error in ',subname
+     &           call rwarn(
+     &           'memory allocation error in '//subname)
             return
          end if
          cv_par2_nodes=0
@@ -3815,8 +3826,9 @@ C ssg
          enddo
          if(dummy.ne.cv_nb_niv2+1) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'Error in ',subname,
-     &           ' : dummy =',dummy,'nbniv2 =',cv_nb_niv2
+     &           call rwarn('Error in '//subname//
+     &           ' : dummy =')
+c~      ,dummy,'nbniv2 =',cv_nb_niv2
             return
          endif
       endif
@@ -3842,7 +3854,7 @@ C ssg
       if((map_strat.ne.cv_equilib_flops).and.
      &   (map_strat.ne.cv_equilib_mem)) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'error in ',subname
+     &        call rwarn('error in '//subname)
          return
       endif
       i=0 
@@ -3988,14 +4000,14 @@ C ssg
      &    STAT=ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Memory deallocation error in ',subname
+     &        call rwarn('Memory deallocation error in '//subname)
          istat = cv_error_memdeloc
          return
       end if
       deallocate(work_per_proc,id_son,STAT=ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Memory deallocation error in ',subname
+     &        call rwarn('Memory deallocation error in '//subname)
          istat = cv_error_memdeloc
          return
       end if
@@ -4008,8 +4020,8 @@ C ssg
      &                 STAT=ierr)
             if(ierr.ne.0) then
                if(cv_lp.gt.0)
-     &         write(cv_lp,*)'Memory deallocation error in ',
-     &                        subname
+     &         call rwarn('Memory deallocation error in '//
+     &                        subname)
                istat = cv_error_memdeloc
                return
             end if
@@ -4019,7 +4031,7 @@ C ssg
          deallocate(cv_layer_p2node,STAT=ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &      write(cv_lp,*)'Memory deallocation error in ',subname
+     &      call rwarn('Memory deallocation error in '//subname)
             istat = cv_error_memdeloc
             return
          end if
@@ -4028,8 +4040,8 @@ C ssg
          call MUMPS_PROPMAP_TERM(i,ierr)
          if(ierr.ne.0) then
             if(cv_lp.gt.0)
-     &           write(cv_lp,*)'PROPMAP_TERM signalled error in ',
-     &           subname
+     &           call rwarn('PROPMAP_TERM signalled error in '//
+     &           subname)
             istat = ierr
             return
          end if
@@ -4037,7 +4049,7 @@ C ssg
       if(associated(cv_prop_map))deallocate(cv_prop_map,STAT=ierr)
       if(ierr.ne.0) then
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)'Memory deallocation error in ',subname
+     &        call rwarn('Memory deallocation error in '//subname)
          istat = cv_error_memdeloc
          return
       end if
@@ -4160,7 +4172,7 @@ C ssg
       deallocate(cv_par2_nodes,cv_cand,STAT=istat)
       if(istat.ne.0) then
          if(cv_lp.gt.0)
-     &   write(cv_lp,*)'Memory deallocation error in ',subname
+     &   call rwarn('Memory deallocation error in '//subname)
          istat = cv_error_memdeloc
          return
       end if
@@ -4191,7 +4203,7 @@ C ssg
       allocate( mem_distribtmp( 0:cv_slavef-1 ),
      &          buffer_memdistrib( 0:cv_slavef-1 ), stat=ierr )
       if ( ierr .gt. 0 ) then
-         if(cv_mp.gt.0) write(cv_mp,*) 'pb allocation mem_dist'
+         if(cv_mp.gt.0) call rwarn('pb allocation mem_dist')
          informerr(1) = -13
          informerr(2) = cv_slavef
          return
@@ -4204,7 +4216,7 @@ C ssg
      &        working_comm,mem_distrib)
          if ( ierr .ne. 0 ) then
             if(cv_mp.gt.0)
-     &      write(cv_mp,*) 'pb in mumps_init_arch_parameters'
+     &      call rwarn('pb in mumps_init_arch_parameters')
             informerr(1) = -13
             informerr(2) = cv_slavef
             return
@@ -4212,8 +4224,8 @@ C ssg
          mem_distribtmp = mem_distrib
          call MUMPS_FIX_NODE_MASTER(ierr)
          if ( ierr .ne. 0 ) then
-            if(cv_mp.gt.0) write(cv_mp,*)
-     &'pb in mumps_init_arch_parameters'
+            if(cv_mp.gt.0) call rwarn(
+     &'pb in mumps_init_arch_parameters')
             informerr(1) = -13
             informerr(2) = cv_slavef
             return
@@ -4248,7 +4260,7 @@ C ssg
          if ( allocated(mem_distribmpi) ) deallocate(mem_distribmpi )
          allocate( mem_distribmpi( 0:cv_slavef-1 ), stat=ierr )
          if ( ierr .gt. 0 ) then
-            if(cv_mp.gt.0) write(cv_mp,*) 'pb allocation mem_dist'
+            if(cv_mp.gt.0) call rwarn('pb allocation mem_dist')
             informerr(1) = -13
             informerr(2) = cv_slavef
             return
@@ -4261,7 +4273,7 @@ C ssg
          call MUMPS_FIX_TABLE_OF_PROCESS(ierr)
          if ( ierr .ne. 0 ) then
             if(cv_mp.gt.0)
-     &      write(cv_mp,*) 'pb in mumps_init_arch_parameters'
+     &      call rwarn('pb in mumps_init_arch_parameters')
             informerr(1) = -13
             informerr(2) = cv_slavef
             return
@@ -4294,8 +4306,8 @@ C ssg
      &     deallocate(table_of_process  )
       allocate( table_of_process(0:cv_slavef-1), stat=ierr )
       if ( ierr .gt. 0 ) then
-         if(cv_mp.gt.0) write(cv_mp,*)
-     &   'pb allocation in MUMPS_FIX_TABLE_OF_PROCESS'
+         if(cv_mp.gt.0) call rwarn(
+     &   'pb allocation in MUMPS_FIX_TABLE_OF_PROCESS')
          return
       end if
       do i=0,cv_slavef - 1
@@ -4349,8 +4361,8 @@ C ssg
             mem_distribtmp(i) = 0
          endif
       enddo
-      if(cv_mp.gt.0) write(cv_mp,*)'problem in MUMPS_FIX_NODE_MASTER:
-     &     cannot find a master'
+      if(cv_mp.gt.0) call rwarn('problem in MUMPS_FIX_NODE_MASTER:
+     &     cannot find a master')
       ierr = 1
       return
       end subroutine MUMPS_FIX_NODE_MASTER
@@ -4373,8 +4385,8 @@ C ssg
       call MPI_GET_PROCESSOR_NAME(name,resultlen,ierr)
       allocate(myname(resultlen),stat=allocok)
       if ( allocok .gt. 0 ) then
-        if(cv_mp.gt.0) write(cv_mp,*)
-     &  'pb allocation in compute_dist for myname'
+        if(cv_mp.gt.0) call rwarn(
+     &  'pb allocation in compute_dist for myname')
         ierr = 1
         return
       end if
@@ -4392,8 +4404,8 @@ C ssg
      &           working_comm,ierr)
          allocate(namercv(lenrcv),stat=allocok)
          if ( allocok .gt. 0 ) then
-            if(cv_mp.gt.0) write(cv_mp,*)
-     &      'pb allocation in compute_dist for namercv'
+            if(cv_mp.gt.0) call rwarn(
+     &      'pb allocation in compute_dist for namercv')
             ierr = 1
             return
          end if
@@ -4445,8 +4457,8 @@ C ssg
       if (allocated(allowed_nodes)) deallocate(allowed_nodes)
       allocate( allowed_nodes(0:nb_arch_nodes-1),stat=ierr)
       if ( ierr .gt. 0 ) then
-         if(cv_mp.gt.0) write(cv_mp,*)
-     &   'pb allocation MUMPS_ALLOC_ALLOW_MASTER'
+         if(cv_mp.gt.0) call rwarn(
+     &   'pb allocation MUMPS_ALLOC_ALLOW_MASTER')
          ierr = -13
          return
       end if
@@ -4454,8 +4466,8 @@ C ssg
        if (allocated(score)) deallocate(score)
       allocate( score(0:nb_arch_nodes-1),stat=ierr)
       if ( ierr .gt. 0 ) then
-         if(cv_mp.gt.0) write(cv_mp,*)
-     &   'pb allocation MUMPS_ALLOC_ALLOW_MASTER'
+         if(cv_mp.gt.0) call rwarn(
+     &   'pb allocation MUMPS_ALLOC_ALLOW_MASTER')
          ierr = -13
          return
       end if
@@ -4485,8 +4497,8 @@ C ssg
          cv_info(2) = dim1+dim2+dim1+dim2
          istat = cv_error_memalloc
          if(cv_lp.gt.0)
-     &        write(cv_lp,*)
-     &        'memory allocation error in ',subname
+     &        call rwarn(
+     &        'memory allocation error in '//subname)
          return
       end if
       a=start1st
@@ -4549,7 +4561,7 @@ C ssg
         cv_info(2) = 3*dim
         istat = cv_error_memalloc
         if(cv_lp.gt.0)
-     &  write(cv_lp,*)'memory allocation error in ',subname
+     &  call rwarn('memory allocation error in '//subname)
         return
       end if
       do i=1,dim
@@ -4665,14 +4677,14 @@ C         if(s.GE.ss) stop 'maxsize of stack reached'
          ELSE IF((SIZEROOT.GT.KEEP(37))
      &           .AND. (KEEP(53).EQ.0)
      &           ) THEN
-            IF (MP.GT.0) WRITE(MP,*) 'A root of estimated size ',
-     &           SIZEROOT,' has been selected for Scalapack.'
+c~             IF (MP.GT.0) WRITE(MP,*) 'A root of estimated size ',
+c~      &           SIZEROOT,' has been selected for Scalapack.'
             KEEP(38) = IROOTTREE
          ELSE
             KEEP(38) = 0
-             IF (MP.GT.0) WRITE(MP,*)
-     &          ' WARNING: Largest root node of size ', SIZEROOT,
-     &          ' not selected for parallel execution'
+c~              IF (MP.GT.0) WRITE(MP,*)
+c~      &          ' WARNING: Largest root node of size ', SIZEROOT,
+c~      &          ' not selected for parallel execution'
          END IF
          IF ((KEEP(38).EQ.0).AND.(KEEP(53).NE.0)) THEN
             KEEP(20) = IROOTTREE
@@ -4770,7 +4782,8 @@ C         if(s.GE.ss) stop 'maxsize of stack reached'
       dk = ifather
       fk = in_father
 # if (check_mumps_static_mapping >= 3)
-         write(6,*) ' Last (close to root) node in chain :', ifather
+         call rwarn(' Last (close to root) node in chain :')
+c~          , ifather
 #endif 
       fils(f1) = next_father 
       frere(dk) = e1
@@ -4819,8 +4832,8 @@ C         if(s.GE.ss) stop 'maxsize of stack reached'
       k  = 1  
       do
          if (.not. (frere(inode) .lt. 0) ) then
-          write(*,*) " Internal error 0 in SETUP_CAND",
-     &    frere(inode), inode
+          call rwarn(" Internal error 0 in SETUP_CAND")
+c~      &    frere(inode), inode
           CALL MUMPS_ABORT()
         endif
         ifather = -frere(inode)
@@ -4834,8 +4847,8 @@ C         if(s.GE.ss) stop 'maxsize of stack reached'
             procnode(ifather) = procnode(inode) 
             cand(dummy+1,:) = cand(dummy,:)
             dummy = dummy + 1
-            write(6,*) ' Mapping property', 
-     &                 ' of procs in chain lost '
+            call rwarn(' Mapping property'//
+     &                 ' of procs in chain lost ')
             CALL MUMPS_ABORT()
           endif
           cand(dummy+1,1:nbcand-1+k-1) = cand(dummy,2:nbcand+k-1)
@@ -4860,9 +4873,10 @@ C         if(s.GE.ss) stop 'maxsize of stack reached'
           nbcand = nbcand+k-1
           k = 1
        else
-          write(6,*) ' Internal error 2 in SETUP_CAND', 
-     &    ' in, ifather =', inode, ifather,
-     &    ' nodetype(ifather) ', nodetype(ifather)
+          call rwarn(' Internal error 2 in SETUP_CAND'//
+     &    ' in, ifather =')
+c~      , inode, ifather,
+c~      &    ' nodetype(ifather) ', nodetype(ifather)
           CALL MUMPS_ABORT()
         endif
         cand(dummy+1,slavef+1)= nbcand
@@ -4925,8 +4939,8 @@ C ssg
      &                    npiv4equilibreRows(nfront - nass, nproc2 ))
             endif
          else
-            write(*,*) "Internal error in MUMPS_GET_SPLIT_4_PERF,"
-            write(*,*) "optimization_strategy not implemented"
+            call rwarn("Internal error in MUMPS_GET_SPLIT_4_PERF,"//
+     &          " optimization_strategy not implemented")
             call MUMPS_ABORT()
           endif
         endif
@@ -4946,8 +4960,8 @@ C ssg
             npivNew = min(npiv - nass,
      &              npiv4equilibreRows(nfront - nass, nproc2 - 1.0d0))
          else
-            write(*,*) "Internal error in MUMPS_GET_SPLIT_4_PERF,"
-            write(*,*) "optimization_strategy not implemented"
+            call rwarn("Internal error in MUMPS_GET_SPLIT_4_PERF,"//
+     &          " optimization_strategy not implemented")
             call MUMPS_ABORT()
           endif
           timeAss = timeAssembly(int(nfront-nass,8), nproc2)
@@ -4995,7 +5009,7 @@ C ssg
         c = 2.*n**2 + s*n + s/6.
         sdelta = (b*b) - 4*a*c
         if (sdelta < 0.0E0) then
-          WRITE(*,*) "Delta < 0 in npiv4equilibreFlops"
+          call rwarn("Delta < 0 in npiv4equilibreFlops")
           call MUMPS_ABORT()
         endif
         sdelta = sqrt(sdelta)

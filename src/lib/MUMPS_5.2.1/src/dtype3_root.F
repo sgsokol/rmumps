@@ -187,8 +187,8 @@ C
        IERROR = root%NPCOL + 1
       endif
       IF (IFLAG.LT.0) THEN
-         IF (LP > 0) write(6,*) MYID, ' : MEMORY ALLOCATION ',
-     &     'FAILURE in DMUMPS_BUILD_AND_SEND_CB_ROOT'
+         call rwarn(' : MEMORY ALLOCATION '//
+     &     'FAILURE in DMUMPS_BUILD_AND_SEND_CB_ROOT')
          CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
          RETURN
       ENDIF
@@ -368,7 +368,7 @@ C
       IROW  = root%MYROW
       IF ( root%yes ) THEN
          if (IROW .ne. root%MYROW .or. JCOL.ne.root%MYCOL) then
-        write(*,*) ' error in grid position buildandsendcbroot'
+        call rwarn(' error in grid position buildandsendcbroot')
         CALL MUMPS_ABORT()
         end if
         IF ( PTRIST(STEP(IROOT)).EQ.0.AND.
@@ -477,8 +477,9 @@ C
           PDEST = IROW * root%NPCOL + JCOL
           IF ( (root%MYROW.eq.IROW.and.root%MYCOL.eq.JCOL) .and.
      &         MYID.ne.PDEST) THEN
-            write(*,*) 'error: myrow,mycol=',root%MYROW,root%MYCOL
-            write(*,*) ' MYID,PDEST=',MYID,PDEST
+            call rwarn('error: myrow,mycol=')
+c~             ,root%MYROW,root%MYCOL
+c~             write(*,*) ' MYID,PDEST=',MYID,PDEST
             CALL MUMPS_ABORT()
           END IF
           IF ( root%MYROW .NE. IROW .OR. root%MYCOL .NE. JCOL) THEN
@@ -498,9 +499,9 @@ C
      &          KEEP(IXSZ), COMP, DKEEP(97),
      &          MYID, SLAVEF, PROCNODE_STEPS, DAD)
                 IF ( LRLU .NE. LRLUS ) THEN
-                  WRITE(*,*) MYID,": pb compress in",
-     &                            "DMUMPS_BUILD_AND_SEND_CB_ROOT"
-                  WRITE(*,*) MYID,': LRLU, LRLUS=',LRLU,LRLUS
+                  call rwarn(": pb compress in "//
+     &                            "DMUMPS_BUILD_AND_SEND_CB_ROOT")
+c~                   WRITE(*,*) MYID,': LRLU, LRLUS=',LRLU,LRLUS
                   CALL MUMPS_ABORT()
                 END IF
               END IF
@@ -555,14 +556,14 @@ C
             IF ( IERR == -2 ) THEN
               IFLAG  = -17
               IERROR = SIZE_MSG
-              IF (LP > 0) WRITE(LP, *) "FAILURE, SEND BUFFER TOO
-     & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT"
+              IF (LP > 0) call rwarn("FAILURE, SEND BUFFER TOO
+     & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT")
               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
               GOTO 500
             ENDIF
             IF ( IERR == -3 ) THEN
-              IF (LP > 0) WRITE(LP, *) "FAILURE, RECV BUFFER TOO
-     & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT"
+              IF (LP > 0)call rwarn("FAILURE, RECV BUFFER TOO
+     & SMALL DURING DMUMPS_BUILD_AND_SEND_CB_ROOT")
               IFLAG  = -20
               IERROR = SIZE_MSG
               CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
@@ -602,9 +603,9 @@ C
           SHIFT_VAL_SON=0_8
           LDA = NELIM
        ELSE
-          WRITE(*,*) MYID,
-     &    ": internal error in DMUMPS_SET_LDA_SHIFT_VAL_SON",
-     &    IW(IOLDPS+XXS), "ISON=",ISON
+          call rwarn(
+     &    ": internal error in DMUMPS_SET_LDA_SHIFT_VAL_SON")
+c~      &    IW(IOLDPS+XXS), "ISON=",ISON
           CALL MUMPS_ABORT()
         ENDIF
         RETURN
@@ -925,8 +926,8 @@ C
       LOGICAL JUPDATE
       ALLOCATE(WK( MBLOCK * NBLOCK ), stat=allocok)
       if(allocok.ne.0) then
-         WRITE(6,*) ' Allocation error of WK in '
-     &       // 'routine DMUMPS_SCATTER_ROOT '
+         call rwarn(' Allocation error of WK in '
+     &       // 'routine DMUMPS_SCATTER_ROOT ')
          CALL MUMPS_ABORT()
       endif
         IAPAR = 1
@@ -1014,8 +1015,8 @@ C
       LOGICAL JUPDATE
       ALLOCATE(WK( MBLOCK * NBLOCK ), stat=allocok)
       if(allocok.ne.0) then
-         WRITE(6,*) ' Allocation error of WK in '
-     &       // 'routine DMUMPS_GATHER_ROOT '
+         call rwarn(' Allocation error of WK in '
+     &       // 'routine DMUMPS_GATHER_ROOT ')
          CALL MUMPS_ABORT()
       endif
         IAPAR = 1

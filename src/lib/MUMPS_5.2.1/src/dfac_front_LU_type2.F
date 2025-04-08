@@ -237,8 +237,8 @@ C ssg
       CURRENT_BLR = 0
       ALLOCATE( IPIV( NASS ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
-        WRITE(*,*) MYID,' : DMUMPS_FAC2_LU :failed to allocate ',
-     &  NASS, ' integers'
+        call rwarn(' : DMUMPS_FAC2_LU :failed to allocate ')
+c~      &  NASS, ' integers'
         IFLAG  = -13
         IERROR =NASS
         GO TO 490

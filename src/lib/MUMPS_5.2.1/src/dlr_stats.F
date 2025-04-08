@@ -996,8 +996,8 @@ C
      &                  NB_ENTRIES_FACTOR_withLR 
         IF (NB_ENTRIES_FACTOR < 0) THEN
          IF (PROKG.AND.MPG.GT.0) THEN
-          WRITE(MPG,*) "NEGATIVE NUMBER OF ENTRIES IN FACTOR"
-          WRITE(MPG,*) "===> OVERFLOW ?"
+          call rwarn("NEGATIVE NUMBER OF ENTRIES IN FACTOR")
+          call rwarn("===> OVERFLOW ?")
          END IF
         END IF
         IF (ACC_FR_MRY .EQ. 0) THEN
@@ -1041,57 +1041,57 @@ C
         DOUBLE PRECISION :: DKEEP(230)
         LOGICAL PROK
         PROK = (PROKG.AND.(MPG.GE.0))
-        IF (PROK) THEN
-        WRITE(MPG,'(/A,A)') 
-     & '-------------- Beginning of BLR statistics -------------------',
-     & '--------------'
-        WRITE(MPG,'(A,I2)') 
-     & ' ICNTL(36) BLR variant                            = ', ICNTL36
-        WRITE(MPG,'(A,ES8.1)')  
-     & ' CNTL(7)   Dropping parameter controlling accuray = ',
-     &                          DKEEP(8)
-        WRITE(MPG,'(A)') 
-     &          ' Statistics after BLR factorization :'
-        WRITE(MPG,'(A,I8)') 
-     &    '     Number of BLR fronts                     = ',
-     &                          CNT_NODES
-        ENDIF  
-        IF (PROK) WRITE(MPG,'(A,F8.1,A)')
-     &    '     Fraction of factors in BLR fronts        =',
-     &                FACTOR_PROCESSED_FRACTION,'% ' 
-        IF (PROK) THEN
-          WRITE(MPG,'(A)') 
-     &  '     Statistics on the number of entries in factors :'
-          WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
-     &  '     INFOG(29) Theoretical nb of entries in factors      ='
-     &     ,dble(K8110),' (100.0%)'
-          WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
-     &  '     INFOG(35) Effective nb of entries  (% of INFOG(29)) ='
-     &     ,dble(K849),' ('
-     &     ,dble(100)*(dble(K849)/dble(max(K8110,1_8)))
-     &     ,'%)'
-        ENDIF
-        IF (PROK) WRITE(MPG,'(A)')
-     &  '     Statistics on operation counts (OPC):'
+c~         IF (PROK) THEN
+c~         WRITE(MPG,'(/A,A)') 
+c~      & '-------------- Beginning of BLR statistics -------------------',
+c~      & '--------------'
+c~         WRITE(MPG,'(A,I2)') 
+c~      & ' ICNTL(36) BLR variant                            = ', ICNTL36
+c~         WRITE(MPG,'(A,ES8.1)')  
+c~      & ' CNTL(7)   Dropping parameter controlling accuray = ',
+c~      &                          DKEEP(8)
+c~         WRITE(MPG,'(A)') 
+c~      &          ' Statistics after BLR factorization :'
+c~         WRITE(MPG,'(A,I8)') 
+c~      &    '     Number of BLR fronts                     = ',
+c~      &                          CNT_NODES
+c~         ENDIF  
+c~         IF (PROK) WRITE(MPG,'(A,F8.1,A)')
+c~      &    '     Fraction of factors in BLR fronts        =',
+c~      &                FACTOR_PROCESSED_FRACTION,'% ' 
+c~         IF (PROK) THEN
+c~           WRITE(MPG,'(A)') 
+c~      &  '     Statistics on the number of entries in factors :'
+c~           WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
+c~      &  '     INFOG(29) Theoretical nb of entries in factors      ='
+c~      &     ,dble(K8110),' (100.0%)'
+c~           WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
+c~      &  '     INFOG(35) Effective nb of entries  (% of INFOG(29)) ='
+c~      &     ,dble(K849),' ('
+c~      &     ,dble(100)*(dble(K849)/dble(max(K8110,1_8)))
+c~      &     ,'%)'
+c~         ENDIF
+c~         IF (PROK) WRITE(MPG,'(A)')
+c~      &  '     Statistics on operation counts (OPC):'
         TOTAL_FLOP = MAX(TOTAL_FLOP,EPSILON(1.0D0))
         DKEEP(55)=dble(TOTAL_FLOP)
         DKEEP(60)=dble(100)
         DKEEP(56)=dble(ACC_FLOP_LR_FACTO+ACC_FLOP_FRFRONTS)
         DKEEP(61)=dble(100*(ACC_FLOP_LR_FACTO+
      &       ACC_FLOP_FRFRONTS) /TOTAL_FLOP)
-        IF (PROK) THEN 
-        WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
-     &  '     RINFOG(3) Total theoretical operations counts       ='
-     &     ,TOTAL_FLOP,' (',100*TOTAL_FLOP/TOTAL_FLOP,'%)'
-        WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
-     &  '     RINFOG(14) Total effective OPC     (% of RINFOG(3)) ='
-     &     ,ACC_FLOP_LR_FACTO+ACC_FLOP_FRFRONTS,' ('
-     &,100*(ACC_FLOP_LR_FACTO+ACC_FLOP_FRFRONTS)/TOTAL_FLOP
-     &,'%)'
-        ENDIF
-      IF (PROK) WRITE(MPG,'(A,A)') 
-     & '-------------- End of BLR statistics -------------------------',
-     & '--------------'
+c~         IF (PROK) THEN 
+c~         WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
+c~      &  '     RINFOG(3) Total theoretical operations counts       ='
+c~      &     ,TOTAL_FLOP,' (',100*TOTAL_FLOP/TOTAL_FLOP,'%)'
+c~         WRITE(MPG,'(A,ES10.3,A,F5.1,A)') 
+c~      &  '     RINFOG(14) Total effective OPC     (% of RINFOG(3)) ='
+c~      &     ,ACC_FLOP_LR_FACTO+ACC_FLOP_FRFRONTS,' ('
+c~      &,100*(ACC_FLOP_LR_FACTO+ACC_FLOP_FRFRONTS)/TOTAL_FLOP
+c~      &,'%)'
+c~         ENDIF
+c~       IF (PROK) WRITE(MPG,'(A,A)') 
+c~      & '-------------- End of BLR statistics -------------------------',
+c~      & '--------------'
       RETURN
       END SUBROUTINE SAVEandWRITE_GAINS
       END MODULE DMUMPS_LR_STATS

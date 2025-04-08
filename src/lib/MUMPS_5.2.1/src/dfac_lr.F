@@ -232,9 +232,10 @@ C
                IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NELIM * LRB%K
-                 write(*,*) 'Allocation problem in BLR routine 
-     &         DMUMPS_BLR_UPD_NELIM_VAR_U: ',
-     &         'not enough memory? memory requested = ', IERROR
+                 call rwarn('Allocation problem in BLR routine 
+     &         DMUMPS_BLR_UPD_NELIM_VAR_U: ' //
+     &         'not enough memory? memory requested = ')
+c~      , IERROR
                  GOTO 100
                ENDIF
                CALL dgemm('N', 'N', LRB%K, NELIM, LRB%N, ONE,
@@ -295,9 +296,10 @@ C
                IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NELIM * KL
-                 write(*,*) 'Allocation problem in BLR routine 
-     &         DMUMPS_BLR_UPD_NELIM_VAR_L: ',
-     &         'not enough memory? memory requested = ', IERROR
+                 call rwarn('Allocation problem in BLR routine 
+     &         DMUMPS_BLR_UPD_NELIM_VAR_L: ' //
+     &         'not enough memory? memory requested = ')
+c~      , IERROR
                  GOTO 100
                ENDIF
                CALL dgemm(UTRANS , 'T' , NELIM, KL, NL , ONE ,
@@ -376,9 +378,10 @@ C
                IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NELIM * KL
-                 write(*,*) 'Allocation problem in BLR routine 
-     &           DMUMPS_BLR_UPDATE_TRAILING: ',
-     &           'not enough memory? memory requested = ', IERROR
+                 call rwarn('Allocation problem in BLR routine 
+     &           DMUMPS_BLR_UPDATE_TRAILING: ' //
+     &           'not enough memory? memory requested = ')
+c~      , IERROR
                  GOTO 100
                ENDIF
                POSELT_TOP  = POSELT 
@@ -507,9 +510,10 @@ C
      &         CURRENT_BLR+1, NEXT_BLR_L)
         ENDIF
         IF (.not.(present(FIRST_BLOCK))) THEN
-          write(*,*) "Internal error in 
-     &      DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: KEEP(480)=",K480,
-     &      ">= 5, but FIRST_BLOCK argument is missing"
+         call rwarn("Internal error in 
+     &      DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: KEEP(480)=")
+c~      ,K480,
+c~      &      ">= 5, but FIRST_BLOCK argument is missing"
           CALL MUMPS_ABORT()
         ENDIF
       ENDIF
@@ -659,10 +663,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = CURRENT_BLR-NB_DEC
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                       call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -680,10 +684,10 @@ C
                      IF (allocok .GT. 0) THEN
                         IFLAG  = -13
                         IERROR = CURRENT_BLR+1
-                        write(*,*) 'Allocation problem in BLR routine ',
-     &                       'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: ',
-     &                       'not enough memory? memory requested = ',
-     &                       IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                       'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: '//
+     &                       'not enough memory? memory requested = ')
+c~      &                       IERROR
                         GOTO 100
                      ENDIF
                     POS_LIST(1) = 1
@@ -695,10 +699,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = CURRENT_BLR+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine ' //
+     &                      'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: ' //
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     RANK_LIST(1) = FR_RANK
@@ -744,10 +748,10 @@ C
                IF (allocok .GT. 0) THEN
                   IFLAG  = -13
                   IERROR = CURRENT_BLR-NB_DEC
-                  write(*,*) 'Allocation problem in BLR routine ',
-     &                 'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: ',
-     &                 'not enough memory? memory requested = ',
-     &                 IERROR
+                  call rwarn('Allocation problem in BLR routine '//
+     &                 'DMUMPS_BLR_UPD_PANEL_LEFT_LDLT: '//
+     &                 'not enough memory? memory requested = ')
+c~      &                 IERROR
                   GOTO 100
                ENDIF
               POS_LIST(1) = 1
@@ -836,9 +840,10 @@ C
      &         CURRENT_BLR+1, NEXT_BLR)
         ENDIF
         IF (.not.(present(FIRST_BLOCK))) THEN
-          write(*,*) "Internal error in 
-     &      DMUMPS_BLR_UPD_PANEL_LEFT: KEEP(480)=",K480,
-     &      ">=5, but FIRST_BLOCK argument is missing"
+          call rwarn("Internal error in 
+     &      DMUMPS_BLR_UPD_PANEL_LEFT: KEEP(480)=")
+c~      ,K480,
+c~      &      ">=5, but FIRST_BLOCK argument is missing"
           CALL MUMPS_ABORT()
         ENDIF
       ENDIF
@@ -1033,10 +1038,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = CURRENT_BLR-NB_DEC
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_PANEL_LEFT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_PANEL_LEFT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -1054,10 +1059,10 @@ C
                      IF (allocok .GT. 0) THEN
                         IFLAG  = -13
                         IERROR = CURRENT_BLR+1
-                        write(*,*) 'Allocation problem in BLR routine ',
-     &                       'DMUMPS_BLR_UPD_PANEL_LEFT: ',
-     &                       'not enough memory? memory requested = ',
-     &                       IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                       'DMUMPS_BLR_UPD_PANEL_LEFT: '//
+     &                       'not enough memory? memory requested = ')
+c~      &                       IERROR
                         GOTO 100
                      ENDIF
                     POS_LIST(1) = 1
@@ -1069,10 +1074,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = CURRENT_BLR+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_PANEL_LEFT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_PANEL_LEFT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     RANK_LIST(1) = FR_RANK
@@ -1118,10 +1123,10 @@ C
               IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = CURRENT_BLR-NB_DEC
-                 write(*,*) 'Allocation problem in BLR routine ',
-     &                'DMUMPS_BLR_UPD_PANEL_LEFT: ',
-     &                'not enough memory? memory requested = ',
-     &                IERROR
+                 call rwarn('Allocation problem in BLR routine '//
+     &                'DMUMPS_BLR_UPD_PANEL_LEFT: '//
+     &                'not enough memory? memory requested = ')
+c~      &                IERROR
                  GOTO 100
               ENDIF
               POS_LIST(1) = 1
@@ -1339,10 +1344,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM-NB_DEC
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -1360,10 +1365,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -1375,10 +1380,10 @@ C
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                    call rwarn('Allocation problem in BLR routine '//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT_LDLT: '//
+     &                      'not enough memory? memory requested = ')
+c~      &                      IERROR
                        GOTO 100
                     ENDIF
                     RANK_LIST(1) = FR_RANK
@@ -1421,10 +1426,10 @@ C
               IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NB_INASM-NB_DEC
-                 write(*,*) 'Allocation problem in BLR routine ',
-     &                'DMUMPS_BLR_UPD_CB_LEFT_LDLT: ',
-     &                'not enough memory? memory requested = ',
-     &                IERROR
+                 call rwarn("Allocation problem in BLR routine "//
+     &                'DMUMPS_BLR_UPD_CB_LEFT_LDLT: '//
+     &                'not enough memory? memory requested = ')
+C     &                IERROR
                  GOTO 100
               ENDIF
               POS_LIST(1) = 1
@@ -1529,8 +1534,8 @@ C ssg
      &          + int(NASS-1,8)
             N = BEGS_BLR_U(3)-BEGS_BLR_U(2)
           ELSE
-            write(*,*) 'Internal error in DMUMPS_BLR_UPD_CB_LEFT',
-     &        LBANDSLAVE,K474       
+            call rwarn('Internal error in DMUMPS_BLR_UPD_CB_LEFT')
+c~      &        LBANDSLAVE,K474       
             CALL MUMPS_ABORT()
           ENDIF
         ELSE
@@ -1666,10 +1671,10 @@ C ssg
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM-NB_DEC
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                       call rwarn("Allocation problem in BLR routine "//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT: '//
+     &                      'not enough memory? memory requested = ')
+C     &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -1687,10 +1692,10 @@ C ssg
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                       call rwarn("Allocation problem in BLR routine "//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT: '//
+     &                      'not enough memory? memory requested = ')
+C     &                      IERROR
                        GOTO 100
                     ENDIF
                     POS_LIST(1) = 1
@@ -1702,10 +1707,10 @@ C ssg
                     IF (allocok .GT. 0) THEN
                        IFLAG  = -13
                        IERROR = NB_INASM+1
-                       write(*,*) 'Allocation problem in BLR routine ',
-     &                      'DMUMPS_BLR_UPD_CB_LEFT: ',
-     &                      'not enough memory? memory requested = ',
-     &                      IERROR
+                       call rwarn("Allocation problem in BLR routine "//
+     &                      'DMUMPS_BLR_UPD_CB_LEFT: '//
+     &                      'not enough memory? memory requested = ')
+C     &                      IERROR
                        GOTO 100
                     ENDIF
                     RANK_LIST(1) = FR_RANK
@@ -1748,10 +1753,10 @@ C ssg
               IF (allocok .GT. 0) THEN
                  IFLAG  = -13
                  IERROR = NB_INASM-NB_DEC
-                 write(*,*) 'Allocation problem in BLR routine ',
-     &                'DMUMPS_BLR_UPD_CB_LEFT: ',
-     &                'not enough memory? memory requested = ',
-     &                IERROR
+                 call rwarn("Allocation problem in BLR routine "//
+     &                'DMUMPS_BLR_UPD_CB_LEFT: '//
+     &                'not enough memory? memory requested = ')
+C     &                IERROR
                  GOTO 100
               ENDIF
               POS_LIST(1) = 1
@@ -2142,8 +2147,9 @@ C ssg
      &       TOLEPS, TOL_OPT, RANK, MAXRANK, INFO)
  3800 CONTINUE
         IF (INFO < 0) THEN
-           WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
-     &                 " OF TRUNCATED_RRQR WHILE COMPRESSING A CB BLOCK"
+           call rwarn(" PROBLEM IN ARGUMENT NUMBER "//
+c~            ,INFO,
+     &               " OF TRUNCATED_RRQR WHILE COMPRESSING A CB BLOCK")
            CALL MUMPS_ABORT()
         END IF
         ISLR = ((RANK.LE.MAXRANK).AND.(M.NE.0).AND.(N.NE.0))     
@@ -2163,8 +2169,9 @@ C ssg
      &           LRB%Q,
      &           M, WORK_THR, LWORK, INFO )
                IF (INFO < 0) THEN
-                 WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
-     &                     " OF CUNMQR WHILE COMPRESSING A CB BLOCK"
+                 call rwarn(" PROBLEM IN ARGUMENT NUMBER "//
+c~                  ,INFO,
+     &                     " OF CUNMQR WHILE COMPRESSING A CB BLOCK")
                  CALL MUMPS_ABORT()
                END IF
                DO JJ=1,N
@@ -2284,7 +2291,7 @@ C ssg
       ELSE IF (DIR .eq. 'H') THEN
         N = BEGS_BLR(CURRENT_BLR+1)-BEGS_BLR(CURRENT_BLR)-NELIM
       ELSE
-         WRITE(*,*) " WRONG ARGUMENT IN DMUMPS_COMPRESS_PANEL "
+         call rwarn(" WRONG ARGUMENT IN DMUMPS_COMPRESS_PANEL ")
          CALL MUMPS_ABORT()
       END IF
       NB_BLOCKS_PANEL = NB_BLR-CURRENT_BLR
@@ -2325,28 +2332,31 @@ C ssg
         IF (K480.GE.5) THEN
           IF (BLR_PANEL(IP-CURRENT_BLR)%ISLR) THEN
              IF (M.NE.BLR_PANEL(IP-CURRENT_BLR)%M) THEN
-              write(*,*) 'Internal error in DMUMPS_COMPRESS_PANEL',
-     &                    ' M size inconsistency',M,
-     &                    BLR_PANEL(IP-CURRENT_BLR)%M
+              call rwarn('Internal error in DMUMPS_COMPRESS_PANEL'//
+     &                    ' M size inconsistency')
+c~      ,M,
+c~      &                    BLR_PANEL(IP-CURRENT_BLR)%M
               CALL MUMPS_ABORT()
             ENDIF
             IF (N.NE.BLR_PANEL(IP-CURRENT_BLR)%N) THEN
-              write(*,*) 'Internal error in DMUMPS_COMPRESS_PANEL',
-     &                    ' N size inconsistency',N,
-     &                    BLR_PANEL(IP-CURRENT_BLR)%N
+              call rwarn('Internal error in DMUMPS_COMPRESS_PANEL' //
+     &                    ' N size inconsistency')
+c~      ,N,
+c~      &                    BLR_PANEL(IP-CURRENT_BLR)%N
               CALL MUMPS_ABORT()
             ENDIF
             IF (BLR_PANEL(IP-CURRENT_BLR)%LRFORM.NE.1) THEN
-              write(*,*) 'Internal error in DMUMPS_COMPRESS_PANEL',
-     &                    ' LRFORM inconsistency',
-     &                    BLR_PANEL(IP-CURRENT_BLR)%LRFORM
+              call rwarn('Internal error in DMUMPS_COMPRESS_PANEL'//
+     &                    ' LRFORM inconsistency')
+c~      &                    BLR_PANEL(IP-CURRENT_BLR)%LRFORM
               CALL MUMPS_ABORT()
             ENDIF
             MAXRANK = floor(dble(M*N)/dble(M+N))
             IF (BLR_PANEL(IP-CURRENT_BLR)%K.GT.MAXRANK) THEN
-              write(*,*) 'Internal error in DMUMPS_COMPRESS_PANEL',
-     &                    ' MAXRANK inconsistency',MAXRANK,
-     &                    BLR_PANEL(IP-CURRENT_BLR)%K
+              call rwarn('Internal error in DMUMPS_COMPRESS_PANEL'//
+     &                    ' MAXRANK inconsistency')
+c~      ,MAXRANK,
+c~      &                    BLR_PANEL(IP-CURRENT_BLR)%K
               CALL MUMPS_ABORT()
             ENDIF
             GOTO 3000
@@ -2384,8 +2394,9 @@ C ssg
      &       TOLEPS, TOL_OPT, RANK, MAXRANK, INFO)
  3800 CONTINUE
       IF (INFO < 0) THEN
-           WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
-     &                 " OF TRUNCATED_RRQR WHILE COMPRESSING A BLOCK "
+           call rwarn(" PROBLEM IN ARGUMENT NUMBER " //
+c~            ,INFO,
+     &               " OF TRUNCATED_RRQR WHILE COMPRESSING A BLOCK ")
            CALL MUMPS_ABORT()
         END IF
         ISLR = ((RANK.LE.MAXRANK).AND.(M.NE.0).AND.(N.NE.0))     
@@ -2407,8 +2418,9 @@ C ssg
      &           BLR_PANEL(IP-CURRENT_BLR)%Q,
      &           M, WORK_THR, LWORK, INFO )
                IF (INFO < 0) THEN
-                 WRITE(*,*) " PROBLEM IN ARGUMENT NUMBER ",INFO,
-     &                     " OF CUNMQR WHILE COMPRESSING A BLOCK "
+                 call rwarn(" PROBLEM IN ARGUMENT NUMBER " //
+c~                  ,INFO,
+     &                     " OF CUNMQR WHILE COMPRESSING A BLOCK ")
                  CALL MUMPS_ABORT()
                END IF
                DO J=1,N
@@ -2488,7 +2500,7 @@ C ssg
         IF (present(NASS)) THEN
           LDA = NASS
        ELSE
-          write(*,*) 'Internal error in DMUMPS_LRTRSM_NELIM_VAR'
+          call rwarn('Internal error in DMUMPS_LRTRSM_NELIM_VAR')
           CALL MUMPS_ABORT()
         ENDIF
       ENDIF
@@ -2588,7 +2600,7 @@ C ssg
         IF (present(NASS)) THEN
           LDA = NASS
        ELSE
-          write(*,*) 'Internal error in DMUMPS_BLR_PANEL_LRTRSM'
+          call rwarn('Internal error in DMUMPS_BLR_PANEL_LRTRSM')
           CALL MUMPS_ABORT()
         ENDIF
       ENDIF

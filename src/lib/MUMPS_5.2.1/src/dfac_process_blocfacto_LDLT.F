@@ -234,18 +234,18 @@ C ssg
      &                 COMM, IERR )
           ALLOCATE(BLR_LM(max(NB_BLR_LM,1)), stat=allocok)
           IF ( allocok .GT. 0 ) THEN
-             IF (LP > 0 ) WRITE(LP,*) MYID,
-     &            ": ALLOCATION FAILURE FOR BLR_LM IN ",
-     &            "DMUMPS_PROCESS_SYM_BLOCFACTO"
+             IF (LP > 0 ) call rwarn(
+     &            ": ALLOCATION FAILURE FOR BLR_LM IN "//
+     &            "DMUMPS_PROCESS_SYM_BLOCFACTO")
              IFLAG = -13
              IERROR = max(NB_BLR_LM,1)
              GOTO 700
           END IF
           ALLOCATE(BEGS_BLR_LM(NB_BLR_LM+2), stat=allocok)
           IF ( allocok .GT. 0 ) THEN
-             IF (LP > 0 ) WRITE(LP,*) MYID,
-     &            ": ALLOCATION FAILURE FOR BEGS_BLR_LM IN ",
-     &            "DMUMPS_PROCESS_SYM_BLOCFACTO"
+             IF (LP > 0 ) call rwarn(
+     &            ": ALLOCATION FAILURE FOR BEGS_BLR_LM IN "//
+     &            "DMUMPS_PROCESS_SYM_BLOCFACTO")
              IFLAG = -13
              IERROR = NB_BLR_LM+2
              GOTO 700
@@ -383,8 +383,8 @@ C ssg
       END IF
       IF (NPIV.GT.0) THEN
         IF ( NPIV1 + NCOL .NE. NASS1 ) THEN
-            WRITE(*,*) 'SymBLFC Error: NPIV1 + NCOL .NE. NASS1 :',
-     &           NPIV1,NCOL,NASS1
+            call rwarn('SymBLFC Error: NPIV1 + NCOL .NE. NASS1 :')
+c~      &           NPIV1,NCOL,NASS1
             CALL MUMPS_ABORT()
         END IF
         ICT11 = IOLDPS+HS+NROW1+NPIV1 - 1
@@ -401,8 +401,8 @@ C ssg
         IF (.NOT.LR_ACTIVATED) THEN
         ALLOCATE( UIP21K( NPIV * NROW1 ), stat = allocok )
         IF ( allocok .GT. 0 ) THEN
-            IF (LP > 0 ) WRITE(LP,*) MYID,
-     &": ALLOCATION FAILURE FOR UIP21K IN DMUMPS_PROCESS_SYM_BLOCFACTO"
+            IF (LP > 0 ) call rwarn(
+     &": ALLOCATION FAILURE FOR UIP21K IN DMUMPS_PROCESS_SYM_BLOCFACTO")
           IFLAG = -13
           IERROR = NPIV * NROW1
           GOTO 700
@@ -410,8 +410,8 @@ C ssg
         ELSE
          ALLOCATE( UIP21K( 1 ), stat = allocok )
          IF ( allocok .GT. 0 ) THEN
-            IF (LP > 0 ) WRITE(LP,*) MYID,
-     &": ALLOCATION FAILURE FOR UIP21K IN DMUMPS_PROCESS_SYM_BLOCFACTO"
+            IF (LP > 0 ) call rwarn(
+     &": ALLOCATION FAILURE FOR UIP21K IN DMUMPS_PROCESS_SYM_BLOCFACTO")
           IFLAG = -13
           IERROR = NPIV * 1
           GOTO 700
@@ -421,9 +421,9 @@ C ssg
           ALLOCATE( LIST_SLAVES_FOLLOW ( NSLAVES_FOLLOW ),
      &            stat = allocok )
           IF ( allocok .GT. 0 ) THEN
-            IF (LP > 0 ) WRITE(LP,*) MYID,
+            IF (LP > 0 ) call rwarn(
      &": ALLOCATION FAILURE FOR LIST_SLAVES_FOLLOW
-     & IN DMUMPS_PROCESS_SYM_BLOCFACTO"
+     & IN DMUMPS_PROCESS_SYM_BLOCFACTO")
             IFLAG = -13
             IERROR = NSLAVES_FOLLOW
             GOTO 700
@@ -542,9 +542,9 @@ C ssg
              ALLOCATE(BEGS_BLR_COL_TMP(size(BEGS_BLR_COL)-SHIFT), 
      &        stat=allocok)
               IF ( allocok .GT. 0 ) THEN
-                IF (LP > 0 ) WRITE(LP,*) MYID,
-     &            ": ALLOCATION FAILURE FOR BEGS_BLR_COL_TMP in",
-     &            "DMUMPS_PROCESS_SYM_BLOCFACTO"
+                IF (LP > 0 ) call rwarn(
+     &            ": ALLOCATION FAILURE FOR BEGS_BLR_COL_TMP in"//
+     &            "DMUMPS_PROCESS_SYM_BLOCFACTO")
                 IFLAG = -13
                 IERROR = size(BEGS_BLR_COL)-SHIFT
                 GOTO 700
@@ -905,18 +905,18 @@ C ssg
             END IF
            END DO
            IF ( IERR .eq. -2 ) THEN
-              IF (LP > 0 ) WRITE(LP,*) MYID,
+              IF (LP > 0 ) call rwarn(
      &": FAILURE, SEND BUFFER TOO SMALL DURING
-     & DMUMPS_PROCESS_SYM_BLOCFACTO"
-             WRITE(LP,*) "NPIV=", NPIV, "NROW1=",NROW1
+     & DMUMPS_PROCESS_SYM_BLOCFACTO")
+c~              WRITE(LP,*) "NPIV=", NPIV, "NROW1=",NROW1
              IFLAG = -17
              IERROR = 5 * KEEP(34) + NPIV * NROW1 * KEEP(35)
              GOTO 700
            END IF
            IF ( IERR .eq. -3 ) THEN
-              IF (LP > 0 ) WRITE(LP,*) MYID,
+              IF (LP > 0 ) call rwarn(
      &": FAILURE, RECV BUFFER TOO SMALL DURING
-     & DMUMPS_PROCESS_SYM_BLOCFACTO"
+     & DMUMPS_PROCESS_SYM_BLOCFACTO")
              IFLAG = -20
              IERROR = 5 * KEEP(34) + NPIV * NROW1 * KEEP(35)
              GOTO 700
@@ -968,7 +968,7 @@ C ssg
           CALL DMUMPS_BUF_SEND_1INT( INODE, DEST, END_NIV2_LDLT,
      &                              COMM, KEEP, IERR )
           IF ( IERR .LT. 0 ) THEN
-            write(*,*) ' Internal error in PROCESS_SYM_BLOCFACTO.'
+            call rwarn(' Internal error in PROCESS_SYM_BLOCFACTO.')
             IFLAG = -99
             GOTO 700
           END IF
@@ -1003,9 +1003,9 @@ C ssg
               ENDIF
               ALLOCATE(M_ARRAY(max(1,NFS4FATHER)), stat=allocok)
               IF ( allocok .GT. 0 ) THEN
-                IF (LP > 0 ) WRITE(LP,*) MYID,
-     &          ": ALLOCATION FAILURE FOR M_ARRAY ",
-     &          "DMUMPS_PROCESS_SYM_BLOCFACTO"
+                IF (LP > 0 ) call rwarn(
+     &          ": ALLOCATION FAILURE FOR M_ARRAY "//
+     &          "DMUMPS_PROCESS_SYM_BLOCFACTO")
                 IFLAG = -13
                 IERROR = max(1,NFS4FATHER)
               ENDIF

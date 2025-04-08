@@ -166,8 +166,8 @@ C ssg
       ALLOCATE( IACT(SLAVEF), stat=allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating IACT in matrix distribution'
+          call rwarn(
+     &     "** Error allocating IACT in matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = SLAVEF
@@ -176,8 +176,8 @@ C ssg
       ALLOCATE( IREQI(SLAVEF), stat=allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating IREQI in matrix distribution'
+          call rwarn(
+     &     "** Error allocating IREQI in matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = SLAVEF
@@ -186,8 +186,8 @@ C ssg
       ALLOCATE( IREQR(SLAVEF), stat=allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating IREQR in matrix distribution'
+          call rwarn(
+     &     "** Error allocating IREQR in matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = SLAVEF
@@ -196,8 +196,8 @@ C ssg
       ALLOCATE( SEND_ACTIVE(SLAVEF), stat=allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating SEND_ACTIVE in matrix distribution'
+          call rwarn(
+     &     "** Error allocating SEND_ACTIVE in matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = SLAVEF
@@ -206,8 +206,8 @@ C ssg
       ALLOCATE( BUFI( NBRECORDS * 2 + 1, 2, SLAVEF ), stat=allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating int buffer for matrix distribution'
+          call rwarn(
+     &     "** Error allocating int buffer for matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = ( NBRECORDS * 2 + 1 ) * SLAVEF * 2
@@ -216,8 +216,8 @@ C ssg
       ALLOCATE( BUFR( NBRECORDS, 2, SLAVEF), stat = allocok)
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &     '** Error allocating real buffer for matrix distribution'
+          call rwarn(
+     &     "** Error allocating real buffer for matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = NBRECORDS * SLAVEF * 2
@@ -226,8 +226,8 @@ C ssg
       ALLOCATE( BUFRECI( NBRECORDS * 2 + 1 ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &    '** Error allocating int recv buffer for matrix distribution'
+          call rwarn(
+     &    "** Error allocating int recv buffer for matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = NBRECORDS * 2 + 1
@@ -236,8 +236,8 @@ C ssg
       ALLOCATE( BUFRECR( NBRECORDS ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
         IF ( LP > 0 ) THEN
-          WRITE(LP,*)
-     &    '** Error allocating int recv buffer for matrix distribution'
+          call rwarn(
+     &    "** Error allocating int recv buffer for matrix distribution")
         END IF
         INFO(1) = -13
         INFO(2) = NBRECORDS
@@ -245,7 +245,7 @@ C ssg
       END IF
       ALLOCATE( IW4( N, 2 ), stat = allocok )
       IF ( allocok .GT. 0 ) THEN
-        WRITE(LP,*) '** Error allocating IW4 for matrix distribution'
+        call rwarn("** Error allocating IW4 for matrix distribution")
         INFO(1) = -13
         INFO(2) = N * 2
       END IF
@@ -655,11 +655,11 @@ C ssg
           JCOL_GRID = mod( ( JPOSROOT - 1 )/root%NBLOCK, root%NPCOL )
           IF ( IROW_GRID .NE. root%MYROW .OR.
      &         JCOL_GRID .NE. root%MYCOL ) THEN
-            WRITE(*,*) MYID,':INTERNAL Error: recvd root arrowhead '
-            WRITE(*,*) MYID,':not belonging to me. IARR,JARR=',IARR,JARR
-            WRITE(*,*) MYID,':IROW_GRID,JCOL_GRID=',IROW_GRID,JCOL_GRID
-            WRITE(*,*) MYID,':MYROW, MYCOL=', root%MYROW, root%MYCOL
-            WRITE(*,*) MYID,':IPOSROOT,JPOSROOT=', IPOSROOT, JPOSROOT
+            call rwarn(':INTERNAL Error: recvd root arrowhead ')
+c~             WRITE(*,*) MYID,':not belonging to me. IARR,JARR=',IARR,JARR
+c~             WRITE(*,*) MYID,':IROW_GRID,JCOL_GRID=',IROW_GRID,JCOL_GRID
+c~             WRITE(*,*) MYID,':MYROW, MYCOL=', root%MYROW, root%MYCOL
+c~             WRITE(*,*) MYID,':IPOSROOT,JPOSROOT=', IPOSROOT, JPOSROOT
             CALL MUMPS_ABORT()
           END IF
           ILOCROOT = root%MBLOCK * ( ( IPOSROOT - 1 ) /

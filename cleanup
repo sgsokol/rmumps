@@ -1,4 +1,5 @@
 #make -C inst clean
+#exit 0
 for f in src/lib/scotch*/src; do
    make -C $f realclean
 done

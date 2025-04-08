@@ -142,7 +142,7 @@ C
       IF ( KEEP(50) .eq. 0 ) THEN
         IW( IWPOSCB + 7+KEEP(IXSZ) ) = S_ROOTBAND_INIT
         IF (NSLAVES_RECU.GT.0) THEN
-          write(6,*) " Internal error in DMUMPS_PROCESS_DESC_BANDE "
+          call rwarn(" Internal error in DMUMPS_PROCESS_DESC_BANDE ")
           CALL MUMPS_ABORT()
         ENDIF
       ELSE
@@ -283,8 +283,8 @@ C
         CALL MUMPS_FDBD_FREE_DESCBAND_STRUC(IW(PTRIST(STEP(INODE))+XXA))
       ELSE 
          IF (INODE_WAITED_FOR.GT.0) THEN
-          WRITE(*,*) " Internal error 1 in DMUMPS_TREAT_DESCBAND",
-     &    INODE, INODE_WAITED_FOR
+          call rwarn(" Internal error 1 in DMUMPS_TREAT_DESCBAND")
+c~      &    INODE, INODE_WAITED_FOR
           CALL MUMPS_ABORT()
         ENDIF
         INODE_WAITED_FOR = INODE

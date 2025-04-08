@@ -1036,7 +1036,7 @@ C
       ENDIF
       IF (COMPRESS_PANEL)  THEN
         IF (PIVOT_OPTION.NE.3 .AND. (KEEP(475).LT.2))  THEN
-          WRITE(*,*) "Internal error 1 in DMUMPS_FACTO_NIV1"
+          call rwarn("Internal error 1 in DMUMPS_FACTO_NIV1")
           CALL MUMPS_ABORT()
         ENDIF
       ELSE

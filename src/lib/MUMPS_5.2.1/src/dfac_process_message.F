@@ -405,13 +405,14 @@ C
           SUBNAME="DMUMPS_PROCESS_RTNELIND"
          IF ( IFLAG .LT. 0 ) GO TO 500
       ELSE IF ( MSGTAG .EQ. UPDATE_LOAD ) THEN
-         WRITE(*,*) "Internal error 3 in DMUMPS_TRAITER_MESSAGE"
+         call rwarn("Internal error 3 in DMUMPS_TRAITER_MESSAGE")
          CALL MUMPS_ABORT()
       ELSE IF ( MSGTAG .EQ. TAG_DUMMY   ) THEN
       ELSE
          IF ( LP > 0 )
-     &     WRITE(LP,*) MYID,
-     &': Internal error, routine DMUMPS_TRAITER_MESSAGE.',MSGTAG
+     &     call rwarn(
+     &': Internal error, routine DMUMPS_TRAITER_MESSAGE.')
+c~      ,MSGTAG
          IFLAG = -100
          IERROR= MSGTAG
          GOTO 500
@@ -422,13 +423,13 @@ C
       IF ( ICNTL(1) .GT. 0 .AND. ICNTL(4).GE.1 ) THEN
         LP=ICNTL(1)
         IF (IFLAG.EQ.-9) THEN
-         WRITE(LP,*) 'FAILURE, WORKSPACE TOO SMALL DURING ',SUBNAME
+         call rwarn('FAILURE, WORKSPACE TOO SMALL DURING '//SUBNAME)
         ENDIF
         IF (IFLAG.EQ.-8) THEN
-         WRITE(LP,*) 'FAILURE IN INTEGER ALLOCATION DURING ',SUBNAME
+         call rwarn('FAILURE IN INTEGER ALLOCATION DURING '//SUBNAME)
         ENDIF
         IF (IFLAG.EQ.-13) THEN
-         WRITE(LP,*) 'FAILURE IN DYNAMIC ALLOCATION DURING ',SUBNAME
+         call rwarn('FAILURE IN DYNAMIC ALLOCATION DURING '//SUBNAME)
         ENDIF
       ENDIF
       CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
@@ -502,8 +503,8 @@ C
       IF ( MSGLEN .GT. LBUFR_BYTES ) THEN
         IFLAG  = -20
         IERROR = MSGLEN
-         WRITE(*,*) ' RECEPTION BUF TOO SMALL, Msgtag/len=',
-     &                MSGTAG,MSGLEN
+         call rwarn(' RECEPTION BUF TOO SMALL, Msgtag/len=')
+c~      &                MSGTAG,MSGLEN
         CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
         RETURN
        ENDIF
@@ -620,7 +621,8 @@ C
       ENDIF
       IF ( ASS_IRECV .NE. MPI_REQUEST_NULL) THEN
         IF (KEEP(117).NE.0) THEN
-         WRITE(*,*) "Problem of active IRECV with KEEP(117)=",KEEP(117)
+         call rwarn("Problem of active IRECV with KEEP(117)=")
+c~          ,KEEP(117)
          CALL MUMPS_ABORT()
         ENDIF
         RIGHT_MESS = .TRUE.
@@ -649,8 +651,8 @@ C
         IF (IERR.LT.0) THEN
           IFLAG = -20
           IF (LP.GT.0)
-     &    write(LP,*) ' Error return from MPI_TEST ',
-     &     IFLAG, ' in DMUMPS_TRY_RECVTREAT'
+     &    call rwarn(' Error return from MPI_TEST ')
+c~      &     IFLAG, ' in DMUMPS_TRY_RECVTREAT'
           CALL DMUMPS_BDC_ERROR( MYID, SLAVEF, COMM, KEEP )
           RETURN
         ENDIF

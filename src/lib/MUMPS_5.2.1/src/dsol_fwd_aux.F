@@ -99,7 +99,7 @@ C
                    IPOOL( LEAF ) = FPERE
                 LEAF = LEAF + 1
                 IF ( LEAF > LPOOL ) THEN
-                   WRITE(*,*) 'Internal error 41r2 : Pool is too small.'
+                  call rwarn('Internal error 41r2 : Pool is too small.')
                    CALL MUMPS_ABORT()
                 END IF
              END IF
@@ -150,7 +150,7 @@ C
                    IPOOL( LEAF ) = FPERE
                 LEAF = LEAF + 1
                 IF ( LEAF > LPOOL ) THEN
-                   WRITE(*,*) 'Internal error 41r2 : Pool is too small.'
+                  call rwarn('Internal error 41r2 : Pool is too small.')
                    CALL MUMPS_ABORT()
                 END IF
              ENDIF
@@ -291,7 +291,7 @@ C
                 ENDDO
 !$OMP END PARALLEL DO
              ELSE
-                  WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+                  call rwarn("UNKNOWN VERSION OF KEEP(350)")
                   CALL MUMPS_ABORT()
               ENDIF
              PTRICB(STEP(FINODE)) =
@@ -303,7 +303,7 @@ C
                    IPOOL( LEAF ) = FPERE
                 LEAF = LEAF + 1
                 IF ( LEAF > LPOOL ) THEN
-                   WRITE(*,*) 'INTERNAL Error 41r: Pool is too small.'
+                   call rwarn('INTERNAL Error 41r: Pool is too small.')
                    CALL MUMPS_ABORT()
                 END IF
              ENDIF
@@ -467,14 +467,14 @@ C
       NRHS_B = JBFIN-JBDEB+1
       IF (DO_NBSPARSE) THEN
          if (JBDEB.GT.JBFIN) then
-         write(6,*) " Internal error 1 in nbsparse :", 
-     &    JBDEB, JBFIN
+         call rwarn(" Internal error 1 in nbsparse :")
+c~      &    JBDEB, JBFIN
          CALL MUMPS_ABORT()
        endif
        IF (JBDEB.LT.1 .OR. JBDEB.GT.NRHS .or. 
      &      JBFIN.LT.1 .OR. JBFIN.GT.NRHS ) THEN
-         write(6,*) " Internal error 2 in nbsparse :", 
-     &    JBDEB, JBFIN
+         call rwarn(" Internal error 2 in nbsparse :")
+C     &    JBDEB, JBFIN
          CALL MUMPS_ABORT()
        endif
       ENDIF
@@ -559,11 +559,11 @@ C
           ENDDO
 !$OMP END PARALLEL DO
        ELSE
-             WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+             call rwarn("UNKNOWN VERSION OF KEEP(350)")
              CALL MUMPS_ABORT()
         ENDIF
         IF ( NPIV .LT. LIELL ) THEN
-            WRITE(*,*) ' Internal error in SOLVE_NODE for Root node'
+            call rwarn(' Internal error in SOLVE_NODE for Root node')
             CALL MUMPS_ABORT()
          END IF
          MYROOT = MYROOT - 1
@@ -677,7 +677,7 @@ C
           ENDDO
 !$OMP END PARALLEL DO
        ELSE
-             WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+             call rwarn("UNKNOWN VERSION OF KEEP(350)")
              CALL MUMPS_ABORT()
          ENDIF
          IFR8 = PCB_COURANT - 1_8
@@ -726,7 +726,7 @@ C
               ENDDO
 !$OMP END PARALLEL DO
            ELSE
-             WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+             call rwarn("UNKNOWN VERSION OF KEEP(350)")
              CALL MUMPS_ABORT()
            ENDIF
          ENDIF
@@ -949,7 +949,7 @@ C
                 ENDDO
 !$OMP END PARALLEL DO
              ELSE
-             WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+             call rwarn("UNKNOWN VERSION OF KEEP(350)")
              CALL MUMPS_ABORT()
          ENDIF
                PTRICB(STEP( INODE )) = PTRICB(STEP( INODE )) - NUPDATE

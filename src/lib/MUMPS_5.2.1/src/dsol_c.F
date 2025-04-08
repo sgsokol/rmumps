@@ -153,8 +153,8 @@ C
         LPANEL_POS = 1
       ENDIF
       IF (IPANEL_POS + LPANEL_POS -1 .ne. LIW1 )  THEN
-         WRITE(*,*)  MYID, ": Internal Error 1 in DMUMPS_SOL_C",
-     &   IPANEL_POS, LPANEL_POS, LIW1
+         call rwarn(": Internal Error 1 in DMUMPS_SOL_C")
+c~      &   IPANEL_POS, LPANEL_POS, LIW1
          CALL MUMPS_ABORT()
       ENDIF
       DOFORWARD = .TRUE.
@@ -189,7 +189,7 @@ C
         Exploit_Sparsity = .FALSE.
         DO_PRUN          = .FALSE.
            IF ( AM1 ) THEN
-          WRITE(*,*) "Internal error 2 in DMUMPS_SOL_C"
+          call rwarn("Internal error 2 in DMUMPS_SOL_C")
           CALL MUMPS_ABORT()
         ENDIF
       ENDIF
@@ -457,9 +457,9 @@ C
       CALL MUMPS_PROPINFO(ICNTL, INFO, COMM_NODES, MYID )
       IF ( INFO(1) .LT. 0 ) THEN
         IF ( LP .GT. 0 ) THEN
-          WRITE(LP,*) MYID,
-     &    ': ** ERROR RETURN FROM DMUMPS_SOL_R,INFO(1:2)=',
-     &    INFO(1:2)
+          call rwarn(
+     &    ': ** ERROR RETURN FROM DMUMPS_SOL_R,INFO(1:2)=')
+c~      &    INFO(1:2)
         END IF
         GOTO 500   
       END IF
@@ -478,7 +478,7 @@ C
           nb_nodes_RHS = nb_prun_roots
           ALLOCATE(nodes_RHS(nb_nodes_RHS), STAT = allocok)
           IF(allocok.GT.0) THEN
-            WRITE(*,*)'Problem with allocation of nodes_RHS'
+            call rwarn('Problem with allocation of nodes_RHS')
             INFO(1) = -13
             INFO(2) = nb_nodes_RHS
             CALL MUMPS_ABORT()
@@ -499,7 +499,7 @@ C
          ENDDO
          ALLOCATE(nodes_RHS(nb_nodes_RHS), STAT = allocok)           
          IF(allocok.GT.0) THEN
-           WRITE(*,*)'Problem with allocation of nodes_RHS'
+           call rwarn('Problem with allocation of nodes_RHS')
            INFO(1) = -13
            INFO(2) = nb_nodes_RHS
            CALL MUMPS_ABORT()
@@ -613,8 +613,8 @@ C
               IF(IERR.LT.0)THEN
                 INFO(1)=IERR
                 INFO(2)=0
-                WRITE(*,*) '** ERROR after DMUMPS_SOLVE_GET_OOC_NODE',
-     &          INFO(1)
+                call rwarn('** ERROR after DMUMPS_SOLVE_GET_OOC_NODE')
+c~      &          INFO(1)
                 call MUMPS_ABORT()
               ENDIF
             ENDIF
@@ -639,9 +639,9 @@ C
               IF(IERR.LT.0)THEN
                  INFO(1)=IERR
                  INFO(2)=0
-                 WRITE(*,*)
-     &           '** ERROR after DMUMPS_FREE_FACTORS_FOR_SOLVE ',
-     &           INFO(1)
+                 call rwarn(
+     &           '** ERROR after DMUMPS_FREE_FACTORS_FOR_SOLVE ')
+c~      &           INFO(1)
                  call MUMPS_ABORT()
               ENDIF
             ENDIF
@@ -792,7 +792,7 @@ C
            IF (allocated(TO_PROCESS)) DEALLOCATE(TO_PROCESS) 
            ALLOCATE (TO_PROCESS(SIZE_TO_PROCESS), stat=I)
            IF(I.GT.0) THEN
-              WRITE(*,*)'Problem with allocation of TO_PROCESS'
+              call rwarn('Problem with allocation of TO_PROCESS')
               CALL MUMPS_ABORT()
            END IF
            TO_PROCESS(:) = .TRUE.
@@ -815,7 +815,7 @@ C
           ALLOCATE(prun_NA(nb_prun_leaves+nb_prun_roots+2),
      &      STAT=allocok)
           IF(allocok.GT.0) THEN
-            WRITE(*,*)'Problem with allocation of prun_na'
+            call rwarn('Problem with allocation of prun_na')
             CALL MUMPS_ABORT()
           END IF
           prun_NA(1) = nb_prun_leaves
@@ -855,19 +855,19 @@ C
 #if defined(RHSCOMP_BYROWS)
         K = min0(10,size(RHSCOMP,2))
         IF (LDIAG.EQ.4) K = size(RHSCOMP,2)
-        WRITE (MP,99992)
-        IF (size(RHSCOMP,2).GT.0) 
-     &     WRITE (MP,99993) (RHSCOMP(1,I),I=1,K)
-        IF (size(RHSCOMP,2).GT.0.and.NRHS>1) 
-     &              WRITE (MP,99994) (RHSCOMP(2,I),I=1,K)
+c~         WRITE (MP,99992)
+c~         IF (size(RHSCOMP,2).GT.0) 
+c~      &     WRITE (MP,99993) (RHSCOMP(1,I),I=1,K)
+c~         IF (size(RHSCOMP,2).GT.0.and.NRHS>1) 
+c~      &              WRITE (MP,99994) (RHSCOMP(2,I),I=1,K)
 #else
         K = min0(10,size(RHSCOMP,1))
         IF (LDIAG.EQ.4) K = size(RHSCOMP,1)
-        WRITE (MP,99992)
-        IF (size(RHSCOMP,1).GT.0) 
-     &     WRITE (MP,99993) (RHSCOMP(I,1),I=1,K)
-        IF (size(RHSCOMP,1).GT.0.and.NRHS>1) 
-     &              WRITE (MP,99994) (RHSCOMP(I,2),I=1,K)
+c~         WRITE (MP,99992)
+c~         IF (size(RHSCOMP,1).GT.0) 
+c~      &     WRITE (MP,99993) (RHSCOMP(I,1),I=1,K)
+c~         IF (size(RHSCOMP,1).GT.0.and.NRHS>1) 
+c~      &              WRITE (MP,99994) (RHSCOMP(I,2),I=1,K)
 #endif
         ENDIF
       ENDIF
@@ -1073,23 +1073,23 @@ C
       MAXSurf       = MAXNPIV_estim*NRHS
 #if defined(RHSCOMP_BYROWS)
       IF (LCWORK .LT. NRHS) THEN
-        WRITE(*,*) MYID, 
-     &  ": Internal error 2 in DMUMPS_GATHER_SOLUTION:",
-     &  TYPE_PARAL, LCWORK, KEEP(247), NRHS
+        call rwarn(
+     &  ": Internal error 2 in DMUMPS_GATHER_SOLUTION:")
+c~      &  TYPE_PARAL, LCWORK, KEEP(247), NRHS
         CALL MUMPS_ABORT()
       ENDIF
 #else
       IF (LCWORK .LT. MAXNPIV_estim) THEN
-        WRITE(*,*) MYID, 
-     &  ": Internal error 2 in DMUMPS_GATHER_SOLUTION:",
-     &  TYPE_PARAL, LCWORK, KEEP(247), NRHS
+        call rwarn(
+     &  ": Internal error 2 in DMUMPS_GATHER_SOLUTION:")
+c~      &  TYPE_PARAL, LCWORK, KEEP(247), NRHS
         CALL MUMPS_ABORT()
       ENDIF
 #endif
       IF (MYID.EQ.MASTER) THEN
          ALLOCATE(IROWlist(KEEP(247)),stat=allocok)
          IF(allocok.GT.0) THEN
-            WRITE(*,*)'Problem with allocation of IROWlist'
+            call rwarn('Problem with allocation of IROWlist')
             CALL MUMPS_ABORT()
          ENDIF
       ENDIF
@@ -1104,10 +1104,10 @@ C
      &                   SIZE2, IERR)
       RECORD_SIZE_P_1= SIZE1+SIZE2
       IF (RECORD_SIZE_P_1.GT.SIZE_BUF_BYTES) THEN
-         write(6,*) MYID, 
-     &    ' Internal error 3 in  DMUMPS_GATHER_SOLUTION '
-         write(6,*) MYID, ' RECORD_SIZE_P_1, SIZE_BUF_BYTES=', 
-     &                 RECORD_SIZE_P_1, SIZE_BUF_BYTES
+         call rwarn(
+     &    ' Internal error 3 in  DMUMPS_GATHER_SOLUTION ')
+c~          write(6,*) MYID, ' RECORD_SIZE_P_1, SIZE_BUF_BYTES=', 
+c~      &                 RECORD_SIZE_P_1, SIZE_BUF_BYTES
          CALL MUMPS_ABORT()
       ENDIF
       N2SEND   =0
@@ -1453,10 +1453,10 @@ C
      &                   SIZE2, IERR)
       RECORD_SIZE_P_1= SIZE1+SIZE2
       IF (RECORD_SIZE_P_1.GT.SIZE_BUF_BYTES) THEN
-         write(6,*) MYID, 
-     &    ' Internal error 3 in  DMUMPS_GATHER_SOLUTION_AM1 '
-         write(6,*) MYID, ' RECORD_SIZE_P_1, SIZE_BUF_BYTES=', 
-     &                 RECORD_SIZE_P_1, SIZE_BUF_BYTES
+         call rwarn(
+     &    ' Internal error 3 in  DMUMPS_GATHER_SOLUTION_AM1 ')
+c~          write(6,*) MYID, ' RECORD_SIZE_P_1, SIZE_BUF_BYTES=', 
+c~      &                 RECORD_SIZE_P_1, SIZE_BUF_BYTES
          CALL MUMPS_ABORT()
       ENDIF
       N2SEND   =0
@@ -2174,7 +2174,7 @@ C
       INTEGER MUMPS_PROCNODE
       EXTERNAL MUMPS_PROCNODE
       IF(KEEP(237).EQ.0) THEN
-        WRITE(*,*)'BUILD_POSINRHSCOMP_SPARSE available for A-1 only !'
+        call rwarn('BUILD_POSINRHSCOMP_SPARSE available for A-1 only !')
         CALL MUMPS_ABORT()
       END IF
       POSINRHSCOMP_ROW = 0
@@ -2268,7 +2268,7 @@ C
                   END DO
                 ELSE IF ((POSINRHSCOMP_COL(ABSJCOL).LT.0).AND.
      &                 (POSINRHSCOMP_COL(ABSJCOL).GE.-N))THEN
-                  WRITE(*,*)'Internal error 7 in BUILD...SPARSE'
+                  call rwarn('Internal error 7 in BUILD...SPARSE')
                   CALL MUMPS_ABORT()
                 ELSE
                   GO_UP = .FALSE.

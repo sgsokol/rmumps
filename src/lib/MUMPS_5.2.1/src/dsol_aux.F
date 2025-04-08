@@ -747,7 +747,7 @@ C ssg
       NSTEPS = id%KEEP(28)
       ALLOCATE(LOCAL_LIST(NSTEPS),STAT=IERR)
       IF(IERR.GT.0) THEN
-         WRITE(*,*)'Problem in solve: error allocating LOCAL_LIST'
+         call rwarn('Problem in solve: error allocating LOCAL_LIST')
          CALL MUMPS_ABORT()
       END IF
       N_LOCAL_LIST = 0
@@ -768,8 +768,8 @@ C ssg
      &           id%WORKING(1),
      &           STAT=IERR)
             IF(IERR.GT.0) THEN
-               WRITE(*,*)'Problem in solve: error allocating ',
-     &              'IPTR_WORKING and WORKING'
+               call rwarn('Problem in solve: error allocating '//
+     &              'IPTR_WORKING and WORKING')
                CALL MUMPS_ABORT()
             END IF
          END IF
@@ -777,7 +777,7 @@ C ssg
       IF(id%MYID.EQ.MASTER) THEN
          ALLOCATE(id%IPTR_WORKING(id%NPROCS+1), STAT=IERR)
          IF(IERR.GT.0) THEN
-            WRITE(*,*)'Problem in solve: error allocating IPTR_WORKING'
+          call rwarn('Problem in solve: error allocating IPTR_WORKING')
             CALL MUMPS_ABORT()
          END IF
          id%IPTR_WORKING = 0
@@ -794,7 +794,7 @@ C ssg
          END DO
          ALLOCATE(id%WORKING(id%IPTR_WORKING(id%NPROCS+1)-1),STAT=IERR)
          IF(IERR.GT.0) THEN
-            WRITE(*,*)'Problem in solve: error allocating LOCAL_LIST'
+            call rwarn('Problem in solve: error allocating LOCAL_LIST')
             CALL MUMPS_ABORT()
          END IF
          TMP = MASTER + 1
@@ -1299,7 +1299,7 @@ C ssg
 !$OMP END PARALLEL DO
 #endif
         ELSE
-           WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+           call rwarn("UNKNOWN VERSION OF KEEP(350)")
            CALL MUMPS_ABORT()
          ENDIF
       ELSE
@@ -1490,7 +1490,7 @@ C ssg
          ENDDO     
 !$OMP END PARALLEL DO
       ELSE
-             WRITE(*,*) "UNKNOWN VERSION OF KEEP(350)"
+             call rwarn("UNKNOWN VERSION OF KEEP(350)")
              CALL MUMPS_ABORT()
          ENDIF
       END IF
@@ -1532,7 +1532,7 @@ C ssg
         ALLOCATE(SCALING(N), stat=allocok)
         IF (allocok > 0) THEN
           IF (LPOK) THEN
-            WRITE(LP,*) 'Error allocating temporary scaling array'
+            call rwarn('Error allocating temporary scaling array')
           ENDIF
           INFO(1)=-13
           INFO(2)=N

@@ -278,8 +278,8 @@ C
      &                            RSIZE2SHIFT)
              ENDIF
            ELSE
-             WRITE(*,*) "Internal error 3 in DMUMPS_COMPRE_NEW",
-     &       STATE_NEXT, DYN_SIZE, FREE_IN_REC
+             call rwarn("Internal error 3 in DMUMPS_COMPRE_NEW")
+c~      &       STATE_NEXT, DYN_SIZE, FREE_IN_REC
              CALL MUMPS_ABORT()
            ENDIF
            INODE = IW(ICURRENT+XXN)
@@ -301,8 +301,8 @@ C
              PTRAST(STEP(INODE))=PTRAST(STEP(INODE))+RSIZE2SHIFT+
      &                           FREE_IN_REC
            ELSE
-               WRITE(*,*) "Internal error 4 in DMUMPS_COMPRE_NEW",
-     &         STATE_NEXT
+               call rwarn("Internal error 4 in DMUMPS_COMPRE_NEW")
+c~      &         STATE_NEXT
                CALL MUMPS_ABORT()
            ENDIF
            CALL MUMPS_SUBTRI8TOARRAY(IW(ICURRENT+XXR),FREE_IN_REC)
@@ -327,7 +327,7 @@ C
             RCURRENT    = RCURRENT    - RCURRENT_SIZE
             NEXT=IW(ICURRENT+XXP)
             IF (NEXT.EQ.TOP_OF_STACK) THEN
-              WRITE(*,*) "Internal error 1 in DMUMPS_COMPRE_NEW"
+              call rwarn("Internal error 1 in DMUMPS_COMPRE_NEW")
               CALL MUMPS_ABORT()
             ENDIF
             STATE_NEXT  = IW(NEXT+XXS)
@@ -381,16 +381,17 @@ C
       IF (NODESTATE.EQ. S_NOLCBNOCONTIG) THEN
          NELIM_ROOT=.FALSE.
          IF (NELIM.NE.0)  THEN
-           WRITE(*,*) "Internal error 1 IN DMUMPS_MAKECBCONTIG"
+           call rwarn("Internal error 1 IN DMUMPS_MAKECBCONTIG")
            CALL MUMPS_ABORT()
          ENDIF
       ELSE IF (NODESTATE .NE. S_NOLCBNOCONTIG38) THEN
-           WRITE(*,*) "Internal error 2 in DMUMPS_MAKECBCONTIG"
-     &                ,NODESTATE
+           call rwarn("Internal error 2 in DMUMPS_MAKECBCONTIG")
+c~      &                ,NODESTATE
            CALL MUMPS_ABORT()
       ENDIF
       IF (ISHIFT .LT.0_8) THEN
-        WRITE(*,*) "Internal error 3 in DMUMPS_MAKECBCONTIG",ISHIFT
+        call rwarn("Internal error 3 in DMUMPS_MAKECBCONTIG")
+c~         ,ISHIFT
         CALL MUMPS_ABORT()
       ENDIF
       IF (NELIM_ROOT) THEN
@@ -469,9 +470,10 @@ C
      &       KEEP216,LRLUS,XSIZE, COMP, ACC_TIME, MYID,
      &       SLAVEF, PROCNODE_STEPS, DAD)
          IF ( LRLU .NE. LRLUS ) THEN
-            WRITE(*,*) 'Internal error 1 in DMUMPS_GET_SIZE_NEEDED ',
-     &      'PB compress... DMUMPS_ALLOC_CB ',
-     &      'LRLU,LRLUS=',LRLU,LRLUS
+            call rwarn('Internal error 1 in DMUMPS_GET_SIZE_NEEDED '//
+     &      'PB compress... DMUMPS_ALLOC_CB '//
+     &      'LRLU,LRLUS=')
+c~      ,LRLU,LRLUS
             IFLAG = -9
             GOTO 500
           END IF
@@ -494,10 +496,11 @@ C
      &       SLAVEF, PROCNODE_STEPS, DAD)
              DMUMPS_COMPRE_NEW_CALLED = .TRUE.
             IF ( LRLU .NE. LRLUS ) THEN
-              WRITE(*,*) 'Internal error 2 ',
-     &        'in DMUMPS_GET_SIZE_NEEDED ',
-     &        'PB compress... DMUMPS_ALLOC_CB ',
-     &        'LRLU,LRLUS=',LRLU,LRLUS
+              call rwarn('Internal error 2 '//
+     &        'in DMUMPS_GET_SIZE_NEEDED '//
+     &        'PB compress... DMUMPS_ALLOC_CB '//
+     &        'LRLU,LRLUS=')
+c~      ,LRLU,LRLUS
               IFLAG = -9
               GOTO 500
             END IF
@@ -511,10 +514,11 @@ C
      &       KEEP216,LRLUS,XSIZE, COMP, ACC_TIME, MYID,
      &       SLAVEF, PROCNODE_STEPS, DAD)
             IF ( LRLU .NE. LRLUS ) THEN
-              WRITE(*,*) 'Internal error 2 ',
-     &        'in DMUMPS_GET_SIZE_NEEDED ',
-     &        'PB compress... DMUMPS_ALLOC_CB ',
-     &        'LRLU,LRLUS=',LRLU,LRLUS
+              call rwarn('Internal error 2 '//
+     &        'in DMUMPS_GET_SIZE_NEEDED '//
+     &        'PB compress... DMUMPS_ALLOC_CB '//
+     &        'LRLU,LRLUS=')
+c~      ,LRLU,LRLUS
               IFLAG = -9
               GOTO 500
             END IF
@@ -535,10 +539,11 @@ C
      &       KEEP216,LRLUS,XSIZE, COMP, ACC_TIME, MYID,
      &       SLAVEF, PROCNODE_STEPS, DAD)
             IF ( LRLU .NE. LRLUS ) THEN
-              WRITE(*,*) 'Internal error 4 ',
-     &        'in DMUMPS_GET_SIZE_NEEDED ',
-     &        'PB compress... DMUMPS_ALLOC_CB ',
-     &        'LRLU,LRLUS=',LRLU,LRLUS
+              call rwarn('Internal error 4 '//
+     &        'in DMUMPS_GET_SIZE_NEEDED '//
+     &        'PB compress... DMUMPS_ALLOC_CB '//
+     &        'LRLU,LRLUS=')
+c~      ,LRLU,LRLUS
               IFLAG = -9
               GOTO 500
             END IF

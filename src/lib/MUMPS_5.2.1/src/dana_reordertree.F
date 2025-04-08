@@ -66,7 +66,7 @@ C
       MEM_SIZE=0_8
       FACT_SIZE=0_8
       IF ((PERM.LT.0 .OR. PERM.GT.7)) THEN
-         WRITE(*,*) "Internal Error in DMUMPS_REORDER_TREE",PERM
+         call rwarn("Internal Error in DMUMPS_REORDER_TREE")
          CALL MUMPS_ABORT()
       END IF
       NBLEAF = NA(1)
@@ -77,8 +77,8 @@ C
             ALLOCATE(M_TOTAL(NSTEPS), stat=allocok )
             IF (allocok > 0) THEN
                IF ( LP .GT. 0 )
-     &              WRITE(LP,*)'Memory allocation error in
-     &              DMUMPS_REORDER_TREE'
+     &              call rwarn('Memory allocation error in
+     &              DMUMPS_REORDER_TREE')
                INFO(1)=-7
                INFO(2)=NSTEPS
                RETURN
@@ -89,8 +89,8 @@ C
          ALLOCATE(M(NSTEPS),stat=allocok )
          IF (allocok > 0) THEN
             IF ( LP .GT. 0 )
-     &           WRITE(LP,*)'Memory allocation error
-     &in DMUMPS_REORDER_TREE'
+     &           call rwarn('Memory allocation error
+     &in DMUMPS_REORDER_TREE')
             INFO(1)=-7
             INFO(2)=NSTEPS
             RETURN
@@ -100,7 +100,7 @@ C
      &     stat=allocok )
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn('Memory allocation error in DMUMPS_REORDER_TREE')
         INFO(1)=-7
         INFO(2)=NSTEPS
         RETURN
@@ -115,7 +115,7 @@ C
      &         TAB1(SIZE_TAB), TAB2(SIZE_TAB), stat=allocok )
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn('Memory allocation error in DMUMPS_REORDER_TREE')
         INFO(1)=-7
         INFO(2)=NSTEPS
         RETURN
@@ -124,7 +124,7 @@ C
      &         RESULT(SIZE_TAB),stat=allocok)
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn('Memory allocation error in DMUMPS_REORDER_TREE')
         INFO(1)=-7
         INFO(2)=SIZE_TAB
         RETURN
@@ -136,8 +136,8 @@ C
          ALLOCATE(COST_TRAV(NSTEPS), stat=allocok )
          IF (allocok > 0) THEN
             IF ( LP .GT. 0 )
-     &           WRITE(LP,*)'Memory allocation error
-     &       in DMUMPS_REORDER_TREE'
+     &           call rwarn('Memory allocation error
+     &       in DMUMPS_REORDER_TREE')
             INFO(1)=-7
             INFO(2)=NSTEPS
             RETURN
@@ -147,8 +147,8 @@ C
       ENDIF
       IF(NBROOT.EQ.NBLEAF)THEN
          IF((PERM.NE.1).OR.(PERM.EQ.4).OR.(PERM.EQ.6))THEN
-          WRITE(*,*)'Internal Error in reordertree:'
-          WRITE(*,*)'  problem with perm parameter in reordertree'
+          call rwarn("Internal Error in reordertree:")
+          call rwarn("  problem with perm parameter in reordertree")
           CALL MUMPS_ABORT()
         ENDIF
         DO I=1,NBROOT
@@ -163,9 +163,9 @@ C
       IF((PERM.EQ.3).OR.(PERM.EQ.4))THEN
          ALLOCATE(DEPTH(NSTEPS),stat=allocok)
          IF (allocok > 0) THEN
-            IF ( LP .GT. 0 )
-     &           WRITE(LP,*)'Memory allocation error in
-     &           DMUMPS_REORDER_TREE'
+c~             IF ( LP .GT. 0 )
+c~      &           WRITE(LP,*)'Memory allocation error in
+c~      &           DMUMPS_REORDER_TREE'
             INFO(1)=-7
             INFO(2)=NSTEPS
             RETURN
@@ -178,7 +178,7 @@ C
  499     CONTINUE
          INODE=IPOOL(fin)
          IF(INODE.LT.0)THEN
-            WRITE(*,*)'Internal Error in reordertree INODE < 0 !'
+            call rwarn("Internal Error in reordertree INODE < 0 !")
             CALL MUMPS_ABORT()
          ENDIF
          IN=INODE
@@ -518,8 +518,8 @@ C
            IF(MEM_SEC_PERM.EQ.M(STEP(IFATH))) THEN
               TAB=>TEMP
            ELSE IF (MEM_SEC_PERM.LT.M(STEP(IFATH))) THEN
-              WRITE(*,*)'Internal error 1 in DMUMPS_REORDER_TREE',
-     &        MEM_SEC_PERM, M(STEP(IFATH))
+              call rwarn('Internal error 1 in DMUMPS_REORDER_TREE')
+c~      &        MEM_SEC_PERM, M(STEP(IFATH))
               CALL MUMPS_ABORT()
            ELSE 
               TOTAL_MEM_SIZE=TMP_TOTAL_MEM_SIZE
@@ -567,7 +567,7 @@ C
  999    CONTINUE
         INODE=IPOOL(fin)
         IF(INODE.LT.0)THEN
-           WRITE(*,*)'Internal Error in reordertree INODE < 0 !'
+           call rwarn("Internal Error in reordertree INODE < 0 !")
            CALL MUMPS_ABORT()
         ENDIF
         IN=INODE
@@ -787,8 +787,8 @@ C
       ALLOCATE(INDICE( SLAVEF ), stat=allocok)
       IF (allocok > 0) THEN
          IF ( LP .GT. 0 )
-     &        WRITE(LP,*)'Memory allocation error in
-     &DMUMPS_REORDER_TREE'
+     &        call rwarn('Memory allocation error in
+     &DMUMPS_REORDER_TREE')
          INFO(1)=-7
          INFO(2)=SLAVEF
          RETURN
@@ -813,7 +813,7 @@ C
       FACT_SIZE=0_8
       IF ((PERM.GT.7).AND.
      &     (.NOT.(K47 == 4 .OR. ((K47.GE.2).AND.(K81 .GE. 1))))) THEN
-         WRITE(*,*) "Internal Error in DMUMPS_REORDER_TREE",PERM
+         call rwarn("Internal Error in DMUMPS_REORDER_TREE")
          CALL MUMPS_ABORT()
       END IF
       NBLEAF = NA(1)
@@ -828,8 +828,8 @@ C
             ALLOCATE(M_TOTAL(NSTEPS), stat=allocok )
             IF (allocok > 0) THEN
                IF ( LP .GT. 0 )
-     &              WRITE(LP,*)'Memory allocation error in
-     &              DMUMPS_REORDER_TREE'
+     &              call rwarn('Memory allocation error in
+     &              DMUMPS_REORDER_TREE')
                INFO(1)=-7
                INFO(2)=NSTEPS
                RETURN
@@ -840,7 +840,7 @@ C
      &          TNSTK(NSTEPS), stat=allocok )
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn("Memory allocation error in DMUMPS_REORDER_TREE")
         INFO(1)=-7
         INFO(2)=NSTEPS
         RETURN
@@ -855,7 +855,7 @@ C
      &         TAB1(SIZE_TAB), TAB2(SIZE_TAB), stat=allocok )
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn("Memory allocation error in DMUMPS_REORDER_TREE")
         INFO(1)=-7
         INFO(2)=NSTEPS
         RETURN
@@ -864,15 +864,15 @@ C
      &         RESULT(SIZE_TAB),stat=allocok)
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in DMUMPS_REORDER_TREE'
+     &    call rwarn("Memory allocation error in DMUMPS_REORDER_TREE")
         INFO(1)=-7
         INFO(2)=SIZE_TAB
         RETURN
       ENDIF
       IF(NBROOT.EQ.NBLEAF)THEN
          IF((PERM.NE.1).OR.(PERM.EQ.4).OR.(PERM.EQ.6))THEN
-          WRITE(*,*)'Internal Error in reordertree:'
-          WRITE(*,*)'  problem with perm parameter in reordertree'
+          call rwarn("Internal Error in reordertree:")
+          call rwarn("  problem with perm parameter in reordertree")
           CALL MUMPS_ABORT()
         ENDIF
         DO I=1,NBROOT
@@ -888,8 +888,8 @@ C
          ALLOCATE(DEPTH(NSTEPS),stat=allocok)
          IF (allocok > 0) THEN
             IF ( LP .GT. 0 )
-     &           WRITE(LP,*)'Memory allocation error in
-     &           DMUMPS_REORDER_TREE'
+     &           call rwarn('Memory allocation error in
+     &           DMUMPS_REORDER_TREE')
             INFO(1)=-7
             INFO(2)=NSTEPS
             RETURN
@@ -902,7 +902,7 @@ C
  499     CONTINUE
          INODE=IPOOL(fin)
          IF(INODE.LT.0)THEN
-            WRITE(*,*)'Internal Error in reordertree INODE < 0 !'
+            call rwarn("Internal Error in reordertree INODE < 0 !")
             CALL MUMPS_ABORT()
          ENDIF
          IN=INODE
@@ -963,7 +963,7 @@ C
  999    CONTINUE
         INODE=IPOOL(fin)
         IF(INODE.LT.0)THEN
-           WRITE(*,*)'Internal Error in reordertree INODE < 0 !'
+           call rwarn("Internal Error in reordertree INODE < 0 !")
            CALL MUMPS_ABORT()
         ENDIF
         IF(SIZE_SBTR.NE.0)THEN 
@@ -983,7 +983,7 @@ C
         ENDIF
         IF (K76.EQ.4)THEN
            IF(SLAVEF.NE.1)THEN
-              WRITE(*,*)'INODE=',INODE,'RANK',RANK_TRAV
+c~               WRITE(*,*)'INODE=',INODE,'RANK',RANK_TRAV
               IF(MUMPS_INSSARBR(PROCNODE(STEP(INODE)),SLAVEF))THEN
                  DEPTH_FIRST_TRAV(STEP(INODE))=DEPTH_FIRST_TRAV(STEP(
      &                ROOT_OF_CUR_SBTR))
@@ -1030,9 +1030,9 @@ C
               ELSE
                  COST_TRAV(STEP(INODE))=dble(COST_NODE)
               ENDIF
-              IF(K76.EQ.5)THEN
-                 WRITE(*,*)'INODE=',INODE,'COST=',COST_TRAV(STEP(INODE))
-              ENDIF
+c~               IF(K76.EQ.5)THEN
+c~                  WRITE(*,*)'INODE=',INODE,'COST=',COST_TRAV(STEP(INODE))
+c~               ENDIF
            ENDIF
         ENDIF
         IF ( K47 == 4 .OR. ((K81.GE.1).AND.(K47.GE.2))) THEN

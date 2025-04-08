@@ -14,51 +14,51 @@ C
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: MPG
       IF (MPG.LE.0) RETURN
-      write(MPG,*) "================================================="
-#if defined(ZERO_TRIANGLE)
-      write(MPG,*) "MUMPS compiled with option -DZERO_TRIANGLE"
-#endif
-#if defined(GEMMT_AVAILABLE)
-      write(MPG, *) "MUMPS compiled with option -DGEMMT_AVAILABLE"
-#endif
-#if defined(DETERMINISTIC_PARALLEL_GRAPH)
-      write(MPG,*) "MUMPS compiled with option"
-     &     ," -DDETERMINISTIC_PARALLEL_GRAPH"
-#endif
-#if defined(metis)
-      write(MPG,*) "MUMPS compiled with option -Dmetis"
-#endif
-#if defined(metis4)
-      write(MPG,*) "MUMPS compiled with option -Dmetis4"
-#endif
-#if defined(MUMPS_F2003)
-      write(MPG,*) "MUMPS compiled with option -DMUMPS_F2003"
-#endif
-#if defined(OLD_OOC_NOPANEL)
-      write(MPG,*) "MUMPS compiled with option -DOLD_OOC_NOPANEL"
-#endif
-#if defined(parmetis)
-      write(MPG,*) "MUMPS compiled with option -Dparmetis"
-#endif
-#if defined(parmetis3)
-      write(MPG,*) "MUMPS compiled with option -Dparmetis3"
-#endif
-#if defined(ptscotch)
-      write(MPG,*) "MUMPS compiled with option -Dptscotch"
-#endif
-#if defined(scotch)
-      write(MPG,*) "MUMPS compiled with option -Dscotch"
-#endif
-#if defined(MUMPS_USE_BLAS2)
-      write(MPG,*) "MUMPS compiled with option -DMUMPS_USE_BLAS2"
-#endif
-      write(MPG,*) "This MUMPS version includes code for SAVE_RESTORE"
-#if defined(NODYNAMICCB)
-      write(MPG,*) "MUMPS compiled with option -DNODYNAMICCB"
-#endif
-#if defined(BLR_MT)
-      write(MPG,*) "MUMPS compiled with option -DBLR_MT"
-#endif
-      write(MPG,*) "================================================="
+c~       write(MPG,*) "================================================="
+c~ #if defined(ZERO_TRIANGLE)
+c~       write(MPG,*) "MUMPS compiled with option -DZERO_TRIANGLE"
+c~ #endif
+c~ #if defined(GEMMT_AVAILABLE)
+c~       write(MPG, *) "MUMPS compiled with option -DGEMMT_AVAILABLE"
+c~ #endif
+c~ #if defined(DETERMINISTIC_PARALLEL_GRAPH)
+c~       write(MPG,*) "MUMPS compiled with option"
+c~      &     ," -DDETERMINISTIC_PARALLEL_GRAPH"
+c~ #endif
+c~ #if defined(metis)
+c~       write(MPG,*) "MUMPS compiled with option -Dmetis"
+c~ #endif
+c~ #if defined(metis4)
+c~       write(MPG,*) "MUMPS compiled with option -Dmetis4"
+c~ #endif
+c~ #if defined(MUMPS_F2003)
+c~       write(MPG,*) "MUMPS compiled with option -DMUMPS_F2003"
+c~ #endif
+c~ #if defined(OLD_OOC_NOPANEL)
+c~       write(MPG,*) "MUMPS compiled with option -DOLD_OOC_NOPANEL"
+c~ #endif
+c~ #if defined(parmetis)
+c~       write(MPG,*) "MUMPS compiled with option -Dparmetis"
+c~ #endif
+c~ #if defined(parmetis3)
+c~       write(MPG,*) "MUMPS compiled with option -Dparmetis3"
+c~ #endif
+c~ #if defined(ptscotch)
+c~       write(MPG,*) "MUMPS compiled with option -Dptscotch"
+c~ #endif
+c~ #if defined(scotch)
+c~       write(MPG,*) "MUMPS compiled with option -Dscotch"
+c~ #endif
+c~ #if defined(MUMPS_USE_BLAS2)
+c~       write(MPG,*) "MUMPS compiled with option -DMUMPS_USE_BLAS2"
+c~ #endif
+c~       write(MPG,*) "This MUMPS version includes code for SAVE_RESTORE"
+c~ #if defined(NODYNAMICCB)
+c~       write(MPG,*) "MUMPS compiled with option -DNODYNAMICCB"
+c~ #endif
+c~ #if defined(BLR_MT)
+c~       write(MPG,*) "MUMPS compiled with option -DBLR_MT"
+c~ #endif
+c~       write(MPG,*) "================================================="
       RETURN
       END SUBROUTINE MUMPS_PRINT_IF_DEFINED

@@ -100,10 +100,11 @@ C
        LIST_NELIM_ROW = IOLDPS + H_INODE + NPIV
        LIST_NELIM_COL = LIST_NELIM_ROW + NFRONT
        IF (NELIM.LE.0) THEN
-            write(6,*) ' ERROR 1 in DMUMPS_PROCESS_ROOT2SON ', NELIM
-            write(6,*) MYID,':Process root2son: INODE=',INODE,
-     & 'Header=',IW(PTLUST_S(STEP(INODE)):PTLUST_S(STEP(INODE))
-     &  +5+KEEP(IXSZ))
+            call rwarn(' ERROR 1 in DMUMPS_PROCESS_ROOT2SON ')
+c~             , NELIM
+c~             write(6,*) MYID,':Process root2son: INODE=',INODE,
+c~      & 'Header=',IW(PTLUST_S(STEP(INODE)):PTLUST_S(STEP(INODE))
+c~      &  +5+KEEP(IXSZ))
             CALL MUMPS_ABORT()
            ENDIF
        NELIM_LOCAL = NELIM_ROOT
@@ -300,10 +301,10 @@ C
        NASS   = IW(IOLDPS+4+KEEP(IXSZ))
        NELIM  = NASS-NPIV
        IF (NELIM.LE.0) THEN
-         write(6,*) MYID,': INODE,LCONT, NROW, NPIV, NASS, NELIM=',
-     &   INODE,LCONT, NROW, NPIV, NASS, NELIM
-         write(6,*) MYID,': IOLDPS=',IOLDPS
-         write(6,*) MYID,': ERROR 2 in DMUMPS_PROCESS_ROOT2SON '
+c~          write(6,*) MYID,': INODE,LCONT, NROW, NPIV, NASS, NELIM=',
+c~      &   INODE,LCONT, NROW, NPIV, NASS, NELIM
+c~          write(6,*) MYID,': IOLDPS=',IOLDPS
+         call rwarn(': ERROR 2 in DMUMPS_PROCESS_ROOT2SON ')
          CALL MUMPS_ABORT()
        ENDIF
        NSLAVES= IW(IOLDPS+5+KEEP(IXSZ))

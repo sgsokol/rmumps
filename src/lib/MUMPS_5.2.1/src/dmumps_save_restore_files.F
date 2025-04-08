@@ -182,7 +182,7 @@ C     &   READ_OOC_FIRST_FILE_NAME(1:READ_OOC_FILE_NAME_LENGTH-2)
      &       id%COMM, id%MYID )
         IF ( id%INFO(1) .LT. 0 ) GOTO 100
         if((id%MYID.EQ.0).AND.(id%PAR.ne.READ_PAR)) THEN
-           write (*,*) id%MYID, 'PAR ',id%PAR, 'READ_PAR ', READ_PAR
+c~            write (*,*) id%MYID, 'PAR ',id%PAR, 'READ_PAR ', READ_PAR
            id%INFO(1) = -73
            id%INFO(2) = 7
         endif

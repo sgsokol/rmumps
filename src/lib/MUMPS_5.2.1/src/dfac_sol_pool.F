@@ -200,12 +200,12 @@ C
       NBTOP       = POOL(LPOOL - 1)
       INSUBTREE   = POOL(LPOOL - 2)
       IF ( KEEP(76) > 6 .OR. KEEP(76) < 0 ) THEN
-         WRITE(*,*) "Error 2 in DMUMPS_EXTRACT_POOL: unknown strategy"
+         call rwarn("Error 2 in DMUMPS_EXTRACT_POOL: unknown strategy")
          CALL MUMPS_ABORT()
       ENDIF
       ATOMIC_SUBTREE =  ( KEEP(76) == 1 .OR. KEEP(76) == 3)
       IF ( DMUMPS_POOL_EMPTY(POOL, LPOOL) ) THEN
-         WRITE(*,*) "Error 1 in DMUMPS_EXTRACT_POOL"
+         call rwarn("Error 1 in DMUMPS_EXTRACT_POOL")
          CALL MUMPS_ABORT()
       ENDIF
       IF ( .NOT. ATOMIC_SUBTREE ) THEN
@@ -251,7 +251,7 @@ C
       ELSE
          IF ( INSUBTREE == 1 ) THEN
             IF (NBINSUBTREE == 0) THEN
-               WRITE(*,*) "Error 3 in DMUMPS_EXTRACT_POOL"
+               call rwarn("Error 3 in DMUMPS_EXTRACT_POOL")
                CALL MUMPS_ABORT()
             ENDIF
             LEFT = .TRUE.
@@ -270,7 +270,7 @@ C
      &              STEP,KEEP,KEEP8,PROCNODE,SLAVEF,MYID,SBTR_FLAG,
      &              PROC_FLAG,MIN_PROC)
                IF(.NOT.SBTR_FLAG)THEN
-                  WRITE(*,*)MYID,': ca a change pour moi'
+                  call rwarn(': ca a change pour moi')
                   LEFT=.FALSE.
                   GOTO 222
                ENDIF
@@ -291,7 +291,7 @@ C
      &                 PROC_FLAG,MIN_PROC)
                   IF(.NOT.SBTR_FLAG)THEN
                      LEFT=.FALSE.
-                     WRITE(*,*)MYID,': ca a change pour moi (2)'
+                     call rwarn(': ca a change pour moi (2)')
                      GOTO 222
                   ENDIF
                ENDIF
@@ -323,7 +323,8 @@ C
          END IF
       ELSE
          IF (NBTOP < 1 ) THEN
-            WRITE(*,*) "Error 5 in DMUMPS_EXTRACT_POOL", NBTOP
+            call rwarn("Error 5 in DMUMPS_EXTRACT_POOL")
+c~             , NBTOP
             CALL MUMPS_ABORT()
          ENDIF
          INODE = POOL( LPOOL - 2 - NBTOP )
@@ -351,7 +352,7 @@ C
      &           PROCNODE,SLAVEF,MYID,SBTR_FLAG,PROC_FLAG,MIN_PROC)
             IF(SBTR_FLAG)THEN
                LEFT=.TRUE. 
-               WRITE(*,*)MYID,': ca a change pour moi (3)'              
+               call rwarn(': ca a change pour moi (3)')
                GOTO 222
             ENDIF
          ELSE
@@ -369,7 +370,7 @@ C
      &                    PROC_FLAG,MIN_PROC)
                      IF(SBTR_FLAG)THEN
                         LEFT=.TRUE.
-                        WRITE(*,*)MYID,': ca a change pour moi (4)'
+                        call rwarn(': ca a change pour moi (4)')
                         GOTO 222
                      ENDIF
                   ELSE
@@ -455,13 +456,13 @@ C
             CALL DMUMPS_CHECK_SBTR_COST(NBINSUBTREE,INSUBTREE,NBTOP,
      &           MIN_COST,SBTR)
             IF(SBTR)THEN
-               WRITE(*,*)MYID,': selecting from subtree'
+               call rwarn(': selecting from subtree')
                RETURN
             ENDIF
          ENDIF
          IF((.NOT.SBTR).AND.(.NOT.FLAG_SAME_PROC))THEN
-            WRITE(*,*)MYID,': I must search for a task
-     &           to save My friend'
+            call rwarn(': I must search for a task
+     &           to save My friend')
             RETURN
          ENDIF
          INODE = NODE_TO_EXTRACT
@@ -491,9 +492,9 @@ C
       INTEGER NODE_TO_EXTRACT,I,POS_TO_EXTRACT,NBTOP,NBINSUBTREE
       NBTOP= POOL(LPOOL - 1)
       NBINSUBTREE = POOL(LPOOL)
-      IF(NBTOP.GT.0)THEN
-         WRITE(*,*)MYID,': NBTOP=',NBTOP
-      ENDIF
+c~       IF(NBTOP.GT.0)THEN
+c~          WRITE(*,*)MYID,': NBTOP=',NBTOP
+c~       ENDIF
       SBTR_FLAG=.FALSE.
       PROC_FLAG=.FALSE.
       CALL DMUMPS_MEM_CONS_MNG(INODE,POOL,LPOOL,N,STEP,KEEP,KEEP8,
@@ -518,14 +519,14 @@ C
      &           LPOOL,INODE)
             IF(MUMPS_INSSARBR(PROCNODE(STEP(INODE)),
      &           SLAVEF))THEN
-               WRITE(*,*)MYID,': Extracting from a subtree
-     &              for helping',MIN_PROC
+c~                WRITE(*,*)MYID,': Extracting from a subtree
+c~      &              for helping',MIN_PROC
                SBTR_FLAG=.TRUE.
                RETURN
             ELSE
                IF(NODE_TO_EXTRACT.NE.INODE)THEN
-                  WRITE(*,*)MYID,': Extracting from top
-     &                 inode=',INODE,'for helping',MIN_PROC
+c~                   WRITE(*,*)MYID,': Extracting from top
+c~      &                 inode=',INODE,'for helping',MIN_PROC
                ENDIF
                CALL DMUMPS_LOAD_CLEAN_MEMINFO_POOL(INODE)
             ENDIF

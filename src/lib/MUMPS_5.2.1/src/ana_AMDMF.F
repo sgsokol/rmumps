@@ -59,7 +59,8 @@ C ssg
            RETURN
         ENDIF
         IF ( SIZE_COMPLEM_LIST < 0 .OR. SIZE_COMPLEM_LIST > N ) THEN
-          WRITE(*,*) "Internal MUMPS_SYMQAMD_NEW", SIZE_COMPLEM_LIST,N
+C          WRITE(*,*) "Internal MUMPS_SYMQAMD_NEW", SIZE_COMPLEM_LIST,N
+          call rwarn("Internal MUMPS_SYMQAMD_NEW")
           CALL MUMPS_ABORT()
         ENDIF
         IF (JOB.EQ.2) THEN
@@ -296,8 +297,10 @@ C ssg
           ENDIF
           IF (DEGREE(ME).EQ.N+1) THEN
              IF (NBD.NE.NBED) THEN
-          write(6,*) ' ERROR in MUMPS_SYMQAMD_NEW ',
-     &                ' quasi dense rows remains'
+C          write(6,*) ' ERROR in MUMPS_SYMQAMD_NEW ',
+C     &                ' quasi dense rows remains'
+          call rwarn("ERROR in MUMPS_SYMQAMD_NEW quasi "//
+     &     "dense rows remains")
           CALL MUMPS_ABORT()
            ENDIF
            IF (JOB.EQ.1) THEN
@@ -324,8 +327,10 @@ C ssg
            NV(ME)   = NBD
            PE(ME)   = 0_8
            IF (NEL.NE.N) THEN
-            write(6,*) 'Internal ERROR 2 detected in QAMD'
-            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+C            write(6,*) 'Internal ERROR 2 detected in QAMD'
+C            write(6,*) ' NEL not equal to N: N, NEL =',N,NEL
+            call rwarn("Internal ERROR 2 detected in QAMD"//
+     &       "NEL not equal to N")
             CALL MUMPS_ABORT()
            ENDIF
            IF (ME.NE. COMPLEM_LIST(1)) THEN

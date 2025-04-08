@@ -699,7 +699,7 @@ C ssg
      &                    (IW(IOLDPS+XXLR).EQ.3))
       NSLAVES= IW(IOLDPS+5+KEEP(IXSZ))
       IF (NSLAVES.EQ.0) THEN
-           WRITE(6,*) ' ERROR 1 in DMUMPS_SEND_FACTORED_BLK '
+           call rwarn(' ERROR 1 in DMUMPS_SEND_FACTORED_BLK ')
            CALL MUMPS_ABORT()
           ENDIF
       NPIV   = IEND - IBEG_BLOCK + 1

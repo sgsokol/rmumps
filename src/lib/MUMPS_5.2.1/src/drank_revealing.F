@@ -25,10 +25,9 @@ C
          INFO(2) = 16  
          IF (KEEP(110).EQ.0) INFO(2) = 24 
           IF(MPG.GT.0) THEN
-           WRITE( MPG,'(A)')
-     &'** ERROR  : Null space computation requirement'
-          WRITE( MPG,'(A)')
-     &'** not consistent with factorization options'
+           call rwarn(
+     &'** ERROR  : Null space computation requirement'//
+     &' not consistent with factorization options')
          ENDIF
          GOTO 333
         ENDIF
@@ -38,10 +37,9 @@ C
          INFO(1) = -37
          INFO(2) = 9  
          IF (MPG.GT.0) THEN
-          WRITE(MPG,'(A)')
-     &'** ERROR  ICNTL(25) incompatible with '
-          WRITE( MPG,'(A)')
-     &'** option transposed system (ICNLT(9)=1) '
+          call rwarn(
+     &'** ERROR  ICNTL(25) incompatible with ' //
+     &'** option transposed system (ICNLT(9)=1) ')
          ENDIF
         ENDIF
         GOTO 333

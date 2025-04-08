@@ -120,7 +120,8 @@ C
           FDM_PTR%NB_FREE_IDX=0
       ELSE
 C     Should not be called twice or when array is unassociated
-          WRITE(*,*) "Internal error 1 in MUMPS_FDM_END", WHAT
+          call rwarn("Internal error 1 in MUMPS_FDM_END")
+c~           , WHAT
           CALL MUMPS_ABORT()
       ENDIF
       IF (associated(FDM_PTR%COUNT_ACCESS)) THEN
@@ -128,7 +129,8 @@ C     Should not be called twice or when array is unassociated
           NULLIFY(FDM_PTR%COUNT_ACCESS)
       ELSE
 C     Should not be called twice or when array is unassociated
-          WRITE(*,*) "Internal error 2 in MUMPS_FDM_END", WHAT
+          call rwarn("Internal error 2 in MUMPS_FDM_END")
+c~           , WHAT
           CALL MUMPS_ABORT()
       ENDIF
       RETURN
@@ -165,12 +167,12 @@ C     Character array of arbitrary dimension 1
       INTEGER :: CHAR_LENGTH, IERR
 C
       IF (WHAT .NE. 'F') THEN
-        WRITE(*,*) "Internal error 1 in MUMPS_FDM_MOD_TO_STRUC"
+        call rwarn("Internal error 1 in MUMPS_FDM_MOD_TO_STRUC")
         CALL MUMPS_ABORT()
       ENDIF
       IF (associated(id_FDM_ENCODING)) THEN
 C     Should be unassociated for this to work
-        WRITE(*,*) "Internal error 2 in MUMPS_FDM_MOD_TO_STRUC"
+        call rwarn("Internal error 2 in MUMPS_FDM_MOD_TO_STRUC")
         CALL MUMPS_ABORT()
       ENDIF
       CHAR_LENGTH=size(transfer(FDM_F,CHAR_ARRAY))
@@ -217,7 +219,7 @@ C     Local variables
 C     ===============
 C
       IF (.NOT.associated(id_FDM_ENCODING)) THEN
-        WRITE(*,*) "Internal error 1 in MUMPS_FDM_STRUC_TO_MOD"
+        call rwarn("Internal error 1 in MUMPS_FDM_STRUC_TO_MOD")
       ENDIF
       FDM_F=transfer(id_FDM_ENCODING,FDM_F)
 C     Module is now responsible for accessing data.
@@ -251,8 +253,8 @@ C
       IF (IWHANDLER .GT. 0) THEN
 C       Already started, counter should at least be 1
          IF (FDM_PTR%COUNT_ACCESS(IWHANDLER) .LT. 1) THEN
-          WRITE(*,*) "Internal error 1 in MUMPS_FDM_START_IDX",
-     &    FDM_PTR%COUNT_ACCESS(IWHANDLER)
+          call rwarn("Internal error 1 in MUMPS_FDM_START_IDX")
+c~      &    FDM_PTR%COUNT_ACCESS(IWHANDLER)
           CALL MUMPS_ABORT()
         ENDIF
         GOTO 100
@@ -291,7 +293,7 @@ C
 C     Number of modules accessing this handler
       FDM_PTR%COUNT_ACCESS(IWHANDLER)=FDM_PTR%COUNT_ACCESS(IWHANDLER)+1
 #if defined(DBG_FDM)
-      WRITE(*,*) "DBG_FDM: IWHANDLER=",IWHANDLER, "Starting FROM=",FROM
+c~       WRITE(*,*) "DBG_FDM: IWHANDLER=",IWHANDLER, "Starting FROM=",FROM
 #endif
       RETURN
       END SUBROUTINE MUMPS_FDM_START_IDX
@@ -312,22 +314,23 @@ C
       CALL MUMPS_FDM_SET_PTR(WHAT, FDM_PTR)
       IF (IWHANDLER .LE.0) THEN
 C     Already ended
-        WRITE(*,*) "Internal error 1 in MUMPS_FDM_END_IDX",IWHANDLER
+        call rwarn("Internal error 1 in MUMPS_FDM_END_IDX")
+c~         ,IWHANDLER
         CALL MUMPS_ABORT()
       ENDIF
 #if defined(DBG_FDM)
-      WRITE(*,*) "DBG_FDM: IWHANDLER=",IWHANDLER, "Ending FROM=",FROM
+c~       WRITE(*,*) "DBG_FDM: IWHANDLER=",IWHANDLER, "Ending FROM=",FROM
 #endif
       FDM_PTR%COUNT_ACCESS(IWHANDLER)=FDM_PTR%COUNT_ACCESS(IWHANDLER)-1
       IF (FDM_PTR%COUNT_ACCESS(IWHANDLER) .LT. 0) THEN
 C     Negative counter!
-        WRITE(*,*) "Internal error 2 in MUMPS_FDM_END_IDX",
-     &  IWHANDLER, FDM_PTR%COUNT_ACCESS(IWHANDLER)
+        call rwarn("Internal error 2 in MUMPS_FDM_END_IDX")
+c~      &  IWHANDLER, FDM_PTR%COUNT_ACCESS(IWHANDLER)
         CALL MUMPS_ABORT()
       ENDIF
       IF (FDM_PTR%COUNT_ACCESS(IWHANDLER) .EQ.0 ) THEN
          IF (FDM_PTR%NB_FREE_IDX .GE. size(FDM_PTR%STACK_FREE_IDX)) THEN
-          WRITE(*,*) "Internal error 3 in MUMPS_FDM_END_IDX"
+          call rwarn("Internal error 3 in MUMPS_FDM_END_IDX")
           CALL MUMPS_ABORT()
         ENDIF
         FDM_PTR%NB_FREE_IDX = FDM_PTR%NB_FREE_IDX + 1
@@ -357,8 +360,8 @@ C
         FDM_PTR => FDM_F
       ELSE
 C     Should be called with either A or F
-        WRITE(*,*) "Internal error 1 in MUMPS_FDM_INIT"
-        WRITE(*,*) "Allowed arguments for WHAT are A or F"
+        call rwarn("Internal error 1 in MUMPS_FDM_INIT")
+        call rwarn("Allowed arguments for WHAT are A or F")
         CALL MUMPS_ABORT()
       ENDIF
       END SUBROUTINE MUMPS_FDM_SET_PTR
@@ -572,7 +575,7 @@ C
                SIZE_VARIABLES_FDM_STRUC_T(i1)=SIZE_INT
             elseif(trim(mode).EQ."save") then
                SIZE_VARIABLES_FDM_STRUC_T(i1)=SIZE_INT
-               write(unit,iostat=err) FDM_STRUC%NB_FREE_IDX
+c~                write(unit,iostat=err) FDM_STRUC%NB_FREE_IDX
                if(err.ne.0) then
                   INFO(1) = -72
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
@@ -605,26 +608,26 @@ C
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=
      &                 size(FDM_STRUC%STACK_FREE_IDX,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(FDM_STRUC%STACK_FREE_IDX,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(FDM_STRUC%STACK_FREE_IDX,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) FDM_STRUC%STACK_FREE_IDX
+c~                   write(unit,iostat=err) FDM_STRUC%STACK_FREE_IDX
                ELSE
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=0_8
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
@@ -682,26 +685,26 @@ C
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=
      &                 size(FDM_STRUC%COUNT_ACCESS,1)*SIZE_INT
-                  write(unit,iostat=err)
-     &                 size(FDM_STRUC%COUNT_ACCESS,1)
+c~                   write(unit,iostat=err)
+c~      &                 size(FDM_STRUC%COUNT_ACCESS,1)
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) FDM_STRUC%COUNT_ACCESS
+c~                   write(unit,iostat=err) FDM_STRUC%COUNT_ACCESS
                ELSE
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=0_8
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                   if(err.ne.0) then
                      INFO(1) = -72
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_written,
      &                    INFO(2))
                   endif
                   IF ( INFO(1) .LT. 0 ) GOTO 100
-                  write(unit,iostat=err) -999
+c~                   write(unit,iostat=err) -999
                ENDIF 
                if(err.ne.0) then
                   INFO(1) = -72
