@@ -2289,8 +2289,8 @@ c~      &           cv_nodetype(ifather)
       do i=1,cv_slavef
          call MUMPS_BIT_SET(procindex,i,ierr)
          if(ierr.ne.0) then
-            if(cv_lp.gt.0)write(cv_lp,*)
-     &           'MUMPS_BIT_SET signalled error to',subname
+            if(cv_lp.gt.0) call rwarn(
+     &           'MUMPS_BIT_SET signalled error to' // subname)
             istat = ierr
             GOTO 999
          end if
@@ -2310,16 +2310,16 @@ c~      &           cv_nodetype(ifather)
             cv_prop_map(i)%ind_proc = procindex
             call MUMPS_PROPMAP(i,pctr,ierr)
             if(ierr.ne.0) then
-            if(cv_lp.gt.0)write(cv_lp,*)
-     &           'PROPMAP signalled error to',subname
+            if(cv_lp.gt.0) call rwarn(
+     &           'PROPMAP signalled error to' // subname)
                istat = ierr
                GOTO 999
             endif
             if((cv_keep(24).eq.16).OR.(cv_keep(24).eq.18)) then
                call MUMPS_MOD_PROPMAP(i,pctr2,ierr)
                if(ierr.ne.0) then
-                  if(cv_lp.gt.0)write(cv_lp,*)
-     &           'MOD_PROPMAP signalled error to',subname
+                  if(cv_lp.gt.0) call rwarn(
+     &           'MOD_PROPMAP signalled error to' // subname)
                   istat = ierr
                   GOTO 999
                endif
@@ -3087,8 +3087,8 @@ c~      ,in,
                      if(k.ge.current2)then
                         call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                         if(ierr.ne.0) then
-                           if(cv_lp.gt.0)write(cv_lp,*)
-     &                          'BIT_SET signalled error to',subname
+                           if(cv_lp.gt.0) call rwarn(
+     &                          'BIT_SET signalled error to'//subname)
                            istat = ierr
                            goto 999
                         end if
@@ -3318,8 +3318,8 @@ c~      ,in,
                 if( MUMPS_BIT_GET4PROC(inode,k69onid)) then
                     call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                     if(ierr.ne.0) then
-                       if(cv_lp.gt.0)write(cv_lp,*)
-     &               'BIT_SET signalled error to',subname
+                       if(cv_lp.gt.0) call rwarn(
+     &               'BIT_SET signalled error to' // subname)
                        istat = ierr
                        goto 999
                     end if
@@ -3390,8 +3390,8 @@ c~      ,in,
                   if( MUMPS_BIT_GET4PROC(inode,k69onid)) then
                      call MUMPS_BIT_SET(procs4son,k69onid,ierr)
                      if(ierr.ne.0) then
-                        if(cv_lp.gt.0)write(cv_lp,*)
-     &                  'BIT_SET signalled error to',subname
+                        if(cv_lp.gt.0) call rwarn(
+     &                  'BIT_SET signalled error to' // subname)
                         istat = ierr
                         goto 999
                      end if

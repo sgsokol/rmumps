@@ -28,8 +28,8 @@ C
       ENDIF
       IPOS = PTRIST(ISTEP)
       IF (IPOS .LE. 0) THEN
-        WRITE(*,*) "Internal error 1 in MUMPS_SOL_GET_NPIV_LIELL_IPOS",
-     &  ISTEP 
+        call rwarn("Internal error 1 in MUMPS_SOL_GET_NPIV_LIELL_IPOS")
+c~      &  ISTEP 
         CALL MUMPS_ABORT()
       ENDIF
       NPIV = IW(IPOS+3+KEEP(IXSZ))

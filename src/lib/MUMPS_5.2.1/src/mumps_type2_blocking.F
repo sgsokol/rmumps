@@ -287,14 +287,15 @@ C
         ENDDO
         BLSIZE = NCB - SumNi
         IF (BLSIZE.LE.0) THEN
-          write(*,*) ' Error in MUMPS_BLOC2_SET_POSK483: ', 
-     &     ' size lastbloc ', BLSIZE
+          call rwarn(' Error in MUMPS_BLOC2_SET_POSK483: ' //
+     &     ' size lastbloc ')
+c~      , BLSIZE
           CALL MUMPS_ABORT()
         ENDIF
         if (NCOLim1+BLSIZE.NE.NFRONT) then
-          write(*,*) ' Error in MUMPS_BLOC2_SET_POSK483: ', 
-     &     ' NCOLim1, BLSIZE, NFRONT=', 
-     &       NCOLim1, BLSIZE, NFRONT
+          call rwarn(' Error in MUMPS_BLOC2_SET_POSK483: ' //
+     &     ' NCOLim1, BLSIZE, NFRONT=')
+c~      &       NCOLim1, BLSIZE, NFRONT
           CALL MUMPS_ABORT()
         endif
         IF (GETPOS) TABPOS(NSLAVES) = SumNi + 1

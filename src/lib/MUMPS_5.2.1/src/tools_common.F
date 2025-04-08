@@ -280,7 +280,7 @@ C
       INTEGER            MYCOL, MYROW, NPCOL, NPROW
       EXTERNAL           blacs_gridinfo
       CALL blacs_gridinfo( ICTXT, NPROW, NPCOL, MYROW, MYCOL )
-      WRITE( *, FMT = 9999 ) MYROW, MYCOL, SRNAME, INFO
+c~       WRITE( *, FMT = 9999 ) MYROW, MYCOL, SRNAME, INFO
  9999 FORMAT( '{', I5, ',', I5, '}:  On entry to ', A,
      &        ' parameter number', I4, ' had an illegal value' )
       END SUBROUTINE PXERBLA
@@ -306,7 +306,7 @@ C
      &                 MPI_MAXLOC, MASTER, COMM, IERR_MPI )
       IF ( MYID.eq. MASTER ) THEN
          IF ( INFOG(1) .ne. TEMP2(1) ) THEN
-          write(*,*) 'Error in MUMPS_MEM_CENTRALIZE'
+          call rwarn('Error in MUMPS_MEM_CENTRALIZE')
           CALL MUMPS_ABORT()
         END IF
         IRANK    = TEMP2(2)
@@ -524,7 +524,7 @@ C ssg
       CHARACTER(*), INTENT(IN) :: STRING
       INTEGER I4
       IF ( I8 .GT. int(huge(I4),8)) THEN
-        WRITE(*,*) STRING
+        call rwarn(STRING)
         CALL MUMPS_ABORT()
       ENDIF
       RETURN
@@ -627,7 +627,7 @@ C ssg
       CASE('any','ANY')
          MUMPS_PARANA_AVAIL = PTSCOTCH .OR. PARMETIS
       CASE default
-         write(*,'("Invalid input in MUMPS_PARANA_AVAIL")')
+         call rwarn("Invalid input in MUMPS_PARANA_AVAIL")
       END SELECT
       RETURN
       END FUNCTION MUMPS_PARANA_AVAIL
@@ -659,7 +659,7 @@ C ssg
       ALLOCATE( IPOOL(NBLEAF), TNSTK(NSTEPS), stat=allocok )
       IF (allocok > 0) THEN
         IF ( LP .GT. 0 )
-     &    WRITE(LP,*)'Memory allocation error in MUMPS_SORT_STEP'
+     &    call rwarn('Memory allocation error in MUMPS_SORT_STEP')
         INFO(1)=-7
         INFO(2)=NSTEPS
         RETURN
@@ -670,8 +670,8 @@ C ssg
       ALLOCATE(STEP_TO_NODE(NSTEPS),stat=allocok)
       IF (allocok > 0) THEN
          IF ( LP .GT. 0 )
-     &        WRITE(LP,*)'Memory allocation error in
-     &MUMPS_SORT_STEP'
+     &        call rwarn('Memory allocation error in
+     &MUMPS_SORT_STEP')
          INFO(1)=-7
          INFO(2)=NSTEPS
          RETURN
@@ -759,7 +759,8 @@ C ssg
       IMPLICIT NONE
       INTEGER, intent(in) :: NBPR, IWNBPR
       IF (NBPR .NE. IWNBPR) THEN
-        WRITE(*,*) " NBPROCFILS(...), IW(..+XXNBPR_ = ", NBPR, IWNBPR
+        call rwarn(" NBPROCFILS(...), IW(..+XXNBPR_ = ")
+c~         , NBPR, IWNBPR
 #if ! defined(IBC_TEST)
         CALL MUMPS_ABORT()
 #endif
@@ -789,7 +790,7 @@ C ssg
       call MPI_GET_PROCESSOR_NAME(MyNAME, MyNAME_length, ierr)
       allocate(MyNAME_TAB(MyNAME_length), STAT=ALLOCOK)
       IF(ALLOCOK.LT.0) THEN
-         write(*,*) "Allocation error in MUMPS_GET_PROC_PER_NODE"
+         call rwarn("Allocation error in MUMPS_GET_PROC_PER_NODE")
          call MUMPS_ABORT()
       ENDIF
       DO i=1, MyNAME_length
@@ -806,7 +807,7 @@ C ssg
      &        i,COMM,ierr)
          allocate(MyNAME_TAB_RCV(MyNAME_length_RCV), STAT=ALLOCOK)
          IF(ALLOCOK.LT.0) THEN
-            write(*,*) "Allocation error in MUMPS_GET_PROC_PER_NODE"
+            call rwarn("Allocation error in MUMPS_GET_PROC_PER_NODE")
             call MUMPS_ABORT()
          ENDIF
          if(MyID .eq. i) then
