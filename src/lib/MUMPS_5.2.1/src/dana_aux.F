@@ -286,8 +286,8 @@ C     &           IORD, COMPRESS
             ELSE IF(KEEP(23) .EQ. -9876543) THEN
                IDENT = .TRUE.
                KEEP(23) = 5
-               IF (PROK) WRITE(MP,'(A)')
-     &              ' ... Apply column permutation (already computed)'
+               IF (PROK) call rwarn(
+     &              ' ... Apply column permutation (already computed)')
                DO J=1,N
                   JPERM = PIV(J)
                   FILS(JPERM) = J 
@@ -313,8 +313,8 @@ C     &           IORD, COMPRESS
                   ENDDO
                   DEALLOCATE(COLSCA_TEMP)
                   IF (PROK)
-     &                 WRITE(MP,'(/A)')
-     &                 ' WARNING input matrix data modified'
+     &                 call rwarn(
+     &                 ' WARNING input matrix data modified')
                   ALLOCATE(IPQ8(N),stat=IERR)
                   IF ( IERR .GT. 0 ) THEN
                      INFO( 1 ) = -7
@@ -335,8 +335,8 @@ C     &           IORD, COMPRESS
                ENDIF
             ENDIF
          ELSE IF (KEEP(23) .EQ. 7 .OR. KEEP(23) .EQ. -9876543 ) THEN
-            IF (PROK) WRITE(MP,'(A)')
-     &           ' ... No column permutation'
+            IF (PROK) call rwarn(
+     &           ' ... No column permutation')
             KEEP(23) = 0
          ENDIF
       ENDIF                     
@@ -2271,16 +2271,16 @@ c~      &        ' WARNING in MAXTRANS INFO(1)=',INFO64(1)
                MTRANS = -9876543
                GOTO 102
             ENDIF
-            IF (PROK) WRITE(MPRINT,'(A)')
-     &           ' ... Apply column permutation'
+            IF (PROK) call rwarn(
+     &           ' ... Apply column permutation')
             DO 100 K=1,NZ
                J = id%JCN(K)
                IF ((J.LE.0).OR.(J.GT.N)) GO TO 100
                id%JCN(K) = IW(IRNW+int(J-1,8))
  100        CONTINUE
             IF (MP.GT.0 .AND. ICNTL(4).GE.2)
-     &           WRITE(MP,'(/A)')
-     &           ' WARNING input matrix data modified'
+     &           call rwarn(
+     &           ' WARNING input matrix data modified')
          ENDIF
  102     CONTINUE
          IF (SCALINGLOC) THEN
@@ -3124,11 +3124,13 @@ c~                ENDIF
        symmetry = min(nint (100.0D0*RSYM), 100)
        IF (PRINTSTAT) THEN
          IF ((MPG .GT. 0).AND.(ICNTL(4).GE.2) )
-     &   write(MPG,'(A,I5)') 
-     &  ' ... Structural symmetry (in percent)=', symmetry
+     &   call rwarn(
+     &  ' ... Structural symmetry (in percent)=')
+c~      , symmetry
          IF (MP.GT.0 .AND. MPG.NE.MP.AND. (ICNTL(4).GE.2) )
-     &   write(MP,'(A,I5)') 
-     &  ' ... Structural symmetry (in percent)=', symmetry
+     &   call rwarn(
+     &  ' ... Structural symmetry (in percent)=')
+c~      , symmetry
        ENDIF
       ELSE
       ENDIF
@@ -3144,11 +3146,13 @@ c~                ENDIF
       INPLACE64_GRAPH_COPY = (LW.GE.2*(IWFR-1_8))
       IF (PRINTSTAT) THEN
        IF (MPG .GT. 0.AND.(ICNTL(4).GE.2))
-     &  write(MPG,'(A,1I5)') 
-     &  ' Average density of rows/columns =', AvgDens
+     &  call rwarn(
+     &  ' Average density of rows/columns =')
+c~      , AvgDens
         IF (MP.GT.0 .AND. MPG.NE.MP.AND.(ICNTL(4).GE.2))
-     &  write(MPG,'(A,1I5)') 
-     &  ' Average density of rows/columns =', AvgDens
+     &  call rwarn(
+     &  ' Average density of rows/columns =')
+c~      , AvgDens
       ENDIF
       RETURN
 99999 FORMAT (/'*** Warning message from analysis routine ***')
@@ -3241,25 +3245,25 @@ c~                ENDIF
       IF (JOB.LT.1 .OR. JOB.GT.6) THEN
          INFO(1) = -1
          INFO(2) = JOB
-         IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'JOB',JOB
+c~          IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'JOB',JOB
          GO TO 99
       ENDIF
       IF (M.LT.1 .OR. M.LT.N) THEN
          INFO(1) = -2
          INFO(2) = M
-         IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'M',M
+c~          IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'M',M
          GO TO 99
       ENDIF
       IF (N.LT.1) THEN
          INFO(1) = -2
          INFO(2) = N
-         IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'N',N
+c~          IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'N',N
          GO TO 99
       ENDIF
       IF (NE.LT.1) THEN
          INFO(1) = -3
          CALL MUMPS_SET_IERROR(NE,INFO(2))
-         IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'NE',NE
+c~          IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9001) INFO(1),'NE',NE
          GO TO 99
       ENDIF
       IF (JOB.EQ.1) K = int(4*N +   M,8)
@@ -3271,7 +3275,7 @@ c~                ENDIF
       IF (LIW.LT.K) THEN
          INFO(1) = -4
          CALL MUMPS_SET_IERROR(K,INFO(2))
-         IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9004) INFO(1),K
+c~          IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9004) INFO(1),K
          GO TO 99
       ENDIF
       IF (JOB.GT.1) THEN
@@ -3283,7 +3287,7 @@ c~                ENDIF
          IF (LDW .LT. K) THEN
             INFO(1) = -5
             CALL MUMPS_SET_IERROR(K,INFO(2))
-            IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9005) INFO(1),K
+c~             IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9005) INFO(1),K
             GO TO 99
          ENDIF
       ENDIF
@@ -3297,13 +3301,13 @@ c~                ENDIF
                IF (I.LT.1 .OR. I.GT.M) THEN
                   INFO(1) = -6
                   INFO(2) = J
-                  IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9006) INFO(1),J,I
+c~                   IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9006) INFO(1),J,I
                   GO TO 99
                ENDIF
                IF (IW(I).EQ.J) THEN
                   INFO(1) = -7
                   INFO(2) = J
-                  IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9007) INFO(1),J,I 
+c~                   IF (ICNTL(1).GE.0) WRITE(ICNTL(1),9007) INFO(1),J,I 
                   GO TO 99
                ELSE
                   IW(I) = J
@@ -3317,12 +3321,12 @@ C            WRITE(ICNTL(3),9020) JOB,M,N,NE
             IF (ICNTL(4).EQ.0) THEN
 C               WRITE(ICNTL(3),9021) (IP(J),J=1,min(10,N+1))
 C               WRITE(ICNTL(3),9022) (IRN(K),K=1_8,min(10_8,NE))
-               IF (JOB.GT.1) WRITE(ICNTL(3),9023) 
-     &                              (A(K),K=1_8,min(10_8,NE))
+c~                IF (JOB.GT.1) WRITE(ICNTL(3),9023) 
+c~      &                              (A(K),K=1_8,min(10_8,NE))
             ELSEIF (ICNTL(4).EQ.1) THEN
 c~                WRITE(ICNTL(3),9021) (IP(J),J=1,N+1)
 c~                WRITE(ICNTL(3),9022) (IRN(K),K=1_8,NE)
-               IF (JOB.GT.1) WRITE(ICNTL(3),9023) (A(K),K=1_8,NE)
+c~                IF (JOB.GT.1) WRITE(ICNTL(3),9023) (A(K),K=1_8,NE)
             ENDIF
 c~             WRITE(ICNTL(3),9024) (ICNTL(J),J=1,NICNTL)
 c~             WRITE(ICNTL(3),9025) (CNTL(J),J=1,NCNTL)

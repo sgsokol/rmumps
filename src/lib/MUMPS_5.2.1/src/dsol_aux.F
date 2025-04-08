@@ -1118,8 +1118,8 @@ C ssg
             IF (mod(IFLAG/2,2) .EQ. 0) THEN
               IFLAG = IFLAG + 2
             ENDIF
-            IF ((MP .GT. 0) .AND. (ICNTL(4) .GE. 2)) WRITE( MP, * )
-     &    ' max-NORM of computed solut. is zero or close to zero. '
+            IF ((MP .GT. 0) .AND. (ICNTL(4) .GE. 2)) call rwarn(
+     &    ' max-NORM of computed solut. is zero or close to zero. ')
       ENDIF
       IF (RESMAX .EQ. DZERO) THEN
         SCLNRM = DZERO
@@ -1127,8 +1127,8 @@ C ssg
         SCLNRM = RESMAX / (ANORM * XNORM)
       ENDIF
       RESL2 = sqrt(RESL2)
-      IF (PROK) WRITE( MPRINT, 90 ) RESMAX, RESL2, ANORM, XNORM, 
-     &      SCLNRM
+c~       IF (PROK) WRITE( MPRINT, 90 ) RESMAX, RESL2, ANORM, XNORM, 
+c~      &      SCLNRM
    90  FORMAT (/' RESIDUAL IS ............ (MAX-NORM)        =',1PD9.2/
      &       '                       .. (2-NORM)          =',1PD9.2/
      &       ' RINFOG(4):NORM OF input  Matrix  (MAX-NORM)=',1PD9.2/

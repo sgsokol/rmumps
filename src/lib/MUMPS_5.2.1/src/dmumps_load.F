@@ -2690,8 +2690,8 @@ c~                   WRITE(*,*)'NCB=',NCB,',SOMME=',X
                   IF(NB_ROWS(i).GT.0)THEN
                     X=1
                  ELSE
-                    WRITE(*,*)
-     &            'Internal error 13 in DMUMPS_SET_PARTI_ACTV_MEM'
+                    call rwarn(
+     &            'Internal error 13 in DMUMPS_SET_PARTI_ACTV_MEM')
                     CALL MUMPS_ABORT()
                   ENDIF
              ENDIF
@@ -2705,8 +2705,8 @@ c~                   WRITE(*,*)'NCB=',NCB,',SOMME=',X
               TAB_POS(i)=POS
               POS=POS+NB_ROWS(i) 
               IF(NB_ROWS(i).LE.0)THEN
-                WRITE(*,*)
-     &          'Internal error 14 in DMUMPS_SET_PARTI_ACTV_MEM'
+                call rwarn(
+     &          'Internal error 14 in DMUMPS_SET_PARTI_ACTV_MEM')
                 CALL MUMPS_ABORT()
               ENDIF
            ENDDO
@@ -2714,8 +2714,8 @@ c~                   WRITE(*,*)'NCB=',NCB,',SOMME=',X
               SLAVES_LIST(i)=TEMP_ID(i)
            ENDDO
            IF(POS.NE.(NCB+1))THEN
-              WRITE(*,*)
-     &        'Internal error 15 in DMUMPS_SET_PARTI_ACTV_MEM'
+              call rwarn(
+     &        'Internal error 15 in DMUMPS_SET_PARTI_ACTV_MEM')
               CALL MUMPS_ABORT()
            ENDIF
       END SUBROUTINE DMUMPS_SET_PARTI_ACTV_MEM
@@ -2794,8 +2794,8 @@ c~                   WRITE(*,*)'NCB=',NCB,',SOMME=',X
                IDWLOAD(i) = i - 1
                IF (WLOAD(i) < -0.5d0 ) THEN
                   IF((MP.GT.0).AND.(LP.GE.2))THEN
-                     WRITE(MP,*)MYID,': Negative load ',
-     &                    WLOAD(i)
+                     call rwarn(': Negative load ')
+c~      &                    WLOAD(i)
                   ENDIF
                ENDIF 
                WLOAD(i)=max(WLOAD(i),0.0d0)
