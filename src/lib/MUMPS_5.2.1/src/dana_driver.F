@@ -2733,7 +2733,7 @@ C                 is, otherwise an error would have occurred
 c~                   IF(PROKG) WRITE(MPG, '(" with Metis.")')
                   id%KEEP(256) = 5
                ELSE
-                  IF(PROKG) WRITE(MPG, '(".")')
+c~                   IF(PROKG) WRITE(MPG, '(".")')
                   id%KEEP(256) = 7
                END IF
             END IF
@@ -2741,17 +2741,17 @@ C     In the case where there the input matrix is too small to do
 C     the parallel analysis we simply revert to sequential version
             IF(id%N .LE. 50) THEN
                id%KEEP(244) = 1
-               IF(PROKG) WRITE(MPG,
-     &            '("Input matrix is too small for the parallel
-     & analysis. Reverting to sequential analysis")',advance='no')
+c~                IF(PROKG) WRITE(MPG,
+c~      &            '("Input matrix is too small for the parallel
+c~      & analysis. Reverting to sequential analysis")',advance='no')
                IF(id%KEEP(245) .EQ. 1) THEN
-                  IF(PROKG) WRITE(MPG, '(" with SCOTCH.")')
+c~                   IF(PROKG) WRITE(MPG, '(" with SCOTCH.")')
                   id%KEEP(256) = 3
                ELSE IF(id%KEEP(245) .EQ. 2) THEN
-                  IF(PROKG) WRITE(MPG, '(" with Metis.")')
+c~                   IF(PROKG) WRITE(MPG, '(" with Metis.")')
                   id%KEEP(256) = 5
                ELSE
-                  IF(PROKG) WRITE(MPG, '(".")')
+c~                   IF(PROKG) WRITE(MPG, '(".")')
                   id%KEEP(256) = 7
                END IF
             END IF

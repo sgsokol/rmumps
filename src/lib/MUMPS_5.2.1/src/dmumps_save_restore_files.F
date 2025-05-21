@@ -40,7 +40,7 @@ C
       SIZE_CHARACTER = 1
       SIZE_LOGICAL   = 4
       FORTRAN_VERSION_OK = .true.
-      read(fileunit,iostat=ierr) READ_FORTRAN_VERSION
+c~      read(fileunit,iostat=ierr) READ_FORTRAN_VERSION
       if(ierr.ne.0) GOTO 100
       if (READ_FORTRAN_VERSION.NE."MUMPS") THEN
         ierr = 0
@@ -52,42 +52,42 @@ C
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
-      read(fileunit,iostat=ierr) READ_HASH
+c~      read(fileunit,iostat=ierr) READ_HASH
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(23*SIZE_CHARACTER,kind=8)
 #if !defined(MUMPS_F2003)
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
-      read(fileunit,iostat=ierr) TOTAL_FILE_SIZE,TOTAL_STRUC_SIZE
+c~      read(fileunit,iostat=ierr) TOTAL_FILE_SIZE,TOTAL_STRUC_SIZE
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(2*SIZE_INT8,kind=8)
 #if !defined(MUMPS_F2003)
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
-      read(fileunit,iostat=ierr) READ_ARITH
+c~      read(fileunit,iostat=ierr) READ_ARITH
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(1,kind=8)
 #if !defined(MUMPS_F2003)
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
-      read(fileunit,iostat=ierr) READ_SYM,READ_PAR,READ_NPROCS
+c~      read(fileunit,iostat=ierr) READ_SYM,READ_PAR,READ_NPROCS
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(3*SIZE_INT,kind=8)
 #if !defined(MUMPS_F2003)
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif     
-      read(fileunit,iostat=ierr) READ_INT_TYPE_64
+c~      read(fileunit,iostat=ierr) READ_INT_TYPE_64
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(SIZE_LOGICAL,kind=8)
 #if !defined(MUMPS_F2003)
       size_read=size_read
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
-      read(fileunit,iostat=ierr) READ_OOC_FILE_NAME_LENGTH
+c~      read(fileunit,iostat=ierr) READ_OOC_FILE_NAME_LENGTH
       if(ierr.ne.0) GOTO 100
       size_read=size_read+int(SIZE_INT,kind=8)
 #if !defined(MUMPS_F2003)
@@ -95,7 +95,7 @@ C
      &         +int(2*SIZE_INT*1,kind=8)
 #endif
       IF(READ_OOC_FILE_NAME_LENGTH.EQ.-999) THEN
-        read(fileunit,iostat=ierr) dummy
+c~        read(fileunit,iostat=ierr) dummy
         if(ierr.ne.0) GOTO 100
         size_read=size_read+int(SIZE_INT,kind=8)
 #if !defined(MUMPS_F2003)
@@ -103,8 +103,8 @@ C
      &           +int(2*SIZE_INT*1,kind=8)
 #endif
       ELSE
-        read(fileunit,iostat=ierr)
-     &    READ_OOC_FIRST_FILE_NAME(1:READ_OOC_FILE_NAME_LENGTH)
+c~        read(fileunit,iostat=ierr)
+c~      &    READ_OOC_FIRST_FILE_NAME(1:READ_OOC_FILE_NAME_LENGTH)
         if(ierr.ne.0) GOTO 100
         size_read=size_read+int(
      &           READ_OOC_FILE_NAME_LENGTH*SIZE_CHARACTER,kind=8)

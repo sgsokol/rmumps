@@ -4300,7 +4300,7 @@ C         the SPMD version than it was with the master/slave approach.
 C
 C         * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 c         IF ( PROK  .AND. ICNTL10 .NE. 0 ) WRITE( MP, 270 )
-          IF ( PROKG .AND. ICNTL10 .NE. 0 ) WRITE( MPG, 270 )
+c~           IF ( PROKG .AND. ICNTL10 .NE. 0 ) WRITE( MPG, 270 )
 C         Initializations and allocations
           NITREF = abs(ICNTL10)
           ALLOCATE(R_Y(id%N), stat = allocok)
@@ -4613,10 +4613,10 @@ C                 ------------------------------------------
                   CALL MUMPS_SECDEB(TIMEEA)
                   IF (ICNTL10.EQ.0) THEN
 C                   No IR : there will be only the EA of the 1st sol.
-                    IF ( MPG .GT. 0 ) WRITE( MPG, 170 )
+c~                     IF ( MPG .GT. 0 ) WRITE( MPG, 170 )
                   ELSEIF (IRStep.EQ.1) THEN
 C                   IR :  we print the EA of the 1st sol.
-                    IF ( MPG .GT. 0 ) WRITE( MPG, 55 )
+c~                     IF ( MPG .GT. 0 ) WRITE( MPG, 55 )
                   ELSEIF ((ICNTL10.LT.0).AND.(IRStep.EQ.NITREF+1)) THEN
 C                   IR with fixed n. of steps:  we print the EA
 C                                               of the last sol.
@@ -4919,7 +4919,7 @@ c~      &         RINFOG(11)
 c~               END IF
             END IF
           END IF ! MASTER && ICNTL11.GT.0
-          IF ( PROKG .AND. abs(ICNTL10) .GT.0 ) WRITE( MPG, 131 )
+c~           IF ( PROKG .AND. abs(ICNTL10) .GT.0 ) WRITE( MPG, 131 )
 C===================================================
 C Perform error analysis after iterative refinements
 C END

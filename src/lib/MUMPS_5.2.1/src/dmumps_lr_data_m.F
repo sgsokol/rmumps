@@ -1176,7 +1176,7 @@ c~             write(unit,iostat=err) -999
          ENDIF 
       elseif(trim(mode).EQ."restore") then
          nullify(BLR_ARRAY)
-         read(unit,iostat=err) size_array1
+c~          read(unit,iostat=err) size_array1
          if(err.ne.0) THEN
             INFO(1) = -75
             CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1187,7 +1187,7 @@ c~             write(unit,iostat=err) -999
             NbRecords=2
             SIZE_GEST=SIZE_INT*2
             SIZE_VARIABLES=0
-            read(unit,iostat=err) dummy
+c~             read(unit,iostat=err) dummy
             if(err.ne.0) THEN
                INFO(1) = -75
                CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1341,7 +1341,7 @@ c~                write(unit,iostat=err) BLR_STRUC%IsSYM
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               read(unit,iostat=err) BLR_STRUC%IsSYM
+c~                read(unit,iostat=err) BLR_STRUC%IsSYM
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1364,7 +1364,7 @@ c~                write(unit,iostat=err) BLR_STRUC%IsT2
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               read(unit,iostat=err) BLR_STRUC%IsT2
+c~                read(unit,iostat=err) BLR_STRUC%IsT2
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1387,7 +1387,7 @@ c~                write(unit,iostat=err) BLR_STRUC%IsSLAVE
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_LOGICAL
-               read(unit,iostat=err) BLR_STRUC%IsSLAVE
+c~                read(unit,iostat=err) BLR_STRUC%IsSLAVE
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1440,7 +1440,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%BEGS_BLR_STATIC)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1450,7 +1450,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=size_array1*SIZE_INT
@@ -1462,7 +1462,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) BLR_STRUC%BEGS_BLR_STATIC
+c~                   read(unit,iostat=err) BLR_STRUC%BEGS_BLR_STATIC
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN
@@ -1517,7 +1517,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%BEGS_BLR_DYNAMIC)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1527,7 +1527,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=size_array1*SIZE_INT
@@ -1539,7 +1539,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) BLR_STRUC%BEGS_BLR_DYNAMIC
+c~                   read(unit,iostat=err) BLR_STRUC%BEGS_BLR_DYNAMIC
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN
@@ -1594,7 +1594,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%BEGS_BLR_L)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1604,7 +1604,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=size_array1*SIZE_INT
@@ -1616,7 +1616,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) BLR_STRUC%BEGS_BLR_L
+c~                   read(unit,iostat=err) BLR_STRUC%BEGS_BLR_L
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN
@@ -1671,7 +1671,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%BEGS_BLR_COL)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1681,7 +1681,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=size_array1*SIZE_INT
@@ -1693,7 +1693,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) BLR_STRUC%BEGS_BLR_COL
+c~                   read(unit,iostat=err) BLR_STRUC%BEGS_BLR_COL
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN
@@ -1718,7 +1718,7 @@ c~                write(unit,iostat=err) BLR_STRUC%NB_ACCESSES_INIT
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               read(unit,iostat=err) BLR_STRUC%NB_ACCESSES_INIT
+c~                read(unit,iostat=err) BLR_STRUC%NB_ACCESSES_INIT
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1741,7 +1741,7 @@ c~                write(unit,iostat=err) BLR_STRUC%NB_PANELS
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               read(unit,iostat=err) BLR_STRUC%NB_PANELS
+c~                read(unit,iostat=err) BLR_STRUC%NB_PANELS
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1820,7 +1820,7 @@ c~                   write(unit,iostat=err) -999
                ENDIF 
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%PANELS_L)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1831,7 +1831,7 @@ c~                   write(unit,iostat=err) -999
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                   if(err.ne.0) THEN
                      INFO(1) = -75
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1938,7 +1938,7 @@ c~                   write(unit,iostat=err) -999
                ENDIF 
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%PANELS_U)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -1949,7 +1949,7 @@ c~                   write(unit,iostat=err) -999
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                   if(err.ne.0) THEN
                      INFO(1) = -75
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2060,7 +2060,7 @@ c~                   write(unit,iostat=err) -999
                ENDIF 
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%CB_LRB)
-               read(unit,iostat=err) size_array1,size_array2
+c~                read(unit,iostat=err) size_array1,size_array2
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2071,7 +2071,7 @@ c~                   write(unit,iostat=err) -999
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*3
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                   if(err.ne.0) THEN
                      INFO(1) = -75
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2181,7 +2181,7 @@ c~                   write(unit,iostat=err) -999
                ENDIF 
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_STRUC%DIAG_BLOCKS)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2192,7 +2192,7 @@ c~                   write(unit,iostat=err) -999
                   NbRecords_BLR_STRUC_T(i1)=2
                   SIZE_GEST_BLR_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_STRUC_T(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                   if(err.ne.0) THEN
                      INFO(1) = -75
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2244,7 +2244,7 @@ c~                write(unit,iostat=err) BLR_STRUC%NFS4FATHER
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_STRUC_T(i1)=SIZE_INT
-               read(unit,iostat=err) BLR_STRUC%NFS4FATHER
+c~                read(unit,iostat=err) BLR_STRUC%NFS4FATHER
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2389,7 +2389,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                nullify(LRB_T%Q)
-               read(unit,iostat=err) size_array1,size_array2
+c~                read(unit,iostat=err) size_array1,size_array2
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2399,7 +2399,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*3
                   SIZE_VARIABLES_LRB_TYPE(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_LRB_TYPE(i1)=
@@ -2412,7 +2412,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) LRB_T%Q
+c~                   read(unit,iostat=err) LRB_T%Q
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 300
                if(err.ne.0) THEN
@@ -2468,7 +2468,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                nullify(LRB_T%R)
-               read(unit,iostat=err) size_array1,size_array2
+c~                read(unit,iostat=err) size_array1,size_array2
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2478,7 +2478,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*3
                   SIZE_VARIABLES_LRB_TYPE(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_LRB_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_LRB_TYPE(i1)=
@@ -2491,7 +2491,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) LRB_T%R
+c~                   read(unit,iostat=err) LRB_T%R
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 300
                if(err.ne.0) THEN
@@ -2516,7 +2516,7 @@ c~                write(unit,iostat=err) LRB_T%LRFORM
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) LRB_T%LRFORM
+c~                read(unit,iostat=err) LRB_T%LRFORM
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2539,7 +2539,7 @@ c~                write(unit,iostat=err) LRB_T%K
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) LRB_T%K
+c~                read(unit,iostat=err) LRB_T%K
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2562,7 +2562,7 @@ c~                write(unit,iostat=err) LRB_T%M
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) LRB_T%M
+c~                read(unit,iostat=err) LRB_T%M
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2585,7 +2585,7 @@ c~                write(unit,iostat=err) LRB_T%N
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) LRB_T%N
+c~                read(unit,iostat=err) LRB_T%N
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2608,7 +2608,7 @@ c~                write(unit,iostat=err) LRB_T%KSVD
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) LRB_T%KSVD
+c~                read(unit,iostat=err) LRB_T%KSVD
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2631,7 +2631,7 @@ c~                write(unit,iostat=err) LRB_T%ISLR
                IF ( INFO(1) .LT. 0 ) GOTO 300
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_LRB_TYPE(i1)=SIZE_LOGICAL
-               read(unit,iostat=err) LRB_T%ISLR
+c~                read(unit,iostat=err) LRB_T%ISLR
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2734,7 +2734,7 @@ c~                write(unit,iostat=err) BLR_PANEL_T%NB_ACCESSES_LEFT
                IF ( INFO(1) .LT. 0 ) GOTO 400
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=SIZE_INT
-               read(unit,iostat=err) BLR_PANEL_T%NB_ACCESSES_LEFT
+c~                read(unit,iostat=err) BLR_PANEL_T%NB_ACCESSES_LEFT
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2813,7 +2813,7 @@ c~                   write(unit,iostat=err) -999
                ENDIF 
             elseif(trim(mode).EQ."restore") then
                nullify(BLR_PANEL_T%LRB_PANEL)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2824,7 +2824,7 @@ c~                   write(unit,iostat=err) -999
                   NbRecords_BLR_PANEL_TYPE(i1)=2
                   SIZE_GEST_BLR_PANEL_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_BLR_PANEL_TYPE(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                   if(err.ne.0) THEN
                      INFO(1) = -75
                      CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2981,7 +2981,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 200
             elseif(trim(mode).EQ."restore") then
                nullify(DIAG_BLOCK_T%DIAG_BLOCK)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -2991,7 +2991,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_DIAG_BLOCK_TYPE(i1)=SIZE_INT*2
                   SIZE_VARIABLES_DIAG_BLOCK_TYPE(i1)=0
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_DIAG_BLOCK_TYPE(i1)=SIZE_INT
                   SIZE_VARIABLES_DIAG_BLOCK_TYPE(i1)=
@@ -3004,7 +3004,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) DIAG_BLOCK_T%DIAG_BLOCK
+c~                   read(unit,iostat=err) DIAG_BLOCK_T%DIAG_BLOCK
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 200
                if(err.ne.0) THEN

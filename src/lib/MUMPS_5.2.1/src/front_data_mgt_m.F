@@ -584,7 +584,7 @@ c~                write(unit,iostat=err) FDM_STRUC%NB_FREE_IDX
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                SIZE_VARIABLES_FDM_STRUC_T(i1)=SIZE_INT
-               read(unit,iostat=err) FDM_STRUC%NB_FREE_IDX
+c~                read(unit,iostat=err) FDM_STRUC%NB_FREE_IDX
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -637,7 +637,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(FDM_STRUC%STACK_FREE_IDX)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -647,7 +647,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=0_8
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=size_array1*SIZE_INT
@@ -659,7 +659,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) FDM_STRUC%STACK_FREE_IDX
+c~                   read(unit,iostat=err) FDM_STRUC%STACK_FREE_IDX
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN
@@ -714,7 +714,7 @@ c~                   write(unit,iostat=err) -999
                IF ( INFO(1) .LT. 0 ) GOTO 100
             elseif(trim(mode).EQ."restore") then
                nullify(FDM_STRUC%COUNT_ACCESS)
-               read(unit,iostat=err) size_array1
+c~                read(unit,iostat=err) size_array1
                if(err.ne.0) THEN
                   INFO(1) = -75
                   CALL MUMPS_SETI8TOI4(TOTAL_FILE_SIZE-size_read
@@ -724,7 +724,7 @@ c~                   write(unit,iostat=err) -999
                if(size_array1.EQ.-999) then
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT*2
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=0_8
-                  read(unit,iostat=err) dummy
+c~                   read(unit,iostat=err) dummy
                else
                   SIZE_GEST_FDM_STRUC_T(i1)=SIZE_INT
                   SIZE_VARIABLES_FDM_STRUC_T(i1)=size_array1*SIZE_INT
@@ -736,7 +736,7 @@ c~                   write(unit,iostat=err) -999
      &                    TOTAL_STRUC_SIZE-size_allocated
      &                    ,INFO(2))
                   endif
-                  read(unit,iostat=err) FDM_STRUC%COUNT_ACCESS
+c~                   read(unit,iostat=err) FDM_STRUC%COUNT_ACCESS
                endif
                IF ( INFO(1) .LT. 0 ) GOTO 100
                if(err.ne.0) THEN

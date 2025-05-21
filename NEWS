@@ -1,3 +1,10 @@
+Version 5.2.1-35
+================
+
+* 2025-05-16
+ - removed warnings in scotch parser
+ - more cleaning of read/write
+
 Version 5.2.1-34
 ================
 
