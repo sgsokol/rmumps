@@ -58,7 +58,7 @@
 **  The defines and includes.
 */
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize ("O")
 
 #define VGRAPH_SEPARATE_GG
 

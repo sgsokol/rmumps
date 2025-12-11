@@ -68,7 +68,7 @@
 **  The defines and includes.
 */
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize ("O")
 
 #define SYMBOL_FAX
 #define SYMBOL_FAX_GRAPH
