@@ -169,115 +169,115 @@ void PrintCtrl(ctrl_t *ctrl)
 {
   idx_t i, j, modnum;
 
-  Rf_warning(" Runtime parameters:\n");
+  rcpp_warning(" Runtime parameters:\n");
 
-  Rf_warning("   Objective type: ");
+  rcpp_warning("   Objective type: ");
   switch (ctrl->objtype) {
     case METIS_OBJTYPE_CUT:
-      Rf_warning("METIS_OBJTYPE_CUT\n");
+      rcpp_warning("METIS_OBJTYPE_CUT\n");
       break;
     case METIS_OBJTYPE_VOL:
-      Rf_warning("METIS_OBJTYPE_VOL\n");
+      rcpp_warning("METIS_OBJTYPE_VOL\n");
       break;
     case METIS_OBJTYPE_NODE:
-      Rf_warning("METIS_OBJTYPE_NODE\n");
+      rcpp_warning("METIS_OBJTYPE_NODE\n");
       break;
     default:
-      Rf_warning("Unknown!\n");
+      rcpp_warning("Unknown!\n");
   }
 
-  Rf_warning("   Coarsening type: ");
+  rcpp_warning("   Coarsening type: ");
   switch (ctrl->ctype) {
     case METIS_CTYPE_RM:
-      Rf_warning("METIS_CTYPE_RM\n");
+      rcpp_warning("METIS_CTYPE_RM\n");
       break;
     case METIS_CTYPE_SHEM:
-      Rf_warning("METIS_CTYPE_SHEM\n");
+      rcpp_warning("METIS_CTYPE_SHEM\n");
       break;
     default:
-      Rf_warning("Unknown!\n");
+      rcpp_warning("Unknown!\n");
   }
 
-  Rf_warning("   Initial partitioning type: ");
+  rcpp_warning("   Initial partitioning type: ");
   switch (ctrl->iptype) {
     case METIS_IPTYPE_GROW:
-      Rf_warning("METIS_IPTYPE_GROW\n");
+      rcpp_warning("METIS_IPTYPE_GROW\n");
       break;
     case METIS_IPTYPE_RANDOM:
-      Rf_warning("METIS_IPTYPE_RANDOM\n");
+      rcpp_warning("METIS_IPTYPE_RANDOM\n");
       break;
     case METIS_IPTYPE_EDGE:
-      Rf_warning("METIS_IPTYPE_EDGE\n");
+      rcpp_warning("METIS_IPTYPE_EDGE\n");
       break;
     case METIS_IPTYPE_NODE:
-      Rf_warning("METIS_IPTYPE_NODE\n");
+      rcpp_warning("METIS_IPTYPE_NODE\n");
       break;
     case METIS_IPTYPE_METISRB:
-      Rf_warning("METIS_IPTYPE_METISRB\n");
+      rcpp_warning("METIS_IPTYPE_METISRB\n");
       break;
     default:
-      Rf_warning("Unknown!\n");
+      rcpp_warning("Unknown!\n");
   }
 
-  Rf_warning("   Refinement type: ");
+  rcpp_warning("   Refinement type: ");
   switch (ctrl->rtype) {
     case METIS_RTYPE_FM:
-      Rf_warning("METIS_RTYPE_FM\n");
+      rcpp_warning("METIS_RTYPE_FM\n");
       break;
     case METIS_RTYPE_GREEDY:
-      Rf_warning("METIS_RTYPE_GREEDY\n");
+      rcpp_warning("METIS_RTYPE_GREEDY\n");
       break;
     case METIS_RTYPE_SEP2SIDED:
-      Rf_warning("METIS_RTYPE_SEP2SIDED\n");
+      rcpp_warning("METIS_RTYPE_SEP2SIDED\n");
       break;
     case METIS_RTYPE_SEP1SIDED:
-      Rf_warning("METIS_RTYPE_SEP1SIDED\n");
+      rcpp_warning("METIS_RTYPE_SEP1SIDED\n");
       break;
     default:
-      Rf_warning("Unknown!\n");
+      rcpp_warning("Unknown!\n");
   }
 
-  Rf_warning("   Perform a 2-hop matching: %s\n", (ctrl->no2hop ? "Yes" : "No"));
+  rcpp_warning("   Perform a 2-hop matching: %s\n", (ctrl->no2hop ? "Yes" : "No"));
 
-  Rf_warning("   Number of balancing constraints: %"PRIDX"\n", ctrl->ncon);
-  Rf_warning("   Number of refinement iterations: %"PRIDX"\n", ctrl->niter);
-  Rf_warning("   Random number seed: %"PRIDX"\n", ctrl->seed);
+  rcpp_warning("   Number of balancing constraints: %"PRIDX"\n", ctrl->ncon);
+  rcpp_warning("   Number of refinement iterations: %"PRIDX"\n", ctrl->niter);
+  rcpp_warning("   Random number seed: %"PRIDX"\n", ctrl->seed);
 
   if (ctrl->optype == METIS_OP_OMETIS) {
-    Rf_warning("   Number of separators: %"PRIDX"\n", ctrl->nseps);
-    Rf_warning("   Compress graph prior to ordering: %s\n", (ctrl->compress ? "Yes" : "No"));
-    Rf_warning("   Detect & order connected components separately: %s\n", (ctrl->ccorder ? "Yes" : "No"));
-    Rf_warning("   Prunning factor for high degree vertices: %"PRREAL"\n", ctrl->pfactor);
+    rcpp_warning("   Number of separators: %"PRIDX"\n", ctrl->nseps);
+    rcpp_warning("   Compress graph prior to ordering: %s\n", (ctrl->compress ? "Yes" : "No"));
+    rcpp_warning("   Detect & order connected components separately: %s\n", (ctrl->ccorder ? "Yes" : "No"));
+    rcpp_warning("   Prunning factor for high degree vertices: %"PRREAL"\n", ctrl->pfactor);
   }
   else {
-    Rf_warning("   Number of partitions: %"PRIDX"\n", ctrl->nparts);
-    Rf_warning("   Number of cuts: %"PRIDX"\n", ctrl->ncuts);
-    Rf_warning("   User-supplied ufactor: %"PRIDX"\n", ctrl->ufactor);
+    rcpp_warning("   Number of partitions: %"PRIDX"\n", ctrl->nparts);
+    rcpp_warning("   Number of cuts: %"PRIDX"\n", ctrl->ncuts);
+    rcpp_warning("   User-supplied ufactor: %"PRIDX"\n", ctrl->ufactor);
 
     if (ctrl->optype == METIS_OP_KMETIS) {
-      Rf_warning("   Minimize connectivity: %s\n", (ctrl->minconn ? "Yes" : "No"));
-      Rf_warning("   Create contigous partitions: %s\n", (ctrl->contig ? "Yes" : "No"));
+      rcpp_warning("   Minimize connectivity: %s\n", (ctrl->minconn ? "Yes" : "No"));
+      rcpp_warning("   Create contigous partitions: %s\n", (ctrl->contig ? "Yes" : "No"));
     }
 
     modnum = (ctrl->ncon==1 ? 5 : (ctrl->ncon==2 ? 3 : (ctrl->ncon==3 ? 2 : 1)));
-    Rf_warning("   Target partition weights: ");
+    rcpp_warning("   Target partition weights: ");
     for (i=0; i<ctrl->nparts; i++) {
       if (i%modnum == 0)
-        Rf_warning("\n     ");
-      Rf_warning("%4"PRIDX"=[", i);
+        rcpp_warning("\n     ");
+      rcpp_warning("%4"PRIDX"=[", i);
       for (j=0; j<ctrl->ncon; j++) 
-        Rf_warning("%s%.2e", (j==0 ? "" : " "), (double)ctrl->tpwgts[i*ctrl->ncon+j]);
-      Rf_warning("]");
+        rcpp_warning("%s%.2e", (j==0 ? "" : " "), (double)ctrl->tpwgts[i*ctrl->ncon+j]);
+      rcpp_warning("]");
     }
-    Rf_warning("\n");
+    rcpp_warning("\n");
   }
 
-  Rf_warning("   Allowed maximum load imbalance: ");
+  rcpp_warning("   Allowed maximum load imbalance: ");
   for (i=0; i<ctrl->ncon; i++) 
-    Rf_warning("%.3"PRREAL" ", ctrl->ubfactors[i]);
-  Rf_warning("\n");
+    rcpp_warning("%.3"PRREAL" ", ctrl->ubfactors[i]);
+  rcpp_warning("\n");
 
-  Rf_warning("\n");
+  rcpp_warning("\n");
 }
 
 
@@ -293,43 +293,43 @@ int CheckParams(ctrl_t *ctrl)
   switch (ctrl->optype) {
     case METIS_OP_PMETIS:
       if (ctrl->objtype != METIS_OBJTYPE_CUT) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect objective type.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect objective type.\n"));
         return 0;
       }
       if (ctrl->ctype != METIS_CTYPE_RM && ctrl->ctype != METIS_CTYPE_SHEM) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect coarsening scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect coarsening scheme.\n"));
         return 0;
       }
       if (ctrl->iptype != METIS_IPTYPE_GROW && ctrl->iptype != METIS_IPTYPE_RANDOM) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect initial partitioning scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect initial partitioning scheme.\n"));
         return 0;
       }
       if (ctrl->rtype != METIS_RTYPE_FM) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect refinement scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect refinement scheme.\n"));
         return 0;
       }
       if (ctrl->ncuts <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ncuts.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ncuts.\n"));
         return 0;
       }
       if (ctrl->niter <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect niter.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect niter.\n"));
         return 0;
       }
       if (ctrl->ufactor <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ufactor.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ufactor.\n"));
         return 0;
       }
       if (ctrl->numflag != 0 && ctrl->numflag != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect numflag.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect numflag.\n"));
         return 0;
       }
       if (ctrl->nparts <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect nparts.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect nparts.\n"));
         return 0;
       }
       if (ctrl->ncon <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ncon.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ncon.\n"));
         return 0;
       }
 
@@ -337,7 +337,7 @@ int CheckParams(ctrl_t *ctrl)
         sum = rsum(ctrl->nparts, ctrl->tpwgts+i, ctrl->ncon);
         if (sum < 0.99 || sum > 1.01) {
           IFSET(dbglvl, METIS_DBG_INFO, 
-              Rf_warning("Input Error: Incorrect sum of %"PRREAL" for tpwgts for constraint %"PRIDX".\n", sum, i));
+              rcpp_warning("Input Error: Incorrect sum of %"PRREAL" for tpwgts for constraint %"PRIDX".\n", sum, i));
           return 0;
         }
       }
@@ -345,7 +345,7 @@ int CheckParams(ctrl_t *ctrl)
         for (j=0; j<ctrl->nparts; j++) {
           if (ctrl->tpwgts[j*ctrl->ncon+i] <= 0.0) {
             IFSET(dbglvl, METIS_DBG_INFO, 
-                Rf_warning("Input Error: Incorrect tpwgts for partition %"PRIDX" and constraint %"PRIDX".\n", j, i));
+                rcpp_warning("Input Error: Incorrect tpwgts for partition %"PRIDX" and constraint %"PRIDX".\n", j, i));
             return 0;
           }
         }
@@ -354,7 +354,7 @@ int CheckParams(ctrl_t *ctrl)
       for (i=0; i<ctrl->ncon; i++) {
         if (ctrl->ubfactors[i] <= 1.0) {
           IFSET(dbglvl, METIS_DBG_INFO, 
-              Rf_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
+              rcpp_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
           return 0;
         }
       }
@@ -363,51 +363,51 @@ int CheckParams(ctrl_t *ctrl)
 
     case METIS_OP_KMETIS:
       if (ctrl->objtype != METIS_OBJTYPE_CUT && ctrl->objtype != METIS_OBJTYPE_VOL) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect objective type.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect objective type.\n"));
         return 0;
       }
       if (ctrl->ctype != METIS_CTYPE_RM && ctrl->ctype != METIS_CTYPE_SHEM) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect coarsening scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect coarsening scheme.\n"));
         return 0;
       }
       if (ctrl->iptype != METIS_IPTYPE_METISRB) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect initial partitioning scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect initial partitioning scheme.\n"));
         return 0;
       }
       if (ctrl->rtype != METIS_RTYPE_GREEDY) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect refinement scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect refinement scheme.\n"));
         return 0;
       }
       if (ctrl->ncuts <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ncuts.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ncuts.\n"));
         return 0;
       }
       if (ctrl->niter <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect niter.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect niter.\n"));
         return 0;
       }
       if (ctrl->ufactor <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ufactor.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ufactor.\n"));
         return 0;
       }
       if (ctrl->numflag != 0 && ctrl->numflag != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect numflag.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect numflag.\n"));
         return 0;
       }
       if (ctrl->nparts <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect nparts.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect nparts.\n"));
         return 0;
       }
       if (ctrl->ncon <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ncon.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ncon.\n"));
         return 0;
       }
       if (ctrl->contig != 0 && ctrl->contig != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect contig.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect contig.\n"));
         return 0;
       }
       if (ctrl->minconn != 0 && ctrl->minconn != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect minconn.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect minconn.\n"));
         return 0;
       }
 
@@ -415,7 +415,7 @@ int CheckParams(ctrl_t *ctrl)
         sum = rsum(ctrl->nparts, ctrl->tpwgts+i, ctrl->ncon);
         if (sum < 0.99 || sum > 1.01) {
           IFSET(dbglvl, METIS_DBG_INFO, 
-              Rf_warning("Input Error: Incorrect sum of %"PRREAL" for tpwgts for constraint %"PRIDX".\n", sum, i));
+              rcpp_warning("Input Error: Incorrect sum of %"PRREAL" for tpwgts for constraint %"PRIDX".\n", sum, i));
           return 0;
         }
       }
@@ -423,7 +423,7 @@ int CheckParams(ctrl_t *ctrl)
         for (j=0; j<ctrl->nparts; j++) {
           if (ctrl->tpwgts[j*ctrl->ncon+i] <= 0.0) {
             IFSET(dbglvl, METIS_DBG_INFO, 
-                Rf_warning("Input Error: Incorrect tpwgts for partition %"PRIDX" and constraint %"PRIDX".\n", j, i));
+                rcpp_warning("Input Error: Incorrect tpwgts for partition %"PRIDX" and constraint %"PRIDX".\n", j, i));
             return 0;
           }
         }
@@ -432,7 +432,7 @@ int CheckParams(ctrl_t *ctrl)
       for (i=0; i<ctrl->ncon; i++) {
         if (ctrl->ubfactors[i] <= 1.0) {
           IFSET(dbglvl, METIS_DBG_INFO, 
-              Rf_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
+              rcpp_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
           return 0;
         }
       }
@@ -443,62 +443,62 @@ int CheckParams(ctrl_t *ctrl)
 
     case METIS_OP_OMETIS:
       if (ctrl->objtype != METIS_OBJTYPE_NODE) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect objective type.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect objective type.\n"));
         return 0;
       }
       if (ctrl->ctype != METIS_CTYPE_RM && ctrl->ctype != METIS_CTYPE_SHEM) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect coarsening scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect coarsening scheme.\n"));
         return 0;
       }
       if (ctrl->iptype != METIS_IPTYPE_EDGE && ctrl->iptype != METIS_IPTYPE_NODE) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect initial partitioning scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect initial partitioning scheme.\n"));
         return 0;
       }
       if (ctrl->rtype != METIS_RTYPE_SEP1SIDED && ctrl->rtype != METIS_RTYPE_SEP2SIDED) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect refinement scheme.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect refinement scheme.\n"));
         return 0;
       }
       if (ctrl->nseps <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect nseps.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect nseps.\n"));
         return 0;
       }
       if (ctrl->niter <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect niter.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect niter.\n"));
         return 0;
       }
       if (ctrl->ufactor <= 0) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ufactor.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ufactor.\n"));
         return 0;
       }
       if (ctrl->numflag != 0 && ctrl->numflag != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect numflag.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect numflag.\n"));
         return 0;
       }
       if (ctrl->nparts != 3) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect nparts.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect nparts.\n"));
         return 0;
       }
       if (ctrl->ncon != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ncon.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ncon.\n"));
         return 0;
       }
       if (ctrl->compress != 0 && ctrl->compress != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect compress.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect compress.\n"));
         return 0;
       }
       if (ctrl->ccorder != 0 && ctrl->ccorder != 1) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect ccorder.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect ccorder.\n"));
         return 0;
       }
       if (ctrl->pfactor < 0.0 ) {
-        IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect pfactor.\n"));
+        IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect pfactor.\n"));
         return 0;
       }
 
       for (i=0; i<ctrl->ncon; i++) {
         if (ctrl->ubfactors[i] <= 1.0) {
           IFSET(dbglvl, METIS_DBG_INFO, 
-              Rf_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
+              rcpp_warning("Input Error: Incorrect ubfactor for constraint %"PRIDX".\n", i));
           return 0;
         }
       }
@@ -506,7 +506,7 @@ int CheckParams(ctrl_t *ctrl)
       break;
 
     default:
-      IFSET(dbglvl, METIS_DBG_INFO, Rf_warning("Input Error: Incorrect optype\n"));
+      IFSET(dbglvl, METIS_DBG_INFO, rcpp_warning("Input Error: Incorrect optype\n"));
       return 0;
   }
 

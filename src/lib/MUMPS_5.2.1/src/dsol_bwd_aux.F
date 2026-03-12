@@ -873,7 +873,7 @@ C     &         PANEL_SIZE
 #else
                 RHSCOMP( IPOSINRHSCOMP_TMP , K ) = 
      &           W( PTRACB(STEP(INODE))+I-1 + (K-JBDEB)*LIELL )
-#endifß
+#endif
               ENDDO
               IPOSINRHSCOMP_TMP =  IPOSINRHSCOMP_TMP + 1
             END DO

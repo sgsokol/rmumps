@@ -30,7 +30,8 @@
 #include "macros.h"
 #include <proto.h>
 
-#include <R_ext/Error.h>
+//#include <R_ext/Error.h>
+#include <rcpp_errwarn.h>
 
 
 #if defined(COMPILER_MSC)

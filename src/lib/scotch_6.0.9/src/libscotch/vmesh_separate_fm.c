@@ -149,7 +149,7 @@ const Gnum                                hashold) /*+ Maximum number of vertice
 
 /* TODO */
   /*fprintf (stderr, "hertnum no longer valid !\n");*/
-  Rf_error("%s", "hertnum no longer valid !");
+  rcpp_error("%s", "hertnum no longer valid !");
   /*exit    (1);*/
 
   addradj = (byte *) helmtab - (byte *) (*helmptr); /* Compute address difference */
@@ -229,7 +229,7 @@ const Gnum                                hashold) /*+ Maximum number of vertice
     }
   }
 
-  Rf_warning("########### vmeshSeparateFmResize (%ld) !!!\n", (long) hashold);
+  rcpp_warning("########### vmeshSeparateFmResize (%ld) !!!\n", (long) hashold);
   
 
   return (0);
@@ -586,7 +586,7 @@ const VmeshSeparateFmParam * restrict const paraptr) /*+ Method parameters    +*
         gainTablAdd (tablptr, (GainLink *) velmptr, velmptr->ncmpgain2); /* Put it in table */
     }
 
-   Rf_warning("LOOP %ld\t(%ld,\t%ld)\n", (long) passnbr, (long) ncmpload2bst, (long) ncmploaddltbst);
+   rcpp_warning("LOOP %ld\t(%ld,\t%ld)\n", (long) passnbr, (long) ncmpload2bst, (long) ncmploaddltbst);
 
     moveflag = 0;                                 /* No moves to date                          */
     movenbr  = 0;                                 /* No uneffective moves yet                  */

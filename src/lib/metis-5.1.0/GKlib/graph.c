@@ -298,40 +298,40 @@ void gk_graph_Write(gk_graph_t *graph, char *filename, int format)
   if (hasvwgts || hasvsizes || hasewgts) 
     fprintf(fpout, " %d%d%d", hasvsizes, hasvwgts, hasewgts);
   fprintf(fpout, "\n");*/
-  Rf_warning("%d %zd", graph->nvtxs, graph->xadj[graph->nvtxs]/2);
+  rcpp_warning("%d %zd", graph->nvtxs, graph->xadj[graph->nvtxs]/2);
   if (hasvwgts || hasvsizes || hasewgts)
-    Rf_warning(" %d%d%d", hasvsizes, hasvwgts, hasewgts);
+    rcpp_warning(" %d%d%d", hasvsizes, hasvwgts, hasewgts);
 
 
   for (i=0; i<graph->nvtxs; i++) {
     if (hasvsizes) {
       if (graph->ivsizes)
         /*fprintf(fpout, " %d", graph->ivsizes[i]);*/
-        Rf_warning(" %d", graph->ivsizes[i]);
+        rcpp_warning(" %d", graph->ivsizes[i]);
       else
         /*fprintf(fpout, " %f", graph->fvsizes[i]);*/
-        Rf_warning(" %f", graph->fvsizes[i]);
+        rcpp_warning(" %f", graph->fvsizes[i]);
     }
 
     if (hasvwgts) {
       if (graph->ivwgts)
         /*fprintf(fpout, " %d", graph->ivwgts[i]);*/
-        Rf_warning(" %d", graph->ivwgts[i]);
+        rcpp_warning(" %d", graph->ivwgts[i]);
       else
         /*fprintf(fpout, " %f", graph->fvwgts[i]);*/
-        Rf_warning(" %f", graph->fvwgts[i]);
+        rcpp_warning(" %f", graph->fvwgts[i]);
     }
 
     for (j=graph->xadj[i]; j<graph->xadj[i+1]; j++) {
       /*fprintf(fpout, " %d", graph->adjncy[j]+1);*/
-      Rf_warning(" %d", graph->adjncy[j]+1);
+      rcpp_warning(" %d", graph->adjncy[j]+1);
       if (hasewgts) {
         if (graph->iadjwgt)
           /*fprintf(fpout, " %d", graph->iadjwgt[j]);*/
-          Rf_warning(" %d", graph->iadjwgt[j]);
+          rcpp_warning(" %d", graph->iadjwgt[j]);
         else 
           /*fprintf(fpout, " %f", graph->fadjwgt[j]);*/
-          Rf_warning(" %f", graph->fadjwgt[j]);
+          rcpp_warning(" %f", graph->fadjwgt[j]);
       }
     }
     /*fprintf(fpout, "\n");*/

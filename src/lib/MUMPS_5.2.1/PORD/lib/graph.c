@@ -85,20 +85,20 @@ void
 printGraph(graph_t *G)
 { PORD_INT count, u, i, istart, istop;
 
-  Rf_warning("\n#vertices %d, #edges %d, type %d, totvwght %d\n", G->nvtx,
+  rcpp_warning("\n#vertices %d, #edges %d, type %d, totvwght %d\n", G->nvtx,
          G->nedges >> 1, G->type, G->totvwght);
   for (u = 0; u < G->nvtx; u++)
    { count = 0;
-     Rf_warning("--- adjacency list of vertex %d (weight %d):\n", u, G->vwght[u]);
+     rcpp_warning("--- adjacency list of vertex %d (weight %d):\n", u, G->vwght[u]);
      istart = G->xadj[u];
      istop = G->xadj[u+1];
      for (i = istart; i < istop; i++)
-      { Rf_warning("%5d", G->adjncy[i]);
+      { rcpp_warning("%5d", G->adjncy[i]);
         if ((++count % 16) == 0)
-          Rf_warning("\n");
+          rcpp_warning("\n");
       }
      if ((count % 16) != 0)
-       Rf_warning("\n");
+       rcpp_warning("\n");
    }
 }
 
@@ -146,7 +146,7 @@ setupSubgraph(graph_t *G, PORD_INT *intvertex, PORD_INT nvint, PORD_INT *vtxmap)
   for (i = 0; i < nvint; i++)
    { u = intvertex[i];
      if ((u < 0) || (u >= nvtx))
-      { Rf_error("\nError in function setupSubgraph\n"
+      { rcpp_error("\nError in function setupSubgraph\n"
              "  node %d does not belong to graph\n", u);
         /*quit();*/
       }
@@ -481,7 +481,7 @@ compressGraph(graph_t* G, PORD_INT* vtxmap)
      compressed graph small enough? if so, allocate working storage
      -------------------------------------------------------------- */
   /* avoid print statement
-   * Rf_warning("indNodes(G, vtxmap) = %d",indNodes(G, vtxmap)); */
+   * rcpp_warning("indNodes(G, vtxmap) = %d",indNodes(G, vtxmap)); */
   if ((nvtxGc = indNodes(G, vtxmap)) > COMPRESS_FRACTION * nvtx)
     return(NULL);
   mymalloc(perm, nvtx, PORD_INT);

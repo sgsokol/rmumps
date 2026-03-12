@@ -310,20 +310,20 @@ printFrontSubscripts(frontsub_t *frontsub)
   ncolupdate = PTP->ncolupdate;
   parent = PTP->parent;
 
-  Rf_warning("#fronts %d, root %d\n", nfronts, root);
+  rcpp_warning("#fronts %d, root %d\n", nfronts, root);
   for (K = firstPostorder(PTP); K != -1; K = nextPostorder(PTP, K))
-   { Rf_warning("--- front %d, ncolfactor %d, ncolupdate %d, parent %d\n",
+   { rcpp_warning("--- front %d, ncolfactor %d, ncolupdate %d, parent %d\n",
             K, ncolfactor[K], ncolupdate[K], parent[K]);
      count = 0;
      istart = xnzf[K];
      istop = xnzf[K+1];
      for (i = istart; i < istop; i++)
-      { Rf_warning("%5d", nzfsub[i]);
+      { rcpp_warning("%5d", nzfsub[i]);
         if ((++count % 16) == 0)
-          Rf_warning("\n");
+          rcpp_warning("\n");
       }
      if ((count % 16) != 0)
-       Rf_warning("\n");
+       rcpp_warning("\n");
    }
 }
 
@@ -491,15 +491,15 @@ printFactorMtx(factorMtx_t *L)
   nzlsub = css->nzlsub;
   xnzlsub = css->xnzlsub;
 
-  Rf_warning("#equations %d, #elements (+diag.) %d, #indices (+diag.) %d\n",
+  rcpp_warning("#equations %d, #elements (+diag.) %d, #indices (+diag.) %d\n",
          neqs, nelem, nind);
   for (k = 0; k < neqs; k++)
-   { Rf_warning("--- column %d\n", k);
+   { rcpp_warning("--- column %d\n", k);
      ksub = xnzlsub[k];
      istart = xnzl[k];
      istop = xnzl[k+1];
      for (i = istart; i < istop; i++)
-       Rf_warning("  row %5d, entry %e\n", nzlsub[ksub++], nzl[i]);
+       rcpp_warning("  row %5d, entry %e\n", nzlsub[ksub++], nzl[i]);
    }
 }
 

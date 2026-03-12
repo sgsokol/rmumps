@@ -95,7 +95,7 @@ const char * const          errstr,               /*+ printf-like variable argum
   /*fprintf  (stderr, "%sERROR: ", errorProgName);*/
   va_start (errlist, errstr);
   /*vfprintf (stderr, errstr, errlist);*/             /* Print arguments */
-  Rf_error(errstr, errlist);
+  rcpp_error(errstr, errlist);
   va_end   (errlist);
   /*fprintf  (stderr, "\n");
   fflush   (stderr);*/                              /* In case it has been set to buffered mode */
@@ -118,7 +118,7 @@ const char * const          errstr,               /*+ printf-like variable argum
   /*fprintf  (stderr, "%sWARNING: ", errorProgName);*/
   va_start (errlist, errstr);
   /*vfprintf (stderr, errstr, errlist); */            /* Print arguments */
-  Rf_warning(errstr, errlist);
+  rcpp_warning(errstr, errlist);
   va_end   (errlist);
   /*fprintf  (stderr, "\n");
   fflush   (stderr);*/                              /* In case it has been set to buffered mode */

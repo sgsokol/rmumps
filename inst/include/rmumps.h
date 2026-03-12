@@ -91,5 +91,5 @@ private:
   void tri_init(MUMPS_INT *irn, MUMPS_INT *jcn, double *a, MUMPS_INT sym);
 };
 #include "rmumps_RcppExports.h"
-
+#include "rcpp_errwarn.h"
 #endif // __rmumps_h__

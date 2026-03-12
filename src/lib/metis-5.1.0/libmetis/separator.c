@@ -143,7 +143,7 @@ void ConstructMinCoverSeparator(ctrl_t *ctrl, graph_t *graph)
     MinCover(bxadj, badjncy, bnvtxs[0], bnvtxs[1], cover, &csize);
 
     IFSET(ctrl->dbglvl, METIS_DBG_SEPINFO,
-      Rf_warning("Nvtxs: %6"PRIDX", [%5"PRIDX" %5"PRIDX"], Cut: %6"PRIDX", SS: [%6"PRIDX" %6"PRIDX"], Cover: %6"PRIDX"\n", nvtxs, graph->pwgts[0], graph->pwgts[1], graph->mincut, bnvtxs[0], bnvtxs[1]-bnvtxs[0], csize));
+      rcpp_warning("Nvtxs: %6"PRIDX", [%5"PRIDX" %5"PRIDX"], Cut: %6"PRIDX", SS: [%6"PRIDX" %6"PRIDX"], Cover: %6"PRIDX"\n", nvtxs, graph->pwgts[0], graph->pwgts[1], graph->mincut, bnvtxs[0], bnvtxs[1]-bnvtxs[0], csize));
 
     for (i=0; i<csize; i++) {
       j = ivmap[cover[i]];
@@ -152,7 +152,7 @@ void ConstructMinCoverSeparator(ctrl_t *ctrl, graph_t *graph)
   }
   else {
     IFSET(ctrl->dbglvl, METIS_DBG_SEPINFO,
-      Rf_warning("Nvtxs: %6"PRIDX", [%5"PRIDX" %5"PRIDX"], Cut: %6"PRIDX", SS: [%6"PRIDX" %6"PRIDX"], Cover: %6"PRIDX"\n", nvtxs, graph->pwgts[0], graph->pwgts[1], graph->mincut, (idx_t)0, (idx_t)0, (idx_t)0));
+      rcpp_warning("Nvtxs: %6"PRIDX", [%5"PRIDX" %5"PRIDX"], Cut: %6"PRIDX", SS: [%6"PRIDX" %6"PRIDX"], Cover: %6"PRIDX"\n", nvtxs, graph->pwgts[0], graph->pwgts[1], graph->mincut, (idx_t)0, (idx_t)0, (idx_t)0));
   }
 
   /* Prepare to refine the vertex separator */

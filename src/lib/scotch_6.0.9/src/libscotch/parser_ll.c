@@ -2031,7 +2031,7 @@ static void yynoreturn yy_fatal_error (const char* msg )
 {
 			/*fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );*/
-	Rf_error("%s\n", msg);
+	rcpp_error("%s\n", msg);
 }
 
 /* Redefine yyless() so it works in section 3 code. */

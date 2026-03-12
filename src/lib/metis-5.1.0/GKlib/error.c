@@ -57,7 +57,7 @@ void errexit(char *f_str,...)
 
   va_start(argp, f_str);
   /*vfprintf(stderr, f_str, argp);*/
-  Rf_error(f_str, argp);
+  rcpp_error(f_str, argp);
   va_end(argp);
 
   /*if (strlen(f_str) == 0 || f_str[strlen(f_str)-1] != '\n')
@@ -81,7 +81,7 @@ void gk_errexit(int signum, char *f_str,...)
 
   va_start(argp, f_str);
   /*vfprintf(stderr, f_str, argp);*/
-  Rf_error(f_str, argp);
+  rcpp_error(f_str, argp);
   va_end(argp);
 
   /*fprintf(stderr,"\n");
@@ -207,9 +207,9 @@ void PrintBackTrace()
   size = backtrace(array, 10);
   strings = backtrace_symbols(array, size);
   
-  Rf_warning("Obtained %d stack frames.\n", size);
+  rcpp_warning("Obtained %d stack frames.\n", size);
   for (i=0; i<size; i++) {
-    Rf_warning("%s\n", strings[i]);
+    rcpp_warning("%s\n", strings[i]);
   }
   free(strings);
 #endif

@@ -120,7 +120,7 @@ MUMPS_METIS_KWAY_64(MUMPS_INT8 *n,     MUMPS_INT8 *iptr,
 #  else
      /*printf("** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
      ierr=1;*/
-     Rf_error("%s", "** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
+     rcpp_error("%s", "** Error: METIS version >= 4, IDXTYPE WIDTH !=64, but MUMPS_METIS_KWAY_64 was called\n");
 #  endif
 #endif
   return;

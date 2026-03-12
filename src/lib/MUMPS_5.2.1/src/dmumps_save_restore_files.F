@@ -240,7 +240,7 @@ C          close(UNIT=supp,STATUS='delete',iostat=tmp_err)
       tmp_savedir=''
       tmp_saveprefix=''
       IF(id%SAVE_DIR.EQ."NAME_NOT_INITIALIZED") THEN
-         call mumps_get_save_dir_C(len_save_dir,tmp_savedir)
+         ! call mumps_get_save_dir_C(len_save_dir,tmp_savedir)
          if(tmp_savedir(1:len_save_dir).EQ."NAME_NOT_INITIALIZED") then
             id%INFO(1) = -77
             id%INFO(2) = 0 
@@ -256,7 +256,7 @@ C          close(UNIT=supp,STATUS='delete',iostat=tmp_err)
      &     id%COMM, id%MYID )
       IF ( id%INFO(1) .LT. 0 ) GOTO 100
       IF(id%SAVE_PREFIX.EQ."NAME_NOT_INITIALIZED") THEN
-         call mumps_get_save_prefix_C(len_save_prefix,tmp_saveprefix)
+         ! call mumps_get_save_prefix_C(len_save_prefix,tmp_saveprefix)
          if(tmp_saveprefix(1:len_save_prefix).EQ."NAME_NOT_INITIALIZED")
      &        then
             saveprefix="save"

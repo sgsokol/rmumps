@@ -3092,7 +3092,7 @@ regerror (
        code generates an invalid error code, then the program has a bug.
        Dump core so we can fix it.  
     abort ();*/
-    Rf_error("%s", "");
+    rcpp_error("%s", "");
 
   msg = gettext (__re_error_msgid + __re_error_msgid_idx[errcode]);
 

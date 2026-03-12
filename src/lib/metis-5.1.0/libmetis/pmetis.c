@@ -163,7 +163,7 @@ idx_t MlevelRecursiveBisection(ctrl_t *ctrl, graph_t *graph, idx_t nparts,
   real_t wsum, *tpwgts2;
 
   if ((nvtxs = graph->nvtxs) == 0) {
-    Rf_warning("\t***Cannot bisect a graph with 0 vertices!\n"
+    rcpp_warning("\t***Cannot bisect a graph with 0 vertices!\n"
            "\t***You are trying to partition a graph into too many parts!\n");
     return 0;
   }

@@ -119,7 +119,7 @@ void MlevelNestedDissectionP(ctrl_t *ctrl, graph_t *graph, idx_t *order,
   MlevelNodeBisectionMultiple(ctrl, graph);
 
   IFSET(ctrl->dbglvl, METIS_DBG_SEPINFO, 
-      Rf_warning("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
+      rcpp_warning("Nvtxs: %6"PRIDX", [%6"PRIDX" %6"PRIDX" %6"PRIDX"]\n", 
         graph->nvtxs, graph->pwgts[0], graph->pwgts[1], graph->pwgts[2]));
 
   if (cpos < npes-1) {
@@ -271,7 +271,7 @@ void FM_2WayNodeRefine1SidedP(ctrl_t *ctrl, graph_t *graph,
   badmaxpwgt = (idx_t)(ubfactor*gk_max(pwgts[0], pwgts[1]));
 
   IFSET(ctrl->dbglvl, METIS_DBG_REFINE,
-    Rf_warning("Partitions-N1: [%6"PRIDX" %6"PRIDX"] Nv-Nb[%6"PRIDX" %6"PRIDX"] "
+    rcpp_warning("Partitions-N1: [%6"PRIDX" %6"PRIDX"] Nv-Nb[%6"PRIDX" %6"PRIDX"] "
            "MaxPwgt[%6"PRIDX"]. ISep: %6"PRIDX"\n", 
            pwgts[0], pwgts[1], graph->nvtxs, graph->nbnd, badmaxpwgt, 
            graph->mincut));
@@ -396,7 +396,7 @@ void FM_2WayNodeRefine1SidedP(ctrl_t *ctrl, graph_t *graph,
 
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO,
-            Rf_warning("Moved %6"PRIDX" to %3"PRIDX", Gain: %5"PRIDX" [%5"PRIDX"] \t[%5"PRIDX" %5"PRIDX" %5"PRIDX"] [%3"PRIDX" %2"PRIDX"]\n", 
+            rcpp_warning("Moved %6"PRIDX" to %3"PRIDX", Gain: %5"PRIDX" [%5"PRIDX"] \t[%5"PRIDX" %5"PRIDX" %5"PRIDX"] [%3"PRIDX" %2"PRIDX"]\n", 
                    higain, to, (vwgt[higain]-rinfo[higain].edegrees[from]), 
                    vwgt[higain], pwgts[0], pwgts[1], pwgts[2], nswaps, limit));
 
@@ -444,7 +444,7 @@ void FM_2WayNodeRefine1SidedP(ctrl_t *ctrl, graph_t *graph,
     ASSERT(mincut == pwgts[2]);
 
     IFSET(ctrl->dbglvl, METIS_DBG_REFINE,
-      Rf_warning("\tMinimum sep: %6"PRIDX" at %5"PRIDX", PWGTS: [%6"PRIDX" %6"PRIDX"], NBND: %6"PRIDX", QSIZE: %6"PRIDX"\n", 
+      rcpp_warning("\tMinimum sep: %6"PRIDX" at %5"PRIDX", PWGTS: [%6"PRIDX" %6"PRIDX"], NBND: %6"PRIDX", QSIZE: %6"PRIDX"\n", 
           mincut, mincutorder, pwgts[0], pwgts[1], nbnd, qsize));
 
     graph->mincut = mincut;
@@ -499,7 +499,7 @@ void FM_2WayNodeRefine2SidedP(ctrl_t *ctrl, graph_t *graph,
   mind  = iwspacemalloc(ctrl, 2*nvtxs);
 
   IFSET(ctrl->dbglvl, METIS_DBG_REFINE,
-    Rf_warning("Partitions: [%6"PRIDX" %6"PRIDX"] Nv-Nb[%6"PRIDX" %6"PRIDX"]. ISep: %6"PRIDX"\n", pwgts[0], pwgts[1], graph->nvtxs, graph->nbnd, graph->mincut));
+    rcpp_warning("Partitions: [%6"PRIDX" %6"PRIDX"] Nv-Nb[%6"PRIDX" %6"PRIDX"]. ISep: %6"PRIDX"\n", pwgts[0], pwgts[1], graph->nvtxs, graph->nbnd, graph->mincut));
 
   badmaxpwgt = (idx_t)(ubfactor*gk_max(pwgts[0], pwgts[1]));
 
@@ -656,7 +656,7 @@ void FM_2WayNodeRefine2SidedP(ctrl_t *ctrl, graph_t *graph,
       mptr[nswaps+1] = nmind;
 
       IFSET(ctrl->dbglvl, METIS_DBG_MOVEINFO,
-            Rf_warning("Moved %6"PRIDX" to %3"PRIDX", Gain: %5"PRIDX" [%5"PRIDX"] "
+            rcpp_warning("Moved %6"PRIDX" to %3"PRIDX", Gain: %5"PRIDX" [%5"PRIDX"] "
                    "[%4"PRIDX" %4"PRIDX"] \t[%5"PRIDX" %5"PRIDX" %5"PRIDX"]\n", 
                    higain, to, g[to], g[other], vwgt[u[to]], vwgt[u[other]], 
                    pwgts[0], pwgts[1], pwgts[2]));
@@ -706,7 +706,7 @@ void FM_2WayNodeRefine2SidedP(ctrl_t *ctrl, graph_t *graph,
     ASSERT(mincut == pwgts[2]);
 
     IFSET(ctrl->dbglvl, METIS_DBG_REFINE,
-      Rf_warning("\tMinimum sep: %6"PRIDX" at %5"PRIDX", PWGTS: [%6"PRIDX" %6"PRIDX"], NBND: %6"PRIDX"\n", mincut, mincutorder, pwgts[0], pwgts[1], nbnd));
+      rcpp_warning("\tMinimum sep: %6"PRIDX" at %5"PRIDX", PWGTS: [%6"PRIDX" %6"PRIDX"], NBND: %6"PRIDX"\n", mincut, mincutorder, pwgts[0], pwgts[1], nbnd));
 
     graph->mincut = mincut;
     graph->nbnd = nbnd;

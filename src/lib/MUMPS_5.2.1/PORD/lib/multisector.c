@@ -138,7 +138,7 @@ constructMultisector(graph_t *G, options_t* options, timings_t *cpus)
      ----------------------------------- */
     if ((nvtx <= MIN_NODES) && (options[OPTION_ORDTYPE] != MINIMUM_PRIORITY)
         && (options[OPTION_MSGLVL] > 0))
-   { Rf_warning("\nWarning in constructMultisector\n"
+   { rcpp_warning("\nWarning in constructMultisector\n"
          "  graph has less than %d nodes, skipping separator construction\n\n",
          MIN_NODES);
      options[OPTION_ORDTYPE] = MINIMUM_PRIORITY;
@@ -168,7 +168,7 @@ constructMultisector(graph_t *G, options_t* options, timings_t *cpus)
        break;
 
      default:
-       Rf_error("\nError in function constructMultisector\n"
+       rcpp_error("\nError in function constructMultisector\n"
             "  unrecognized ordering type %d\n", ordtype);
        /*quit();*/
    }
@@ -201,7 +201,7 @@ extractMS2stage(nestdiss_t *ndroot)
    { parent = nd->parent;
      if ((parent == NULL) || (parent->childB == NULL)
         || (parent->childW == NULL))
-       { Rf_error("\nError in function extractMS2stage\n"
+       { rcpp_error("\nError in function extractMS2stage\n"
               "  nested dissection tree corrupted\n");
          /*quit();*/
        }
@@ -257,7 +257,7 @@ extractMSmultistage(nestdiss_t *ndroot)
    { parent = nd->parent;
      if ((parent == NULL) || (parent->childB == NULL)
         || (parent->childW == NULL))
-       { Rf_error("\nError in function extractMSmultistage\n"
+       { rcpp_error("\nError in function extractMSmultistage\n"
               "  nested dissection tree corrupted\n");
          /*quit();*/
        }

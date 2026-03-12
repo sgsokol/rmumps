@@ -920,3 +920,23 @@ int Rmumps__get_permutation(XPtr<Rmumps> pm) {
   XPtr<Rmumps> p(pm);
   return(p->get_permutation());
 }
+
+// define rcpp_stop and _warning for C compatibility
+extern "C" {
+  void rcpp_error(const char* format, ...) {
+    char buf[1024];
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(buf, (size_t) 1023, format, ap);
+    va_end(ap);
+    Rcpp::stop("%s", buf);
+  }
+  void rcpp_warning(const char* format, ...) {
+    char buf[1024];
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(buf, (size_t) 1023, format, ap);
+    va_end(ap);
+    Rcpp::warning("%s", buf);
+  }
+}

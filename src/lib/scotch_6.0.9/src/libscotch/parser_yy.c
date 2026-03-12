@@ -957,8 +957,8 @@ do {                                            \
 do {                                                                      \
   if (yydebug)                                                            \
     {                                                                     \
-      /*Rf_warning("%s ", Title);*/                                   \
-      /*Rf_warning(Kind, Value);*/ \
+      /*rcpp_warning("%s ", Title);*/                                   \
+      /*rcpp_warning(Kind, Value);*/ \
       /*YYFPRINTF (stderr, "\n");*/                                           \
     }                                                                     \
 } while (0)
@@ -1005,13 +1005,13 @@ yy_symbol_print (FILE *yyo,
 static void
 yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
 {
-  /*Rf_warning("Stack now");*/
+  /*rcpp_warning("Stack now");*/
   for (; yybottom <= yytop; yybottom++)
     {
       int yybot = *yybottom;
-      /*Rf_warning(" %d", yybot);*/
+      /*rcpp_warning(" %d", yybot);*/
     }
-  /*Rf_warning("\n");*/
+  /*rcpp_warning("\n");*/
 }
 
 # define YY_STACK_PRINT(Bottom, Top)                            \
@@ -1032,13 +1032,13 @@ yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp,
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
   int yyi;
-  /*Rf_warning("Reducing stack by rule %d (line %d):\n",
+  /*rcpp_warning("Reducing stack by rule %d (line %d):\n",
              yyrule - 1, yylno);*/
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      /*Rf_warning("   $%d = ", yyi + 1);
-      Rf_warning(YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
+      /*rcpp_warning("   $%d = ", yyi + 1);
+      rcpp_warning(YY_ACCESSING_SYMBOL (+yyssp[yyi + 1 - yynrhs]),
                        &yyvsp[(yyi + 1) - (yynrhs)]);*/
       /*YYFPRINTF (stderr, "\n");*/
     }
@@ -1156,7 +1156,7 @@ yyparse (void)
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  /*Rf_warning("%s", ("Starting parse\n"));*/
+  /*rcpp_warning("%s", ("Starting parse\n"));*/
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
 
@@ -1176,7 +1176,7 @@ yynewstate:
 | yysetstate -- set current state (the top of the stack) to yystate.  |
 `--------------------------------------------------------------------*/
 yysetstate:
-  /*Rf_warning("Entering state %d\n", yystate);*/
+  /*rcpp_warning("Entering state %d\n", yystate);*/
   YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
   YY_IGNORE_USELESS_CAST_BEGIN
   *yyssp = YY_CAST (yy_state_t, yystate);
@@ -1237,7 +1237,7 @@ yysetstate:
       yyvsp = yyvs + yysize - 1;
 
       YY_IGNORE_USELESS_CAST_BEGIN
-      /*Rf_warning("Stack size increased to %ld\n",
+      /*rcpp_warning("Stack size increased to %ld\n",
                   YY_CAST (long, yystacksize));*/
       YY_IGNORE_USELESS_CAST_END
 
@@ -1270,7 +1270,7 @@ yybackup:
   /* YYCHAR is either empty, or end-of-input, or a valid lookahead.  */
   if (yychar == YYEMPTY)
     {
-      /*Rf_warning("%s", "Reading a token\n");*/
+      /*rcpp_warning("%s", "Reading a token\n");*/
       yychar = yylex ();
     }
 
@@ -1278,7 +1278,7 @@ yybackup:
     {
       yychar = YYEOF;
       yytoken = YYSYMBOL_YYEOF;
-      /*Rf_warning("%s", "Now at end of input.\n");*/
+      /*rcpp_warning("%s", "Now at end of input.\n");*/
     }
   else if (yychar == YYerror)
     {

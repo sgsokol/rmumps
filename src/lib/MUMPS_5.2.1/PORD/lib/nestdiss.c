@@ -173,7 +173,7 @@ splitNDnode(nestdiss_t *nd, options_t *options, timings_t *cpus)
         case BLACK: b_nvint++; break;
         case WHITE: w_nvint++; break;
         default:
-          Rf_error("\nError in function splitNDnode\n"
+          rcpp_error("\nError in function splitNDnode\n"
                "  node %d has unrecognized color %d\n", u, intcolor[i]);
           /*quit();*/
       }
@@ -230,13 +230,13 @@ buildNDtree(nestdiss_t *ndroot, options_t *options, timings_t *cpus)
 
      splitNDnode(nd, options, cpus);
      if ((nd->childB == NULL) || (nd->childW == NULL))
-      { Rf_error("\nError in function buildNDtree\n"
+      { rcpp_error("\nError in function buildNDtree\n"
              "  recursive nested dissection process failed\n");
         /*quit();*/
       }
 
      if (options[OPTION_MSGLVL] > 1)
-       Rf_warning("%4d. S %6d, B %6d, W %6d [bal %4.2f, rel %6.4f, cost %7.2f]\n",
+       rcpp_warning("%4d. S %6d, B %6d, W %6d [bal %4.2f, rel %6.4f, cost %7.2f]\n",
              seps, nd->cwght[GRAY], nd->cwght[BLACK], nd->cwght[WHITE],
              (FLOAT)min(nd->cwght[BLACK], nd->cwght[WHITE])
                      / max(nd->cwght[BLACK], nd->cwght[WHITE]),
@@ -269,7 +269,7 @@ freeNDtree(nestdiss_t *ndroot)
    { parent = nd->parent;
      if ((parent == NULL) || (parent->childB == NULL)
         || (parent->childW == NULL))
-       { Rf_error("\nError in function removeNDtree\n"
+       { rcpp_error("\nError in function removeNDtree\n"
               "  nested dissection tree corrupted\n");
          /*quit();*/
        }

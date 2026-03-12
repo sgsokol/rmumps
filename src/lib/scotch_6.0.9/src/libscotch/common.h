@@ -131,7 +131,8 @@
 #endif /* HAVE_NOT_SYS_WAIT_H */
 #endif /* COMMON_PTHREAD */
 
-#include <R_ext/Error.h>
+//#include <R_ext/Error.h>
+#include <rcpp_errwarn.h>
 /*
 **  Working definitions.
 */

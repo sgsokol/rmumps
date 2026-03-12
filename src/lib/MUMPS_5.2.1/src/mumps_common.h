@@ -87,5 +87,6 @@ MUMPS_ICOPY_64to32_64C_IP_C(MUMPS_INT8 *inouttab, MUMPS_INT8 *sizetab);
     F_SYMBOL(icopy_64to32_64c_ip_c4,ICOPY_64TO32_64C_IP_C4)
 void MUMPS_CALL
 MUMPS_ICOPY_64to32_64C_IP_C4(MUMPS_INT *inouttab, MUMPS_INT8 *sizetab); 
-#include <R_ext/Error.h>
+//#include <R_ext/Error.h>
+#include <rcpp_errwarn.h>
 #endif /* MUMPS_COMMON_H */

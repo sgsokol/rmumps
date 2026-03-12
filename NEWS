@@ -1,78 +1,93 @@
+Log changes in rmumps package
+=============================
+
+Version 5.2.1-38
+----------------
+
+* 2026-03-11
+ - fixed gcc-15 warnings (signaled by R CRAN team)
+
+Version 5.2.1-37
+----------------
+
+* 2026-02-27
+ - replaced Rf_error() by Rcpp::stop() in C++ code (issue #3)
+
 Version 5.2.1-36
-================
+----------------
 
 * 2025-12-11
  - fixed gcc warning about FORTIFY_SOURCE under no optimization (signaled by R CRAN team)
 
 Version 5.2.1-35
-================
+----------------
 
 * 2025-05-16
  - removed warnings in scotch parser
  - more cleaning of read/write
 
 Version 5.2.1-34
-================
+----------------
 
 * 2025-04-08
  - even more cleaning 'write' calls
 
 Version 5.2.1-33
-================
+----------------
 
 * 2025-04-08
  - more cleaning 'write' calls
 
 Version 5.2.1-32
-================
+----------------
 
 * 2025-04-07
  - removed 'write' calls in *.F signaled by R CRAN team on debian system
 
 Version 5.2.1-31
-================
+----------------
 
 * 2025-04-02
  - removed printf, sprintf, abort, exit, rand, srand, std[in,out,err] signaled by R CRAN team
 
 Version 5.2.1-30
-================
+----------------
 
 * 2024-06-14
  - fixed buffer overflow on ubuntu/gcc13
 
 Version 5.2.1-29
-================
+----------------
 
 * 2024-03-29
  - added method 'log2det()' (requested in issue #2)
 
 Version 5.2.1-28
-================
+----------------
 
 * 2024-02-26
  - fixed gcc UBSAN issues signaled by CRAN
 
 Version 5.2.1-27
-================
+----------------
 
 * 2024-02-02
  - fixed warnings about _FORTIFY_SOURCE and fixed form fortran signaled by CRAN
 Version 5.2.1-26
-================
+----------------
 
 * 2023-11-28
  - fixed warnings about format string signaled by CRAN
 
 Version 5.2.1-25
-================
+----------------
 
 * 2023-11-02
  - fixed warnings on function prototype signaled by CRAN
  - fixed gcc UBSAN issues signaled by CRAN
 
 Version 5.2.1-23
-================
+----------------
 
 * 2023-03-08
  - added set_perm_in() method to set user provided permutation
@@ -80,49 +95,49 @@ Version 5.2.1-23
  - updated CITATION as recommended by win-builder header
 
 Version 5.2.1-22
-================
+----------------
 
 * 2023-01-11
  - fixed pointer qualifier discarding for clang15  (signaled by CRAN team)
 
 Version 5.2.1-21
-================
+----------------
 
 * 2023-01-10
  - fixed compilation errors in C23 mode (signaled by CRAN team)
 
 Version 5.2.1-20
-================
+----------------
 
 * 2022-10-19
  - fixed compilation errors about function prototypes (signaled by CRAN team)
 
 Version 5.2.1-18
-================
+----------------
 
 * 2022-10-03
  - fixed metis/gklib compilation error from clang-15 (signaled by CRAN team)
 
 Version 5.2.1-15
-================
+----------------
 
 * 2022-03-25
  - fixed rank mismatch errors from gcc-12 (signaled by CRAN team)
  
 Version 5.2.1-14
-================
+----------------
 
 * 2021-08-11
  - fixed -Wunneeded-internal-declaration (signaled by CRAN team)
 
 Version 5.2.1-13
-================
+----------------
 
 * 2021-07-19
  - fixed -Wswitch (signaled by CRAN team)
  
 Version 5.2.1-12
-================
+----------------
 
 * 2020-02-20
  - MUMPS_SIZE_C() replaced by sizeof()
@@ -137,77 +152,77 @@ Version 5.2.1-12
  - fixed warnings in graph_match.h and kgraph_map_df_loop.c
 
 Version 5.2.1-10
-================
+----------------
 
 * 2020-01-27
  - fixed gcc-9 warning about uninitialized variables (signaled by CRAN team)
 
 Version 5.2.1-9
-===============
+---------------
 
 * 2020-01-27
  - fixed gcc-10 warning about uninitialized variables (signaled by CRAN team)
 
 Version 5.2.1-8
-===============
+---------------
 
 * 2020-01-23
  - fixed gcc-10 warning about type mismatches signaled by CRAN team (signaled by CRAN team)
  - added Copyright holders to DESCRIPTION file
 
 Version 5.2.1-7
-===============
+---------------
 
 * 2019-12-06
  - fixed clang-10 warning (signaled by CRAN team)
 
 Version 5.2.1-6
-===============
+---------------
 
 * 2019-11-05
  - added C wrappers for some methods. Wrappers are registered with R_RegisterCCallable() so they are available from other package's C++ code.
  
  Version 5.2.1-5
-===============
+---------------
 
 * 2019-08-26
  - fixed clang issues (signaled by CRAN team)
 
 VVersion 5.2.1-4
-===============
+---------------
 
 * 2019-08-21
  - fixed some more LTO warnings (signaled by CRAN team)
  
 ersion 5.2.1-3
-===============
+---------------
 
 * 2019-07-19
  - removed compile test on all platforms
 
 Version 5.2.1-2
-===============
+---------------
 
 * 2019-07-19
  - fixed LTO issues (signaled by CRAN team)
  - removed compile test on win-i386
  
 Version 5.2.1-1
-===============
+---------------
 
 * 2019-07-15
  - upgrade to MUMPS-5.2.1
  - removed compile test on Mac OS;
  
 VVersion 5.1.2-7
-===============
+---------------
 
 * 2019-07-02
  - fixed NAMESPACE corrupted by roxygen2
  - fixed manual entries for constants RMUMPS_PERM_<smth>
  
 ersion 5.1.2-6
-===============
+---------------
 
 * 2019-04-23
  - added C++ methods set_mat_ptr(), set_rhs_ptr()
@@ -218,54 +233,54 @@ ersion 5.1.2-6
  - changed F77 for FC in Makevars;
 
 Version 5.1.2-5
-===============
+---------------
 
 * 2018-12-18
  - renamed MUMPS *.F files to *.F95 to be comnformant with R conventions for file extensions
  - removed STOP call in mpi.f
 
 Version 5.1.2-4
-===============
+---------------
 
 * 2018-01-05
  - fixed usage of -fPIC option
  - fixed non ASCII character in DESCRIPTION file
 
 Version 5.1.2-3
-===============
+---------------
 
 * 2018-01-03
  - added doi refs in DESCRIPTION:Description field
  - fixed errors in tests for older R releases
 
 Version 5.1.2-2
-===============
+---------------
 
 * 2017-12-13
  - added inst/COPYRIGHTS and contributors in DESCRIPTION:Autors@R
 
 Version 5.1.2-1
-===============
+---------------
 
 * 2017-12-12
  - upgrade MUMPS from v5.1.1 to v5.1.2
  - fixed a compilation error of metis library on windows/R-released
  
 Version 5.1.1-3
-===============
+---------------
 
 * 2017-09-19
  - fixed warning "Integer division truncated to constant ‘768614336404’" in dana_aux.F
 
 Version 5.1.1-2
-===============
+---------------
 
 * 2017-07-05
  - fixed gfortran-6 warning "Integer division truncated to constant ‘768614336404’"
  - fixed C warning about header guard
 
 Version 5.1.1-1
-===============
+---------------
 
 * 2017-04-26
  - upgraded MUMPS to the latest version 5.1.1
@@ -274,7 +289,7 @@ Version 5.1.1-1
 
 
 Version 5.0.1.12
-================
+----------------
 
 * 2017-03-06
  - added library SCOTCH v6.0.4 (http://gforge.inria.fr/projects/scotch/) as option for ordering (...$set_icntl(3, 7))
@@ -285,26 +300,26 @@ Version 5.0.1.12
  - fixed registering C-callable in coming R-3.4
 
 Version 5.0.1.11
-================
+----------------
 
 * 2016-12-21
- - increased default auxiliary memory via ICNTL(14)=50 (was 25)
+ - increased default auxiliary memory via ICNTL(14)-50 (was 25)
  - added methods for finer control and information: set_cntl(), get_cntl(), set_icntl(), get_icntl(), get_infos()
 
 Version 5.0.1.10
-================
+----------------
 
 * 2016-08-25
  - fixed compilation with -pedantic option
 
 Version 5.0.1.9-1
-=================
+-----------------
 
 * 2016-04-14
  - fixed building process (signaled by CRAN team)
  
 Version 5.0.1.9
-===============
+---------------
 
 * 2016-04-12
  - added method triplet() rendreding a simple_triplet_matrix (cf. package slam)
@@ -313,7 +328,7 @@ Version 5.0.1.9
  - fixed valgrind's warning about non initialized memory use in dmumps()
 
 Version 5.0.1.8
-===============
+---------------
 
 * 2016-02-22
  - added constructor from slam::simple_triplet_matrix
@@ -322,7 +337,7 @@ Version 5.0.1.8
  - fixed constructor from i, j, v triplicate;
 
 Version 5.0.1.7
-===============
+---------------
 
 * 2016-01-20
  - INTEGER type is compiled as int32 and not int64 as in previous version;
@@ -339,7 +354,7 @@ Version 5.0.1.7
    RcppModule (detected by UBSAN test run by CRAN team);
 
 Version 5.0.1.4
-===============
+---------------
 
 * 2015-12-17
  - initial release. Provides solve(), numeric() and symbolic() methods

@@ -42,7 +42,7 @@ MUMPS_TEST_REQUEST_C(MUMPS_INT *request_id,MUMPS_INT *flag,MUMPS_INT *ierr)
   request_id_loc=(MUMPS_INT)*request_id;
   switch(mumps_io_flag_async){
   case IO_SYNC:
-    /* Rf_warning("mumps_test_request_c should not be called with strategy %d\n",mumps_io_flag_async);*/
+    /* rcpp_warning("mumps_test_request_c should not be called with strategy %d\n",mumps_io_flag_async);*/
     /* JY+EA: Allow for this option, since it is similar to wait_request
      * and wait_request is allowed in synchronous mode.
      * We always return TRUE.
@@ -82,7 +82,7 @@ MUMPS_WAIT_REQUEST(MUMPS_INT *request_id,MUMPS_INT *ierr)
     return;
   switch(mumps_io_flag_async){
   case IO_SYNC:
-    /* Rf_warning("mumps_wait_request should not be called with strategy %d\n",mumps_io_flag_async); */
+    /* rcpp_warning("mumps_wait_request should not be called with strategy %d\n",mumps_io_flag_async); */
     break;
 #if ! defined(MUMPS_WIN32) && ! defined(WITHOUT_PTHREAD)
   case IO_ASYNC_TH:
@@ -94,7 +94,7 @@ MUMPS_WAIT_REQUEST(MUMPS_INT *request_id,MUMPS_INT *ierr)
     snprintf(buf,63,"Error: unknown I/O strategy : %d\n",mumps_io_flag_async);
     mumps_io_error((MUMPS_INT)*ierr,buf);
     return;
-    /*    Rf_warning("Error: unknown I/O strategy : %d\n",mumps_io_flag_async);
+    /*    rcpp_warning("Error: unknown I/O strategy : %d\n",mumps_io_flag_async);
           exit (-3);*/
   }
 #if ! defined(MUMPS_WIN32)
@@ -213,7 +213,7 @@ MUMPS_LOW_LEVEL_INIT_OOC_C(MUMPS_INT *_myid, MUMPS_INT *total_size_io, MUMPS_INT
   if(async_loc){
     switch(async_loc){
     case IO_SYNC:
-      Rf_warning("mumps_low_level_init_ooc_c should not be called with strategy %d\n",mumps_io_flag_async);
+      rcpp_warning("mumps_low_level_init_ooc_c should not be called with strategy %d\n",mumps_io_flag_async);
       break;
 #if ! defined(MUMPS_WIN32) && ! defined(WITHOUT_PTHREAD)
     case IO_ASYNC_TH:
@@ -433,12 +433,12 @@ void MUMPS_CALL
 MUMPS_OOC_PRINT_STATS(void)
 {
 #if ! defined(MUMPS_WIN32)
-  Rf_warning("%d: total time spent in i/o mode = %lf\n",mumps_io_myid,mumps_time_spent_in_sync);
+  rcpp_warning("%d: total time spent in i/o mode = %lf\n",mumps_io_myid,mumps_time_spent_in_sync);
 #endif
-  Rf_warning("%d: Volume of read i/o = %lf\n",mumps_io_myid,read_op_vol);
-  Rf_warning("%d: Volume of write i/o = %lf\n",mumps_io_myid,write_op_vol);
+  rcpp_warning("%d: Volume of read i/o = %lf\n",mumps_io_myid,read_op_vol);
+  rcpp_warning("%d: Volume of write i/o = %lf\n",mumps_io_myid,write_op_vol);
   total_vol=total_vol+read_op_vol+write_op_vol;
-  Rf_warning("%d: Total i/o volume = %lf\n",mumps_io_myid,total_vol);
+  rcpp_warning("%d: Total i/o volume = %lf\n",mumps_io_myid,total_vol);
   return;
 }
 void MUMPS_CALL

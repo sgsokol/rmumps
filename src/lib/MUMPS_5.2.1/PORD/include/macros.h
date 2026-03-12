@@ -9,7 +9,8 @@
 /
 ******************************************************************************/
 
-#include <R_ext/Error.h>
+//#include <R_ext/Error.h>
+#include <rcpp_errwarn.h>
 #include <R_ext/RS.h>
 #include <R_ext/Random.h>
 double unifCrand(void);
@@ -29,7 +30,7 @@ double unifCrand(void);
             { /*printf("malloc failed on line %d of file %s (nr=%d)\n",*/ \
                      /*__LINE__, __FILE__, nr);*/ \
               /*exit(ERR);*/ \
-              Rf_error("%s", "mymalloc failed"); \
+              rcpp_error("%s", "mymalloc failed"); \
             }
 
 #define myrealloc(ptr, nr, type) \
@@ -37,7 +38,7 @@ double unifCrand(void);
             { /*printf("realloc failed on line %d of file %s (nr=%d)\n",*/ \
                      /*__LINE__, __FILE__, nr);*/ \
               /*exit(ERR);*/ \
-              Rf_error("%s", "myremalloc failed"); \
+              rcpp_error("%s", "myremalloc failed"); \
             }
 
 #define myrandom(range) \
@@ -70,7 +71,7 @@ double unifCrand(void);
            var += ((FLOAT)clock()/CLOCKS_PER_SEC);
 
 #define quit() \
-           Rf_error("%s", ""); /*exit(ERR);*/
+           rcpp_error("%s", ""); /*exit(ERR);*/
 
 #ifdef PARIX
 #undef pord_starttimer(var)
@@ -91,5 +92,5 @@ double unifCrand(void);
 #endif
 #undef quit()
 #define quit() \
-           Rf_error("%s", ""); /*exit(ERR);*/
+           rcpp_error("%s", ""); /*exit(ERR);*/
 #endif

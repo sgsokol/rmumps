@@ -158,11 +158,11 @@ const MeshCoarsenType         coartype)           /*+ Matching type             
   memSet (coarhbdgtab, ~0, coarhashsiz * sizeof (MeshCoarsenHbdg));
   finemulttax -= coarmeshptr->baseval;
 
-#define SCOTCH_DEBUG_MESH3
+#undef  SCOTCH_DEBUG_MESH3
 #ifdef SCOTCH_DEBUG_MESH3
-Rf_warning("%s", "-------- ENTERING COARSENING ---------\n");
+rcpp_warning("%s", "-------- ENTERING COARSENING ---------\n");
 
-Rf_warning("finenodenbr=%ld, fineelemnbr=%ld, fineedgenbr=%ld, finedegrmax=%ld\n", (long) finemeshptr->vnodnbr, (long) finemeshptr->velmnbr, (long) finemeshptr->edgenbr, (long) finemeshptr->degrmax);
+rcpp_warning("finenodenbr=%ld, fineelemnbr=%ld, fineedgenbr=%ld, finedegrmax=%ld\n", (long) finemeshptr->vnodnbr, (long) finemeshptr->velmnbr, (long) finemeshptr->edgenbr, (long) finemeshptr->degrmax);
 #endif /* SCOTCH_DEBUG_MESH3 */
 
   meshCoarFuncTab[coartype] (finemeshptr, finemulttax, finecoartax, &coarvelmnbr, &coarvnodnbr, &coaredgenbr); /* Call proper matching function */
@@ -345,8 +345,8 @@ Rf_warning("finenodenbr=%ld, fineelemnbr=%ld, fineedgenbr=%ld, finedegrmax=%ld\n
   *finecoarptr = finecoartax;                     /* Return multinode array */
 
 #ifdef SCOTCH_DEBUG_MESH3
-Rf_warning("coarvnodnbr=%ld\tcoarvelmnbr=%ld\tcoaredgenbr=%ld, coardegrmax=%ld\n", (long) coarmeshptr->vnodnbr, (long) coarmeshptr->velmnbr, (long) coarmeshptr->edgenbr, (long) coarmeshptr->degrmax);
-Rf_warning("%s", "-------- EXITING COARSENING ---------\n"); /* TODO REMOVE */
+rcpp_warning("coarvnodnbr=%ld\tcoarvelmnbr=%ld\tcoaredgenbr=%ld, coardegrmax=%ld\n", (long) coarmeshptr->vnodnbr, (long) coarmeshptr->velmnbr, (long) coarmeshptr->edgenbr, (long) coarmeshptr->degrmax);
+rcpp_warning("%s", "-------- EXITING COARSENING ---------\n"); /* TODO REMOVE */
 #endif /* SCOTCH_DEBUG_MESH3 */
 
   return (0);
@@ -428,7 +428,7 @@ Gnum * restrict const             coaredgeptr)    /* Pointer to (upper bound on)
           finecoartax[finevelmnum] = coarvelmnum;
           finemulttax[coarvelmnum].finevelmnum[0] =
           finemulttax[coarvelmnum].finevelmnum[1] = finevelmnum;
-Rf_warning("++ %ld %ld\n", (long) finevelmnum, (long) finemeshptr->velotax[finevelmnum]); /* TODO REMOVE */
+//rcpp_warning("++ %ld %ld\n", (long) finevelmnum, (long) finemeshptr->velotax[finevelmnum]); /* TODO REMOVE */
           coarvelmnum ++;                         /* One more single vertex created */
         }
         continue;

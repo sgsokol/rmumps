@@ -9,7 +9,8 @@
 
 #ifndef _GK_MACROS_H_
 #define _GK_MACROS_H_
-#include <R_ext/Error.h>
+//#include <R_ext/Error.h>
+#include <rcpp_errwarn.h>
 /*-------------------------------------------------------------
  * Usefull commands 
  *-------------------------------------------------------------*/
@@ -62,7 +63,7 @@
         /*printf("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
               __LINE__, __FILE__);                               \
         abort();   */                                             \
-        Rf_error("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
+        rcpp_error("***MALLOC_CHECK failed on line %d of file %s: " #ptr "\n", \
               __LINE__, __FILE__); \
     }
 #else
@@ -95,7 +96,7 @@
         /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
         abort();*/                                                \
-        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        rcpp_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__); \
     }
 
@@ -106,7 +107,7 @@
         printf msg ; \
         printf("\n"); \
         abort(); */                                               \
-        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
+        rcpp_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
               __LINE__, __FILE__, msg); \
     }
 
@@ -114,15 +115,15 @@
     if (!(expr)) {                                               \
         /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__); */                              \
-        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        rcpp_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__); \
     }
 
 #define GKCUASSERTP(expr,msg)                                          \
     if (!(expr)) {                                               \
-        Rf_warning("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        rcpp_warning("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
-        Rf_warning("%s", msg) ; \
+        rcpp_warning("%s", msg) ; \
         /*printf("\n");*/ \
     }
 
@@ -135,7 +136,7 @@
         /*printf("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__);                               \
         assert(expr);*/                                                \
-        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
+        rcpp_error("***ASSERTION failed on line %d of file %s: " #expr "\n", \
               __LINE__, __FILE__); \
     }
 
@@ -146,7 +147,7 @@
         printf msg ; \
         printf("\n"); \
         assert(expr); */                                               \
-        Rf_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
+        rcpp_error("***ASSERTION failed on line %d of file %s: " #expr "\n%s", \
               __LINE__, __FILE__, msg); \
     }
 #else

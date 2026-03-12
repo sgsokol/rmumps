@@ -171,7 +171,7 @@ idx_t IsConnected(graph_t *graph, idx_t report)
   ncmps = FindPartitionInducedComponents(graph, NULL, NULL, NULL);
 
   if (ncmps != 1 && report)
-    Rf_warning("The graph is not connected. It has %"PRIDX" connected components.\n", ncmps);
+    rcpp_warning("The graph is not connected. It has %"PRIDX" connected components.\n", ncmps);
 
   return (ncmps == 1);
 }
@@ -236,18 +236,18 @@ idx_t IsConnectedSubdomain(ctrl_t *ctrl, graph_t *graph, idx_t pid, idx_t report
   cptr[++ncmps] = first;
 
   if (ncmps > 1 && report) {
-    Rf_warning("The graph has %"PRIDX" connected components in partition %"PRIDX":\t", ncmps, pid);
+    rcpp_warning("The graph has %"PRIDX" connected components in partition %"PRIDX":\t", ncmps, pid);
     for (i=0; i<ncmps; i++) {
       wgt = 0;
       for (j=cptr[i]; j<cptr[i+1]; j++)
         wgt += graph->vwgt[queue[j]];
-      Rf_warning("[%5"PRIDX" %5"PRIDX"] ", cptr[i+1]-cptr[i], wgt);
+      rcpp_warning("[%5"PRIDX" %5"PRIDX"] ", cptr[i+1]-cptr[i], wgt);
       /*
       if (cptr[i+1]-cptr[i] == 1)
-        Rf_warning("[%"PRIDX" %"PRIDX"] ", queue[cptr[i]], xadj[queue[cptr[i]]+1]-xadj[queue[cptr[i]]]);
+        rcpp_warning("[%"PRIDX" %"PRIDX"] ", queue[cptr[i]], xadj[queue[cptr[i]]+1]-xadj[queue[cptr[i]]]);
       */
     }
-    Rf_warning("\n");
+    rcpp_warning("\n");
   }
 
   gk_free((void **)&touched, &queue, &cptr, LTERM);
@@ -366,7 +366,7 @@ void EliminateComponents(ctrl_t *ctrl, graph_t *graph)
   ncmps = FindPartitionInducedComponents(graph, where, cptr, cind);
 
   IFSET(ctrl->dbglvl, METIS_DBG_CONTIGINFO, 
-      Rf_warning("I found %"PRIDX" components, for this %"PRIDX"-way partition\n", 
+      rcpp_warning("I found %"PRIDX" components, for this %"PRIDX"-way partition\n", 
           ncmps, nparts)); 
 
   /* There are more components than partitions */
@@ -437,7 +437,7 @@ void EliminateComponents(ctrl_t *ctrl, graph_t *graph)
           iaxpy(ncon, 1, vwgt+cind[j]*ncon, 1, cwgt, 1);
 
         IFSET(ctrl->dbglvl, METIS_DBG_CONTIGINFO, 
-            Rf_warning("Trying to move %"PRIDX" [%"PRIDX"] from %"PRIDX"\n", 
+            rcpp_warning("Trying to move %"PRIDX" [%"PRIDX"] from %"PRIDX"\n", 
                 cid, isum(ncon, cwgt, 1), me)); 
 
         /* Determine the connectivity */
@@ -483,7 +483,7 @@ void EliminateComponents(ctrl_t *ctrl, graph_t *graph)
         }
 
         IFSET(ctrl->dbglvl, METIS_DBG_CONTIGINFO, 
-            Rf_warning("\tMoving it to %"PRIDX" [%"PRIDX"] [%"PRIDX"]\n", target, cpvec[target], ncand));
+            rcpp_warning("\tMoving it to %"PRIDX" [%"PRIDX"] [%"PRIDX"]\n", target, cpvec[target], ncand));
 
         /* Note that as a result of a previous movement, a connected component may
            now will like to stay to its original partition */
@@ -510,7 +510,7 @@ void EliminateComponents(ctrl_t *ctrl, graph_t *graph)
         todo[i] = todo[--ntodo];
       }
       if (oldntodo == ntodo) {
-        IFSET(ctrl->dbglvl, METIS_DBG_CONTIGINFO, Rf_warning("Stopped at ntodo: %"PRIDX"\n", ntodo));
+        IFSET(ctrl->dbglvl, METIS_DBG_CONTIGINFO, rcpp_warning("Stopped at ntodo: %"PRIDX"\n", ntodo));
         break;
       }
     }

@@ -184,7 +184,7 @@ char *                      argv[])
       if (C_fileNum < C_FILEARGNBR)               /* A file name has been given */
         C_fileTab[C_fileNum ++].nameptr = argv[i];
       else {
-        Rf_error("%s", "dummysizes: ERROR: main: too many file names given");
+        rcpp_error("%s", "dummysizes: ERROR: main: too many file names given");
         /*exit    (1);*/
       }
     }
@@ -199,12 +199,12 @@ char *                      argv[])
           suffptr = &argv[i][2];
           break;
         case 'V' :
-          Rf_warning("%s", "dummysizes, version " SCOTCH_VERSION_STRING "\n");
-          Rf_warning("%s", "Copyright 2004,2007-2010,2018 IPB, Universite de Bordeaux, INRIA & CNRS, France\n");
-          Rf_warning("%s", "This software is libre/free software under CeCILL-C -- see the user's manual for more information\n");
+          rcpp_warning("%s", "dummysizes, version " SCOTCH_VERSION_STRING "\n");
+          rcpp_warning("%s", "Copyright 2004,2007-2010,2018 IPB, Universite de Bordeaux, INRIA & CNRS, France\n");
+          rcpp_warning("%s", "This software is libre/free software under CeCILL-C -- see the user's manual for more information\n");
           return  (0);
         default :
-          Rf_warning("dummysizes: ERROR: main: unprocessed option (\"%s\")", argv[i]);
+          rcpp_warning("dummysizes: ERROR: main: unprocessed option (\"%s\")", argv[i]);
           exit    (1);
       }
     }
@@ -214,7 +214,7 @@ char *                      argv[])
     if ((C_fileTab[i].nameptr[0] != '-') ||       /* If not standard stream */
         (C_fileTab[i].nameptr[1] != '\0')) {
       if ((C_fileTab[i].fileptr = fopen (C_fileTab[i].nameptr, ((C_fileTab[i].flagval & FILEMODE) == FILEMODER) ? "r" : "w")) == NULL) { /* Open the file */
-          Rf_warning("dummysizes: ERROR: main: cannot open file (%d)", i);
+          rcpp_warning("dummysizes: ERROR: main: cannot open file (%d)", i);
           exit    (1);
       }
     }
@@ -295,7 +295,7 @@ char *                      argv[])
 #endif /* SCOTCH_PTSCOTCH */
 #ifdef SCOTCH_NAME_SUFFIX
     if (regcomp (&regedat, " SCOTCH_[a-z][0-9a-zA-Z_]*", 0) != 0) {
-      Rf_error("%s", "dummysizes: ERROR: cannot compile regular expression\n");
+      rcpp_error("%s", "dummysizes: ERROR: cannot compile regular expression\n");
       /*exit    (1);*/
     }
 #endif /* SCOTCH_NAME_SUFFIX */
@@ -307,7 +307,7 @@ char *                      argv[])
 
     if (((charnbr = strlen (chartab)) >= (CHARMAX - 1)) && /* If line read is at least as long as maximum size     */
         (chartab[CHARMAX - 1] != '\n')) {         /* And last character is not a newline, that is, some is missing */
-      Rf_error("%s", "dummysizes: ERROR: line too long\n");
+      rcpp_error("%s", "dummysizes: ERROR: line too long\n");
       /*exit    (1);*/
     }
 

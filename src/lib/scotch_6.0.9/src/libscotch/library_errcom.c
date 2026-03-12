@@ -90,7 +90,7 @@ const char * const          errstr,               /*+ printf-like variable argum
   va_end     (errlist);                           /* Close variable-argument list */
   errbuf[1023] = '\0';                            /* Set end of string            */
   /*errorPrint (errbuf); */                           /* Print arguments              */
-  Rf_error("%s", errbuf);
+  rcpp_error("%s", errbuf);
   /*exit       (1);*/
 }
 
@@ -118,5 +118,5 @@ const char * const          errstr,               /*+ printf-like variable argum
   va_end      (errlist);                          /* Close variable-argument list */
   errbuf[1023] = '\0';                            /* Set end of string            */
   /*errorPrintW (errbuf);*/                           /* Print arguments              */
-  Rf_warning("%s", errbuf);
+  rcpp_warning("%s", errbuf);
 }

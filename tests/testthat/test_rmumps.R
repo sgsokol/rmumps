@@ -54,7 +54,7 @@ rm(ai)
 
 if (getRversion() >= "3.4.0") {
   # test matrix creation from slam::simple_triplet_matrix (which requires R-3.4.0+)
-  asl=as.simple_triplet_matrix(a)
+  asl=slam::as.simple_triplet_matrix(a)
   ai=Rmumps$new(asl)
   xi=solve(ai, b)
   test_that("testing matrix from slam::simple_triplet_matrix", {

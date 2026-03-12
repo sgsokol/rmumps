@@ -632,7 +632,7 @@ void gk_csr_Write(gk_csr_t *mat, char *filename, int format, int writevals, int 
 
   if (format == GK_CSR_FMT_CLUTO) {
     /*fprintf(fpout, "%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);*/
-    Rf_warning("%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);
+    rcpp_warning("%d %d %zd\n", mat->nrows, mat->ncols, mat->rowptr[mat->nrows]);
     writevals = 1;
     numbering = 1;
   }
@@ -640,10 +640,10 @@ void gk_csr_Write(gk_csr_t *mat, char *filename, int format, int writevals, int 
   for (i=0; i<mat->nrows; i++) {
     for (j=mat->rowptr[i]; j<mat->rowptr[i+1]; j++) {
       /*fprintf(fpout, " %d", mat->rowind[j]+(numbering ? 1 : 0));*/
-      Rf_warning(" %d", mat->rowind[j]+(numbering ? 1 : 0));
+      rcpp_warning(" %d", mat->rowind[j]+(numbering ? 1 : 0));
       if (writevals) 
         /*fprintf(fpout, " %f", mat->rowval[j]);*/
-        Rf_warning(" %f", mat->rowval[j]);
+        rcpp_warning(" %f", mat->rowval[j]);
     }
     /*fprintf(fpout, "\n");*/
   }
@@ -1567,7 +1567,7 @@ void gk_csr_Scale(gk_csr_t *mat, int type)
           nnzcols += (collen[i] > 0 ? 1 : 0);
 
         bgfreq = gk_max(10, (ssize_t)(.5*rowptr[nrows]/nnzcols));
-        Rf_warning("nnz: %zd, nnzcols: %d, bgfreq: %d\n", rowptr[nrows], nnzcols, bgfreq);
+        rcpp_warning("nnz: %zd, nnzcols: %d, bgfreq: %d\n", rowptr[nrows], nnzcols, bgfreq);
 
         #pragma omp for schedule(static)
         for (i=0; i<ncols; i++)

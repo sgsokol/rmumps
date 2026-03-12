@@ -93,7 +93,7 @@ void*  mumps_async_thread_function_with_sem (void* arg){
          default:
            /*printf("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
            exit (-3);*/
-           Rf_error("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
+           rcpp_error("Error : Mumps_IO : Operation %d is neither READ nor WRITE\n",current_io_request->io_type);
          }
       /* Notify that the IO was performed */
       /* Wait that finished_requests queue could register 
