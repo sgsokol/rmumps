@@ -17,7 +17,7 @@
 #' @examples
 #' if (requireNamespace("slam", quietly=TRUE)) {
 #'     am=rmumps::Rmumps$new(slam::as.simple_triplet_matrix(diag(1:3)))
-#'     am$set_permutation(RMUMPS_PERM_SCOTCH)
+#'     am$set_permutation(RMUMPS_PERM_AMD)
 #'     am$solve(1:3)
 #' }
 NULL

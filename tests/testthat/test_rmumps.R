@@ -45,7 +45,7 @@ test_that("solving symmetric-2 system", {
 # test matrix creation from ijv triade
 a=as(a, "dgTMatrix")
 ai=Rmumps$new(a@i, a@j, a@x, ncol(a))
-ai$set_permutation(RMUMPS_PERM_SCOTCH)
+#ai$set_permutation(RMUMPS_PERM_SCOTCH)
 xi=solve(ai, b)
 test_that("testing a from i,j,v", {
   expect_equal(xi, 1:n)
@@ -67,7 +67,7 @@ NumericVector solve_ptr(List a, NumericVector b) {
   NumericVector v=a["v"];
   int n=a["nrow"], nz=v.size();
   Rmumps rmu((int *) ir.begin(), (int *) jc.begin(), (double *) v.begin(), n, nz, 0);
-  rmu.set_permutation(RMUMPS_PERM_SCOTCH);
+  //rmu.set_permutation(RMUMPS_PERM_SCOTCH);
   rmu.solveptr((double *) b.begin(), n, 1);
   return(b);
 }

@@ -1,6 +1,24 @@
 Log changes in rmumps package
 =============================
 
+Version 5.2.1-41
+----------------
+
+* 2026-03-13
+ - fixed more LTO warnings (signaled by R CRAN team)
+
+Version 5.2.1-40
+----------------
+
+* 2026-03-13
+ - fixed gcc-san warnings in examples (signaled by R CRAN team)
+
+Version 5.2.1-39
+----------------
+
+* 2026-03-12
+ - fixed gcc-san warnings in tests (signaled by R CRAN team)
+
 Version 5.2.1-38
 ----------------
 

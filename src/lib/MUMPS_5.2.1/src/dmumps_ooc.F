@@ -231,7 +231,7 @@ c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
          ASYNC=1
       ENDIF
       DIM_ERR_STR_OOC = ERR_STR_OOC_MAX_LEN
-      CALL MUMPS_LOW_LEVEL_INIT_ERR_STR(DIM_ERR_STR_OOC,ERR_STR_OOC)
+      ! CALL MUMPS_LOW_LEVEL_INIT_ERR_STR(DIM_ERR_STR_OOC,ERR_STR_OOC)
       DIM_DIR=len(trim(id%OOC_TMPDIR))
       DIM_PREFIX=len(trim(id%OOC_PREFIX))
       CALL DMUMPS_CONVERT_STR_TO_CHR_ARRAY(TMP_DIR(1),
@@ -531,7 +531,7 @@ c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                  DO J=1,id%OOC_FILE_NAME_LENGTH(K)
                     TMP_NAME(J)=id%OOC_FILE_NAMES(K,J)
                  ENDDO
-                 CALL MUMPS_OOC_REMOVE_FILE_C(IERR, TMP_NAME(1))
+                 ! CALL MUMPS_OOC_REMOVE_FILE_C(IERR, TMP_NAME(1))
                  IF(IERR.LT.0)THEN
                     IF (ICNTL1.GT.0)THEN
 c~                        WRITE(ICNTL1,*)MYID_OOC,': ',
@@ -2876,7 +2876,7 @@ c~      &                   IERR
       DO I1=1,OOC_NB_FILE_TYPE
          TMP=I1-1
          DO I=1,id%OOC_NB_FILES(I1)
-            CALL MUMPS_OOC_GET_FILE_NAME_C(TMP,I,DIM,TMP_NAME(1))
+            ! CALL MUMPS_OOC_GET_FILE_NAME_C(TMP,I,DIM,TMP_NAME(1))
             DO J=1,DIM+1
                id%OOC_FILE_NAMES(K,J)=TMP_NAME(J)
             ENDDO
@@ -2934,7 +2934,7 @@ c~      &   WRITE(ICNTL1,*)MYID_OOC,': ',ERR_STR_OOC(1:DIM_ERR_STR_OOC)
                TMP_NAME(J)=id%OOC_FILE_NAMES(K,J)
             ENDDO
             TMP=I1-1
-            CALL MUMPS_OOC_SET_FILE_NAME_C(TMP,I,DIM,IERR,TMP_NAME(1))
+            ! CALL MUMPS_OOC_SET_FILE_NAME_C(TMP,I,DIM,IERR,TMP_NAME(1))
             IF(IERR.LT.0)THEN
                IF (ICNTL1.GT.0)
      &         call rwarn(': ')
