@@ -1,6 +1,12 @@
 Log changes in rmumps package
 =============================
 
+Version 5.2.1-42
+----------------
+
+* 2026-05-26
+ - accepted PR #4 by Balasubramanian Narasimhan exposing dmumps_c() to other packages
+
 Version 5.2.1-41
 ----------------
 
