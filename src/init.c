@@ -2,13 +2,14 @@
 #include <Rinternals.h>
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
+#include "lib/MUMPS_5.2.1/include/dmumps_c.h"
 
 /* MUMPS' double-precision C entry point (dmumps_c), compiled into this
  * package from the bundled MUMPS sources. Declared here only so we can take
  * its address for R_RegisterCCallable() below; the full prototype, together
  * with DMUMPS_STRUC_C, lives in dmumps_c.h (shipped in inst/include and made
  * available to client packages via LinkingTo: rmumps). */
-extern void dmumps_c(void);
+extern void dmumps_c(DMUMPS_STRUC_C * dmumps_par);
 
 void R_init_rmumps(DllInfo *dll)
 {

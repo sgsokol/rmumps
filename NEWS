@@ -1,13 +1,18 @@
 Log changes in rmumps package
 =============================
 
-Version 5.2.1-42
+Version 5.2.1-43
+----------------
+
+* 2026-05-28
+ - fixed dmumps_c() declaration to include MUMPS_STRUC_C (signaled by R CRAN team)
+
+VVersion 5.2.1-42
 ----------------
 
 * 2026-05-26
  - accepted PR #4 by Balasubramanian Narasimhan exposing dmumps_c() to other packages
-
-Version 5.2.1-41
+ersion 5.2.1-41
 ----------------
 
 * 2026-03-13
